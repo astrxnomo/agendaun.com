@@ -9,6 +9,13 @@ import {
   type CalendarEvent,
 } from "@/components/calendar/event-calendar"
 import { type EventColor } from "@/components/calendar/types"
+import {
+  findBaseEventForSeries,
+  isRecurringEvent,
+  processEventsWithRecurrence,
+  removeEventSeries,
+  updateEventSeries,
+} from "@/components/calendar/utils"
 
 // Etiquettes data for calendar filtering
 export const etiquettes = [
@@ -58,6 +65,56 @@ const daysUntilNextSunday = getDaysUntilNextSunday(currentDate)
 
 // Sample events data with hardcoded times
 const sampleEvents: CalendarEvent[] = [
+  // Recurring weekly meeting
+  {
+    id: "weekly-standup",
+    title: "Weekly Team Standup",
+    description: "Team synchronization meeting every Monday",
+    start: setMinutes(
+      setHours(addDays(currentDate, -6 + daysUntilNextSunday), 9),
+      0,
+    ),
+    end: setMinutes(
+      setHours(addDays(currentDate, -6 + daysUntilNextSunday), 10),
+      0,
+    ),
+    color: "emerald",
+    location: "Conference Room A",
+    recurrence: {
+      type: "weekly",
+      interval: 1,
+      daysOfWeek: [1], // Monday
+      count: 8, // 8 weeks
+    },
+  },
+  // Daily recurring event
+  {
+    id: "daily-review",
+    title: "Daily Review",
+    description: "Daily task review and planning",
+    start: setMinutes(setHours(currentDate, 17), 0),
+    end: setMinutes(setHours(currentDate, 17), 30),
+    color: "orange",
+    recurrence: {
+      type: "daily",
+      interval: 1,
+      count: 10, // 10 days
+    },
+  },
+  // Infinite recurring event (no end date or count)
+  {
+    id: "infinite-standup",
+    title: "Daily Standup (Infinite)",
+    description: "Daily standup meeting that never ends",
+    start: setMinutes(setHours(currentDate, 9), 0),
+    end: setMinutes(setHours(currentDate, 9), 30),
+    color: "violet",
+    recurrence: {
+      type: "daily",
+      interval: 1,
+      // No endDate or count = infinite recurrence
+    },
+  },
   {
     id: "w1-0a",
     title: "Executive Board Meeting",
@@ -592,28 +649,107 @@ const sampleEvents: CalendarEvent[] = [
 ]
 
 export default function Component() {
-  const [events, setEvents] = useState<CalendarEvent[]>(sampleEvents)
+  const [baseEvents, setBaseEvents] = useState<CalendarEvent[]>(sampleEvents)
   const { isColorVisible } = useCalendarContext()
+
+  // Debug: Log recurring events
+  console.log(
+    "📅 Recurring events in sample data:",
+    sampleEvents.filter((event) => event.recurrence?.type !== "none"),
+  )
+
+  // Process events to expand recurring ones
+  const processedEvents = useMemo(() => {
+    console.log("🔄 Processing events. Base events count:", baseEvents.length)
+
+    // Calculate view window for recurring events generation
+    // Generate events for 3 months before and after current date
+    const viewStart = addDays(new Date(), -90)
+    const viewEnd = addDays(new Date(), 90)
+
+    const processed = processEventsWithRecurrence(
+      baseEvents,
+      viewStart,
+      viewEnd,
+    )
+    console.log("✅ Processed events count:", processed.length)
+    console.log("📅 View window:", { viewStart, viewEnd })
+    return processed
+  }, [baseEvents]) // This will re-run whenever baseEvents changes
 
   // Filter events based on visible colors
   const visibleEvents = useMemo(() => {
-    return events.filter((event) => isColorVisible(event.color))
-  }, [events, isColorVisible])
+    return processedEvents.filter((event) => isColorVisible(event.color))
+  }, [processedEvents, isColorVisible])
 
   const handleEventAdd = (event: CalendarEvent) => {
-    setEvents([...events, event])
+    console.log("🆕 Adding new event:", event)
+    setBaseEvents((prevEvents) => [...prevEvents, event])
   }
 
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
-    setEvents(
-      events.map((event) =>
-        event.id === updatedEvent.id ? updatedEvent : event,
-      ),
-    )
+    console.log("🔄 Updating event:", updatedEvent)
+
+    if (isRecurringEvent(updatedEvent) && updatedEvent.seriesId) {
+      console.log("📝 Updating recurring event series:", updatedEvent.seriesId)
+      // Find the base event and update it
+      const baseEvent = findBaseEventForSeries(
+        baseEvents,
+        updatedEvent.seriesId,
+      )
+      if (baseEvent) {
+        // Create the updated base event with the new data
+        const updatedBaseEvent = {
+          ...baseEvent,
+          title: updatedEvent.title,
+          description: updatedEvent.description,
+          color: updatedEvent.color,
+          location: updatedEvent.location,
+          // Keep the original recurrence settings
+          recurrence: baseEvent.recurrence,
+        }
+
+        setBaseEvents((prevEvents) =>
+          updateEventSeries(
+            prevEvents,
+            updatedEvent.seriesId!,
+            updatedBaseEvent,
+          ),
+        )
+      }
+    } else {
+      console.log("📝 Updating single event:", updatedEvent.id)
+      // Update single event
+      setBaseEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event.id === updatedEvent.id ? updatedEvent : event,
+        ),
+      )
+    }
   }
 
   const handleEventDelete = (eventId: string) => {
-    setEvents(events.filter((event) => event.id !== eventId))
+    console.log("🗑️ Deleting event:", eventId)
+    // Find the event to determine if it's part of a series
+    const eventToDelete = processedEvents.find((event) => event.id === eventId)
+
+    if (
+      eventToDelete &&
+      isRecurringEvent(eventToDelete) &&
+      eventToDelete.seriesId
+    ) {
+      console.log("🗑️ Deleting recurring event series:", eventToDelete.seriesId)
+      // Delete all events in the series
+      setBaseEvents((prevEvents) =>
+        removeEventSeries(prevEvents, eventToDelete.seriesId!),
+      )
+    } else {
+      console.log("🗑️ Deleting single event:", eventId)
+      // Delete single event
+      setBaseEvents((prevEvents) =>
+        prevEvents.filter((event) => event.id !== eventId),
+      )
+    }
   }
 
   return (

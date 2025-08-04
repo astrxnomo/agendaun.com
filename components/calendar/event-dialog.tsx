@@ -2,7 +2,7 @@
 
 import { format, isBefore } from "date-fns"
 import { es } from "date-fns/locale"
-import { CalendarDays, Trash2 } from "lucide-react"
+import { CalendarDays, Repeat, Trash2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 import {
@@ -11,6 +11,7 @@ import {
   EndHour,
   StartHour,
 } from "@/components/calendar/constants"
+import { isRecurringEvent } from "@/components/calendar/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -41,7 +42,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
 import type { CalendarEvent } from "@/components/calendar/event-calendar"
-import type { EventColor } from "@/components/calendar/types"
+import type {
+  DayOfWeek,
+  EventColor,
+  RecurrenceType,
+} from "@/components/calendar/types"
 
 interface EventDialogProps {
   event: CalendarEvent | null
@@ -71,6 +76,32 @@ export function EventDialog({
   const [startDateOpen, setStartDateOpen] = useState(false)
   const [endDateOpen, setEndDateOpen] = useState(false)
 
+  // Recurrence states
+  const [recurrenceType, setRecurrenceType] = useState<RecurrenceType>("none")
+  const [recurrenceInterval, setRecurrenceInterval] = useState(1)
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date | undefined>(
+    undefined,
+  )
+  const [recurrenceCount, setRecurrenceCount] = useState<number | undefined>(
+    undefined,
+  )
+  const [recurrenceEndType, setRecurrenceEndType] = useState<
+    "never" | "date" | "count"
+  >("never")
+  const [recurrenceEndDateOpen, setRecurrenceEndDateOpen] = useState(false)
+  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
+
+  // Days of week for the interface
+  const daysOfWeek = [
+    { value: 1 as DayOfWeek, label: "Lu", fullName: "Lunes" },
+    { value: 2 as DayOfWeek, label: "Ma", fullName: "Martes" },
+    { value: 3 as DayOfWeek, label: "Mi", fullName: "Miércoles" },
+    { value: 4 as DayOfWeek, label: "Ju", fullName: "Jueves" },
+    { value: 5 as DayOfWeek, label: "Vi", fullName: "Viernes" },
+    { value: 6 as DayOfWeek, label: "Sa", fullName: "Sábado" },
+    { value: 0 as DayOfWeek, label: "Do", fullName: "Domingo" },
+  ]
+
   // Debug log to check what event is being passed
   useEffect(() => {
     console.log("EventDialog received event:", event)
@@ -91,6 +122,31 @@ export function EventDialog({
       setAllDay(event.allDay || false)
       setLocation(event.location || "")
       setColor(event.color! || "sky")
+
+      // Set recurrence values
+      if (event.recurrence) {
+        setRecurrenceType(event.recurrence.type)
+        setRecurrenceInterval(event.recurrence.interval)
+        setRecurrenceEndDate(event.recurrence.endDate)
+        setRecurrenceCount(event.recurrence.count)
+        setSelectedDays(event.recurrence.daysOfWeek || [])
+
+        if (event.recurrence.endDate) {
+          setRecurrenceEndType("date")
+        } else if (event.recurrence.count) {
+          setRecurrenceEndType("count")
+        } else {
+          setRecurrenceEndType("never")
+        }
+      } else {
+        setRecurrenceType("none")
+        setRecurrenceInterval(1)
+        setRecurrenceEndDate(undefined)
+        setRecurrenceCount(undefined)
+        setRecurrenceEndType("never")
+        setSelectedDays([])
+      }
+
       setError(null) // Reset error when opening dialog
     } else {
       resetForm()
@@ -107,6 +163,12 @@ export function EventDialog({
     setAllDay(false)
     setLocation("")
     setColor("blue")
+    setRecurrenceType("none")
+    setRecurrenceInterval(1)
+    setRecurrenceEndDate(undefined)
+    setRecurrenceCount(undefined)
+    setRecurrenceEndType("never")
+    setSelectedDays([])
     setError(null)
   }
 
@@ -171,6 +233,21 @@ export function EventDialog({
     // Use generic title if empty
     const eventTitle = title.trim() ? title : "(no title)"
 
+    // Build recurrence rule
+    let recurrence = undefined
+    if (recurrenceType !== "none") {
+      recurrence = {
+        type: recurrenceType,
+        interval: recurrenceInterval,
+        endDate: recurrenceEndType === "date" ? recurrenceEndDate : undefined,
+        count: recurrenceEndType === "count" ? recurrenceCount : undefined,
+        daysOfWeek:
+          recurrenceType === "weekly" && selectedDays.length > 0
+            ? selectedDays
+            : undefined,
+      }
+    }
+
     onSave({
       id: event?.id || "",
       title: eventTitle,
@@ -180,6 +257,7 @@ export function EventDialog({
       allDay,
       location,
       color,
+      recurrence,
     })
   }
 
@@ -187,6 +265,16 @@ export function EventDialog({
     if (event?.id) {
       onDelete(event.id)
     }
+  }
+
+  const toggleDaySelection = (day: DayOfWeek) => {
+    setSelectedDays((prev) => {
+      if (prev.includes(day)) {
+        return prev.filter((d) => d !== day)
+      } else {
+        return [...prev, day].sort()
+      }
+    })
   }
 
   // Updated color options to match types.ts
@@ -232,7 +320,15 @@ export function EventDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{event?.id ? "Edit Event" : "Create Event"}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {event?.id ? "Edit Event" : "Create Event"}
+            {event && isRecurringEvent(event) && (
+              <div className="text-muted-foreground flex items-center gap-1 text-sm">
+                <Repeat className="h-4 w-4" />
+                <span>Serie recurrente</span>
+              </div>
+            )}
+          </DialogTitle>
           <DialogDescription className="sr-only">
             {event?.id
               ? "Edit the details of this event"
@@ -410,6 +506,186 @@ export function EventDialog({
             <Label htmlFor="all-day">All day</Label>
           </div>
 
+          {/* Recurrence Section */}
+          <fieldset className="space-y-3">
+            <legend className="text-foreground text-sm leading-none font-medium">
+              Repetir
+            </legend>
+
+            <div className="*:not-first:mt-1.5">
+              <Label htmlFor="recurrence-type">Tipo de repetición</Label>
+              <Select
+                value={recurrenceType}
+                onValueChange={(value: RecurrenceType) =>
+                  setRecurrenceType(value)
+                }
+              >
+                <SelectTrigger id="recurrence-type">
+                  <SelectValue placeholder="Seleccionar tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No repetir</SelectItem>
+                  <SelectItem value="daily">Diariamente</SelectItem>
+                  <SelectItem value="weekly">Semanalmente</SelectItem>
+                  <SelectItem value="monthly">Mensualmente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {recurrenceType !== "none" && (
+              <>
+                <div className="*:not-first:mt-1.5">
+                  <Label htmlFor="recurrence-interval">
+                    Repetir cada {recurrenceInterval}{" "}
+                    {recurrenceType === "daily"
+                      ? recurrenceInterval === 1
+                        ? "día"
+                        : "días"
+                      : recurrenceType === "weekly"
+                        ? recurrenceInterval === 1
+                          ? "semana"
+                          : "semanas"
+                        : recurrenceInterval === 1
+                          ? "mes"
+                          : "meses"}
+                  </Label>
+                  <Select
+                    value={recurrenceInterval.toString()}
+                    onValueChange={(value) =>
+                      setRecurrenceInterval(parseInt(value))
+                    }
+                  >
+                    <SelectTrigger id="recurrence-interval">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map(
+                        (num) => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Days of week selector for weekly recurrence */}
+                {recurrenceType === "weekly" && (
+                  <div className="space-y-2">
+                    <Label>Días de la semana</Label>
+                    <div className="flex gap-1">
+                      {daysOfWeek.map((day) => (
+                        <button
+                          key={day.value}
+                          type="button"
+                          onClick={() => toggleDaySelection(day.value)}
+                          className={cn(
+                            "flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium transition-colors",
+                            selectedDays.includes(day.value)
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground hover:bg-muted/80",
+                          )}
+                          title={day.fullName}
+                        >
+                          {day.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <Label>Finaliza</Label>
+                  <RadioGroup
+                    value={recurrenceEndType}
+                    onValueChange={(value: "never" | "date" | "count") =>
+                      setRecurrenceEndType(value)
+                    }
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="never" id="end-never" />
+                      <Label htmlFor="end-never" className="text-sm">
+                        Nunca
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="date" id="end-date-radio" />
+                      <Label htmlFor="end-date-radio" className="text-sm">
+                        El
+                      </Label>
+                      {recurrenceEndType === "date" && (
+                        <Popover
+                          open={recurrenceEndDateOpen}
+                          onOpenChange={setRecurrenceEndDateOpen}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={cn(
+                                "h-8 justify-start text-left font-normal",
+                                !recurrenceEndDate && "text-muted-foreground",
+                              )}
+                            >
+                              {recurrenceEndDate
+                                ? format(recurrenceEndDate, "d 'de' MMM", {
+                                    locale: es,
+                                  })
+                                : "Fecha"}
+                              <CalendarDays className="ml-2 h-4 w-4" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-2" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={recurrenceEndDate}
+                              onSelect={(date) => {
+                                if (date) {
+                                  setRecurrenceEndDate(date)
+                                  setRecurrenceEndDateOpen(false)
+                                }
+                              }}
+                              disabled={{ before: startDate }}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="count" id="end-count" />
+                      <Label htmlFor="end-count" className="text-sm">
+                        Después de
+                      </Label>
+                      {recurrenceEndType === "count" && (
+                        <>
+                          <Input
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={recurrenceCount || ""}
+                            onChange={(e) =>
+                              setRecurrenceCount(
+                                parseInt(e.target.value) || undefined,
+                              )
+                            }
+                            className="h-8 w-16 text-center"
+                          />
+                          <span className="text-muted-foreground text-sm">
+                            veces
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </RadioGroup>
+                </div>
+              </>
+            )}
+          </fieldset>
+
           <div className="*:not-first:mt-1.5">
             <Label htmlFor="location">Location</Label>
             <Input
@@ -444,6 +720,19 @@ export function EventDialog({
             </RadioGroup>
           </fieldset>
         </div>
+
+        {event && isRecurringEvent(event) && (
+          <div className="border-muted bg-muted/20 rounded-md border p-3">
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+              <Repeat className="h-4 w-4" />
+              <span>
+                <strong>Evento recurrente:</strong> Los cambios afectarán a toda
+                la serie de eventos.
+              </span>
+            </div>
+          </div>
+        )}
+
         <DialogFooter className="flex-row sm:justify-between">
           {event?.id && (
             <Button

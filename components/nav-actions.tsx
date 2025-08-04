@@ -4,6 +4,7 @@ import {
   ArrowDown,
   ArrowUp,
   Bell,
+  Clock,
   Copy,
   CornerUpLeft,
   CornerUpRight,
@@ -101,14 +102,11 @@ const data = [
 export function NavActions() {
   const [isOpen, setIsOpen] = React.useState(false)
 
-  React.useEffect(() => {
-    setIsOpen(true)
-  }, [])
-
   return (
     <div className="flex items-center gap-2 text-sm">
-      <div className="text-muted-foreground hidden font-medium md:inline-block">
-        Edit Oct 08
+      <div className="text-muted-foreground flex items-center gap-1">
+        <Clock className="inline size-4" />
+        Actualizado Oct 08
       </div>
       <Button variant="ghost" size="icon" className="h-7 w-7">
         <Star />

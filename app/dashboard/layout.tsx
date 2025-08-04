@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar"
+import NavSearch from "@/components/nav-top"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export default function RootLayout({
@@ -10,7 +11,10 @@ export default function RootLayout({
     <>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>{children}</SidebarInset>
+        <SidebarInset>
+          <NavSearch />
+          {children}
+        </SidebarInset>
       </SidebarProvider>
     </>
   )

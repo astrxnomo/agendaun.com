@@ -245,10 +245,8 @@ export function WeekView({
       {showAllDaySection && (
         <div className="border-border/70 bg-muted/50 border-b">
           <div className="grid grid-cols-8">
-            <div className="border-border/70 relative border-r">
-              <span className="text-muted-foreground/70 absolute bottom-0 left-0 h-6 w-16 max-w-full pe-2 text-right text-[10px] sm:pe-4 sm:text-xs">
-                Todo el dia
-              </span>
+            <div className="border-border/70 text-muted-foreground/80 relative flex items-center justify-center border-r py-2 text-[10px] font-semibold">
+              Todo el día
             </div>
             {days.map((day, dayIndex) => {
               const dayAllDayEvents = allDayEvents.filter((event) => {
@@ -315,7 +313,7 @@ export function WeekView({
               className="border-border/70 relative min-h-[var(--week-cells-height)] border-b last:border-b-0"
             >
               {index > 0 && (
-                <span className="bg-background text-muted-foreground/70 absolute -top-3 left-0 flex h-6 w-16 max-w-full items-center justify-end pe-2 text-[10px] sm:pe-4 sm:text-xs">
+                <span className="bg-background text-muted-foreground/70 absolute -top-3 left-0 flex h-6 items-center justify-end pe-1 text-[10px] sm:pe-3 sm:text-[11px]">
                   {format(hour, "h a", { locale: es })}
                 </span>
               )}

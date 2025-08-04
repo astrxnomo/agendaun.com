@@ -1,18 +1,19 @@
 "use client"
 
 import {
-  BookOpen,
+  Building2,
   Calendar,
   CalendarDays,
-  CheckSquare,
   Clock,
   GraduationCap,
   LifeBuoy,
-  Settings2,
-  User,
+  MapPin,
+  Newspaper,
+  Star,
+  Theater,
+  Trophy,
   Users,
 } from "lucide-react"
-import * as React from "react"
 import Link from "next/link"
 
 import { NavMain } from "@/components/nav-main"
@@ -58,101 +59,126 @@ const data = {
           url: "/dashboard/calendar?view=day",
         },
         {
-          title: "Agenda",
+          title: "Agenda Personal",
           url: "/dashboard/calendar?view=agenda",
         },
       ],
     },
     {
-      title: "Horarios",
+      title: "Eventos Universitarios",
+      url: "/dashboard/events",
+      icon: CalendarDays,
+      items: [
+        {
+          title: "Todos los Eventos",
+          url: "/dashboard/events",
+        },
+        {
+          title: "Eventos Culturales",
+          url: "/dashboard/events?type=cultural",
+        },
+        {
+          title: "Conferencias",
+          url: "/dashboard/events?type=conferences",
+        },
+        {
+          title: "Deportes",
+          url: "/dashboard/events?type=sports",
+        },
+        {
+          title: "Talleres",
+          url: "/dashboard/events?type=workshops",
+        },
+        {
+          title: "Ferias y Expo",
+          url: "/dashboard/events?type=fairs",
+        },
+      ],
+    },
+    {
+      title: "Horarios Académicos",
       url: "/dashboard/schedules",
       icon: Clock,
       items: [
         {
-          title: "Mis Horarios",
-          url: "/dashboard/schedules",
+          title: "Tutorías",
+          url: "/dashboard/schedules/tutoring",
         },
         {
-          title: "Crear Horario",
-          url: "/dashboard/schedules/create",
+          title: "Oficinas",
+          url: "/dashboard/schedules/offices",
         },
         {
-          title: "Horarios Guardados",
-          url: "/dashboard/schedules/saved",
-        },
-      ],
-    },
-    {
-      title: "Materias",
-      url: "/dashboard/subjects",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Mis Materias",
-          url: "/dashboard/subjects",
-        },
-        {
-          title: "Agregar Materia",
-          url: "/dashboard/subjects/add",
+          title: "Laboratorios",
+          url: "/dashboard/schedules/labs",
         },
         {
           title: "Profesores",
-          url: "/dashboard/subjects/professors",
-        },
-        {
-          title: "Aulas",
-          url: "/dashboard/subjects/classrooms",
+          url: "/dashboard/schedules/professors",
         },
       ],
     },
     {
-      title: "Tareas",
-      url: "/dashboard/tasks",
-      icon: CheckSquare,
+      title: "Servicios Universitarios",
+      url: "/dashboard/services",
+      icon: Building2,
       items: [
         {
-          title: "Pendientes",
-          url: "/dashboard/tasks?status=pending",
+          title: "Biblioteca",
+          url: "/dashboard/services/library",
         },
         {
-          title: "Completadas",
-          url: "/dashboard/tasks?status=completed",
+          title: "Cafeterías",
+          url: "/dashboard/services/cafeterias",
         },
         {
-          title: "Vencidas",
-          url: "/dashboard/tasks?status=overdue",
+          title: "Centros de Copiado",
+          url: "/dashboard/services/printing",
         },
         {
-          title: "Nueva Tarea",
-          url: "/dashboard/tasks/create",
+          title: "Transporte",
+          url: "/dashboard/services/transport",
+        },
+        {
+          title: "Bienestar Estudiantil",
+          url: "/dashboard/services/wellness",
+        },
+        {
+          title: "Servicios Médicos",
+          url: "/dashboard/services/medical",
         },
       ],
     },
     {
-      title: "Configuración",
-      url: "/dashboard/settings",
-      icon: Settings2,
+      title: "Noticias",
+      url: "/dashboard/news",
+      icon: Newspaper,
       items: [
         {
-          title: "Perfil",
-          url: "/dashboard/settings/profile",
+          title: "Últimas Noticias",
+          url: "/dashboard/news",
         },
         {
-          title: "Notificaciones",
-          url: "/dashboard/settings/notifications",
+          title: "Comunicados Oficiales",
+          url: "/dashboard/news?type=official",
         },
         {
-          title: "Preferencias",
-          url: "/dashboard/settings/preferences",
+          title: "Eventos Destacados",
+          url: "/dashboard/news?type=featured",
         },
         {
-          title: "Universidad",
-          url: "/dashboard/settings/university",
+          title: "Convocatorias",
+          url: "/dashboard/news?type=calls",
         },
       ],
     },
   ],
   navSecondary: [
+    {
+      title: "Mapa del Campus",
+      url: "/campus-map",
+      icon: MapPin,
+    },
     {
       title: "Soporte",
       url: "/support",
@@ -166,26 +192,31 @@ const data = {
   ],
   projects: [
     {
-      name: "Semestre Actual",
-      url: "/dashboard/semesters/current",
-      icon: GraduationCap,
+      name: "Eventos Favoritos",
+      url: "/dashboard/favorites",
+      icon: Star,
     },
     {
-      name: "Exámenes",
-      url: "/dashboard/exams",
-      icon: CalendarDays,
+      name: "Grupos de Estudio",
+      url: "/dashboard/study-groups",
+      icon: Users,
     },
     {
-      name: "Mi Progreso",
-      url: "/dashboard/progress",
-      icon: User,
+      name: "Deportes y Recreación",
+      url: "/dashboard/sports",
+      icon: Trophy,
+    },
+    {
+      name: "Arte y Cultura",
+      url: "/dashboard/culture",
+      icon: Theater,
     },
   ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

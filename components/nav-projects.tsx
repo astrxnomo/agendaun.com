@@ -1,12 +1,15 @@
 "use client"
 
 import {
-  Folder,
+  Bookmark,
+  Heart,
   MoreHorizontal,
+  Plus,
+  Settings,
   Share,
-  Trash2,
   type LucideIcon,
 } from "lucide-react"
+import Link from "next/link"
 
 import {
   DropdownMenu,
@@ -38,21 +41,21 @@ export function NavProjects({
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>Mis Espacios</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <a href={item.url}>
+            <SidebarMenuButton asChild tooltip={item.name}>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction showOnHover>
                   <MoreHorizontal />
-                  <span className="sr-only">More</span>
+                  <span className="sr-only">Más opciones para {item.name}</span>
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -60,27 +63,35 @@ export function NavProjects({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
-                  <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
+                <DropdownMenuItem asChild>
+                  <Link href={item.url}>
+                    <Settings className="text-muted-foreground" />
+                    <span>Ver Detalles</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Share className="text-muted-foreground" />
-                  <span>Share Project</span>
+                  <span>Compartir</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Bookmark className="text-muted-foreground" />
+                  <span>Marcar como Favorito</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete Project</span>
+                  <Heart className="text-muted-foreground" />
+                  <span>Personalizar</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-          <SidebarMenuButton>
-            <MoreHorizontal />
-            <span>More</span>
+          <SidebarMenuButton asChild tooltip="Explorar más espacios">
+            <Link href="/dashboard/explore">
+              <Plus />
+              <span>Explorar Más</span>
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

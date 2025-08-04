@@ -1,13 +1,14 @@
 "use client"
 
 import { differenceInMinutes, format, getMinutes, isPast } from "date-fns"
+import { MapPin } from "lucide-react"
 import { useMemo } from "react"
 
-import { cn } from "@/lib/utils"
 import {
   getBorderRadiusClasses,
   getEventColorClasses,
 } from "@/components/calendar/utils"
+import { cn } from "@/lib/utils"
 
 import type { CalendarEvent } from "@/components/calendar/types"
 import type { DraggableAttributes } from "@dnd-kit/core"
@@ -181,6 +182,11 @@ export function EventItem({
   }
 
   if (view === "week" || view === "day") {
+    // Calculate lines available based on duration
+    const availableLines = Math.floor(durationMinutes / 15) // roughly 1 line per 15 minutes
+    const canShowDescription = availableLines >= 3 && event.description
+    const canShowLocation = availableLines >= 4 && event.location
+
     return (
       <EventWrapper
         event={event}
@@ -190,7 +196,7 @@ export function EventItem({
         onClick={onClick}
         className={cn(
           "py-1",
-          durationMinutes < 45 ? "items-center" : "flex-col",
+          durationMinutes < 45 ? "items-center" : "flex-col justify-start",
           view === "week" ? "text-[10px] sm:text-[13px]" : "text-[13px]",
           className,
         )}
@@ -210,14 +216,27 @@ export function EventItem({
             )}
           </div>
         ) : (
-          <>
+          <div className="flex h-full flex-col gap-0.5 overflow-hidden">
             <div className="truncate font-medium">{event.title}</div>
             {showTime && (
               <div className="truncate font-normal uppercase opacity-70 sm:text-xs">
                 {getEventTime()}
               </div>
             )}
-          </>
+            {canShowDescription && (
+              <div className="flex-1 overflow-hidden text-xs opacity-90">
+                <div className="line-clamp-2 sm:line-clamp-3">
+                  {event.description}
+                </div>
+              </div>
+            )}
+            {canShowLocation && (
+              <div className="flex items-center gap-1 text-xs opacity-70">
+                <MapPin className="inline-block size-3" />
+                <span className="truncate font-medium">{event.location}</span>
+              </div>
+            )}
+          </div>
         )}
       </EventWrapper>
     )
