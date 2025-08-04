@@ -104,8 +104,8 @@ export function NavActions() {
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <div className="text-muted-foreground flex items-center gap-1">
-        <Clock className="inline size-4" />
+      <div className="text-muted-foreground flex items-center gap-1 text-xs">
+        <Clock className="inline size-3" />
         Actualizado Oct 08
       </div>
       <Button variant="ghost" size="icon" className="h-7 w-7">

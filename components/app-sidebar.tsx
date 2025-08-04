@@ -2,13 +2,22 @@
 
 import {
   Building2,
+  Bus,
   Calendar,
   CalendarDays,
+  ChevronRight,
   Clock,
+  Coffee,
+  FlaskConical,
   GraduationCap,
+  Heart,
+  Home,
+  Library,
   LifeBuoy,
-  MapPin,
-  Newspaper,
+  NotepadText,
+  Palette,
+  Presentation,
+  SquareUser,
   Star,
   Theater,
   Trophy,
@@ -16,18 +25,26 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
 import { LoginForm } from "./login-form"
@@ -124,7 +141,7 @@ const data = {
       icon: Building2,
       items: [
         {
-          title: "Biblioteca",
+          title: "Bibliotecas",
           url: "/dashboard/services/library",
         },
         {
@@ -132,7 +149,7 @@ const data = {
           url: "/dashboard/services/cafeterias",
         },
         {
-          title: "Centros de Copiado",
+          title: "Papelerías",
           url: "/dashboard/services/printing",
         },
         {
@@ -149,36 +166,8 @@ const data = {
         },
       ],
     },
-    {
-      title: "Noticias",
-      url: "/dashboard/news",
-      icon: Newspaper,
-      items: [
-        {
-          title: "Últimas Noticias",
-          url: "/dashboard/news",
-        },
-        {
-          title: "Comunicados Oficiales",
-          url: "/dashboard/news?type=official",
-        },
-        {
-          title: "Eventos Destacados",
-          url: "/dashboard/news?type=featured",
-        },
-        {
-          title: "Convocatorias",
-          url: "/dashboard/news?type=calls",
-        },
-      ],
-    },
   ],
   navSecondary: [
-    {
-      title: "Mapa del Campus",
-      url: "/campus-map",
-      icon: MapPin,
-    },
     {
       title: "Soporte",
       url: "/support",
@@ -235,9 +224,208 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuButton asChild tooltip="Inicio">
+              <Link href="/dashboard">
+                <Home />
+                <span>Inicio</span>
+              </Link>
+            </SidebarMenuButton>
+            <SidebarMenuButton asChild tooltip="Mi horario">
+              <Link href="/dashboard/calendar">
+                <Calendar />
+                <span>Mi horario</span>
+              </Link>
+            </SidebarMenuButton>
+            <SidebarMenuButton asChild tooltip="Mis favoritos">
+              <Link href="/dashboard/events">
+                <Star />
+                <span>Mis favoritos</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Universidad</SidebarGroupLabel>
+          <SidebarMenu>
+            <Collapsible asChild defaultOpen={true}>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Horarios Académicos">
+                  <Link href="/dashboard/schedules">
+                    <Clock />
+                    <span>Horarios</span>
+                  </Link>
+                </SidebarMenuButton>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuAction className="data-[state=open]:rotate-90">
+                    <ChevronRight />
+                    <span className="sr-only">Expandir Horarios</span>
+                  </SidebarMenuAction>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/schedules/professors">
+                          <SquareUser className="size-4" />
+                          <span>Profesores</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/schedules/offices">
+                          <Building2 className="size-4" />
+                          <span>Oficinas</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/schedules/faculties">
+                          <GraduationCap className="size-4" />
+                          <span>Facultades</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/schedules/tutoring">
+                          <NotepadText className="size-4" />
+                          <span>Monitorias</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/schedules/labs">
+                          <FlaskConical className="size-4" />
+                          <span>Laboratorios</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+
+            <Collapsible asChild>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Eventos Universitarios">
+                  <Link href="/dashboard/events">
+                    <CalendarDays />
+                    <span>Eventos</span>
+                  </Link>
+                </SidebarMenuButton>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuAction className="data-[state=open]:rotate-90">
+                    <ChevronRight />
+                    <span className="sr-only">Expandir Eventos</span>
+                  </SidebarMenuAction>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/events?type=academic">
+                          <GraduationCap className="size-4" />
+                          <span>Académicos</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/events?type=cultural">
+                          <Palette className="size-4" />
+                          <span>Culturales</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/events">
+                          <Trophy className="size-4" />
+                          <span>Deportivos</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/events?type=conferences">
+                          <Presentation className="size-4" />
+                          <span>Conferencias</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/events?type=workshops">
+                          <Users className="size-4" />
+                          <span>Talleres</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+
+            <Collapsible asChild>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Servicios Universitarios">
+                  <Link href="/dashboard/services">
+                    <Building2 />
+                    <span>Servicios</span>
+                  </Link>
+                </SidebarMenuButton>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuAction className="data-[state=open]:rotate-90">
+                    <ChevronRight />
+                    <span className="sr-only">Expandir Servicios</span>
+                  </SidebarMenuAction>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/services/library">
+                          <Library className="size-4" />
+                          <span>Bibliotecas</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/services/cafeterias">
+                          <Coffee className="size-4" />
+                          <span>Cafeterías</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/services/wellness">
+                          <Heart className="size-4" />
+                          <span>Bienestar</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/services/transport">
+                          <Bus className="size-4" />
+                          <span>Transporte</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

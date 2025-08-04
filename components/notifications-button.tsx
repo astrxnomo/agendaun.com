@@ -15,7 +15,7 @@ import {
 const initialNotifications = [
   {
     id: 1,
-    image: "/avatar-80-01.jpg",
+    image: "",
     user: "Chris Tompson",
     action: "requested review on",
     target: "PR #42: Feature implementation",
@@ -24,7 +24,7 @@ const initialNotifications = [
   },
   {
     id: 2,
-    image: "/avatar-80-02.jpg",
+    image: "/",
     user: "Emma Davis",
     action: "shared",
     target: "New component library",
@@ -33,7 +33,7 @@ const initialNotifications = [
   },
   {
     id: 3,
-    image: "/avatar-80-03.jpg",
+    image: "",
     user: "James Wilson",
     action: "assigned you to",
     target: "API integration task",
@@ -42,7 +42,7 @@ const initialNotifications = [
   },
   {
     id: 4,
-    image: "/avatar-80-04.jpg",
+    image: "",
     user: "Alex Morgan",
     action: "replied to your comment in",
     target: "Authentication flow",
@@ -51,7 +51,7 @@ const initialNotifications = [
   },
   {
     id: 5,
-    image: "/avatar-80-05.jpg",
+    image: "",
     user: "Sarah Chen",
     action: "commented on",
     target: "Dashboard redesign",
@@ -60,7 +60,7 @@ const initialNotifications = [
   },
   {
     id: 6,
-    image: "/avatar-80-06.jpg",
+    image: "",
     user: "Miky Derya",
     action: "mentioned you in",
     target: "Origin UI open graph image",
@@ -113,13 +113,13 @@ export default function Notifications() {
       <PopoverTrigger asChild>
         <Button
           size="icon"
-          variant="ghost"
+          variant="outline"
           className="relative"
           aria-label="Open notifications"
         >
-          <BellIcon size={16} aria-hidden="true" />
+          <BellIcon className="size-4" aria-hidden="true" />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-2 left-full min-w-5 -translate-x-1/2 px-1">
+            <Badge className="absolute -top-0.5 -right-0.5 min-w-4 px-1 text-[8px]">
               {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
           )}

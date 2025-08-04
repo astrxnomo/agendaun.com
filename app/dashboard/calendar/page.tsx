@@ -15,8 +15,8 @@ export default function Page() {
   return (
     <CalendarProvider>
       <header className="flex h-14 shrink-0 items-center gap-2">
-        <div className="flex flex-1 items-center gap-4 px-3">
-          <Calendar className="size-5" />
+        <div className="flex flex-1 items-center gap-3 px-3">
+          <Calendar className="size-4" />
           <Separator
             orientation="vertical"
             className="data-[orientation=vertical]:h-4"

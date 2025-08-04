@@ -46,7 +46,7 @@ export default function ThemeToggle() {
             className="text-primary-foreground hover:bg-muted/90 flex size-8 items-center justify-center rounded-lg transition-colors"
             aria-label={`Tema actual: ${currentTheme.label}. Clic para cambiar`}
           >
-            <CurrentIcon className="size-4" />
+            <CurrentIcon className="size-3" />
           </button>
         </SidebarMenuItem>
       </SidebarMenu>

@@ -270,7 +270,7 @@ function SidebarTrigger({
     <Button
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
-      variant="ghost"
+      variant="outline"
       size="icon"
       className={cn("size-8", className)}
       onClick={(event) => {
@@ -280,9 +280,9 @@ function SidebarTrigger({
       {...props}
     >
       {!isOutsideSidebar ? (
-        <PanelLeft className="size-5" size={20} />
+        <PanelLeft className="size-4" />
       ) : (
-        <p className="size-5">hola </p>
+        <p className="size-4"></p>
       )}
       <span className="sr-only">
         {isOutsideSidebar ? "Collapse sidebar" : "Expand sidebar"}
