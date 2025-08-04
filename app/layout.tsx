@@ -1,7 +1,7 @@
 import { Outfit } from "next/font/google"
 
-import { Toaster } from "@/components/calendar/sonner"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 
 import type { Metadata } from "next"
 

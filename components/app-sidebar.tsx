@@ -2,17 +2,18 @@
 
 import {
   BookOpen,
-  Bot,
-  Command,
-  Frame,
+  Calendar,
+  CalendarDays,
+  CheckSquare,
+  Clock,
+  GraduationCap,
   LifeBuoy,
-  Map,
-  PieChart,
-  Send,
   Settings2,
-  SquareTerminal,
+  User,
+  Users,
 } from "lucide-react"
 import * as React from "react"
+import Link from "next/link"
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
@@ -33,124 +34,151 @@ import ThemeToggle from "./theme-toggle"
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Usuario",
+    email: "estudiante@unal.edu.co",
+    avatar: "/avatars/user.jpg",
   },
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
+      title: "Calendario",
+      url: "/dashboard/calendar",
+      icon: Calendar,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Vista Mensual",
+          url: "/dashboard/calendar?view=month",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "Vista Semanal",
+          url: "/dashboard/calendar?view=week",
         },
         {
-          title: "Settings",
-          url: "#",
+          title: "Vista Diaria",
+          url: "/dashboard/calendar?view=day",
+        },
+        {
+          title: "Agenda",
+          url: "/dashboard/calendar?view=agenda",
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
+      title: "Horarios",
+      url: "/dashboard/schedules",
+      icon: Clock,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Mis Horarios",
+          url: "/dashboard/schedules",
         },
         {
-          title: "Explorer",
-          url: "#",
+          title: "Crear Horario",
+          url: "/dashboard/schedules/create",
         },
         {
-          title: "Quantum",
-          url: "#",
+          title: "Horarios Guardados",
+          url: "/dashboard/schedules/saved",
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
+      title: "Materias",
+      url: "/dashboard/subjects",
       icon: BookOpen,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Mis Materias",
+          url: "/dashboard/subjects",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Agregar Materia",
+          url: "/dashboard/subjects/add",
         },
         {
-          title: "Tutorials",
-          url: "#",
+          title: "Profesores",
+          url: "/dashboard/subjects/professors",
         },
         {
-          title: "Changelog",
-          url: "#",
+          title: "Aulas",
+          url: "/dashboard/subjects/classrooms",
         },
       ],
     },
     {
-      title: "Settings",
-      url: "#",
+      title: "Tareas",
+      url: "/dashboard/tasks",
+      icon: CheckSquare,
+      items: [
+        {
+          title: "Pendientes",
+          url: "/dashboard/tasks?status=pending",
+        },
+        {
+          title: "Completadas",
+          url: "/dashboard/tasks?status=completed",
+        },
+        {
+          title: "Vencidas",
+          url: "/dashboard/tasks?status=overdue",
+        },
+        {
+          title: "Nueva Tarea",
+          url: "/dashboard/tasks/create",
+        },
+      ],
+    },
+    {
+      title: "Configuración",
+      url: "/dashboard/settings",
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "Perfil",
+          url: "/dashboard/settings/profile",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Notificaciones",
+          url: "/dashboard/settings/notifications",
         },
         {
-          title: "Billing",
-          url: "#",
+          title: "Preferencias",
+          url: "/dashboard/settings/preferences",
         },
         {
-          title: "Limits",
-          url: "#",
+          title: "Universidad",
+          url: "/dashboard/settings/university",
         },
       ],
     },
   ],
   navSecondary: [
     {
-      title: "Support",
-      url: "#",
+      title: "Soporte",
+      url: "/support",
       icon: LifeBuoy,
     },
     {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
+      title: "Comunidad",
+      url: "/community",
+      icon: Users,
     },
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      name: "Semestre Actual",
+      url: "/dashboard/semesters/current",
+      icon: GraduationCap,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
+      name: "Exámenes",
+      url: "/dashboard/exams",
+      icon: CalendarDays,
     },
     {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      name: "Mi Progreso",
+      url: "/dashboard/progress",
+      icon: User,
     },
   ],
 }
@@ -162,15 +190,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href="/dashboard">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
+                  <GraduationCap className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">HorarioU</span>
+                  <span className="truncate text-xs">Universidad</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
