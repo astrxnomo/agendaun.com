@@ -84,10 +84,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <span>Inicio</span>
               </Link>
             </SidebarMenuButton>
-            <SidebarMenuButton asChild tooltip="Mi horario">
-              <Link href="/dashboard/calendar">
+            <SidebarMenuButton asChild tooltip="Mi calendario">
+              <Link href="/dashboard/my-calendar">
                 <Calendar />
-                <span>Mi horario</span>
+                <span>Mi calendario</span>
               </Link>
             </SidebarMenuButton>
             <SidebarMenuButton asChild tooltip="Mis favoritos">
@@ -102,12 +102,54 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Universidad</SidebarGroupLabel>
           <SidebarMenu>
-            <SidebarMenuButton asChild tooltip="Calendario Nacional">
-              <Link href="/dashboard/events">
-                <CalendarDays />
-                <span>Calendario Nacional</span>
-              </Link>
-            </SidebarMenuButton>
+            <Collapsible asChild>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Calendarios">
+                  <Link href="/dashboard/calendar">
+                    <CalendarDays />
+                    <span>Calendarios</span>
+                  </Link>
+                </SidebarMenuButton>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuAction className="data-[state=open]:rotate-90">
+                    <ChevronRight />
+                    <span className="sr-only">Expandir Calendarios</span>
+                  </SidebarMenuAction>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/calendar/national">
+                          <span>🇨🇴 Nacional</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/calendar/department">
+                          <span>🏫 Departamental</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/calendar/public">
+                          <span>🌍 Público</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/calendar/permissions-demo">
+                          <span>💡 Demo Permisos</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
             <Collapsible asChild defaultOpen={true}>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Horarios">

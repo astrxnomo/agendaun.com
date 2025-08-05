@@ -4,7 +4,12 @@ import { addDays, getDay, setHours, setMinutes } from "date-fns"
 import { useMemo, useState } from "react"
 
 import { useCalendarContext } from "@/components/calendar/calendar-context"
-import { EventCalendar } from "@/components/calendar/event-calendar"
+import {
+  type CalendarType,
+  type UserRole,
+  useCalendarPermissions,
+} from "@/components/calendar/permissions"
+import { SetupCalendar } from "@/components/calendar/setup-calendar"
 import {
   type CalendarEvent,
   type EventColor,
@@ -591,9 +596,23 @@ const sampleEvents: CalendarEvent[] = [
   },
 ]
 
-export default function Component() {
+export default function MyCalendar({
+  editable = true,
+  calendarType = "personal",
+  userRole = "user",
+}: {
+  editable?: boolean
+  calendarType?: CalendarType
+  userRole?: UserRole
+}) {
   const [events, setEvents] = useState<CalendarEvent[]>(sampleEvents)
   const { isColorVisible } = useCalendarContext()
+
+  // Obtener permisos basados en el tipo de calendario y rol del usuario
+  const permissions = useCalendarPermissions(calendarType, userRole)
+
+  // El calendario es editable si se permite explícitamente Y el usuario tiene permisos
+  const isEditable = editable && permissions.canEdit
 
   // Filtrar eventos basado en colores visibles
   const visibleEvents = useMemo(() => {
@@ -601,28 +620,37 @@ export default function Component() {
   }, [events, isColorVisible])
 
   const handleEventAdd = (event: CalendarEvent) => {
-    setEvents([...events, event])
+    if (permissions.canCreate) {
+      setEvents([...events, event])
+    }
   }
 
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
-    setEvents(
-      events.map((event) =>
-        event.id === updatedEvent.id ? updatedEvent : event,
-      ),
-    )
+    if (permissions.canEdit) {
+      setEvents(
+        events.map((event) =>
+          event.id === updatedEvent.id ? updatedEvent : event,
+        ),
+      )
+    }
   }
 
   const handleEventDelete = (eventId: string) => {
-    setEvents(events.filter((event) => event.id !== eventId))
+    if (permissions.canDelete) {
+      setEvents(events.filter((event) => event.id !== eventId))
+    }
   }
 
   return (
-    <EventCalendar
+    <SetupCalendar
       events={visibleEvents}
       onEventAdd={handleEventAdd}
       onEventUpdate={handleEventUpdate}
       onEventDelete={handleEventDelete}
       initialView="week"
+      editable={isEditable}
+      calendarType={calendarType}
+      permissions={permissions}
     />
   )
 }

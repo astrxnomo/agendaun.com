@@ -1,4 +1,4 @@
-import BigCalendar from "@/components/calendars/my-calendar"
+import MyCalendar from "@/components/calendars/my-calendar"
 import { NavActions } from "@/components/nav-actions"
 import {
   Breadcrumb,
@@ -25,7 +25,7 @@ export default function Page() {
         </div>
       </header>
       <div className="flex flex-1 flex-col gap-4 p-2 pt-0">
-        <BigCalendar />
+        <MyCalendar editable={true} />
       </div>
     </>
   )

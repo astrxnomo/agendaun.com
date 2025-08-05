@@ -16,6 +16,7 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  Plus,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -28,7 +29,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
 import { AgendaView } from "./agenda-view"
@@ -42,7 +42,9 @@ import {
 } from "./constants"
 import { DayView } from "./day-view"
 import { EventDialog } from "./event-dialog"
+import { EventViewDialog } from "./event-view-dialog"
 import { MonthView } from "./month-view"
+import { type CalendarPermissions, type CalendarType } from "./permissions"
 import { type CalendarEvent, type CalendarView } from "./types"
 import { addHoursToDate } from "./utils"
 import { WeekView } from "./week-view"
@@ -54,22 +56,28 @@ export interface EventCalendarProps {
   onEventDelete?: (eventId: string) => void
   className?: string
   initialView?: CalendarView
+  editable?: boolean
+  calendarType?: CalendarType
+  permissions?: CalendarPermissions
 }
 
-export function EventCalendar({
+export function SetupCalendar({
   events = [],
   onEventAdd,
   onEventUpdate,
   onEventDelete,
   className,
   initialView = "month",
+  editable = true,
+  calendarType = "personal",
+  permissions,
 }: EventCalendarProps) {
   // Use the shared calendar context instead of local state
   const { currentDate, setCurrentDate } = useCalendarContext()
   const [view, setView] = useState<CalendarView>(initialView)
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
+  const [isEventViewDialogOpen, setIsEventViewDialogOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
-  const { open } = useSidebar()
 
   // Add keyboard shortcuts for view switching
   useEffect(() => {
@@ -139,13 +147,19 @@ export function EventCalendar({
   }
 
   const handleEventSelect = (event: CalendarEvent) => {
-    console.log("Event selected:", event) // Debug log
     setSelectedEvent(event)
-    setIsEventDialogOpen(true)
+
+    // Si el usuario tiene permisos de edición, abrir dialog de edición
+    // Si no, abrir dialog de solo lectura
+    if (permissions?.canEdit && editable) {
+      setIsEventDialogOpen(true)
+    } else {
+      setIsEventViewDialogOpen(true)
+    }
   }
 
   const handleEventCreate = (startTime: Date) => {
-    console.log("Creating new event at:", startTime) // Debug log
+    if (!editable || !permissions?.canCreate) return // No permitir creación si no es editable o no tiene permisos
 
     // Snap to 15-minute intervals
     const minutes = startTime.getMinutes()
@@ -289,11 +303,6 @@ export function EventCalendar({
         >
           <div className="flex justify-between gap-1.5 max-sm:items-center sm:flex-col">
             <div className="flex items-center gap-1.5">
-              <SidebarTrigger
-                data-state={open ? "invisible" : "visible"}
-                className="peer text-muted-foreground/80 hover:text-foreground/80 size-7 transition-opacity duration-200 ease-in-out hover:bg-transparent! sm:-ms-1.5 lg:data-[state=invisible]:pointer-events-none lg:data-[state=invisible]:opacity-0"
-                isOutsideSidebar
-              />
               <h2 className="text-xl font-semibold capitalize transition-transform duration-300 ease-in-out lg:peer-data-[state=invisible]:-translate-x-7.5">
                 {viewTitle}
               </h2>
@@ -322,6 +331,7 @@ export function EventCalendar({
                 </Button>
               </div>
               <Button
+                variant="secondary"
                 className="max-sm:h-8 max-sm:px-2.5!"
                 onClick={handleToday}
               >
@@ -329,16 +339,19 @@ export function EventCalendar({
               </Button>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <Button
-                variant="outline"
-                className="max-sm:h-8 max-sm:px-2.5!"
-                onClick={() => {
-                  setSelectedEvent(null) // Ensure we're creating a new event
-                  setIsEventDialogOpen(true)
-                }}
-              >
-                Nuevo Evento
-              </Button>
+              {editable && permissions?.canCreate && (
+                <Button
+                  className="max-sm:h-8 max-sm:px-2.5!"
+                  onClick={() => {
+                    setSelectedEvent(null)
+                    setIsEventDialogOpen(true)
+                  }}
+                >
+                  <Plus />
+                  Nuevo Evento
+                </Button>
+              )}
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -421,6 +434,16 @@ export function EventCalendar({
           }}
           onSave={handleEventSave}
           onDelete={handleEventDelete}
+        />
+
+        <EventViewDialog
+          event={selectedEvent}
+          isOpen={isEventViewDialogOpen}
+          onClose={() => {
+            setIsEventViewDialogOpen(false)
+            setSelectedEvent(null)
+          }}
+          calendarType={calendarType}
         />
       </CalendarDndProvider>
     </div>

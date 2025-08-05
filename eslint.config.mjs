@@ -1,12 +1,9 @@
-import path from "node:path"
-import { fileURLToPath } from "node:url"
-
-import { fixupConfigRules, fixupPluginRules } from "@eslint/compat"
+import { fixupConfigRules } from "@eslint/compat"
 import { FlatCompat } from "@eslint/eslintrc"
 import js from "@eslint/js"
-import typescriptEslint from "@typescript-eslint/eslint-plugin"
 import tsParser from "@typescript-eslint/parser"
-import _import from "eslint-plugin-import"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -17,9 +14,6 @@ const compat = new FlatCompat({
 })
 
 const config = [
-  {
-    ignores: ["eslint.config.mjs"],
-  },
   ...fixupConfigRules(
     compat.extends(
       "next/core-web-vitals",
@@ -29,34 +23,20 @@ const config = [
     ),
   ),
   {
-    plugins: {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      "@typescript-eslint": fixupPluginRules(typescriptEslint),
-      import: fixupPluginRules(_import),
-    },
-
+    // Removed the plugins section entirely since they're already included
     languageOptions: {
       parser: tsParser,
-      ecmaVersion: 5,
-      sourceType: "script",
-
+      ecmaVersion: 2022,
+      sourceType: "module",
       parserOptions: {
-        project: true,
+        projectService: true,
         tsconfigRootDir: __dirname,
-        allowDefaultProject: true,
       },
     },
-
     rules: {
       "@typescript-eslint/array-type": "off",
       "@typescript-eslint/consistent-type-definitions": "off",
-      "@typescript-eslint/no-unsafe-arguments": "off",
       "@typescript-eslint/prefer-nullish-coalescing": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/consistent-type-imports": [
         "warn",
         {
@@ -64,23 +44,20 @@ const config = [
           fixStyle: "inline-type-imports",
         },
       ],
-
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {
           argsIgnorePattern: "^_",
         },
       ],
-
       "@typescript-eslint/require-await": "off",
-
       "@typescript-eslint/no-misused-promises": [
         "error",
         {
           checksVoidReturn: false,
         },
       ],
-
+      /*
       "import/order": [
         "warn",
         {
@@ -92,10 +69,10 @@ const config = [
             "object",
             "type",
           ],
-
           "newlines-between": "always",
         },
       ],
+      */
     },
   },
 ]

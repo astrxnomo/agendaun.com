@@ -87,9 +87,9 @@ const quickStats = [
 
 const quickActions = [
   {
-    title: "Mi Horario",
+    title: "Mi calendario",
     description: "Ver calendario personal",
-    href: "/dashboard/calendar",
+    href: "/dashboard/my-calendar",
     icon: Calendar,
     color: "bg-blue-500",
   },
