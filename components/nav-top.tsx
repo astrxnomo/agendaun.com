@@ -4,7 +4,7 @@ import { SidebarTrigger } from "./ui/sidebar"
 
 export default function NavSearch() {
   return (
-    <header className="border-b px-4 md:px-6">
+    <header className="border-b px-4">
       <div className="flex h-14 items-center justify-between gap-4">
         {/* Left side */}
         <div className="flex flex-1 items-center gap-2">

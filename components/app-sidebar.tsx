@@ -1,25 +1,22 @@
 "use client"
 
 import {
+  BookMarked,
   Building2,
   Bus,
   Calendar,
   CalendarDays,
   ChevronRight,
   Clock,
-  Coffee,
   FlaskConical,
   GraduationCap,
-  Heart,
   Home,
-  Library,
-  LifeBuoy,
+  MapPinned,
   NotepadText,
   Palette,
   Presentation,
   SquareUser,
   Star,
-  Theater,
   Trophy,
   Users,
 } from "lucide-react"
@@ -47,6 +44,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
+import { Filters } from "./filters-dialog"
 import { LoginForm } from "./login-form"
 import ThemeToggle from "./theme-toggle"
 
@@ -56,151 +54,6 @@ const data = {
     email: "estudiante@unal.edu.co",
     avatar: "/avatars/user.jpg",
   },
-  navMain: [
-    {
-      title: "Calendario",
-      url: "/dashboard/calendar",
-      icon: Calendar,
-      isActive: true,
-      items: [
-        {
-          title: "Vista Mensual",
-          url: "/dashboard/calendar?view=month",
-        },
-        {
-          title: "Vista Semanal",
-          url: "/dashboard/calendar?view=week",
-        },
-        {
-          title: "Vista Diaria",
-          url: "/dashboard/calendar?view=day",
-        },
-        {
-          title: "Agenda Personal",
-          url: "/dashboard/calendar?view=agenda",
-        },
-      ],
-    },
-    {
-      title: "Eventos Universitarios",
-      url: "/dashboard/events",
-      icon: CalendarDays,
-      items: [
-        {
-          title: "Todos los Eventos",
-          url: "/dashboard/events",
-        },
-        {
-          title: "Eventos Culturales",
-          url: "/dashboard/events?type=cultural",
-        },
-        {
-          title: "Conferencias",
-          url: "/dashboard/events?type=conferences",
-        },
-        {
-          title: "Deportes",
-          url: "/dashboard/events?type=sports",
-        },
-        {
-          title: "Talleres",
-          url: "/dashboard/events?type=workshops",
-        },
-        {
-          title: "Ferias y Expo",
-          url: "/dashboard/events?type=fairs",
-        },
-      ],
-    },
-    {
-      title: "Horarios Académicos",
-      url: "/dashboard/schedules",
-      icon: Clock,
-      items: [
-        {
-          title: "Tutorías",
-          url: "/dashboard/schedules/tutoring",
-        },
-        {
-          title: "Oficinas",
-          url: "/dashboard/schedules/offices",
-        },
-        {
-          title: "Laboratorios",
-          url: "/dashboard/schedules/labs",
-        },
-        {
-          title: "Profesores",
-          url: "/dashboard/schedules/professors",
-        },
-      ],
-    },
-    {
-      title: "Servicios Universitarios",
-      url: "/dashboard/services",
-      icon: Building2,
-      items: [
-        {
-          title: "Bibliotecas",
-          url: "/dashboard/services/library",
-        },
-        {
-          title: "Cafeterías",
-          url: "/dashboard/services/cafeterias",
-        },
-        {
-          title: "Papelerías",
-          url: "/dashboard/services/printing",
-        },
-        {
-          title: "Transporte",
-          url: "/dashboard/services/transport",
-        },
-        {
-          title: "Bienestar Estudiantil",
-          url: "/dashboard/services/wellness",
-        },
-        {
-          title: "Servicios Médicos",
-          url: "/dashboard/services/medical",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Soporte",
-      url: "/support",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Comunidad",
-      url: "/community",
-      icon: Users,
-    },
-  ],
-  projects: [
-    {
-      name: "Eventos Favoritos",
-      url: "/dashboard/favorites",
-      icon: Star,
-    },
-    {
-      name: "Grupos de Estudio",
-      url: "/dashboard/study-groups",
-      icon: Users,
-    },
-    {
-      name: "Deportes y Recreación",
-      url: "/dashboard/sports",
-      icon: Trophy,
-    },
-    {
-      name: "Arte y Cultura",
-      url: "/dashboard/culture",
-      icon: Theater,
-    },
-  ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -250,9 +103,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Universidad</SidebarGroupLabel>
           <SidebarMenu>
+            <SidebarMenuButton asChild tooltip="Calendario Nacional">
+              <Link href="/dashboard/events">
+                <CalendarDays />
+                <span>Calendario Nacional</span>
+              </Link>
+            </SidebarMenuButton>
             <Collapsible asChild defaultOpen={true}>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Horarios Académicos">
+                <SidebarMenuButton asChild tooltip="Horarios">
                   <Link href="/dashboard/schedules">
                     <Clock />
                     <span>Horarios</span>
@@ -268,14 +127,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/schedules/professors">
-                          <SquareUser className="size-4" />
-                          <span>Profesores</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
                         <Link href="/dashboard/schedules/offices">
                           <Building2 className="size-4" />
                           <span>Oficinas</span>
@@ -284,12 +135,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/schedules/faculties">
-                          <GraduationCap className="size-4" />
-                          <span>Facultades</span>
+                        <Link href="/dashboard/services/library">
+                          <BookMarked className="size-4" />
+                          <span>Bibliotecas</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/schedules/professors">
+                          <SquareUser className="size-4" />
+                          <span>Profesores</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
                         <Link href="/dashboard/schedules/tutoring">
@@ -306,6 +166,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/dashboard/schedules/transport">
+                          <Bus className="size-4" />
+                          <span>Transportes</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>
@@ -313,9 +181,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             <Collapsible asChild>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Eventos Universitarios">
+                <SidebarMenuButton asChild tooltip="Eventos">
                   <Link href="/dashboard/events">
-                    <CalendarDays />
+                    <MapPinned />
                     <span>Eventos</span>
                   </Link>
                 </SidebarMenuButton>
@@ -345,7 +213,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/events">
+                        <Link href="/dashboard/events?type=sports">
                           <Trophy className="size-4" />
                           <span>Deportivos</span>
                         </Link>
@@ -371,63 +239,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </CollapsibleContent>
               </SidebarMenuItem>
             </Collapsible>
-
-            <Collapsible asChild>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Servicios Universitarios">
-                  <Link href="/dashboard/services">
-                    <Building2 />
-                    <span>Servicios</span>
-                  </Link>
-                </SidebarMenuButton>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuAction className="data-[state=open]:rotate-90">
-                    <ChevronRight />
-                    <span className="sr-only">Expandir Servicios</span>
-                  </SidebarMenuAction>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/services/library">
-                          <Library className="size-4" />
-                          <span>Bibliotecas</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/services/cafeterias">
-                          <Coffee className="size-4" />
-                          <span>Cafeterías</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/services/wellness">
-                          <Heart className="size-4" />
-                          <span>Bienestar</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/services/transport">
-                          <Bus className="size-4" />
-                          <span>Transporte</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <Filters />
         <NavUser user={data.user} />
         <LoginForm />
         <ThemeToggle />

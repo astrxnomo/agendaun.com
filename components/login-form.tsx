@@ -1,4 +1,4 @@
-import { LogIn } from "lucide-react"
+import { LogIn, Mail } from "lucide-react"
 import { useId } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -49,7 +49,7 @@ export function LoginForm() {
                 className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-full border"
                 aria-hidden="true"
               >
-                <LogIn className="size-5" />
+                <Mail className="size-5" />
               </div>
               <DialogHeader>
                 <DialogTitle className="sm:text-center">
