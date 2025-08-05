@@ -2,6 +2,7 @@ import { Outfit } from "next/font/google"
 
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+import { UniversityFilterProvider } from "@/contexts/university-filter-context"
 
 import type { Metadata } from "next"
 
@@ -30,7 +31,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <UniversityFilterProvider>{children}</UniversityFilterProvider>
           <Toaster position="bottom-right" />
         </ThemeProvider>
       </body>
