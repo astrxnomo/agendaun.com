@@ -413,3 +413,37 @@ export function findBaseEventForSeries(
 ): CalendarEvent | undefined {
   return events.find((event) => event.id === seriesId)
 }
+
+/**
+ * Format a date as time string (HH:MM)
+ */
+export function formatTime(date: Date): string {
+  return date.toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+}
+
+/**
+ * Format a date as date string
+ */
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString("es-ES", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
+}
+
+/**
+ * Format a date as short date string
+ */
+export function formatShortDate(date: Date): string {
+  return date.toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })
+}

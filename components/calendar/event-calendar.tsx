@@ -51,6 +51,7 @@ export interface EventCalendarProps {
   onEventAdd?: (event: CalendarEvent) => void
   onEventUpdate?: (event: CalendarEvent) => void
   onEventDelete?: (eventId: string) => void
+  onEventSelect?: (event: CalendarEvent) => void
   className?: string
   initialView?: CalendarView
 }
@@ -60,6 +61,7 @@ export function EventCalendar({
   onEventAdd,
   onEventUpdate,
   onEventDelete,
+  onEventSelect,
   className,
   initialView = "month",
 }: EventCalendarProps) {
@@ -138,8 +140,14 @@ export function EventCalendar({
 
   const handleEventSelect = (event: CalendarEvent) => {
     console.log("Event selected:", event) // Debug log
-    setSelectedEvent(event)
-    setIsEventDialogOpen(true)
+
+    // Si hay un handler personalizado, usarlo; sino, comportamiento por defecto
+    if (onEventSelect) {
+      onEventSelect(event)
+    } else {
+      setSelectedEvent(event)
+      setIsEventDialogOpen(true)
+    }
   }
 
   const handleEventCreate = (startTime: Date) => {
@@ -166,6 +174,22 @@ export function EventCalendar({
       start: startTime,
       end: addHoursToDate(startTime, 1),
       allDay: false,
+      metadata: {
+        campusId: "",
+        facultyId: "",
+        studyProgramId: "",
+        eventType: "class",
+        courseCode: "",
+        professorId: "",
+        classroom: "",
+        capacity: 0,
+        enrolled: 0,
+        eventCode: "",
+        academicLevel: "undergraduate",
+        semester: 0,
+        academicYear: 0,
+        tags: [],
+      },
     }
     setSelectedEvent(newEvent)
     setIsEventDialogOpen(true)
@@ -422,3 +446,4 @@ export function EventCalendar({
   )
 }
 export { CalendarEvent }
+
