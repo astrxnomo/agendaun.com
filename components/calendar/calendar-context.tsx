@@ -1,13 +1,8 @@
 "use client"
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  type ReactNode,
-} from "react"
+import { createContext, useContext, useState, type ReactNode } from "react"
 
-import { etiquettes } from "@/components/big-calendar"
+import { etiquettes } from "@/components/calendars/my-calendar"
 
 interface CalendarContextType {
   // Date management

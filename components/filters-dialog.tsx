@@ -17,7 +17,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useUniversityFilters } from "@/contexts/university-filter-context"
 
 import {
   Dialog,
@@ -27,6 +26,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog"
+
+import { useUniversityFilters } from "@/contexts/university-filter-context"
 
 // Mapeo de sedes con información visual optimizada
 const CAMPUS_INFO = {

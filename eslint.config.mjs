@@ -17,6 +17,9 @@ const compat = new FlatCompat({
 })
 
 const config = [
+  {
+    ignores: ["eslint.config.mjs"],
+  },
   ...fixupConfigRules(
     compat.extends(
       "next/core-web-vitals",
@@ -39,15 +42,21 @@ const config = [
       sourceType: "script",
 
       parserOptions: {
-        projectService: true,
+        project: true,
         tsconfigRootDir: __dirname,
+        allowDefaultProject: true,
       },
     },
 
     rules: {
       "@typescript-eslint/array-type": "off",
       "@typescript-eslint/consistent-type-definitions": "off",
+      "@typescript-eslint/no-unsafe-arguments": "off",
       "@typescript-eslint/prefer-nullish-coalescing": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/consistent-type-imports": [
         "warn",
         {

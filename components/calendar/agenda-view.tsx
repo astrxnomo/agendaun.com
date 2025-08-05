@@ -5,10 +5,10 @@ import { es } from "date-fns/locale"
 import { Calendar } from "lucide-react"
 import { useMemo } from "react"
 
-import { AgendaDaysToShow } from "@/components/calendar/constants"
-import { EventItem } from "@/components/calendar/event-item"
-import { type CalendarEvent } from "@/components/calendar/types"
-import { getAgendaEventsForDay } from "@/components/calendar/utils"
+import { AgendaDaysToShow } from "./constants"
+import { EventItem } from "./event-item"
+import { type CalendarEvent } from "./types"
+import { getAgendaEventsForDay } from "./utils"
 
 interface AgendaViewProps {
   currentDate: Date
@@ -45,9 +45,9 @@ export function AgendaView({
       {!hasEvents ? (
         <div className="flex min-h-[70svh] flex-col items-center justify-center py-16 text-center">
           <Calendar size={32} className="text-muted-foreground/50 mb-2" />
-          <h3 className="text-lg font-medium">No events found</h3>
+          <h3 className="text-lg font-medium">No se encontraron eventos</h3>
           <p className="text-muted-foreground">
-            There are no events scheduled for this time period.
+            No hay eventos programados para este periodo de tiempo.
           </p>
         </div>
       ) : (
@@ -65,7 +65,7 @@ export function AgendaView({
                 className="bg-background absolute -top-3 left-0 flex h-6 items-center pe-4 text-[10px] uppercase data-today:font-medium sm:pe-4 sm:text-xs"
                 data-today={isToday(day) || undefined}
               >
-                {format(day, "d MMM, EEEE", { locale: es })}
+                <span>{format(day, "d MMM, EEEE", { locale: es })}</span>
               </span>
               <div className="mt-6 space-y-2">
                 {dayEvents.map((event) => (

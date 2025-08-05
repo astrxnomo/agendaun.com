@@ -23,8 +23,8 @@ import {
   type ReactNode,
 } from "react"
 
-import { EventItem } from "@/components/calendar/event-item"
-import { type CalendarEvent } from "@/components/calendar/types"
+import { EventItem } from "./event-item"
+import { type CalendarEvent } from "./types"
 
 // Define the context type
 type CalendarDndContextType = {

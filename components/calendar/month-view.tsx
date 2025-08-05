@@ -20,22 +20,23 @@ import {
   EventGap,
   EventHeight,
 } from "@/components/calendar/constants"
-import { DraggableEvent } from "@/components/calendar/draggable-event"
-import { DroppableCell } from "@/components/calendar/droppable-cell"
-import { EventItem } from "@/components/calendar/event-item"
-import { type CalendarEvent } from "@/components/calendar/types"
-import { useEventVisibility } from "@/components/calendar/use-event-visibility"
-import {
-  getAllEventsForDay,
-  getEventsForDay,
-  getSpanningEventsForDay,
-  sortEvents,
-} from "@/components/calendar/utils"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+
+import { DraggableEvent } from "./draggable-event"
+import { DroppableCell } from "./droppable-cell"
+import { EventItem } from "./event-item"
+import { useEventVisibility } from "./hooks/use-event-visibility"
+import { type CalendarEvent } from "./types"
+import {
+  getAllEventsForDay,
+  getEventsForDay,
+  getSpanningEventsForDay,
+  sortEvents,
+} from "./utils"
 
 interface MonthViewProps {
   currentDate: Date
@@ -53,24 +54,15 @@ export function MonthView({
   const days = useMemo(() => {
     const monthStart = startOfMonth(currentDate)
     const monthEnd = endOfMonth(monthStart)
-    const calendarStart = startOfWeek(monthStart, {
-      weekStartsOn: 1,
-      locale: es,
-    })
-    const calendarEnd = endOfWeek(monthEnd, {
-      weekStartsOn: 1,
-      locale: es,
-    })
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 })
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 })
 
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd })
   }, [currentDate])
 
   const weekdays = useMemo(() => {
     return Array.from({ length: 7 }).map((_, i) => {
-      const date = addDays(
-        startOfWeek(new Date(), { weekStartsOn: 1, locale: es }),
-        i,
-      )
+      const date = addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), i)
       return format(date, "EEE", { locale: es })
     })
   }, [])
@@ -130,7 +122,10 @@ export function MonthView({
               const spanningEvents = getSpanningEventsForDay(events, day)
               const isCurrentMonth = isSameMonth(day, currentDate)
               const cellId = `month-cell-${day.toISOString()}`
-              const allDayEvents = [...spanningEvents, ...dayEvents]
+              const allDayEvents: CalendarEvent[] = [
+                ...spanningEvents,
+                ...dayEvents,
+              ]
               const allEvents = getAllEventsForDay(events, day)
 
               const isReferenceCell = weekIndex === 0 && dayIndex === 0
@@ -194,10 +189,9 @@ export function MonthView({
                                 <div className="invisible" aria-hidden={true}>
                                   {!event.allDay && (
                                     <span>
-                                      {format(
-                                        new Date(event.start),
-                                        "h:mm",
-                                      )}{" "}
+                                      {format(new Date(event.start), "h:mm", {
+                                        locale: es,
+                                      })}{" "}
                                     </span>
                                   )}
                                   {event.title}

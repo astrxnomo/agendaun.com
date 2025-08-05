@@ -37,6 +37,7 @@ export default function SidebarCalendar({ className }: SidebarCalendarProps) {
         onSelect={handleSelect}
         month={calendarMonth}
         onMonthChange={setCalendarMonth}
+        weekStartsOn={1}
         classNames={{
           day_button:
             "transition-none! hover:not-in-data-selected:bg-sidebar-accent group-[.range-middle]:group-data-selected:bg-sidebar-accent text-sidebar-foreground",

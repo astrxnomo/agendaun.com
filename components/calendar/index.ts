@@ -1,18 +1,8 @@
-// 🎯 Exportaciones principales del sistema de calendario optimizado
+"use client"
 
-// Tipos base
-export type {
-  CalendarEvent,
-  CalendarView,
-  EventColor,
-  RecurrenceRule,
-  TutoringEvent,
-  TutoringEventMetadata,
-  UniversityEventMetadata,
-} from "./types"
-
-// Componentes de calendario base
+// Component exports
 export { AgendaView } from "./agenda-view"
+export { CalendarDndProvider, useCalendarDnd } from "./calendar-dnd-context"
 export { DayView } from "./day-view"
 export { DraggableEvent } from "./draggable-event"
 export { DroppableCell } from "./droppable-cell"
@@ -22,31 +12,14 @@ export { EventItem } from "./event-item"
 export { EventsPopup } from "./events-popup"
 export { MonthView } from "./month-view"
 export { WeekView } from "./week-view"
-export { WrappedEventCalendar } from "./wrapped-event-calendar"
 
-// Componentes especializados optimizados
-export { TutoringCalendar } from "./schedules/tutoring-calendar"
-
-// Hooks optimizados
-export {
-  useFilteredTutoringEvents,
-  useTutoringEvents,
-} from "./hooks/use-tutoring-events"
-
-// Adaptadores para integración
-export {
-  TutoringCalendarAdapter,
-  TutoringListAdapter,
-  TutoringStatsAdapter,
-} from "./adapters/tutoring-adapters"
-
-// Contextos y providers
-export { CalendarDndProvider, useCalendarDnd } from "./calendar-dnd-context"
-
-// Hooks de utilidades
-export * from "./use-current-time-indicator"
-export * from "./use-event-visibility"
-
-// Constantes y utilidades
+// Constants and utility exports
 export * from "./constants"
 export * from "./utils"
+
+// Hook exports
+export * from "@/components/calendar/hooks/use-current-time-indicator"
+export * from "@/components/calendar/hooks/use-event-visibility"
+
+// Type exports
+export type { CalendarEvent, CalendarView, EventColor } from "./types"

@@ -44,7 +44,6 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
-import { Filters } from "./filters-dialog"
 import { LoginForm } from "./login-form"
 import ThemeToggle from "./theme-toggle"
 
@@ -243,7 +242,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <Filters />
         <NavUser user={data.user} />
         <LoginForm />
         <ThemeToggle />

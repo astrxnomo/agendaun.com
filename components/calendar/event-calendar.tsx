@@ -28,6 +28,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
 import { AgendaView } from "./agenda-view"
@@ -51,7 +52,6 @@ export interface EventCalendarProps {
   onEventAdd?: (event: CalendarEvent) => void
   onEventUpdate?: (event: CalendarEvent) => void
   onEventDelete?: (eventId: string) => void
-  onEventSelect?: (event: CalendarEvent) => void
   className?: string
   initialView?: CalendarView
 }
@@ -61,7 +61,6 @@ export function EventCalendar({
   onEventAdd,
   onEventUpdate,
   onEventDelete,
-  onEventSelect,
   className,
   initialView = "month",
 }: EventCalendarProps) {
@@ -70,6 +69,7 @@ export function EventCalendar({
   const [view, setView] = useState<CalendarView>(initialView)
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const { open } = useSidebar()
 
   // Add keyboard shortcuts for view switching
   useEffect(() => {
@@ -140,14 +140,8 @@ export function EventCalendar({
 
   const handleEventSelect = (event: CalendarEvent) => {
     console.log("Event selected:", event) // Debug log
-
-    // Si hay un handler personalizado, usarlo; sino, comportamiento por defecto
-    if (onEventSelect) {
-      onEventSelect(event)
-    } else {
-      setSelectedEvent(event)
-      setIsEventDialogOpen(true)
-    }
+    setSelectedEvent(event)
+    setIsEventDialogOpen(true)
   }
 
   const handleEventCreate = (startTime: Date) => {
@@ -174,22 +168,6 @@ export function EventCalendar({
       start: startTime,
       end: addHoursToDate(startTime, 1),
       allDay: false,
-      metadata: {
-        campusId: "",
-        facultyId: "",
-        studyProgramId: "",
-        eventType: "class",
-        courseCode: "",
-        professorId: "",
-        classroom: "",
-        capacity: 0,
-        enrolled: 0,
-        eventCode: "",
-        academicLevel: "undergraduate",
-        semester: 0,
-        academicYear: 0,
-        tags: [],
-      },
     }
     setSelectedEvent(newEvent)
     setIsEventDialogOpen(true)
@@ -255,8 +233,8 @@ export function EventCalendar({
     if (view === "month") {
       return format(currentDate, "MMMM yyyy", { locale: es })
     } else if (view === "week") {
-      const start = startOfWeek(currentDate, { weekStartsOn: 1, locale: es })
-      const end = endOfWeek(currentDate, { weekStartsOn: 1, locale: es })
+      const start = startOfWeek(currentDate, { weekStartsOn: 1 })
+      const end = endOfWeek(currentDate, { weekStartsOn: 1 })
       if (isSameMonth(start, end)) {
         return format(start, "MMMM yyyy", { locale: es })
       } else {
@@ -271,7 +249,7 @@ export function EventCalendar({
           <span className="max-sm:hidden min-md:hidden" aria-hidden="true">
             {format(currentDate, "MMMM d, yyyy", { locale: es })}
           </span>
-          <span className="max-md:hidden">
+          <span className="capitalize max-md:hidden">
             {format(currentDate, "EEE MMMM d, yyyy", { locale: es })}
           </span>
         </>
@@ -305,12 +283,17 @@ export function EventCalendar({
       <CalendarDndProvider onEventUpdate={handleEventUpdate}>
         <div
           className={cn(
-            "flex flex-col justify-between gap-2 pb-5 sm:flex-row sm:items-center sm:px-4",
+            "flex flex-col justify-between gap-2 py-5 sm:flex-row sm:items-center sm:px-4",
             className,
           )}
         >
           <div className="flex justify-between gap-1.5 max-sm:items-center sm:flex-col">
             <div className="flex items-center gap-1.5">
+              <SidebarTrigger
+                data-state={open ? "invisible" : "visible"}
+                className="peer text-muted-foreground/80 hover:text-foreground/80 size-7 transition-opacity duration-200 ease-in-out hover:bg-transparent! sm:-ms-1.5 lg:data-[state=invisible]:pointer-events-none lg:data-[state=invisible]:opacity-0"
+                isOutsideSidebar
+              />
               <h2 className="text-xl font-semibold capitalize transition-transform duration-300 ease-in-out lg:peer-data-[state=invisible]:-translate-x-7.5">
                 {viewTitle}
               </h2>
@@ -354,7 +337,7 @@ export function EventCalendar({
                   setIsEventDialogOpen(true)
                 }}
               >
-                Nuevo evento
+                Nuevo Evento
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -368,9 +351,7 @@ export function EventCalendar({
                         ? "Semana"
                         : view === "day"
                           ? "Día"
-                          : view === "agenda"
-                            ? "Agenda"
-                            : view}
+                          : "Agenda"}
                     <ChevronDownIcon
                       className="-me-1 opacity-60"
                       size={16}
@@ -386,7 +367,7 @@ export function EventCalendar({
                     Semana <DropdownMenuShortcut>S</DropdownMenuShortcut>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setView("day")}>
-                    Dia <DropdownMenuShortcut>D</DropdownMenuShortcut>
+                    Día <DropdownMenuShortcut>D</DropdownMenuShortcut>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setView("agenda")}>
                     Agenda <DropdownMenuShortcut>A</DropdownMenuShortcut>
@@ -445,4 +426,3 @@ export function EventCalendar({
     </div>
   )
 }
-export { CalendarEvent }

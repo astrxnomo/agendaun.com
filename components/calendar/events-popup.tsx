@@ -5,8 +5,9 @@ import { es } from "date-fns/locale"
 import { XIcon } from "lucide-react"
 import { useEffect, useMemo, useRef } from "react"
 
-import { type CalendarEvent } from "@/components/calendar/event-calendar"
 import { EventItem } from "@/components/calendar/event-item"
+
+import type { CalendarEvent } from "@/components/calendar/types"
 
 interface EventsPopupProps {
   date: Date
@@ -95,7 +96,7 @@ export function EventsPopup({
       }}
     >
       <div className="bg-background sticky top-0 flex items-center justify-between border-b p-3">
-        <h3 className="font-medium">
+        <h3 className="font-medium capitalize">
           {format(date, "d MMMM yyyy", { locale: es })}
         </h3>
         <button
