@@ -220,7 +220,7 @@ export function WeekView({
 
   return (
     <div data-slot="week-view" className="flex h-full flex-col">
-      <div className="bg-background/80 border-border/70 sticky top-0 z-30 grid grid-cols-8 border-y uppercase backdrop-blur-md">
+      <div className="bg-background/80 border-border/70 sticky top-11.5 z-30 grid grid-cols-8 border-y uppercase backdrop-blur-md">
         <div className="text-muted-foreground/70 py-2 text-center text-xs">
           <span className="max-[479px]:sr-only">
             {format(new Date(), "O", { locale: es })}
@@ -247,7 +247,7 @@ export function WeekView({
         <div className="border-border/70 bg-muted/50 border-b">
           <div className="grid grid-cols-8">
             <div className="border-border/70 relative border-r">
-              <span className="text-muted-foreground/70 absolute bottom-0 left-0 h-6 w-16 max-w-full pe-2 text-right text-[10px] sm:pe-4 sm:text-xs">
+              <span className="text-muted-foreground/70 absolute bottom-0 left-0 h-6 w-16 max-w-full pe-2 text-right text-[10px] sm:pe-4">
                 Todo el día
               </span>
             </div>
