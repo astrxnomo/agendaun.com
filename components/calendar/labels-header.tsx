@@ -3,13 +3,13 @@
 import { Plus, Settings } from "lucide-react"
 import { useState } from "react"
 
+import { useCalendarContext } from "@/components/calendar/calendar-context"
 import {
   calendarColors,
   getCircleColorClass,
   getEventColorClasses,
 } from "@/components/calendar/colors"
-import { type EventColor } from "@/components/calendar/types"
-import { useCustomLabels } from "@/components/custom-labels-context"
+import { type CustomLabel, type EventColor } from "@/components/calendar/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -40,32 +40,54 @@ import {
 
 interface LabelsHeaderProps {
   editable?: boolean
+  labels?: CustomLabel[]
+  onLabelAdd?: (label: Omit<CustomLabel, "id">) => void
+  onLabelUpdate?: (id: string, updates: Partial<CustomLabel>) => void
+  onLabelDelete?: (labelId: string) => void
+  onLabelToggle?: (labelId: string) => void
 }
 
-export function LabelsHeader({ editable = true }: LabelsHeaderProps) {
-  const {
-    labels,
-    addLabel,
-    toggleLabelVisibility,
-    deleteLabel,
-    updateLabel,
-    getAvailableColors,
-  } = useCustomLabels()
+export function LabelsHeader({
+  editable = true,
+  labels = [],
+  onLabelAdd,
+  onLabelUpdate,
+  onLabelDelete,
+  onLabelToggle,
+}: LabelsHeaderProps) {
+  const { toggleLabelVisibility, isLabelVisible } = useCalendarContext()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [newLabelName, setNewLabelName] = useState("")
   const [newLabelColor, setNewLabelColor] = useState<EventColor>("blue")
   const [editingLabel, setEditingLabel] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
 
+  // Calcular colores disponibles basado en las etiquetas pasadas como props
+  const getAvailableColors = (): EventColor[] => {
+    const allColors: EventColor[] = [
+      "gray",
+      "blue",
+      "red",
+      "green",
+      "purple",
+      "orange",
+      "pink",
+      "teal",
+      "yellow",
+      "indigo",
+    ]
+    const usedColors = labels.map((label) => label.color)
+    return allColors.filter((color) => !usedColors.includes(color))
+  }
+
   const availableColors = getAvailableColors()
   const canCreateNewLabel = availableColors.length > 0
 
   const handleCreateLabel = () => {
-    if (newLabelName.trim() && canCreateNewLabel) {
-      addLabel({
+    if (newLabelName.trim() && canCreateNewLabel && onLabelAdd) {
+      onLabelAdd({
         name: newLabelName.trim(),
         color: newLabelColor,
-        isActive: true,
       })
       setNewLabelName("")
       // Establecer el primer color disponible para la próxima etiqueta
@@ -86,8 +108,8 @@ export function LabelsHeader({ editable = true }: LabelsHeaderProps) {
   }
 
   const handleSaveEdit = () => {
-    if (editingLabel && editName.trim()) {
-      updateLabel(editingLabel, { name: editName.trim() })
+    if (editingLabel && editName.trim() && onLabelUpdate) {
+      onLabelUpdate(editingLabel, { name: editName.trim() })
       setEditingLabel(null)
       setEditName("")
     }
@@ -128,9 +150,11 @@ export function LabelsHeader({ editable = true }: LabelsHeaderProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Badge
-                      variant={label.isActive ? "default" : "secondary"}
+                      variant={
+                        isLabelVisible(label.id) ? "default" : "secondary"
+                      }
                       className={`cursor-pointer transition-all hover:opacity-80 ${
-                        label.isActive
+                        isLabelVisible(label.id)
                           ? getEventColorClasses(label.color)
                           : "opacity-50"
                       }`}
@@ -139,10 +163,12 @@ export function LabelsHeader({ editable = true }: LabelsHeaderProps) {
                         // En modo solo lectura, alternar directamente con un click
                         if (!editable) {
                           toggleLabelVisibility(label.id)
+                          onLabelToggle?.(label.id)
                           return
                         }
                         // En modo edición, también permite alternar con click directo
                         toggleLabelVisibility(label.id)
+                        onLabelToggle?.(label.id)
                       }}
                     >
                       {label.name}
@@ -151,9 +177,12 @@ export function LabelsHeader({ editable = true }: LabelsHeaderProps) {
                   {editable && (
                     <DropdownMenuContent>
                       <DropdownMenuItem
-                        onClick={() => toggleLabelVisibility(label.id)}
+                        onClick={() => {
+                          toggleLabelVisibility(label.id)
+                          onLabelToggle?.(label.id)
+                        }}
                       >
-                        {label.isActive ? "Ocultar" : "Mostrar"}
+                        {isLabelVisible(label.id) ? "Ocultar" : "Mostrar"}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleEditLabel(label.id)}
@@ -162,7 +191,7 @@ export function LabelsHeader({ editable = true }: LabelsHeaderProps) {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => deleteLabel(label.id)}
+                        onClick={() => onLabelDelete?.(label.id)}
                         className="text-red-600"
                       >
                         Eliminar
@@ -293,7 +322,10 @@ export function LabelsHeader({ editable = true }: LabelsHeaderProps) {
             <DropdownMenuItem
               onClick={() => {
                 labels.forEach((label) => {
-                  if (!label.isActive) toggleLabelVisibility(label.id)
+                  if (!isLabelVisible(label.id)) {
+                    toggleLabelVisibility(label.id)
+                    onLabelToggle?.(label.id)
+                  }
                 })
               }}
             >
@@ -302,7 +334,10 @@ export function LabelsHeader({ editable = true }: LabelsHeaderProps) {
             <DropdownMenuItem
               onClick={() => {
                 labels.forEach((label) => {
-                  if (label.isActive) toggleLabelVisibility(label.id)
+                  if (isLabelVisible(label.id)) {
+                    toggleLabelVisibility(label.id)
+                    onLabelToggle?.(label.id)
+                  }
                 })
               }}
             >

@@ -22,14 +22,14 @@ export const calendarColors: {
 // Genera las clases CSS dinámicamente basado en el color y shade
 const generateColorClasses = (color: EventColor, shade: number) => {
   return {
-    // Clases básicas para badges/dialogs
-    bgClass: `bg-${color}-${Math.round(shade / 2)}`,
-    textClass: `text-${color}-900`,
-    borderClass: `border-${color}-300`,
+    // Clases básicas para badges/dialogs con colores más suaves
+    bgClass: `bg-${color}-100 dark:bg-${color}-900/30`,
+    textClass: `text-${color}-700 dark:text-${color}-300`,
+    borderClass: `border-${color}-200 dark:border-${color}-700`,
 
-    // Clases sólidas para indicadores
-    solidBgClass: `bg-${color}-600`,
-    solidBorderClass: `border-${color}-700`,
+    // Clases sólidas para indicadores (círculos)
+    solidBgClass: `bg-${color}-500`,
+    solidBorderClass: `border-${color}-600`,
 
     // Clases optimizadas para eventos con transparencias
     eventClasses: `bg-${color}-${shade}/50 hover:bg-${color}-${shade}/40 text-${color}-900/90 shadow-${color}-700/8 dark:bg-${color}-400/25 dark:hover:bg-${color}-400/20 dark:text-${color}-200`,
@@ -46,6 +46,31 @@ export const getColorClasses = (color: EventColor) => {
   return generateColorClasses(colorConfig.value, colorConfig.shade)
 }
 
+// Función para obtener el nombre de la etiqueta basado en el color
+export const getColorLabel = (color: EventColor): string => {
+  const colorConfig = calendarColors.find((c) => c.value === color)
+  return colorConfig ? colorConfig.label : "Sin categoría"
+}
+
+// Función para obtener la etiqueta del evento (prioriza event.label, luego color)
+export const getEventLabel = (event: {
+  label?: string
+  color?: EventColor
+}): string => {
+  // Si el evento tiene una etiqueta personalizada, usarla
+  if (event.label) {
+    return event.label
+  }
+
+  // Si no, usar la etiqueta basada en el color
+  if (event.color) {
+    return getColorLabel(event.color)
+  }
+
+  // Fallback
+  return "Evento"
+}
+
 // Función para obtener las clases CSS de badge/dialog
 export const getColorClass = (color: EventColor) => {
   const colorClasses = generateColorClasses(color, 200)
@@ -54,8 +79,7 @@ export const getColorClass = (color: EventColor) => {
 
 // Función para obtener las clases CSS para el indicador circular
 export const getCircleColorClass = (color: EventColor) => {
-  const colorClasses = generateColorClasses(color, 200)
-  return `${colorClasses.solidBorderClass} ${colorClasses.solidBgClass}`
+  return `bg-${color}-500 border-${color}-600 border`
 }
 
 // Función para obtener las clases CSS para eventos con transparencias y modo oscuro

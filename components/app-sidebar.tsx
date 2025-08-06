@@ -12,6 +12,7 @@ import {
   FlaskConical,
   GraduationCap,
   Home,
+  MapPinHouse,
   MapPinned,
   NotepadText,
   Palette,
@@ -20,7 +21,6 @@ import {
   SquareUser,
   Star,
   Trophy,
-  University,
   Users,
 } from "lucide-react"
 import Link from "next/link"
@@ -133,7 +133,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
                         <Link href="/dashboard/calendar/sede">
-                          <University />
+                          <MapPinHouse />
                           <span>Sede</span>
                         </Link>
                       </SidebarMenuSubButton>

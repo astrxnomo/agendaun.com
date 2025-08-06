@@ -17,6 +17,11 @@ interface CalendarContextType {
   toggleColorVisibility: (color: string) => void
   isColorVisible: (color: string | undefined) => boolean
 
+  // Label visibility management
+  hiddenLabels: string[]
+  toggleLabelVisibility: (labelId: string) => void
+  isLabelVisible: (labelId: string | undefined) => boolean
+
   // Event filtering by academic filters
   filterEventsByAcademicFilters: (events: CalendarEvent[]) => CalendarEvent[]
 }
@@ -46,6 +51,9 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     return calendarColors.map((color) => color.value)
   })
 
+  // Initialize hiddenLabels with empty array (all labels visible by default)
+  const [hiddenLabels, setHiddenLabels] = useState<string[]>([])
+
   // Toggle visibility of a color
   const toggleColorVisibility = (color: string) => {
     setVisibleColors((prev) => {
@@ -62,6 +70,29 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     // Events without a color use "gray" by default
     const eventColor = color || "gray"
     return visibleColors.includes(eventColor)
+  }
+
+  // Toggle visibility of a label
+  const toggleLabelVisibility = (labelId: string) => {
+    setHiddenLabels((prev) => {
+      if (prev.includes(labelId)) {
+        // Si la etiqueta está oculta, la mostramos
+        return prev.filter((id) => id !== labelId)
+      } else {
+        // Si la etiqueta está visible, la ocultamos
+        return [...prev, labelId]
+      }
+    })
+  }
+
+  // Check if a label is visible
+  const isLabelVisible = (labelId: string | undefined) => {
+    // Si no hay labelId, el evento es siempre visible
+    if (!labelId) {
+      return true
+    }
+    // El evento es visible si su etiqueta NO está en la lista de ocultas
+    return !hiddenLabels.includes(labelId)
   }
 
   // Filter events by academic filters (sede, facultad, programa)
@@ -129,6 +160,9 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     visibleColors,
     toggleColorVisibility,
     isColorVisible,
+    hiddenLabels,
+    toggleLabelVisibility,
+    isLabelVisible,
     filterEventsByAcademicFilters,
   }
 

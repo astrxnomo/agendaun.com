@@ -29,7 +29,6 @@ const CustomLabelsContext = createContext<CustomLabelsContextType | undefined>(
   undefined,
 )
 
-// Etiquetas predeterminadas para Mi Calendario
 const defaultLabels: CustomLabel[] = [
   {
     id: "materias",
@@ -121,12 +120,17 @@ export function CustomLabelsProvider({ children }: { children: ReactNode }) {
     return labels.find((label) => label.name === name)
   }
 
-  const isEventVisible = (event: { color?: EventColor; label?: string }) => {
-    // Si el evento tiene una etiqueta definida como string, buscar por nombre o ID
-    if (event.label) {
-      const labelByName = getLabelByName(event.label)
-      const labelById = labels.find((label) => label.id === event.label)
-      const label = labelByName || labelById
+  const isEventVisible = (event: {
+    color?: EventColor
+    label?: string
+    labelId?: string
+  }) => {
+    // Priorizar labelId sobre label para mayor consistencia
+    const eventLabelId = event.labelId || event.label
+
+    // Si el evento tiene una etiqueta definida, verificar su visibilidad
+    if (eventLabelId) {
+      const label = labels.find((l) => l.id === eventLabelId)
       return label ? label.isActive : true // Si no encuentra la etiqueta, mostrar el evento
     }
 

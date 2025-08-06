@@ -3,7 +3,6 @@
 import { Edit, Eye, SquarePen } from "lucide-react"
 import { useState } from "react"
 
-import { LabelsHeader } from "@/components/calendar/labels-header"
 import PersonalCalendar from "@/components/calendars/personal-calendar"
 import { Button } from "@/components/ui/button"
 
@@ -48,7 +47,6 @@ export default function Page() {
 
       {/* Contenedor con scroll para que funcione el sticky */}
       <div className="flex-1 overflow-auto">
-        <LabelsHeader editable={isEditable} />
         <PersonalCalendar editable={isEditable} />
       </div>
     </div>

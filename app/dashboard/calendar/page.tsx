@@ -3,7 +3,7 @@ import {
   CalendarDays,
   Flag,
   GraduationCap,
-  University,
+  MapPinHouse,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -73,7 +73,7 @@ export default function CalendarPage() {
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-                  <University className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  <MapPinHouse className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Sede</CardTitle>

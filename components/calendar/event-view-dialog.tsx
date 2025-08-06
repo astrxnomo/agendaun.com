@@ -4,10 +4,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar1, Clock, MapPin } from "lucide-react"
 
-import {
-  getCircleColorClass,
-  getColorClasses,
-} from "@/components/calendar/colors"
+import { getColorClasses, getEventLabel } from "@/components/calendar/colors"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,27 +17,36 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
-import type { CalendarEvent } from "@/components/calendar/types"
+import type { CalendarEvent, CustomLabel } from "@/components/calendar/types"
 
 interface EventViewDialogProps {
   event: CalendarEvent | null
   isOpen: boolean
   onClose: () => void
-  calendarType?: "personal" | "national" | "department" | "public" | "facultad"
+  customLabels?: CustomLabel[]
 }
 
 export function EventViewDialog({
   event,
   isOpen,
   onClose,
+  customLabels = [],
 }: EventViewDialogProps) {
   if (!event) return null
 
   const startDate = new Date(event.start)
   const endDate = new Date(event.end)
-  const colorClasses = event.color
-    ? getColorClasses(event.color)
-    : getColorClasses("blue")
+
+  // Get color from label or fallback to direct color
+  const getEventColor = () => {
+    if (event.labelId && customLabels.length > 0) {
+      const label = customLabels.find((l) => l.id === event.labelId)
+      return label?.color || "gray"
+    }
+    return event.color || "gray"
+  }
+
+  const colorClasses = getColorClasses(getEventColor())
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -50,12 +56,14 @@ export function EventViewDialog({
             <div
               className={cn(
                 "flex size-10 items-center justify-center rounded-full border",
-                `${colorClasses.bgClass} ${colorClasses.textClass} ${colorClasses.borderClass}`,
+                colorClasses.eventClasses,
               )}
             >
-              <Calendar1 className="size-5" />
+              <Calendar1 className={cn("size-5", colorClasses.textClass)} />
             </div>
-            <DialogTitle className="text-left">{event.title}</DialogTitle>
+            <DialogTitle className="text-left text-lg font-semibold">
+              {event.title}
+            </DialogTitle>
           </div>
         </DialogHeader>
 
@@ -123,24 +131,27 @@ export function EventViewDialog({
           )}
 
           {/* Etiqueta de color */}
-          {event.color && (
-            <div className="flex items-center gap-2">
-              <div
-                className={cn(
-                  "size-3 rounded-full border",
-                  getCircleColorClass(event.color),
-                )}
-              />
+          {(event.color || event.labelId) && (
+            <>
+              <Separator />
               <Badge
                 variant="secondary"
                 className={cn(
-                  "text-xs",
-                  `${colorClasses.bgClass} ${colorClasses.textClass} ${colorClasses.borderClass}`,
+                  "border text-xs capitalize",
+                  colorClasses.eventClasses,
                 )}
               >
-                {event.label || "Evento"}
+                {(() => {
+                  if (event.labelId && customLabels.length > 0) {
+                    const label = customLabels.find(
+                      (l) => l.id === event.labelId,
+                    )
+                    return label?.name || getEventLabel(event)
+                  }
+                  return getEventLabel(event)
+                })()}
               </Badge>
-            </div>
+            </>
           )}
         </div>
 

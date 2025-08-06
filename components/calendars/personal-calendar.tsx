@@ -10,8 +10,12 @@ import {
   useCalendarPermissions,
 } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
-import { type CalendarEvent } from "@/components/calendar/types"
-import { useCustomLabels } from "@/components/custom-labels-context"
+import {
+  type CalendarEvent,
+  type CustomLabel,
+} from "@/components/calendar/types"
+
+import { LabelsHeader } from "../calendar/labels-header"
 
 // Función para calcular días hasta el próximo lunes
 const getDaysUntilNextMonday = (date: Date) => {
@@ -21,6 +25,16 @@ const getDaysUntilNextMonday = (date: Date) => {
 
 const currentDate = new Date()
 const daysUntilNextMonday = getDaysUntilNextMonday(currentDate)
+
+// Etiquetas personalizadas para el calendario personal
+const personalLabels: CustomLabel[] = [
+  { id: "materias", name: "Materias", color: "blue" },
+  { id: "reuniones", name: "Reuniones", color: "orange" },
+  { id: "semilleros", name: "Semilleros", color: "green" },
+  { id: "examenes", name: "Exámenes", color: "red" },
+  { id: "personal", name: "Personal", color: "pink" },
+  { id: "proyectos", name: "Proyectos", color: "purple" },
+]
 
 // Eventos de ejemplo para Mi Calendario con etiquetas personalizadas
 const personalEvents: CalendarEvent[] = [
@@ -37,7 +51,7 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "blue",
-    label: "materias",
+    labelId: "materias",
     location: "Aula 201",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -56,7 +70,7 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "orange",
-    label: "reuniones",
+    labelId: "reuniones",
     location: "Biblioteca Central",
   },
   {
@@ -72,7 +86,7 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "green",
-    label: "semilleros",
+    labelId: "semilleros",
     location: "Laboratorio de IA",
   },
   {
@@ -88,7 +102,7 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "red",
-    label: "examenes",
+    labelId: "examenes",
     location: "Aula Magna",
   },
   {
@@ -104,7 +118,7 @@ const personalEvents: CalendarEvent[] = [
       30,
     ),
     color: "pink",
-    label: "personal",
+    labelId: "personal",
     location: "Gimnasio Universitario",
   },
   {
@@ -120,7 +134,7 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "purple",
-    label: "proyectos",
+    labelId: "proyectos",
     location: "Casa",
   },
   // Eventos de esta semana
@@ -134,7 +148,7 @@ const personalEvents: CalendarEvent[] = [
     ),
     end: setMinutes(setHours(addDays(currentDate, daysUntilNextMonday), 12), 0),
     color: "blue",
-    label: "materias",
+    labelId: "materias",
     location: "Aula 305",
   },
   {
@@ -150,7 +164,7 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "orange",
-    label: "reuniones",
+    labelId: "reuniones",
     location: "Sala de Juntas",
   },
   {
@@ -166,7 +180,7 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "purple",
-    label: "proyectos",
+    labelId: "proyectos",
     location: "Auditorio",
   },
   {
@@ -182,7 +196,7 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "pink",
-    label: "personal",
+    labelId: "personal",
     location: "Cafetería Universitaria",
   },
   // Evento sin etiqueta para probar
@@ -206,33 +220,75 @@ interface PersonalCalendarProps {
   editable?: boolean
   calendarType?: CalendarType
   userRole?: UserRole
+  labels?: CustomLabel[]
+  onLabelsChange?: (labels: CustomLabel[]) => void
 }
 
 export default function PersonalCalendar({
   editable = true,
   calendarType = "personal",
   userRole = "user",
+  labels: propsLabels = personalLabels,
+  onLabelsChange,
 }: PersonalCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(personalEvents)
-  const { filterEventsByAcademicFilters } = useCalendarContext()
-  const { isEventVisible } = useCustomLabels()
+  const [labels, setLabels] = useState<CustomLabel[]>(propsLabels)
+  const { isLabelVisible } = useCalendarContext()
 
-  // Obtener permisos basados en el tipo de calendario y rol del usuario
   const permissions = useCalendarPermissions(calendarType, userRole)
-
-  // El calendario es editable si se permite explícitamente Y el usuario tiene permisos
   const isEditable = editable && permissions.canEdit
 
-  // Filtrar eventos basado en etiquetas visibles Y filtros académicos
-  const visibleEvents = useMemo(() => {
-    // Primero filtrar por etiquetas personalizadas
-    const labelFilteredEvents = events.filter((event) => {
-      return isEventVisible(event)
-    })
+  const handleLabelAdd = (newLabel: Omit<CustomLabel, "id">) => {
+    const label: CustomLabel = {
+      ...newLabel,
+      id: crypto.randomUUID(),
+    }
+    const updatedLabels = [...labels, label]
+    setLabels(updatedLabels)
+    onLabelsChange?.(updatedLabels)
+  }
 
-    // Luego aplicar filtros académicos (sede, facultad, programa)
-    return filterEventsByAcademicFilters(labelFilteredEvents)
-  }, [events, isEventVisible, filterEventsByAcademicFilters])
+  const handleLabelUpdate = (id: string, updates: Partial<CustomLabel>) => {
+    const updatedLabels = labels.map((label) =>
+      label.id === id ? { ...label, ...updates } : label,
+    )
+    setLabels(updatedLabels)
+    onLabelsChange?.(updatedLabels)
+  }
+
+  const handleLabelDelete = (labelId: string) => {
+    const updatedLabels = labels.filter((label) => label.id !== labelId)
+    setLabels(updatedLabels)
+    onLabelsChange?.(updatedLabels)
+
+    // También actualizar eventos que usen esta etiqueta
+    setEvents(
+      events.map((event) => ({
+        ...event,
+        labelId: event.labelId === labelId ? undefined : event.labelId,
+        label: event.label === labelId ? undefined : event.label,
+      })),
+    )
+  }
+
+  const handleLabelToggle = (_labelId: string) => {
+    // Esta función se maneja en el CalendarContext
+    // pero podríamos agregar lógica adicional aquí si fuera necesario
+  }
+  // Filtrar eventos basado en etiquetas visibles
+  const visibleEvents = useMemo(() => {
+    const isEventVisible = (event: CalendarEvent) => {
+      if (event.labelId) {
+        return isLabelVisible(event.labelId)
+      }
+      if (event.label) {
+        return isLabelVisible(event.label)
+      }
+      return true // Eventos sin etiqueta siempre visibles
+    }
+
+    return events.filter(isEventVisible)
+  }, [events, isLabelVisible])
 
   const handleEventAdd = (event: CalendarEvent) => {
     if (permissions.canCreate) {
@@ -257,14 +313,29 @@ export default function PersonalCalendar({
   }
 
   return (
-    <SetupCalendar
-      events={visibleEvents}
-      onEventAdd={handleEventAdd}
-      onEventUpdate={handleEventUpdate}
-      onEventDelete={handleEventDelete}
-      initialView="week"
-      editable={isEditable}
-      permissions={permissions}
-    />
+    <>
+      <LabelsHeader
+        editable={isEditable}
+        labels={labels}
+        onLabelAdd={handleLabelAdd}
+        onLabelUpdate={handleLabelUpdate}
+        onLabelDelete={handleLabelDelete}
+        onLabelToggle={handleLabelToggle}
+      />
+      <SetupCalendar
+        events={visibleEvents}
+        onEventAdd={handleEventAdd}
+        onEventUpdate={handleEventUpdate}
+        onEventDelete={handleEventDelete}
+        initialView="week"
+        editable={isEditable}
+        permissions={permissions}
+        calendarType="personal"
+        customLabels={labels}
+        onLabelAdd={handleLabelAdd}
+        onLabelUpdate={handleLabelUpdate}
+        onLabelDelete={handleLabelDelete}
+      />
+    </>
   )
 }

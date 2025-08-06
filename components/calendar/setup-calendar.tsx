@@ -13,6 +13,7 @@ import {
 } from "date-fns"
 import { es } from "date-fns/locale"
 import {
+  CalendarCog,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -45,7 +46,11 @@ import { EventDialog } from "./event-dialog"
 import { EventViewDialog } from "./event-view-dialog"
 import { MonthView } from "./month-view"
 import { type CalendarPermissions, type CalendarType } from "./permissions"
-import { type CalendarEvent, type CalendarView } from "./types"
+import {
+  type CalendarEvent,
+  type CalendarView,
+  type CustomLabel,
+} from "./types"
 import { addHoursToDate } from "./utils"
 import { WeekView } from "./week-view"
 
@@ -59,6 +64,10 @@ export interface EventCalendarProps {
   editable?: boolean
   calendarType?: CalendarType
   permissions?: CalendarPermissions
+  customLabels?: CustomLabel[]
+  onLabelAdd?: (label: Omit<CustomLabel, "id">) => void
+  onLabelUpdate?: (id: string, updates: Partial<CustomLabel>) => void
+  onLabelDelete?: (labelId: string) => void
 }
 
 export function SetupCalendar({
@@ -70,6 +79,10 @@ export function SetupCalendar({
   initialView = "month",
   editable = true,
   permissions,
+  customLabels = [],
+  onLabelAdd,
+  onLabelUpdate,
+  onLabelDelete,
 }: EventCalendarProps) {
   // Use the shared calendar context instead of local state
   const { currentDate, setCurrentDate } = useCalendarContext()
@@ -330,7 +343,6 @@ export function SetupCalendar({
                 </Button>
               </div>
               <Button
-                variant="secondary"
                 className="max-sm:h-8 max-sm:px-2.5!"
                 onClick={handleToday}
               >
@@ -357,6 +369,7 @@ export function SetupCalendar({
                     variant="outline"
                     className="gap-1.5 max-sm:h-8 max-sm:gap-1 max-sm:px-2!"
                   >
+                    <CalendarCog />
                     {view === "month"
                       ? "Mes"
                       : view === "week"
@@ -433,6 +446,7 @@ export function SetupCalendar({
           }}
           onSave={handleEventSave}
           onDelete={handleEventDelete}
+          customLabels={customLabels}
         />
 
         <EventViewDialog
@@ -442,6 +456,7 @@ export function SetupCalendar({
             setIsEventViewDialogOpen(false)
             setSelectedEvent(null)
           }}
+          customLabels={customLabels}
         />
       </CalendarDndProvider>
     </div>
