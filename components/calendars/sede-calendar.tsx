@@ -17,7 +17,7 @@ const sedeEvents: CalendarEvent[] = [
     start: new Date(2025, 7, 2), // 2 agosto 2025
     end: new Date(2025, 7, 2),
     allDay: true,
-    color: "emerald",
+    color: "green",
     label: "Bienvenida",
     location: "Auditorio Principal - Sede Central",
     sede: "sede-central",
@@ -66,7 +66,7 @@ const sedeEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 7, 20), 8), 0), // 20 agosto 2025, 8:00 AM
     end: setMinutes(setHours(new Date(2025, 7, 20), 18), 0), // 20 agosto 2025, 6:00 PM
     allDay: false,
-    color: "emerald",
+    color: "green",
     label: "Proceso Académico",
     location: "Centro de Atención - Sede Norte",
     sede: "sede-norte",
@@ -115,7 +115,7 @@ const sedeEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 8, 15), 14), 0), // 15 septiembre 2025, 2:00 PM
     end: setMinutes(setHours(new Date(2025, 8, 15), 18), 0), // 15 septiembre 2025, 6:00 PM
     allDay: false,
-    color: "violet",
+    color: "purple",
     label: "Ceremonia Académica",
     location: "Auditorio Principal - Sede Central",
     sede: "sede-central",
@@ -127,7 +127,7 @@ const sedeEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 9, 10), 9), 0), // 10 octubre 2025, 9:00 AM
     end: setMinutes(setHours(new Date(2025, 9, 10), 16), 0), // 10 octubre 2025, 4:00 PM
     allDay: false,
-    color: "rose",
+    color: "pink",
     label: "Bienestar",
     location: "Plaza Central - Sede Este",
     sede: "sede-este",
@@ -163,7 +163,7 @@ const sedeEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 10, 18), 8), 0), // 18 noviembre 2025, 8:00 AM
     end: setMinutes(setHours(new Date(2025, 10, 18), 17), 0), // 18 noviembre 2025, 5:00 PM
     allDay: false,
-    color: "emerald",
+    color: "green",
     label: "Investigación",
     location: "Centro de Investigaciones - Sede Sur",
     sede: "sede-sur",
@@ -224,7 +224,6 @@ export default function SedeCalendar({ userRole = "user" }: SedeCalendarProps) {
       onEventDelete={handleEventDelete}
       initialView="month"
       editable={false}
-      calendarType="department"
       permissions={permissions}
     />
   )

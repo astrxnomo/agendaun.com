@@ -17,18 +17,13 @@ export interface CalendarEvent {
 }
 
 export type EventColor =
-  | "blue"
-  | "orange"
-  | "violet"
-  | "rose"
-  | "emerald"
-  | "red"
-  | "yellow"
-  | "green"
-  | "cyan"
-  | "purple"
-  | "pink"
-  | "indigo"
-  | "teal"
-  | "lime"
-  | "amber"
+  | "gray" // Por defecto para eventos sin color
+  | "blue" // Azul distintivo
+  | "red" // Rojo clásico
+  | "green" // Verde natural
+  | "purple" // Morado vibrante
+  | "orange" // Naranja brillante
+  | "pink" // Rosa distintivo
+  | "teal" // Verde azulado
+  | "yellow" // Amarillo brillante
+  | "indigo" // Añil profundo

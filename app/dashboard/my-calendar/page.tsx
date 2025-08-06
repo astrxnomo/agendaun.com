@@ -1,11 +1,10 @@
 "use client"
 
-import { Edit, Eye } from "lucide-react"
+import { Edit, Eye, SquarePen } from "lucide-react"
 import { useState } from "react"
 
 import { LabelsHeader } from "@/components/calendar/labels-header"
 import PersonalCalendar from "@/components/calendars/personal-calendar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
 export default function Page() {
@@ -20,16 +19,7 @@ export default function Page() {
       <div className="bg-background flex h-16 shrink-0 items-center justify-between border-b px-4">
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-semibold">Mi Calendario Personal</h1>
-          <Badge
-            variant={isEditable ? "default" : "secondary"}
-            className={`text-xs ${
-              isEditable
-                ? "border-green-200 bg-green-100 text-green-800"
-                : "border-gray-200 bg-gray-100 text-gray-600"
-            }`}
-          >
-            {isEditable ? "Modo Edición" : "Solo Lectura"}
-          </Badge>
+          {isEditable ? <SquarePen /> : <Eye />}
         </div>
         <Button
           variant={isEditable ? "outline" : "default"}
@@ -45,12 +35,12 @@ export default function Page() {
           {isEditable ? (
             <>
               <Eye className="h-4 w-4" />
-              Solo Lectura
+              Lectura
             </>
           ) : (
             <>
               <Edit className="h-4 w-4" />
-              Habilitar Edición
+              Editar
             </>
           )}
         </Button>
@@ -58,7 +48,7 @@ export default function Page() {
 
       {/* Contenedor con scroll para que funcione el sticky */}
       <div className="flex-1 overflow-auto">
-        <LabelsHeader />
+        <LabelsHeader editable={isEditable} />
         <PersonalCalendar editable={isEditable} />
       </div>
     </div>

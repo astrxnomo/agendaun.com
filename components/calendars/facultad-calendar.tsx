@@ -17,7 +17,7 @@ const facultadEvents: CalendarEvent[] = [
     start: new Date(2025, 7, 3), // 3 agosto 2025
     end: new Date(2025, 7, 3),
     allDay: true,
-    color: "emerald",
+    color: "green",
     label: "Orientación",
     location: "Facultad de Ingeniería",
     sede: "sede-central",
@@ -82,7 +82,7 @@ const facultadEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 7, 19), 15), 0), // 19 agosto 2025, 3:00 PM
     end: setMinutes(setHours(new Date(2025, 7, 19), 17), 0), // 19 agosto 2025, 5:00 PM
     allDay: false,
-    color: "violet",
+    color: "purple",
     label: "Conferencia",
     location: "Aula Magna - Facultad de Derecho",
     sede: "sede-central",
@@ -108,7 +108,7 @@ const facultadEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 7, 28), 10), 0), // 28 agosto 2025, 10:00 AM
     end: setMinutes(setHours(new Date(2025, 7, 28), 12), 0), // 28 agosto 2025, 12:00 PM
     allDay: false,
-    color: "rose",
+    color: "pink",
     label: "Mesa Redonda",
     location: "Sala de Conferencias - Facultad de Psicología",
     sede: "sede-norte",
@@ -121,7 +121,7 @@ const facultadEvents: CalendarEvent[] = [
     start: new Date(2025, 7, 30), // 30 agosto 2025
     end: new Date(2025, 7, 31), // 31 agosto 2025
     allDay: true,
-    color: "emerald",
+    color: "green",
     label: "Exposición",
     location: "Galería - Facultad de Arquitectura",
     sede: "sede-central",
@@ -135,7 +135,7 @@ const facultadEvents: CalendarEvent[] = [
     start: new Date(2025, 8, 16), // 16 septiembre 2025
     end: new Date(2025, 8, 20), // 20 septiembre 2025
     allDay: true,
-    color: "emerald",
+    color: "green",
     label: "Evento Académico",
     location: "Facultad de Ingeniería",
     sede: "sede-central",
@@ -174,7 +174,7 @@ const facultadEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 9, 12), 8), 0), // 12 octubre 2025, 8:00 AM
     end: setMinutes(setHours(new Date(2025, 9, 12), 17), 0), // 12 octubre 2025, 5:00 PM
     allDay: false,
-    color: "violet",
+    color: "purple",
     label: "Simposio",
     location: "Facultad de Derecho",
     sede: "sede-central",
@@ -187,7 +187,7 @@ const facultadEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 9, 18), 9), 0), // 18 octubre 2025, 9:00 AM
     end: setMinutes(setHours(new Date(2025, 9, 18), 16), 0), // 18 octubre 2025, 4:00 PM
     allDay: false,
-    color: "rose",
+    color: "pink",
     label: "Investigación",
     location: "Laboratorio de Psicología",
     sede: "sede-norte",
@@ -200,7 +200,7 @@ const facultadEvents: CalendarEvent[] = [
     start: new Date(2025, 10, 14), // 14 noviembre 2025
     end: new Date(2025, 10, 16), // 16 noviembre 2025
     allDay: true,
-    color: "emerald",
+    color: "green",
     label: "Congreso",
     location: "Facultad de Arquitectura",
     sede: "sede-central",
@@ -304,7 +304,6 @@ export default function FacultadCalendar({
       onEventDelete={handleEventDelete}
       initialView="month"
       editable={isEditable}
-      calendarType="facultad"
       permissions={permissions}
     />
   )

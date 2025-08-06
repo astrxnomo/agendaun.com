@@ -16,7 +16,7 @@ const nationalEvents: CalendarEvent[] = [
     start: new Date(2025, 7, 1), // 1 agosto 2025
     end: new Date(2025, 7, 1),
     allDay: true,
-    color: "emerald",
+    color: "green",
     label: "Evento Académico Nacional",
   },
   {
@@ -56,7 +56,7 @@ const nationalEvents: CalendarEvent[] = [
     start: new Date(2025, 7, 18), // 18 agosto 2025
     end: new Date(2025, 7, 18),
     allDay: true,
-    color: "violet",
+    color: "purple",
     label: "Festivo Nacional",
   },
   {
@@ -96,7 +96,7 @@ const nationalEvents: CalendarEvent[] = [
     start: new Date(2025, 10, 3), // 3 noviembre 2025
     end: new Date(2025, 10, 3),
     allDay: true,
-    color: "violet",
+    color: "purple",
     label: "Festivo Nacional",
   },
   {
@@ -116,7 +116,7 @@ const nationalEvents: CalendarEvent[] = [
     start: new Date(2025, 11, 8), // 8 diciembre 2025
     end: new Date(2025, 11, 8),
     allDay: true,
-    color: "violet",
+    color: "purple",
     label: "Festivo Nacional",
   },
   {
@@ -126,7 +126,7 @@ const nationalEvents: CalendarEvent[] = [
     start: new Date(2025, 11, 25), // 25 diciembre 2025
     end: new Date(2025, 11, 25),
     allDay: true,
-    color: "rose",
+    color: "pink",
     label: "Festivo Nacional",
   },
   {
@@ -146,7 +146,7 @@ const nationalEvents: CalendarEvent[] = [
     start: new Date(2026, 0, 6), // 6 enero 2026
     end: new Date(2026, 0, 6),
     allDay: true,
-    color: "violet",
+    color: "purple",
     label: "Festivo Nacional",
   },
   {
@@ -156,7 +156,7 @@ const nationalEvents: CalendarEvent[] = [
     start: new Date(2026, 2, 23), // 23 marzo 2026 (trasladado al lunes)
     end: new Date(2026, 2, 23),
     allDay: true,
-    color: "violet",
+    color: "purple",
     label: "Festivo Nacional",
   },
 ]
@@ -209,7 +209,6 @@ export default function NationalCalendar({
       onEventDelete={handleEventDelete}
       initialView="month"
       editable={permissions.canEdit}
-      calendarType="national"
       permissions={permissions}
     />
   )

@@ -7,18 +7,21 @@ export default function FacultadCalendarPage() {
       <PageHeader
         breadcrumbs={[
           { label: "Inicio", href: "/dashboard" },
-          { label: "Calendario", href: "/dashboard/calendar" },
+          { label: "Calendarios", href: "/dashboard/calendar" },
           { label: "Facultad", isCurrentPage: true },
         ]}
       />
-      <div className="flex h-full flex-col">
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <h1 className="text-lg font-semibold">Calendario de Facultad</h1>
-        </header>
-        <div className="flex-1">
-          <FacultadCalendar editable={false} />
+      <div className="border-b p-6">
+        <div className="">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Calendario de Facultad
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Festividades y días festivos oficiales de la facultad
+          </p>
         </div>
       </div>
+      <FacultadCalendar editable={false} />
     </>
   )
 }

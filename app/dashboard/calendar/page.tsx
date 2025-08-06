@@ -23,7 +23,7 @@ export default function CalendarPage() {
       <PageHeader
         breadcrumbs={[
           { label: "Inicio", href: "/dashboard" },
-          { label: "Calendario", isCurrentPage: true },
+          { label: "Calendarioss", isCurrentPage: true },
         ]}
       />
       <div className="border-b p-6">
@@ -59,10 +59,7 @@ export default function CalendarPage() {
                 Calendario con fechas importantes a nivel nacional de Colombia,
                 incluyendo días festivos y celebraciones oficiales.
               </p>
-              <Button
-                asChild
-                className="w-full transition-transform group-hover:translate-y-[-1px]"
-              >
+              <Button asChild className="w-full transition-transform">
                 <Link href="/dashboard/calendar/national">
                   <CalendarDays className="mr-2 h-4 w-4" />
                   Ver Calendario Nacional
@@ -91,10 +88,7 @@ export default function CalendarPage() {
                 Calendario con eventos, actividades y fechas importantes
                 específicas de tu sede universitaria.
               </p>
-              <Button
-                asChild
-                className="w-full transition-transform group-hover:translate-y-[-1px]"
-              >
+              <Button asChild className="w-full transition-transform">
                 <Link href="/dashboard/calendar/sede">
                   <CalendarDays className="mr-2 h-4 w-4" />
                   Ver Calendario de Sede
@@ -123,10 +117,7 @@ export default function CalendarPage() {
                 Calendario con eventos, conferencias y actividades específicas
                 de tu facultad dentro de la universidad.
               </p>
-              <Button
-                asChild
-                className="w-full transition-transform group-hover:translate-y-[-1px]"
-              >
+              <Button asChild className="w-full transition-transform">
                 <Link href="/dashboard/calendar/facultad">
                   <CalendarDays className="mr-2 h-4 w-4" />
                   Ver Calendario de Facultad
@@ -155,10 +146,7 @@ export default function CalendarPage() {
                 Calendario personalizado con eventos académicos específicos de
                 tu programa de estudios.
               </p>
-              <Button
-                asChild
-                className="w-full transition-transform group-hover:translate-y-[-1px]"
-              >
+              <Button asChild className="w-full transition-transform">
                 <Link href="/dashboard/calendar/programa">
                   <CalendarDays className="mr-2 h-4 w-4" />
                   Ver Calendario de Programa

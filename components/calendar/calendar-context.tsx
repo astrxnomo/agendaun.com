@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, type ReactNode } from "react"
 
-import { etiquettes } from "@/components/calendars/my-calendar"
+import { calendarColors } from "@/components/calendar/colors"
 import { useFilters } from "@/components/filters-context"
 
 import { type CalendarEvent } from "./types"
@@ -41,12 +41,9 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
   const { filters } = useFilters()
 
-  // Initialize visibleColors based on the isActive property in etiquettes
+  // Initialize visibleColors with all available colors by default
   const [visibleColors, setVisibleColors] = useState<string[]>(() => {
-    // Filter etiquettes to get only those that are active
-    return etiquettes
-      .filter((etiquette) => etiquette.isActive)
-      .map((etiquette) => etiquette.color)
+    return calendarColors.map((color) => color.value)
   })
 
   // Toggle visibility of a color
@@ -62,8 +59,9 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
 
   // Check if a color is visible
   const isColorVisible = (color: string | undefined) => {
-    if (!color) return true // Events without a color are always visible
-    return visibleColors.includes(color)
+    // Events without a color use "gray" by default
+    const eventColor = color || "gray"
+    return visibleColors.includes(eventColor)
   }
 
   // Filter events by academic filters (sede, facultad, programa)

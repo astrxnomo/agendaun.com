@@ -48,7 +48,7 @@ const defaultLabels: CustomLabel[] = [
   {
     id: "semilleros",
     name: "Semilleros",
-    color: "emerald",
+    color: "green",
     isActive: true,
     createdAt: new Date(),
   },
@@ -69,7 +69,7 @@ const defaultLabels: CustomLabel[] = [
   {
     id: "personal",
     name: "Personal",
-    color: "rose",
+    color: "pink",
     isActive: true,
     createdAt: new Date(),
   },
@@ -142,21 +142,16 @@ export function CustomLabelsProvider({ children }: { children: ReactNode }) {
 
   const getAvailableColors = (): EventColor[] => {
     const allColors: EventColor[] = [
+      "gray",
       "blue",
       "red",
-      "emerald",
-      "orange",
+      "green",
       "purple",
-      "rose",
-      "yellow",
-      "indigo",
+      "orange",
       "pink",
       "teal",
-      "cyan",
-      "lime",
-      "amber",
-      "violet",
-      "green",
+      "yellow",
+      "indigo",
     ]
     const usedColors = labels.map((label) => label.color)
     return allColors.filter((color) => !usedColors.includes(color))

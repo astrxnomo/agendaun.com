@@ -3,6 +3,11 @@
 import { Plus, Settings } from "lucide-react"
 import { useState } from "react"
 
+import {
+  calendarColors,
+  getCircleColorClass,
+  getEventColorClasses,
+} from "@/components/calendar/colors"
 import { type EventColor } from "@/components/calendar/types"
 import { useCustomLabels } from "@/components/custom-labels-context"
 import { Badge } from "@/components/ui/badge"
@@ -33,25 +38,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-const colors: { value: EventColor; label: string; class: string }[] = [
-  { value: "blue", label: "Azul", class: "bg-blue-500" },
-  { value: "red", label: "Rojo", class: "bg-red-500" },
-  { value: "emerald", label: "Verde", class: "bg-emerald-500" },
-  { value: "orange", label: "Naranja", class: "bg-orange-500" },
-  { value: "purple", label: "Morado", class: "bg-purple-500" },
-  { value: "rose", label: "Rosa", class: "bg-rose-500" },
-  { value: "yellow", label: "Amarillo", class: "bg-yellow-500" },
-  { value: "indigo", label: "Índigo", class: "bg-indigo-500" },
-  { value: "pink", label: "Rosa Fuerte", class: "bg-pink-500" },
-  { value: "teal", label: "Verde Azulado", class: "bg-teal-500" },
-  { value: "cyan", label: "Cian", class: "bg-cyan-500" },
-  { value: "lime", label: "Lima", class: "bg-lime-500" },
-  { value: "amber", label: "Ámbar", class: "bg-amber-500" },
-  { value: "violet", label: "Violeta", class: "bg-violet-500" },
-  { value: "green", label: "Verde Claro", class: "bg-green-500" },
-]
+interface LabelsHeaderProps {
+  editable?: boolean
+}
 
-export function LabelsHeader() {
+export function LabelsHeader({ editable = true }: LabelsHeaderProps) {
   const {
     labels,
     addLabel,
@@ -108,168 +99,193 @@ export function LabelsHeader() {
   }
 
   return (
-    <div className="bg-background border-b shadow-sm">
-      <div className="flex h-12 shrink-0 items-center gap-2 px-4">
-        <span className="text-muted-foreground mr-2 text-sm font-medium">
+    <div className="bg-background sticky top-0 z-10 border-b shadow-sm">
+      <div className="scrollbar-none flex h-12 shrink-0 items-center gap-2 overflow-x-auto px-4">
+        <span className="text-muted-foreground mr-2 shrink-0 text-sm font-medium">
           Etiquetas:
         </span>
 
         {/* Etiquetas existentes */}
-        {labels.map((label) => (
-          <div key={label.id} className="flex items-center gap-1">
-            {editingLabel === label.id ? (
-              <div className="flex items-center gap-1">
-                <Input
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="h-6 w-24 text-xs"
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleSaveEdit()
-                    if (e.key === "Escape") handleCancelEdit()
-                  }}
-                  onBlur={handleSaveEdit}
-                />
-              </div>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Badge
-                    variant={label.isActive ? "default" : "secondary"}
-                    className={`cursor-pointer transition-all hover:opacity-80 ${
-                      label.isActive
-                        ? `bg-${label.color}-500 text-white hover:bg-${label.color}-600`
-                        : "opacity-50"
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      toggleLabelVisibility(label.id)
+        <div className="flex shrink-0 items-center gap-1">
+          {labels.map((label) => (
+            <div key={label.id} className="flex items-center gap-1">
+              {editingLabel === label.id ? (
+                <div className="flex items-center gap-1">
+                  <Input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="h-6 w-24 text-xs"
+                    autoFocus
+                    disabled={!editable}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveEdit()
+                      if (e.key === "Escape") handleCancelEdit()
                     }}
-                  >
-                    {label.name}
-                  </Badge>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={() => toggleLabelVisibility(label.id)}
-                  >
-                    {label.isActive ? "Ocultar" : "Mostrar"}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleEditLabel(label.id)}>
-                    Editar nombre
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => deleteLabel(label.id)}
-                    className="text-red-600"
-                  >
-                    Eliminar
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        ))}
-
-        {/* Botón para agregar nueva etiqueta */}
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-6 border-dashed px-2 text-xs"
-              disabled={!canCreateNewLabel}
-              title={
-                canCreateNewLabel
-                  ? "Crear nueva etiqueta"
-                  : "No hay más colores disponibles para nuevas etiquetas"
-              }
-              onClick={() => {
-                if (canCreateNewLabel) {
-                  setNewLabelColor(availableColors[0])
-                }
-              }}
-            >
-              <Plus className="mr-1 h-3 w-3" />
-              Nueva{" "}
-              {!canCreateNewLabel && `(${availableColors.length} disponibles)`}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Crear Nueva Etiqueta</DialogTitle>
-              <DialogDescription>
-                Crea una etiqueta personalizada para organizar tu calendario.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Nombre
-                </Label>
-                <Input
-                  id="name"
-                  value={newLabelName}
-                  onChange={(e) => setNewLabelName(e.target.value)}
-                  className="col-span-3"
-                  placeholder="ej. Clases, Reuniones..."
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleCreateLabel()
-                  }}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="color" className="text-right">
-                  Color
-                </Label>
-                <Select
-                  value={newLabelColor}
-                  onValueChange={(value: EventColor) => setNewLabelColor(value)}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Selecciona un color" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colors
-                      .filter((color) => availableColors.includes(color.value))
-                      .map((color) => (
-                        <SelectItem key={color.value} value={color.value}>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className={`h-4 w-4 rounded-full ${color.class}`}
-                            />
-                            {color.label}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    {availableColors.length === 0 && (
-                      <SelectItem value="" disabled>
-                        No hay colores disponibles
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+                    onBlur={handleSaveEdit}
+                  />
+                </div>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Badge
+                      variant={label.isActive ? "default" : "secondary"}
+                      className={`cursor-pointer transition-all hover:opacity-80 ${
+                        label.isActive
+                          ? getEventColorClasses(label.color)
+                          : "opacity-50"
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        // En modo solo lectura, alternar directamente con un click
+                        if (!editable) {
+                          toggleLabelVisibility(label.id)
+                          return
+                        }
+                        // En modo edición, también permite alternar con click directo
+                        toggleLabelVisibility(label.id)
+                      }}
+                    >
+                      {label.name}
+                    </Badge>
+                  </DropdownMenuTrigger>
+                  {editable && (
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        onClick={() => toggleLabelVisibility(label.id)}
+                      >
+                        {label.isActive ? "Ocultar" : "Mostrar"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleEditLabel(label.id)}
+                      >
+                        Editar nombre
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => deleteLabel(label.id)}
+                        className="text-red-600"
+                      >
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  )}
+                </DropdownMenu>
+              )}
             </div>
-            <DialogFooter>
+          ))}
+        </div>
+
+        {/* Botón para agregar nueva etiqueta - solo si está en modo edición */}
+        {editable && (
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
               <Button
-                type="button"
                 variant="outline"
-                onClick={() => setIsCreateOpen(false)}
+                size="sm"
+                className="h-6 shrink-0 border-dashed px-2 text-xs"
+                disabled={!canCreateNewLabel}
+                title={
+                  canCreateNewLabel
+                    ? "Crear nueva etiqueta"
+                    : "No hay más colores disponibles para nuevas etiquetas"
+                }
+                onClick={() => {
+                  if (canCreateNewLabel) {
+                    setNewLabelColor(availableColors[0])
+                  }
+                }}
               >
-                Cancelar
+                <Plus className="mr-1 h-3 w-3" />
+                <span className="hidden sm:inline">Nueva</span>
+                <span className="sm:hidden">+</span>
+                {!canCreateNewLabel && (
+                  <span className="hidden lg:inline">
+                    {" "}
+                    ({availableColors.length} disponibles)
+                  </span>
+                )}
               </Button>
-              <Button type="button" onClick={handleCreateLabel}>
-                Crear Etiqueta
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Crear Nueva Etiqueta</DialogTitle>
+                <DialogDescription>
+                  Crea una etiqueta personalizada para organizar tu calendario.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Nombre
+                  </Label>
+                  <Input
+                    id="name"
+                    value={newLabelName}
+                    onChange={(e) => setNewLabelName(e.target.value)}
+                    className="col-span-3"
+                    placeholder="ej. Clases, Reuniones..."
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleCreateLabel()
+                    }}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="color" className="text-right">
+                    Color
+                  </Label>
+                  <Select
+                    value={newLabelColor}
+                    onValueChange={(value: EventColor) =>
+                      setNewLabelColor(value)
+                    }
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Selecciona un color" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {calendarColors
+                        .filter((color) =>
+                          availableColors.includes(color.value),
+                        )
+                        .map((color) => (
+                          <SelectItem key={color.value} value={color.value}>
+                            <div className="flex items-center space-x-2">
+                              <div
+                                className={`h-4 w-4 rounded-full ${getCircleColorClass(color.value)}`}
+                              />
+                              {color.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      {availableColors.length === 0 && (
+                        <SelectItem value="" disabled>
+                          No hay colores disponibles
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreateOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button type="button" onClick={handleCreateLabel}>
+                  Crear Etiqueta
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* Botón de configuración adicional */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+            <Button variant="ghost" size="sm" className="h-6 w-6 shrink-0 p-0">
               <Settings className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>

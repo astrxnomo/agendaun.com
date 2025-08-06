@@ -6,6 +6,10 @@ import { Calendar1, Trash } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 import {
+  calendarColors,
+  getCircleColorClass,
+} from "@/components/calendar/colors"
+import {
   DefaultEndHour,
   DefaultStartHour,
   EndHour,
@@ -67,7 +71,7 @@ export function EventDialog({
   const [endTime, setEndTime] = useState(`${DefaultEndHour}:00`)
   const [allDay, setAllDay] = useState(false)
   const [location, setLocation] = useState("")
-  const [color, setColor] = useState<EventColor>("blue")
+  const [color, setColor] = useState<EventColor>("gray")
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   // const [endDateOpen, setEndDateOpen] = useState(false)
@@ -86,7 +90,7 @@ export function EventDialog({
       setEndTime(formatTimeForInput(end))
       setAllDay(event.allDay || false)
       setLocation(event.location || "")
-      setColor(event.color! || "sky")
+      setColor(event.color! || "neutral")
       setError(null) // Reset error when opening dialog
     } else {
       resetForm()
@@ -102,7 +106,7 @@ export function EventDialog({
     setEndTime(`${DefaultEndHour}:00`)
     setAllDay(false)
     setLocation("")
-    setColor("blue")
+    setColor("gray")
     setError(null)
   }
 
@@ -184,45 +188,6 @@ export function EventDialog({
       onDelete(event.id)
     }
   }
-
-  // Updated color options to match types.ts
-  const colorOptions: Array<{
-    value: EventColor
-    label: string
-    bgClass: string
-    borderClass: string
-  }> = [
-    {
-      value: "blue",
-      label: "Blue",
-      bgClass: "bg-blue-400 data-[state=checked]:bg-blue-400",
-      borderClass: "border-blue-400 data-[state=checked]:border-blue-400",
-    },
-    {
-      value: "violet",
-      label: "Violet",
-      bgClass: "bg-violet-400 data-[state=checked]:bg-violet-400",
-      borderClass: "border-violet-400 data-[state=checked]:border-violet-400",
-    },
-    {
-      value: "rose",
-      label: "Rose",
-      bgClass: "bg-rose-400 data-[state=checked]:bg-rose-400",
-      borderClass: "border-rose-400 data-[state=checked]:border-rose-400",
-    },
-    {
-      value: "emerald",
-      label: "Emerald",
-      bgClass: "bg-emerald-400 data-[state=checked]:bg-emerald-400",
-      borderClass: "border-emerald-400 data-[state=checked]:border-emerald-400",
-    },
-    {
-      value: "orange",
-      label: "Orange",
-      bgClass: "bg-orange-400 data-[state=checked]:bg-orange-400",
-      borderClass: "border-orange-400 data-[state=checked]:border-orange-400",
-    },
-  ]
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -422,11 +387,11 @@ export function EventDialog({
             </legend>
             <RadioGroup
               className="flex gap-1.5"
-              defaultValue={colorOptions[0]?.value}
+              defaultValue={calendarColors[0]?.value}
               value={color}
               onValueChange={(value: EventColor) => setColor(value)}
             >
-              {colorOptions.map((colorOption) => (
+              {calendarColors.map((colorOption) => (
                 <RadioGroupItem
                   key={colorOption.value}
                   id={`color-${colorOption.value}`}
@@ -434,8 +399,8 @@ export function EventDialog({
                   aria-label={colorOption.label}
                   className={cn(
                     "size-6 shadow-none",
-                    colorOption.bgClass,
-                    colorOption.borderClass,
+                    getCircleColorClass(colorOption.value),
+                    `data-[state=checked]:${getCircleColorClass(colorOption.value)}`,
                   )}
                 />
               ))}

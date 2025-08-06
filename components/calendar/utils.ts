@@ -1,30 +1,19 @@
 import { isSameDay } from "date-fns"
 
+import { getEventColorClasses as getCentralizedEventColorClasses } from "@/components/calendar/colors"
 import {
   type CalendarEvent,
   type EventColor,
 } from "@/components/calendar/types"
 
 /**
- * Get CSS classes for event colors
+ * Get CSS classes for event colors using centralized color system
  */
 export function getEventColorClasses(color?: EventColor): string {
-  const eventColor = color || "sky"
+  const eventColor = color || "gray"
 
-  switch (eventColor) {
-    case "sky":
-      return "bg-blue-200/50 hover:bg-blue-200/40 text-blue-900/90 dark:bg-blue-400/25 dark:hover:bg-blue-400/20 dark:text-blue-200 shadow-blue-700/8"
-    case "violet":
-      return "bg-violet-200/50 hover:bg-violet-200/40 text-violet-900/90 dark:bg-violet-400/25 dark:hover:bg-violet-400/20 dark:text-violet-200 shadow-violet-700/8"
-    case "rose":
-      return "bg-rose-200/50 hover:bg-rose-200/40 text-rose-900/90 dark:bg-rose-400/25 dark:hover:bg-rose-400/20 dark:text-rose-200 shadow-rose-700/8"
-    case "emerald":
-      return "bg-emerald-200/50 hover:bg-emerald-200/40 text-emerald-900/90 dark:bg-emerald-400/25 dark:hover:bg-emerald-400/20 dark:text-emerald-200 shadow-emerald-700/8"
-    case "orange":
-      return "bg-orange-200/50 hover:bg-orange-200/40 text-orange-900/90 dark:bg-orange-400/25 dark:hover:bg-orange-400/20 dark:text-orange-200 shadow-orange-700/8"
-    default:
-      return "bg-blue-200/50 hover:bg-blue-200/40 text-blue-900/90 dark:bg-blue-400/25 dark:hover:bg-blue-400/20 dark:text-blue-200 shadow-blue-700/8"
-  }
+  // Usa el sistema centralizado de colores con transparencias y modo oscuro
+  return getCentralizedEventColorClasses(eventColor)
 }
 
 /**
@@ -39,9 +28,9 @@ export function getBorderRadiusClasses(
   } else if (isFirstDay) {
     return "rounded-l rounded-r-none not-in-data-[slot=popover-content]:w-[calc(100%+5px)]" // Only left end rounded
   } else if (isLastDay) {
-    return "rounded-r rounded-l-none not-in-data-[slot=popover-content]:w-[calc(100%+4px)] not-in-data-[slot=popover-content]:-translate-x-[4px]" // Only right end rounded
+    return "rounded-r rounded-l-none not-in-data-[slot=popover-content]:w-[calc(100%+4px)] not-in-data-[slot=popover-content]:-translate-x-[4px]"
   } else {
-    return "rounded-none not-in-data-[slot=popover-content]:w-[calc(100%+9px)] not-in-data-[slot=popover-content]:-translate-x-[4px]" // No rounded corners
+    return "rounded-none not-in-data-[slot=popover-content]:w-[calc(100%+9px)] not-in-data-[slot=popover-content]:-translate-x-[4px]"
   }
 }
 

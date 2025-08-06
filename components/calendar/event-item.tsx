@@ -138,7 +138,7 @@ export function EventItem({
   }, [displayStart, displayEnd])
 
   const getEventTime = () => {
-    if (event.allDay) return "All day"
+    if (event.allDay) return "Todo el dia"
 
     // For short events (less than 45 minutes), only show start time
     if (durationMinutes < 45) {
@@ -242,7 +242,7 @@ export function EventItem({
       <div className="text-sm font-medium">{event.title}</div>
       <div className="text-xs opacity-70">
         {event.allDay ? (
-          <span>All day</span>
+          <span>Todo el dia</span>
         ) : (
           <span className="uppercase">
             {formatTimeWithOptionalMinutes(displayStart)} -{" "}

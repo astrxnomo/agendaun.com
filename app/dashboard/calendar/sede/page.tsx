@@ -7,7 +7,7 @@ export default function SedeCalendarPage() {
       <PageHeader
         breadcrumbs={[
           { label: "Inicio", href: "/dashboard" },
-          { label: "Calendario", href: "/dashboard/calendar" },
+          { label: "Calendarios", href: "/dashboard/calendar" },
           { label: "Sede", isCurrentPage: true },
         ]}
       />

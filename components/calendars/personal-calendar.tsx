@@ -71,7 +71,7 @@ const personalEvents: CalendarEvent[] = [
       setHours(addDays(currentDate, -4 + daysUntilNextMonday), 18),
       0,
     ),
-    color: "emerald",
+    color: "green",
     label: "semilleros",
     location: "Laboratorio de IA",
   },
@@ -103,7 +103,7 @@ const personalEvents: CalendarEvent[] = [
       setHours(addDays(currentDate, -2 + daysUntilNextMonday), 19),
       30,
     ),
-    color: "rose",
+    color: "pink",
     label: "personal",
     location: "Gimnasio Universitario",
   },
@@ -181,7 +181,7 @@ const personalEvents: CalendarEvent[] = [
       setHours(addDays(currentDate, daysUntilNextMonday + 3), 14),
       0,
     ),
-    color: "rose",
+    color: "pink",
     label: "personal",
     location: "Cafetería Universitaria",
   },
@@ -198,7 +198,6 @@ const personalEvents: CalendarEvent[] = [
       setHours(addDays(currentDate, daysUntilNextMonday + 4), 17),
       0,
     ),
-    color: "yellow", // Color que no está asociado a ninguna etiqueta
     location: "Lugar sin etiqueta",
   },
 ]
@@ -265,7 +264,6 @@ export default function PersonalCalendar({
       onEventDelete={handleEventDelete}
       initialView="week"
       editable={isEditable}
-      calendarType={calendarType}
       permissions={permissions}
     />
   )

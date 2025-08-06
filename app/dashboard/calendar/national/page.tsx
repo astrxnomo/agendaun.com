@@ -7,7 +7,7 @@ export default function NationalCalendarPage() {
       <PageHeader
         breadcrumbs={[
           { label: "Inicio", href: "/dashboard" },
-          { label: "Calendario", href: "/dashboard/calendar" },
+          { label: "Calendarios", href: "/dashboard/calendar" },
           { label: "Nacional", isCurrentPage: true },
         ]}
       />

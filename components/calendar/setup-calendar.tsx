@@ -69,7 +69,6 @@ export function SetupCalendar({
   className,
   initialView = "month",
   editable = true,
-  calendarType = "personal",
   permissions,
 }: EventCalendarProps) {
   // Use the shared calendar context instead of local state
@@ -443,7 +442,6 @@ export function SetupCalendar({
             setIsEventViewDialogOpen(false)
             setSelectedEvent(null)
           }}
-          calendarType={calendarType}
         />
       </CalendarDndProvider>
     </div>

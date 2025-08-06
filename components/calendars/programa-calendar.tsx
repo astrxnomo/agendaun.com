@@ -26,7 +26,7 @@ const programaEvents: CalendarEvent[] = [
     start: new Date(2025, 7, 1), // 1 agosto 2025
     end: new Date(2025, 7, 2), // 2 agosto 2025
     allDay: true,
-    color: "emerald",
+    color: "green",
     label: "Inducción",
     location: "Aula Magna - Edificio de Ingeniería",
     sede: "sede-central",
@@ -96,7 +96,7 @@ const programaEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 7, 19), 14), 0), // 19 agosto 2025, 2:00 PM
     end: setMinutes(setHours(new Date(2025, 7, 19), 17), 0), // 19 agosto 2025, 5:00 PM
     allDay: false,
-    color: "violet",
+    color: "purple",
     label: "Simulacro",
     location: "Sala de Audiencias - Facultad de Derecho",
     sede: "sede-central",
@@ -110,7 +110,7 @@ const programaEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 7, 22), 8), 0), // 22 agosto 2025, 8:00 AM
     end: setMinutes(setHours(new Date(2025, 7, 22), 11), 0), // 22 agosto 2025, 11:00 AM
     allDay: false,
-    color: "rose",
+    color: "pink",
     label: "Práctica Clínica",
     location: "Clínica Universitaria",
     sede: "sede-norte",
@@ -138,7 +138,7 @@ const programaEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 7, 30), 14), 0), // 30 agosto 2025, 2:00 PM
     end: setMinutes(setHours(new Date(2025, 7, 30), 18), 0), // 30 agosto 2025, 6:00 PM
     allDay: false,
-    color: "violet",
+    color: "purple",
     label: "Evaluación Académica",
     location: "Auditorio de Ingeniería",
     sede: "sede-central",
@@ -152,7 +152,7 @@ const programaEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 8, 12), 16), 0), // 12 septiembre 2025, 4:00 PM
     end: setMinutes(setHours(new Date(2025, 8, 12), 18), 0), // 12 septiembre 2025, 6:00 PM
     allDay: false,
-    color: "emerald",
+    color: "green",
     label: "Seminario",
     location: "Laboratorio de IA",
     sede: "sede-central",
@@ -184,7 +184,7 @@ const programaEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 8, 25), 8), 0), // 25 septiembre 2025, 8:00 AM
     end: setMinutes(setHours(new Date(2025, 8, 25), 10), 0), // 25 septiembre 2025, 10:00 AM
     allDay: false,
-    color: "rose",
+    color: "pink",
     label: "Evaluación",
     location: "Aula Magna - Administración",
     sede: "sede-sur",
@@ -212,7 +212,7 @@ const programaEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 9, 22), 9), 0), // 22 octubre 2025, 9:00 AM
     end: setMinutes(setHours(new Date(2025, 9, 22), 11), 0), // 22 octubre 2025, 11:00 AM
     allDay: false,
-    color: "violet",
+    color: "purple",
     label: "Sustentación",
     location: "Sala de Jurados - Facultad de Derecho",
     sede: "sede-central",
@@ -226,7 +226,7 @@ const programaEvents: CalendarEvent[] = [
     start: new Date(2025, 10, 15), // 15 noviembre 2025
     end: new Date(2025, 10, 17), // 17 noviembre 2025
     allDay: true,
-    color: "emerald",
+    color: "green",
     label: "Congreso",
     location: "Centro de Convenciones Médicas",
     sede: "sede-central",
@@ -291,7 +291,6 @@ export default function ProgramaCalendar({
       onEventDelete={handleEventDelete}
       initialView="week"
       editable={true}
-      calendarType="personal"
       permissions={permissions}
     />
   )
