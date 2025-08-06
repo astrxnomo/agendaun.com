@@ -57,7 +57,7 @@ const config = [
           checksVoidReturn: false,
         },
       ],
-      /*
+      
       "import/order": [
         "warn",
         {
@@ -72,7 +72,7 @@ const config = [
           "newlines-between": "always",
         },
       ],
-      */
+      
     },
   },
 ]

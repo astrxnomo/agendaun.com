@@ -1,3 +1,4 @@
+import ConfigFilterButton from "./config-filter-button"
 import Notifications from "./notifications-button"
 import Search from "./search-dialog"
 import { SidebarTrigger } from "./ui/sidebar"
@@ -8,8 +9,8 @@ export default function NavSearch() {
       <div className="flex h-14 items-center justify-between gap-4">
         {/* Left side */}
         <div className="flex flex-1 items-center gap-2">
-          {/* Mobile menu trigger */}
           <SidebarTrigger />
+          <ConfigFilterButton />
         </div>
         {/* Middle area */}
         <div className="grow">

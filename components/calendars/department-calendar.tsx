@@ -21,6 +21,9 @@ const departmentEvents: CalendarEvent[] = [
     color: "blue",
     label: "Reunión Departamental",
     location: "Aula Magna - Edificio A",
+    sede: "sede-central",
+    facultad: "ingenieria",
+    programa: "ingenieria-sistemas",
   },
   {
     id: "capacitacion-metodologias-activas",
@@ -33,6 +36,9 @@ const departmentEvents: CalendarEvent[] = [
     color: "emerald",
     label: "Capacitación",
     location: "Laboratorio de Informática 1",
+    sede: "sede-norte",
+    facultad: "ingenieria",
+    programa: "ingenieria-industrial",
   },
   {
     id: "evaluacion-curricular-segundo-semestre",
@@ -43,6 +49,9 @@ const departmentEvents: CalendarEvent[] = [
     allDay: true,
     color: "violet",
     label: "Evaluación Académica",
+    sede: "sede-sur",
+    facultad: "ciencias",
+    programa: "psicologia",
   },
   {
     id: "reunion-docentes-septiembre",
@@ -137,15 +146,21 @@ export default function DepartmentCalendar({
   _departmentName = "Departamento Académico",
 }: DepartmentCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(departmentEvents)
-  const { isColorVisible } = useCalendarContext()
+  const { isColorVisible, filterEventsByAcademicFilters } = useCalendarContext()
 
   // Obtener permisos para calendario departamental
   const permissions = useCalendarPermissions("department", userRole)
 
-  // Filtrar eventos basado en colores visibles
+  // Filtrar eventos basado en colores visibles Y filtros académicos
   const visibleEvents = useMemo(() => {
-    return events.filter((event) => isColorVisible(event.color))
-  }, [events, isColorVisible])
+    // Primero filtrar por colores visibles
+    const colorFilteredEvents = events.filter((event) =>
+      isColorVisible(event.color),
+    )
+
+    // Luego aplicar filtros académicos (sede, facultad, programa)
+    return filterEventsByAcademicFilters(colorFilteredEvents)
+  }, [events, isColorVisible, filterEventsByAcademicFilters])
 
   const handleEventAdd = (event: CalendarEvent) => {
     if (permissions.canCreate) {

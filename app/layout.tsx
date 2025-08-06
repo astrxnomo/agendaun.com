@@ -1,5 +1,6 @@
 import { Outfit } from "next/font/google"
 
+import { FiltersProvider } from "@/components/filters-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 
@@ -30,8 +31,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster position="bottom-right" />
+          <FiltersProvider>
+            {children}
+            <Toaster position="bottom-right" />
+          </FiltersProvider>
         </ThemeProvider>
       </body>
     </html>

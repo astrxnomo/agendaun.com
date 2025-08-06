@@ -1,4 +1,9 @@
-export type CalendarType = "personal" | "national" | "department" | "public"
+export type CalendarType =
+  | "personal"
+  | "national"
+  | "department"
+  | "public"
+  | "facultad"
 export type UserRole = "admin" | "editor" | "moderator" | "user"
 
 export interface CalendarPermissions {
@@ -138,6 +143,36 @@ export const CALENDAR_PERMISSIONS: Record<
       canCreate: false,
       canView: true,
       calendarType: "public",
+    },
+  },
+  facultad: {
+    admin: {
+      canEdit: true,
+      canDelete: true,
+      canCreate: true,
+      canView: true,
+      calendarType: "facultad",
+    },
+    editor: {
+      canEdit: true,
+      canDelete: true,
+      canCreate: true,
+      canView: true,
+      calendarType: "facultad",
+    },
+    moderator: {
+      canEdit: true,
+      canDelete: false,
+      canCreate: true,
+      canView: true,
+      calendarType: "facultad",
+    },
+    user: {
+      canEdit: false,
+      canDelete: false,
+      canCreate: false,
+      canView: true,
+      calendarType: "facultad",
     },
   },
 }

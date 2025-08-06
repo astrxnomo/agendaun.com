@@ -11,6 +11,32 @@ import { type CalendarEvent } from "@/components/calendar/types"
 // Eventos públicos - eventos abiertos a toda la comunidad universitaria (desde agosto 2025)
 const publicEvents: CalendarEvent[] = [
   {
+    id: "charla-bienestar-agosto",
+    title: "Charla: Bienestar Mental Universitario",
+    description:
+      "Charla abierta sobre salud mental y bienestar en el ámbito universitario",
+    start: setMinutes(setHours(new Date(2025, 7, 3), 10), 0), // 3 agosto 2025, 10:00 AM
+    end: setMinutes(setHours(new Date(2025, 7, 3), 12), 0), // 3 agosto 2025, 12:00 PM
+    allDay: false,
+    color: "rose",
+    label: "Charla Bienestar",
+    location: "Auditorio Central",
+    sede: "sede-central",
+  },
+  {
+    id: "taller-empleabilidad-agosto",
+    title: "Taller: Estrategias de Empleabilidad",
+    description:
+      "Taller gratuito sobre preparación de CV, entrevistas laborales y networking",
+    start: setMinutes(setHours(new Date(2025, 7, 7), 14), 0), // 7 agosto 2025, 2:00 PM
+    end: setMinutes(setHours(new Date(2025, 7, 7), 17), 0), // 7 agosto 2025, 5:00 PM
+    allDay: false,
+    color: "orange",
+    label: "Taller Empleabilidad",
+    location: "Aula Múltiple 1",
+    sede: "sede-norte",
+  },
+  {
     id: "conferencia-inteligencia-artificial",
     title: "Conferencia: Inteligencia Artificial en la Educación",
     description:
@@ -21,6 +47,35 @@ const publicEvents: CalendarEvent[] = [
     color: "blue",
     label: "Conferencia Pública",
     location: "Auditorio Principal",
+    sede: "sede-central",
+    facultad: "ingenieria",
+    programa: "ingenieria-sistemas",
+  },
+  {
+    id: "feria-salud-agosto",
+    title: "Feria de Salud y Deporte",
+    description:
+      "Actividades de promoción de salud, exámenes médicos gratuitos y competencias deportivas",
+    start: new Date(2025, 7, 21), // 21 agosto 2025
+    end: new Date(2025, 7, 22), // 22 agosto 2025
+    allDay: true,
+    color: "emerald",
+    label: "Feria de Salud",
+    location: "Complejo Deportivo",
+    sede: "sede-este",
+  },
+  {
+    id: "encuentro-egresados-agosto",
+    title: "Encuentro de Egresados",
+    description:
+      "Evento de reencuentro y networking para graduados de todas las promociones",
+    start: setMinutes(setHours(new Date(2025, 7, 24), 18), 0), // 24 agosto 2025, 6:00 PM
+    end: setMinutes(setHours(new Date(2025, 7, 24), 22), 0), // 24 agosto 2025, 10:00 PM
+    allDay: false,
+    color: "purple",
+    label: "Encuentro Alumni",
+    location: "Centro de Convenciones",
+    sede: "sede-central",
   },
   {
     id: "feria-empleo-segundo-semestre",
@@ -33,6 +88,22 @@ const publicEvents: CalendarEvent[] = [
     color: "emerald",
     label: "Feria de Empleo",
     location: "Plaza Central - Campus Principal",
+    sede: "sede-norte",
+    facultad: "administracion",
+    programa: "administracion-empresas",
+  },
+  {
+    id: "concierto-estudiantes-agosto",
+    title: "Concierto de Talentos Estudiantiles",
+    description:
+      "Presentación musical con bandas y artistas de la comunidad universitaria",
+    start: setMinutes(setHours(new Date(2025, 7, 31), 19), 0), // 31 agosto 2025, 7:00 PM
+    end: setMinutes(setHours(new Date(2025, 7, 31), 22), 0), // 31 agosto 2025, 10:00 PM
+    allDay: false,
+    color: "violet",
+    label: "Evento Cultural",
+    location: "Teatro Universitario",
+    sede: "sede-central",
   },
   {
     id: "semana-bienvenida-nuevos",
@@ -45,6 +116,7 @@ const publicEvents: CalendarEvent[] = [
     color: "violet",
     label: "Evento de Integración",
     location: "Todo el Campus",
+    sede: "sede-sur",
   },
   {
     id: "festival-arte-cultura-segundo",
@@ -140,15 +212,21 @@ export default function PublicCalendar({
   userRole = "user",
 }: PublicCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(publicEvents)
-  const { isColorVisible } = useCalendarContext()
+  const { isColorVisible, filterEventsByAcademicFilters } = useCalendarContext()
 
   // Obtener permisos para calendario público
   const permissions = useCalendarPermissions("public", userRole)
 
-  // Filtrar eventos basado en colores visibles
+  // Filtrar eventos basado en colores visibles Y filtros académicos
   const visibleEvents = useMemo(() => {
-    return events.filter((event) => isColorVisible(event.color))
-  }, [events, isColorVisible])
+    // Primero filtrar por colores visibles
+    const colorFilteredEvents = events.filter((event) =>
+      isColorVisible(event.color),
+    )
+
+    // Luego aplicar filtros académicos (sede, facultad, programa)
+    return filterEventsByAcademicFilters(colorFilteredEvents)
+  }, [events, isColorVisible, filterEventsByAcademicFilters])
 
   const handleEventAdd = (event: CalendarEvent) => {
     if (permissions.canCreate) {

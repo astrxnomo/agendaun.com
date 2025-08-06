@@ -285,7 +285,7 @@ export function SetupCalendar({
 
   return (
     <div
-      className="flex flex-col rounded-lg has-data-[slot=month-view]:flex-1"
+      className="flex flex-col has-data-[slot=month-view]:flex-1"
       style={
         {
           "--event-height": `${EventHeight}px`,
@@ -297,7 +297,7 @@ export function SetupCalendar({
       <CalendarDndProvider onEventUpdate={handleEventUpdate}>
         <div
           className={cn(
-            "flex flex-col justify-between gap-2 py-5 sm:flex-row sm:items-center sm:px-4",
+            "flex flex-col justify-between gap-2 px-4 py-5 sm:flex-row sm:items-center",
             className,
           )}
         >

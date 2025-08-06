@@ -63,6 +63,84 @@ const daysUntilNextMonday = getDaysUntilNextMonday(currentDate)
 
 // Datos de eventos de ejemplo con horarios en español
 const sampleEvents: CalendarEvent[] = [
+  // Eventos específicos de agosto 2025 para pruebas
+  {
+    id: "aug-1",
+    title: "Inicio de Clases - Preparación",
+    description:
+      "Preparar materiales y plan de estudios para el nuevo semestre",
+    start: setMinutes(setHours(new Date(2025, 7, 1), 9), 0), // 1 agosto 2025, 9:00 AM
+    end: setMinutes(setHours(new Date(2025, 7, 1), 11), 0), // 1 agosto 2025, 11:00 AM
+    color: "emerald",
+    location: "Oficina personal",
+    sede: "sede-central",
+    facultad: "ingenieria",
+    programa: "ingenieria-sistemas",
+  },
+  {
+    id: "aug-3",
+    title: "Reunión con Decano",
+    description: "Reunión sobre planificación académica del semestre",
+    start: setMinutes(setHours(new Date(2025, 7, 3), 14), 0), // 3 agosto 2025, 2:00 PM
+    end: setMinutes(setHours(new Date(2025, 7, 3), 15), 30), // 3 agosto 2025, 3:30 PM
+    color: "blue",
+    location: "Decanatura",
+    sede: "sede-central",
+    facultad: "ingenieria",
+  },
+  {
+    id: "aug-9",
+    title: "Taller de Investigación",
+    description: "Participación en taller sobre metodologías de investigación",
+    start: setMinutes(setHours(new Date(2025, 7, 9), 8), 0), // 9 agosto 2025, 8:00 AM
+    end: setMinutes(setHours(new Date(2025, 7, 9), 12), 0), // 9 agosto 2025, 12:00 PM
+    color: "purple",
+    location: "Centro de Investigación",
+    sede: "sede-norte",
+    facultad: "ciencias",
+  },
+  {
+    id: "aug-15",
+    title: "Cita Médica",
+    description: "Chequeo médico anual",
+    start: setMinutes(setHours(new Date(2025, 7, 15), 10), 0), // 15 agosto 2025, 10:00 AM
+    end: setMinutes(setHours(new Date(2025, 7, 15), 11), 0), // 15 agosto 2025, 11:00 AM
+    color: "red",
+    location: "Centro Médico Universitario",
+  },
+  {
+    id: "aug-20",
+    title: "Conferencia Personal",
+    description: "Asistir a conferencia sobre desarrollo profesional",
+    start: setMinutes(setHours(new Date(2025, 7, 20), 16), 0), // 20 agosto 2025, 4:00 PM
+    end: setMinutes(setHours(new Date(2025, 7, 20), 18), 0), // 20 agosto 2025, 6:00 PM
+    color: "violet",
+    location: "Auditorio Central",
+    sede: "sede-central",
+  },
+  {
+    id: "aug-25",
+    title: "Almuerzo Familiar",
+    description: "Reunión familiar mensual",
+    start: setMinutes(setHours(new Date(2025, 7, 25), 12), 0), // 25 agosto 2025, 12:00 PM
+    end: setMinutes(setHours(new Date(2025, 7, 25), 14), 0), // 25 agosto 2025, 2:00 PM
+    color: "orange",
+    location: "Restaurante Casa Verde",
+  },
+  {
+    id: "aug-30",
+    title: "Revisión de Proyectos",
+    description: "Evaluación de proyectos estudiantiles del semestre",
+    start: setMinutes(setHours(new Date(2025, 7, 30), 9), 0), // 30 agosto 2025, 9:00 AM
+    end: setMinutes(setHours(new Date(2025, 7, 30), 17), 0), // 30 agosto 2025, 5:00 PM
+    color: "blue",
+    location: "Aula de Evaluación",
+    sede: "sede-central",
+    facultad: "ingenieria",
+    programa: "ingenieria-sistemas",
+  },
+
+  // Eventos dinámicos basados en fecha actual
   {
     id: "w1-0a",
     title: "Reunión Junta Directiva",
@@ -77,6 +155,9 @@ const sampleEvents: CalendarEvent[] = [
     ),
     color: "blue",
     location: "Sala de Juntas Ejecutiva",
+    sede: "sede-central",
+    facultad: "administracion",
+    programa: "administracion-empresas",
   },
   {
     id: "w1-0b",
@@ -92,6 +173,9 @@ const sampleEvents: CalendarEvent[] = [
     ),
     color: "violet",
     location: "Sala de Conferencias A",
+    sede: "sede-norte",
+    facultad: "administracion",
+    programa: "administracion-empresas",
   },
   {
     id: "w1-1",
@@ -107,6 +191,9 @@ const sampleEvents: CalendarEvent[] = [
     ),
     color: "violet",
     location: "Laboratorio de Innovación",
+    sede: "sede-central",
+    facultad: "ingenieria",
+    programa: "ingenieria-sistemas",
   },
   {
     id: "w1-2",
@@ -122,6 +209,9 @@ const sampleEvents: CalendarEvent[] = [
     ),
     color: "emerald",
     location: "Oficinas del Cliente",
+    sede: "sede-sur",
+    facultad: "administracion",
+    programa: "administracion-empresas",
   },
   {
     id: "w1-3",
@@ -137,6 +227,9 @@ const sampleEvents: CalendarEvent[] = [
     ),
     color: "blue",
     location: "Sala de Finanzas",
+    sede: "sede-central",
+    facultad: "ciencias",
+    programa: "psicologia",
   },
   {
     id: "w1-4",
@@ -606,7 +699,7 @@ export default function MyCalendar({
   userRole?: UserRole
 }) {
   const [events, setEvents] = useState<CalendarEvent[]>(sampleEvents)
-  const { isColorVisible } = useCalendarContext()
+  const { isColorVisible, filterEventsByAcademicFilters } = useCalendarContext()
 
   // Obtener permisos basados en el tipo de calendario y rol del usuario
   const permissions = useCalendarPermissions(calendarType, userRole)
@@ -614,10 +707,16 @@ export default function MyCalendar({
   // El calendario es editable si se permite explícitamente Y el usuario tiene permisos
   const isEditable = editable && permissions.canEdit
 
-  // Filtrar eventos basado en colores visibles
+  // Filtrar eventos basado en colores visibles Y filtros académicos
   const visibleEvents = useMemo(() => {
-    return events.filter((event) => isColorVisible(event.color))
-  }, [events, isColorVisible])
+    // Primero filtrar por colores visibles
+    const colorFilteredEvents = events.filter((event) =>
+      isColorVisible(event.color),
+    )
+
+    // Luego aplicar filtros académicos (sede, facultad, programa)
+    return filterEventsByAcademicFilters(colorFilteredEvents)
+  }, [events, isColorVisible, filterEventsByAcademicFilters])
 
   const handleEventAdd = (event: CalendarEvent) => {
     if (permissions.canCreate) {

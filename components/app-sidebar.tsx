@@ -8,6 +8,7 @@ import {
   CalendarDays,
   ChevronRight,
   Clock,
+  Flag,
   FlaskConical,
   GraduationCap,
   Home,
@@ -15,9 +16,11 @@ import {
   NotepadText,
   Palette,
   Presentation,
+  School,
   SquareUser,
   Star,
   Trophy,
+  University,
   Users,
 } from "lucide-react"
 import Link from "next/link"
@@ -44,6 +47,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
+import ConfigFilterButton from "./config-filter-button"
 import { LoginForm } from "./login-form"
 import ThemeToggle from "./theme-toggle"
 
@@ -121,28 +125,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
                         <Link href="/dashboard/calendar/national">
-                          <span>🇨🇴 Nacional</span>
+                          <Flag className="size-4" />
+                          <span>Nacional</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/calendar/department">
-                          <span>🏫 Departamental</span>
+                        <Link href="/dashboard/calendar/sede">
+                          <University />
+                          <span>Sede</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/calendar/public">
-                          <span>🌍 Público</span>
+                        <Link href="/dashboard/calendar/facultad">
+                          <School />
+                          <span>Facultad</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/calendar/permissions-demo">
-                          <span>💡 Demo Permisos</span>
+                        <Link href="/dashboard/calendar/programa">
+                          <GraduationCap />
+                          <span>Programa</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
@@ -285,6 +293,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
+        <ConfigFilterButton variant="sidebar" />
         <LoginForm />
         <ThemeToggle />
       </SidebarFooter>

@@ -10,6 +10,26 @@ import { type CalendarEvent } from "@/components/calendar/types"
 // Eventos nacionales de Colombia - eventos oficiales del país (desde agosto 2025)
 const nationalEvents: CalendarEvent[] = [
   {
+    id: "regreso-clases-agosto",
+    title: "Inicio de Clases Segundo Semestre",
+    description: "Inicio del período académico 2025-2",
+    start: new Date(2025, 7, 1), // 1 agosto 2025
+    end: new Date(2025, 7, 1),
+    allDay: true,
+    color: "emerald",
+    label: "Evento Académico Nacional",
+  },
+  {
+    id: "jornada-vacunacion-agosto",
+    title: "Jornada Nacional de Vacunación",
+    description: "Campaña nacional de vacunación estudiantil",
+    start: new Date(2025, 7, 5), // 5 agosto 2025
+    end: new Date(2025, 7, 5),
+    allDay: true,
+    color: "red",
+    label: "Salud Pública",
+  },
+  {
     id: "batalla-boyaca",
     title: "Batalla de Boyacá",
     description: "Conmemoración de la Batalla de Boyacá",
@@ -20,6 +40,16 @@ const nationalEvents: CalendarEvent[] = [
     label: "Festivo Nacional",
   },
   {
+    id: "semana-ciencia-agosto",
+    title: "Semana Nacional de la Ciencia",
+    description: "Eventos y actividades científicas en todo el país",
+    start: new Date(2025, 7, 12), // 12 agosto 2025
+    end: new Date(2025, 7, 16), // 16 agosto 2025
+    allDay: true,
+    color: "purple",
+    label: "Ciencia y Tecnología",
+  },
+  {
     id: "asuncion",
     title: "Asunción de la Virgen",
     description: "Festividad religiosa católica",
@@ -28,6 +58,26 @@ const nationalEvents: CalendarEvent[] = [
     allDay: true,
     color: "violet",
     label: "Festivo Nacional",
+  },
+  {
+    id: "dia-juventud-agosto",
+    title: "Día Nacional de la Juventud",
+    description: "Celebración y actividades para jóvenes universitarios",
+    start: new Date(2025, 7, 24), // 24 agosto 2025
+    end: new Date(2025, 7, 24),
+    allDay: true,
+    color: "orange",
+    label: "Juventud",
+  },
+  {
+    id: "foro-educacion-agosto",
+    title: "Foro Nacional de Educación Superior",
+    description: "Encuentro nacional de rectores y directivos universitarios",
+    start: new Date(2025, 7, 28), // 28 agosto 2025
+    end: new Date(2025, 7, 30), // 30 agosto 2025
+    allDay: true,
+    color: "blue",
+    label: "Educación Superior",
   },
   {
     id: "dia-raza",
