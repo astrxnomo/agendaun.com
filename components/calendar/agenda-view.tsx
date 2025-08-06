@@ -39,7 +39,7 @@ export function AgendaView({
   )
 
   return (
-    <div className="border-border/70 border-t ps-4">
+    <div className="border-border/70 border-t px-4">
       {!hasEvents ? (
         <div className="flex min-h-[70svh] flex-col items-center justify-center py-16 text-center">
           <Calendar size={32} className="text-muted-foreground/50 mb-2" />

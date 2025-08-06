@@ -24,9 +24,7 @@ export default function Page() {
           <NavActions />
         </div>
       </header>
-      <div className="flex flex-1 flex-col gap-4 p-2 pt-0">
-        <MyCalendar editable={true} />
-      </div>
+      <MyCalendar editable={true} />
     </>
   )
 }
