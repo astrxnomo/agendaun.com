@@ -14,7 +14,7 @@ export function getEventColorClasses(color?: EventColor): string {
   // Usar clases hardcodeadas para garantizar que Tailwind las compile
   switch (eventColor) {
     case "gray":
-      return "bg-gray-400/60 hover:bg-gray-500/50 text-gray-900 border border-gray-300/40 shadow-sm"
+      return "bg-gray-200/50 hover:bg-gray-200/40 text-gray-900/90 shadow-gray-700/8 dark:bg-gray-400/25 dark:hover:bg-gray-400/20 dark:text-gray-200"
     case "blue":
       return "bg-blue-200/50 hover:bg-blue-200/40 text-blue-900/90 shadow-blue-700/8 dark:bg-blue-400/25 dark:hover:bg-blue-400/20 dark:text-blue-200"
     case "red":
@@ -34,7 +34,7 @@ export function getEventColorClasses(color?: EventColor): string {
     case "indigo":
       return "bg-indigo-200/50 hover:bg-indigo-200/40 text-indigo-900/90 shadow-indigo-700/8 dark:bg-indigo-400/25 dark:hover:bg-indigo-400/20 dark:text-indigo-200"
     default:
-      return "bg-gray-400/60 hover:bg-gray-500/50 text-gray-900 border border-gray-300/40 shadow-sm"
+      return "bg-gray-200/50 hover:bg-gray-200/40 text-gray-900/90 shadow-gray-700/8 dark:bg-gray-400/25 dark:hover:bg-gray-400/20 dark:text-gray-200"
   }
 }
 
