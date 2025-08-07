@@ -1,9 +1,9 @@
 "use client"
 
 import { addDays, getDay, setHours, setMinutes } from "date-fns"
-import { useCallback, useMemo, useState } from "react"
 
-import { LabelsHeader } from "@/components/calendar/labels-header"
+import { useCalendarEvents } from "@/components/calendar/hooks/use-calendar-events"
+import { useCalendarFilters } from "@/components/calendar/hooks/use-calendar-filters"
 import {
   type CalendarType,
   type UserRole,
@@ -11,6 +11,8 @@ import {
 } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
 import { type CalendarEvent, type Etiquette } from "@/components/calendar/types"
+
+import { EtiquettesHeader } from "../calendar/etiquettes-header"
 
 // Función para calcular días hasta el próximo lunes
 const getDaysUntilNextMonday = (date: Date) => {
@@ -25,10 +27,16 @@ const daysUntilNextMonday = getDaysUntilNextMonday(currentDate)
 export const personalEtiquettes: Etiquette[] = [
   { id: "materias", name: "Materias", color: "blue", isActive: true },
   { id: "reuniones", name: "Reuniones", color: "orange", isActive: true },
-  { id: "semilleros", name: "Semilleros", color: "green", isActive: true },
+  { id: "semilleros", name: "Semilleros", color: "green", isActive: false },
   { id: "examenes", name: "Exámenes", color: "red", isActive: true },
   { id: "personal", name: "Personal", color: "pink", isActive: true },
   { id: "proyectos", name: "Proyectos", color: "purple", isActive: true },
+  {
+    id: "sin-etiqueta",
+    name: "Sin Etiqueta",
+    color: "gray",
+    isActive: true,
+  },
 ]
 
 // Eventos de ejemplo para Mi Calendario con etiquetas personalizadas
@@ -214,73 +222,42 @@ export default function PersonalCalendar({
   calendarType = "personal",
   userRole = "user",
 }: PersonalCalendarProps) {
-  const [events, setEvents] = useState<CalendarEvent[]>(personalEvents)
+  const { events, addEvent, updateEvent, deleteEvent } =
+    useCalendarEvents(personalEvents)
 
-  // Estado local para las etiquetas de este calendario específico
-  const [visibleColors, setVisibleColors] = useState<string[]>(() => {
-    // Inicializar con todos los colores activos
-    return personalEtiquettes
-      .filter((etiquette) => etiquette.isActive)
-      .map((etiquette) => etiquette.color)
-  })
+  const { visibleEvents, toggleEtiquetteVisibility, isEtiquetteVisible } =
+    useCalendarFilters({
+      etiquettes: personalEtiquettes,
+      events,
+    })
 
   const permissions = useCalendarPermissions(calendarType, userRole)
   const isEditable = editable && permissions.canEdit
 
-  // Función para alternar visibilidad de color (local a este calendario)
-  const toggleColorVisibility = (color: string) => {
-    setVisibleColors((prev) => {
-      if (prev.includes(color)) {
-        return prev.filter((c) => c !== color)
-      } else {
-        return [...prev, color]
-      }
-    })
-  }
-
-  // Función para verificar si un color es visible (local a este calendario)
-  const isColorVisible = useCallback(
-    (color: string | undefined) => {
-      if (!color) return true // Events without a color are always visible
-      return visibleColors.includes(color)
-    },
-    [visibleColors],
-  )
-
-  // Filtrar eventos basado en colores visibles (solo para este calendario)
-  const visibleEvents = useMemo(() => {
-    return events.filter((event) => isColorVisible(event.color))
-  }, [events, isColorVisible])
-
   const handleEventAdd = (event: CalendarEvent) => {
     if (permissions.canCreate) {
-      setEvents([...events, event])
+      addEvent(event)
     }
   }
 
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
     if (permissions.canEdit) {
-      setEvents(
-        events.map((event) =>
-          event.id === updatedEvent.id ? updatedEvent : event,
-        ),
-      )
+      updateEvent(updatedEvent.id, updatedEvent)
     }
   }
 
   const handleEventDelete = (eventId: string) => {
     if (permissions.canDelete) {
-      setEvents(events.filter((event) => event.id !== eventId))
+      deleteEvent(eventId)
     }
   }
 
   return (
     <>
-      <LabelsHeader
+      <EtiquettesHeader
         etiquettes={personalEtiquettes}
-        isColorVisible={isColorVisible}
-        toggleColorVisibility={toggleColorVisibility}
-        title="Etiquetas Personales"
+        isEtiquetteVisible={isEtiquetteVisible}
+        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}
@@ -290,7 +267,7 @@ export default function PersonalCalendar({
         initialView="week"
         editable={isEditable}
         permissions={permissions}
-        calendarType="personal"
+        customEtiquettes={personalEtiquettes}
       />
     </>
   )

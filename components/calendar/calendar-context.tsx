@@ -1,6 +1,12 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react"
 
 import { type CalendarEvent } from "./types"
 
@@ -64,63 +70,66 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
   }
 
   // Filter events by academic filters (sede, facultad, programa)
-  const filterEventsByAcademicFilters = (events: CalendarEvent[]) => {
-    return events.filter((event) => {
-      // NIVEL NACIONAL: Si no hay filtros activos, mostrar todos los eventos
-      if (!filters.sede && !filters.facultad && !filters.programa) {
+  const filterEventsByAcademicFilters = useCallback(
+    (events: CalendarEvent[]) => {
+      return events.filter((event) => {
+        // NIVEL NACIONAL: Si no hay filtros activos, mostrar todos los eventos
+        if (!filters.sede && !filters.facultad && !filters.programa) {
+          return true
+        }
+
+        // NIVEL SEDE: Si solo hay filtro de sede, mostrar eventos de esa sede
+        if (filters.sede && !filters.facultad && !filters.programa) {
+          // Mostrar eventos que pertenecen a esta sede
+          // También incluir eventos sin sede específica (eventos nacionales que aplican a todas las sedes)
+          return !event.sede || event.sede === filters.sede
+        }
+
+        // NIVEL FACULTAD: Si hay sede y facultad, mostrar eventos de esa facultad
+        if (filters.sede && filters.facultad && !filters.programa) {
+          // Si el evento no tiene sede, debe mostrarse (es nacional)
+          if (!event.sede) return true
+          // Si tiene sede, debe coincidir con la sede filtrada
+          if (event.sede !== filters.sede) return false
+
+          // Si el evento no tiene facultad, debe mostrarse (es de toda la sede)
+          if (!event.facultad) return true
+          // Si tiene facultad, debe coincidir con la facultad filtrada
+          return event.facultad === filters.facultad
+        }
+
+        // NIVEL PROGRAMA: Si hay sede, facultad y programa, mostrar eventos específicos del programa
+        if (filters.sede && filters.facultad && filters.programa) {
+          // Si el evento no tiene sede, debe mostrarse (es nacional)
+          if (!event.sede) return true
+          // Si tiene sede, debe coincidir con la sede filtrada
+          if (event.sede !== filters.sede) return false
+
+          // Si el evento no tiene facultad, debe mostrarse (es de toda la sede)
+          if (!event.facultad) return true
+          // Si tiene facultad, debe coincidir con la facultad filtrada
+          if (event.facultad !== filters.facultad) return false
+
+          // Si el evento no tiene programa, debe mostrarse (es de toda la facultad)
+          if (!event.programa) return true
+          // Si tiene programa, debe coincidir con el programa filtrado
+          return event.programa === filters.programa
+        }
+
+        // Casos edge: filtros parciales incompletos
+        if (filters.facultad && !filters.sede) {
+          return !event.facultad || event.facultad === filters.facultad
+        }
+
+        if (filters.programa && !filters.facultad) {
+          return !event.programa || event.programa === filters.programa
+        }
+
         return true
-      }
-
-      // NIVEL SEDE: Si solo hay filtro de sede, mostrar eventos de esa sede
-      if (filters.sede && !filters.facultad && !filters.programa) {
-        // Mostrar eventos que pertenecen a esta sede
-        // También incluir eventos sin sede específica (eventos nacionales que aplican a todas las sedes)
-        return !event.sede || event.sede === filters.sede
-      }
-
-      // NIVEL FACULTAD: Si hay sede y facultad, mostrar eventos de esa facultad
-      if (filters.sede && filters.facultad && !filters.programa) {
-        // Si el evento no tiene sede, debe mostrarse (es nacional)
-        if (!event.sede) return true
-        // Si tiene sede, debe coincidir con la sede filtrada
-        if (event.sede !== filters.sede) return false
-
-        // Si el evento no tiene facultad, debe mostrarse (es de toda la sede)
-        if (!event.facultad) return true
-        // Si tiene facultad, debe coincidir con la facultad filtrada
-        return event.facultad === filters.facultad
-      }
-
-      // NIVEL PROGRAMA: Si hay sede, facultad y programa, mostrar eventos específicos del programa
-      if (filters.sede && filters.facultad && filters.programa) {
-        // Si el evento no tiene sede, debe mostrarse (es nacional)
-        if (!event.sede) return true
-        // Si tiene sede, debe coincidir con la sede filtrada
-        if (event.sede !== filters.sede) return false
-
-        // Si el evento no tiene facultad, debe mostrarse (es de toda la sede)
-        if (!event.facultad) return true
-        // Si tiene facultad, debe coincidir con la facultad filtrada
-        if (event.facultad !== filters.facultad) return false
-
-        // Si el evento no tiene programa, debe mostrarse (es de toda la facultad)
-        if (!event.programa) return true
-        // Si tiene programa, debe coincidir con el programa filtrado
-        return event.programa === filters.programa
-      }
-
-      // Casos edge: filtros parciales incompletos
-      if (filters.facultad && !filters.sede) {
-        return !event.facultad || event.facultad === filters.facultad
-      }
-
-      if (filters.programa && !filters.facultad) {
-        return !event.programa || event.programa === filters.programa
-      }
-
-      return true
-    })
-  }
+      })
+    },
+    [filters],
+  )
 
   const value = {
     currentDate,

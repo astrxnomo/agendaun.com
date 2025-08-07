@@ -4,7 +4,6 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar1, Clock, MapPin } from "lucide-react"
 
-import { getColorClasses } from "@/components/calendar/colors"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,29 +16,29 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
-import { personalEtiquettes } from "../calendars/personal-calendar"
+import { getEtiquetteColor } from "./utils"
 
-import type { CalendarEvent } from "@/components/calendar/types"
+import type { CalendarEvent, Etiquette } from "@/components/calendar/types"
 
 interface EventViewDialogProps {
   event: CalendarEvent | null
   isOpen: boolean
   onClose: () => void
+  etiquettes?: Etiquette[] // ← Nueva prop para etiquetas disponibles
 }
 
 export function EventViewDialog({
   event,
   isOpen,
   onClose,
+  etiquettes: etiquettes = [], // ← Prefijo underscore para indicar que no se usa aún
 }: EventViewDialogProps) {
   if (!event) return null
 
   const startDate = new Date(event.start)
   const endDate = new Date(event.end)
 
-  // Usar directamente el color del evento (como en el ejemplo)
-  const eventColor = event.color || "gray"
-  const colorClasses = getColorClasses(eventColor)
+  const etiquetteColor = getEtiquetteColor(event.color)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -49,10 +48,10 @@ export function EventViewDialog({
             <div
               className={cn(
                 "flex size-10 items-center justify-center rounded-full border",
-                colorClasses.eventClasses,
+                etiquetteColor,
               )}
             >
-              <Calendar1 className={cn("size-5", colorClasses.textClass)} />
+              <Calendar1 className="size-5" />
             </div>
             <DialogTitle className="text-left text-lg font-semibold">
               {event.title}
@@ -129,14 +128,10 @@ export function EventViewDialog({
               <Separator />
               <Badge
                 variant="secondary"
-                className={cn(
-                  "border text-xs capitalize",
-                  colorClasses.eventClasses,
-                )}
+                className={cn("border text-xs capitalize", etiquetteColor)}
               >
-                {personalEtiquettes.find(
-                  (etiquette) => etiquette.color === event.color,
-                )?.name || "Sin etiqueta"}
+                {etiquettes.find((etiquette) => etiquette.color === event.color)
+                  ?.name || "Sin etiqueta"}
               </Badge>
             </>
           )}

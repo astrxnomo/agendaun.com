@@ -6,20 +6,12 @@ import { Calendar1, Trash } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 import {
-  calendarColors,
-  getCircleColorClass,
-} from "@/components/calendar/colors"
-import {
   DefaultEndHour,
   DefaultStartHour,
   EndHour,
   StartHour,
 } from "@/components/calendar/constants"
-import {
-  type CalendarEvent,
-  type Etiquette,
-  type EventColor,
-} from "@/components/calendar/types"
+import { type CalendarEvent, type Etiquette } from "@/components/calendar/types"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -49,12 +41,15 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
+import { getEtiquetteIndicatorColor } from "./utils"
+
 interface EventDialogProps {
   event: CalendarEvent | null
   isOpen: boolean
   onClose: () => void
   onSave: (event: CalendarEvent) => void
   onDelete: (eventId: string) => void
+  customEtiquettes?: Etiquette[] // ← Nueva prop para etiquetas disponibles
   customLabels?: Etiquette[]
 }
 
@@ -64,6 +59,7 @@ export function EventDialog({
   onClose,
   onSave,
   onDelete,
+  customEtiquettes = [], // ← Recibir etiquetas con default vacío
 }: EventDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -73,7 +69,7 @@ export function EventDialog({
   const [endTime, setEndTime] = useState(`${DefaultEndHour}:00`)
   const [allDay, setAllDay] = useState(false)
   const [location, setLocation] = useState("")
-  const [color, setColor] = useState<EventColor>("blue")
+  const [etiquette, setEtiquette] = useState<string | null>(null) // Nueva state para etiqueta seleccionada
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   // const [endDateOpen, setEndDateOpen] = useState(false)
@@ -92,12 +88,16 @@ export function EventDialog({
       setEndTime(formatTimeForInput(end))
       setAllDay(event.allDay || false)
       setLocation(event.location || "")
-      setColor(event.color! || "neutral")
+      // Buscar la etiqueta que corresponde al color del evento
+      const matchingEtiquette = customEtiquettes.find(
+        (etiq) => etiq.color === event.color,
+      )
+      setEtiquette(matchingEtiquette?.id || null)
       setError(null) // Reset error when opening dialog
     } else {
       resetForm()
     }
-  }, [event])
+  }, [event, customEtiquettes])
 
   const resetForm = () => {
     setTitle("")
@@ -108,7 +108,7 @@ export function EventDialog({
     setEndTime(`${DefaultEndHour}:00`)
     setAllDay(false)
     setLocation("")
-    setColor("gray")
+    setEtiquette(null)
     setError(null)
   }
 
@@ -173,6 +173,12 @@ export function EventDialog({
     // Use generic title if empty
     const eventTitle = title.trim() ? title : "(sin título)"
 
+    // Determinar el color basado en la etiqueta seleccionada
+    const selectedEtiquetteObj = etiquette
+      ? customEtiquettes.find((etiq) => etiq.id === etiquette)
+      : null
+    const eventColor = selectedEtiquetteObj?.color || "gray"
+
     onSave({
       id: event?.id || "",
       title: eventTitle,
@@ -181,7 +187,7 @@ export function EventDialog({
       end,
       allDay,
       location,
-      color,
+      color: eventColor,
     })
   }
 
@@ -386,23 +392,32 @@ export function EventDialog({
               Etiqueta
             </legend>
             <RadioGroup
-              className="flex gap-1.5"
-              defaultValue={calendarColors[0]?.value}
-              value={color}
-              onValueChange={(value: EventColor) => setColor(value)}
+              className="grid grid-cols-2 gap-2"
+              value={etiquette || "none"}
+              onValueChange={(value) =>
+                setEtiquette(value === "none" ? null : value)
+              }
             >
-              {calendarColors.map((colorOption) => (
-                <RadioGroupItem
-                  key={colorOption.value}
-                  id={`color-${colorOption.value}`}
-                  value={colorOption.value}
-                  aria-label={colorOption.label}
+              {/* Etiquetas disponibles */}
+              {customEtiquettes.map((etiq) => (
+                <label
+                  key={etiq.id}
                   className={cn(
-                    "size-6 shadow-none",
-                    getCircleColorClass(colorOption.value),
-                    `data-[state=checked]:${getCircleColorClass(colorOption.value)}`,
+                    "relative flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
+                    etiquette === etiq.id
+                      ? "border-primary bg-primary/5"
+                      : "border-input hover:bg-muted",
                   )}
-                />
+                >
+                  <RadioGroupItem value={etiq.id} className="sr-only" />
+                  <div
+                    className={cn(
+                      "size-3 rounded-full border border-gray-400",
+                      getEtiquetteIndicatorColor(etiq.color),
+                    )}
+                  />
+                  <span>{etiq.name}</span>
+                </label>
               ))}
             </RadioGroup>
           </fieldset>

@@ -4,7 +4,7 @@ import { addDays, setHours, setMinutes } from "date-fns"
 import { useCallback, useMemo, useState } from "react"
 
 import { useCalendarContext } from "@/components/calendar/calendar-context"
-import { LabelsHeader } from "@/components/calendar/labels-header"
+import { EtiquettesHeader } from "@/components/calendar/etiquettes-header"
 import { useCalendarPermissions } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
 import {
@@ -264,6 +264,12 @@ const programaEtiquettes: Etiquette[] = [
     color: "red",
     isActive: true,
   },
+  {
+    id: "sin-etiqueta",
+    name: "Sin Etiqueta",
+    color: "gray",
+    isActive: true,
+  },
 ]
 
 interface ProgramaCalendarProps {
@@ -273,19 +279,18 @@ interface ProgramaCalendarProps {
 
 export default function ProgramaCalendar({
   userRole = "user",
-  _programName = "Programa Académico",
 }: ProgramaCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(programaEvents)
   const { filterEventsByAcademicFilters } = useCalendarContext()
 
   // Estado local para colores visibles - comenzamos con todos los colores visibles
-  const [visibleColors, setVisibleColors] = useState<Set<EventColor>>(
+  const [visibleEtiquettes, setVisibleEtiquettes] = useState<Set<EventColor>>(
     new Set(programaEtiquettes.map((etiquette) => etiquette.color)),
   )
 
   // Función para alternar visibilidad de color
-  const toggleColorVisibility = useCallback((color: string) => {
-    setVisibleColors((prev) => {
+  const toggleEtiquetteVisibility = useCallback((color: string) => {
+    setVisibleEtiquettes((prev) => {
       const newSet = new Set(prev)
       if (newSet.has(color as EventColor)) {
         newSet.delete(color as EventColor)
@@ -297,9 +302,10 @@ export default function ProgramaCalendar({
   }, [])
 
   // Función para verificar si un color es visible
-  const isColorVisible = useCallback(
-    (color?: string) => (color ? visibleColors.has(color as EventColor) : true),
-    [visibleColors],
+  const isEtiquetteVisible = useCallback(
+    (color?: string) =>
+      color ? visibleEtiquettes.has(color as EventColor) : true,
+    [visibleEtiquettes],
   )
 
   // Obtener permisos para calendario de programa
@@ -309,12 +315,12 @@ export default function ProgramaCalendar({
   const visibleEvents = useMemo(() => {
     // Primero filtrar por colores visibles
     const colorFilteredEvents = events.filter((event) =>
-      event.color ? isColorVisible(event.color) : true,
+      event.color ? isEtiquetteVisible(event.color) : true,
     )
 
     // Luego aplicar filtros académicos (sede, facultad, programa)
     return filterEventsByAcademicFilters(colorFilteredEvents)
-  }, [events, isColorVisible, filterEventsByAcademicFilters])
+  }, [events, isEtiquetteVisible, filterEventsByAcademicFilters])
 
   const handleEventAdd = (event: CalendarEvent) => {
     if (permissions.canCreate) {
@@ -339,11 +345,11 @@ export default function ProgramaCalendar({
   }
 
   return (
-    <div className="space-y-4">
-      <LabelsHeader
+    <>
+      <EtiquettesHeader
         etiquettes={programaEtiquettes}
-        isColorVisible={isColorVisible}
-        toggleColorVisibility={toggleColorVisibility}
+        isEtiquetteVisible={isEtiquetteVisible}
+        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}
@@ -353,7 +359,8 @@ export default function ProgramaCalendar({
         initialView="week"
         editable={true}
         permissions={permissions}
+        customEtiquettes={programaEtiquettes} // ← Pasar etiquetas específicas del calendario de programa
       />
-    </div>
+    </>
   )
 }

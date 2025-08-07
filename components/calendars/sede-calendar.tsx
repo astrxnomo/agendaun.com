@@ -1,10 +1,12 @@
 "use client"
 
 import { setHours, setMinutes } from "date-fns"
-import { useCallback, useMemo, useState } from "react"
+import { useMemo } from "react"
 
-import { useCalendarContext } from "@/components/calendar/calendar-context"
-import { LabelsHeader } from "@/components/calendar/labels-header"
+import { EtiquettesHeader } from "@/components/calendar/etiquettes-header"
+import { useAcademicFilters } from "@/components/calendar/hooks/use-academic-filters"
+import { useCalendarEvents } from "@/components/calendar/hooks/use-calendar-events"
+import { useCalendarFilters } from "@/components/calendar/hooks/use-calendar-filters"
 import { useCalendarPermissions } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
 import { type CalendarEvent, type Etiquette } from "@/components/calendar/types"
@@ -26,6 +28,12 @@ export const sedeEtiquettes: Etiquette[] = [
   },
   { id: "eventos", name: "Eventos", color: "purple", isActive: true },
   { id: "bienestar", name: "Bienestar", color: "pink", isActive: true },
+  {
+    id: "sin-etiqueta",
+    name: "Sin Etiqueta",
+    color: "gray",
+    isActive: true,
+  },
 ]
 
 // Eventos específicos de sede - eventos administrativos y académicos de sede (desde agosto 2025)
@@ -184,79 +192,49 @@ interface SedeCalendarProps {
 }
 
 export default function SedeCalendar({ userRole = "user" }: SedeCalendarProps) {
-  const [events, setEvents] = useState<CalendarEvent[]>(sedeEvents)
-  const { filterEventsByAcademicFilters } = useCalendarContext()
+  // 1. Eventos
+  const { events, addEvent, updateEvent, deleteEvent } =
+    useCalendarEvents(sedeEvents)
 
-  // Estado local para las etiquetas de este calendario específico
-  const [visibleColors, setVisibleColors] = useState<string[]>(() => {
-    return sedeEtiquettes
-      .filter((etiquette) => etiquette.isActive)
-      .map((etiquette) => etiquette.color)
-  })
+  // 2. Filtros académicos PRIMERO
+  const { filterEventsByAcademicFilters } = useAcademicFilters()
+  const academicFilteredEvents = useMemo(() => {
+    return filterEventsByAcademicFilters(events)
+  }, [events, filterEventsByAcademicFilters])
 
-  // Obtener permisos para calendario de sede
-  const permissions = useCalendarPermissions("department", userRole)
-
-  // Función para alternar visibilidad de color (local a este calendario)
-  const toggleColorVisibility = (color: string) => {
-    setVisibleColors((prev) => {
-      if (prev.includes(color)) {
-        return prev.filter((c) => c !== color)
-      } else {
-        return [...prev, color]
-      }
+  // 3. Filtros de etiquetas DESPUÉS (con eventos ya filtrados)
+  const { visibleEvents, toggleEtiquetteVisibility, isEtiquetteVisible } =
+    useCalendarFilters({
+      etiquettes: sedeEtiquettes,
+      events: academicFilteredEvents,
     })
-  }
 
-  // Función para verificar si un color es visible (local a este calendario)
-  const isColorVisible = useCallback(
-    (color: string | undefined) => {
-      if (!color) return true
-      return visibleColors.includes(color)
-    },
-    [visibleColors],
-  )
-
-  // Filtrar eventos basado en colores visibles Y filtros académicos
-  const visibleEvents = useMemo(() => {
-    // Primero filtrar por colores visibles
-    const colorFilteredEvents = events.filter((event) =>
-      isColorVisible(event.color),
-    )
-
-    // Luego aplicar filtros académicos (sede, facultad, programa)
-    return filterEventsByAcademicFilters(colorFilteredEvents)
-  }, [events, isColorVisible, filterEventsByAcademicFilters])
+  const permissions = useCalendarPermissions("department", userRole)
 
   const handleEventAdd = (event: CalendarEvent) => {
     if (permissions.canCreate) {
-      setEvents([...events, event])
+      addEvent(event)
     }
   }
 
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
     if (permissions.canEdit) {
-      setEvents(
-        events.map((event) =>
-          event.id === updatedEvent.id ? updatedEvent : event,
-        ),
-      )
+      updateEvent(updatedEvent.id, updatedEvent)
     }
   }
 
   const handleEventDelete = (eventId: string) => {
     if (permissions.canDelete) {
-      setEvents(events.filter((event) => event.id !== eventId))
+      deleteEvent(eventId)
     }
   }
 
   return (
     <>
-      <LabelsHeader
+      <EtiquettesHeader
         etiquettes={sedeEtiquettes}
-        isColorVisible={isColorVisible}
-        toggleColorVisibility={toggleColorVisibility}
-        title="Etiquetas de Sede"
+        isEtiquetteVisible={isEtiquetteVisible}
+        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}
@@ -266,6 +244,7 @@ export default function SedeCalendar({ userRole = "user" }: SedeCalendarProps) {
         initialView="month"
         editable={false}
         permissions={permissions}
+        customEtiquettes={sedeEtiquettes}
       />
     </>
   )

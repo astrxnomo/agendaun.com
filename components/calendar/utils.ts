@@ -8,7 +8,7 @@ import {
 /**
  * Get CSS classes for event colors using centralized color system
  */
-export function getEventColorClasses(color?: EventColor): string {
+export function getEtiquetteColor(color?: EventColor): string {
   const eventColor = color || "gray"
 
   // Usar clases hardcodeadas para garantizar que Tailwind las compile
@@ -35,6 +35,35 @@ export function getEventColorClasses(color?: EventColor): string {
       return "bg-indigo-200/50 hover:bg-indigo-200/40 text-indigo-900/90 shadow-indigo-700/8 dark:bg-indigo-400/25 dark:hover:bg-indigo-400/20 dark:text-indigo-200"
     default:
       return "bg-gray-200/50 hover:bg-gray-200/40 text-gray-900/90 shadow-gray-700/8 dark:bg-gray-400/25 dark:hover:bg-gray-400/20 dark:text-gray-200"
+  }
+}
+export function getEtiquetteIndicatorColor(color?: EventColor): string {
+  const eventColor = color || "gray"
+
+  // Colores más sólidos para indicadores de etiquetas
+  switch (eventColor) {
+    case "gray":
+      return "bg-gray-400 dark:bg-gray-500"
+    case "blue":
+      return "bg-blue-500 dark:bg-blue-400"
+    case "red":
+      return "bg-red-500 dark:bg-red-400"
+    case "green":
+      return "bg-green-500 dark:bg-green-400"
+    case "purple":
+      return "bg-purple-500 dark:bg-purple-400"
+    case "orange":
+      return "bg-orange-500 dark:bg-orange-400"
+    case "pink":
+      return "bg-pink-500 dark:bg-pink-400"
+    case "teal":
+      return "bg-teal-500 dark:bg-teal-400"
+    case "yellow":
+      return "bg-yellow-500 dark:bg-yellow-400"
+    case "indigo":
+      return "bg-indigo-500 dark:bg-indigo-400"
+    default:
+      return "bg-gray-400 dark:bg-gray-500"
   }
 }
 

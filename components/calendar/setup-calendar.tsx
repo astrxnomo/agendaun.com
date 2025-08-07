@@ -45,7 +45,7 @@ import { DayView } from "./day-view"
 import { EventDialog } from "./event-dialog"
 import { EventViewDialog } from "./event-view-dialog"
 import { MonthView } from "./month-view"
-import { type CalendarPermissions, type CalendarType } from "./permissions"
+import { type CalendarPermissions } from "./permissions"
 import { type CalendarEvent, type CalendarView, type Etiquette } from "./types"
 import { addHoursToDate } from "./utils"
 import { WeekView } from "./week-view"
@@ -58,12 +58,8 @@ export interface EventCalendarProps {
   className?: string
   initialView?: CalendarView
   editable?: boolean
-  calendarType?: CalendarType
   permissions?: CalendarPermissions
-  customLabels?: Etiquette[]
-  onLabelAdd?: (label: Omit<Etiquette, "id">) => void
-  onLabelUpdate?: (id: string, updates: Partial<Etiquette>) => void
-  onLabelDelete?: (labelId: string) => void
+  customEtiquettes?: Etiquette[] // ← Nueva prop para las etiquetas disponibles
 }
 
 export function SetupCalendar({
@@ -75,6 +71,7 @@ export function SetupCalendar({
   initialView = "month",
   editable = true,
   permissions,
+  customEtiquettes: etiquettes = [], // ← Recibir etiquetas con default vacío
 }: EventCalendarProps) {
   // Use the shared calendar context instead of local state
   const { currentDate, setCurrentDate } = useCalendarContext()
@@ -199,7 +196,6 @@ export function SetupCalendar({
         description: format(new Date(event.start), "MMM d, yyyy", {
           locale: es,
         }),
-        position: "bottom-left",
       })
     } else {
       onEventAdd?.({
@@ -211,7 +207,6 @@ export function SetupCalendar({
         description: format(new Date(event.start), "MMM d, yyyy", {
           locale: es,
         }),
-        position: "bottom-left",
       })
     }
     setIsEventDialogOpen(false)
@@ -230,7 +225,6 @@ export function SetupCalendar({
         description: format(new Date(deletedEvent.start), "MMM d, yyyy", {
           locale: es,
         }),
-        position: "bottom-left",
       })
     }
   }
@@ -243,7 +237,6 @@ export function SetupCalendar({
       description: format(new Date(updatedEvent.start), "MMM d, yyyy", {
         locale: es,
       }),
-      position: "bottom-left",
     })
   }
 
@@ -438,6 +431,7 @@ export function SetupCalendar({
           }}
           onSave={handleEventSave}
           onDelete={handleEventDelete}
+          customEtiquettes={etiquettes} // ← Pasar etiquetas al diálogo
         />
 
         <EventViewDialog
@@ -447,6 +441,7 @@ export function SetupCalendar({
             setIsEventViewDialogOpen(false)
             setSelectedEvent(null)
           }}
+          etiquettes={etiquettes} // ← Pasar etiquetas al diálogo de vista
         />
       </CalendarDndProvider>
     </div>

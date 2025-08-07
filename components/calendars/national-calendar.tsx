@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react"
 
-import { LabelsHeader } from "@/components/calendar/labels-header"
+import { EtiquettesHeader } from "@/components/calendar/etiquettes-header"
 import { useCalendarPermissions } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
 import {
@@ -188,6 +188,12 @@ const nationalEtiquettes: Etiquette[] = [
     color: "pink",
     isActive: true,
   },
+  {
+    id: "sin-etiqueta",
+    name: "Sin Etiqueta",
+    color: "gray",
+    isActive: true,
+  },
 ]
 
 interface NationalCalendarProps {
@@ -200,13 +206,13 @@ export default function NationalCalendar({
   const [events, setEvents] = useState<CalendarEvent[]>(nationalEvents)
 
   // Estado local para colores visibles - comenzamos con todos los colores visibles
-  const [visibleColors, setVisibleColors] = useState<Set<EventColor>>(
+  const [visibleEtiquettes, setVisibleEtiquettes] = useState<Set<EventColor>>(
     new Set(nationalEtiquettes.map((etiquette) => etiquette.color)),
   )
 
   // Función para alternar visibilidad de color
-  const toggleColorVisibility = useCallback((color: string) => {
-    setVisibleColors((prev) => {
+  const toggleEtiquetteVisibility = useCallback((color: string) => {
+    setVisibleEtiquettes((prev) => {
       const newSet = new Set(prev)
       if (newSet.has(color as EventColor)) {
         newSet.delete(color as EventColor)
@@ -218,9 +224,10 @@ export default function NationalCalendar({
   }, [])
 
   // Función para verificar si un color es visible
-  const isColorVisible = useCallback(
-    (color?: string) => (color ? visibleColors.has(color as EventColor) : true),
-    [visibleColors],
+  const isEtiquetteVisible = useCallback(
+    (color?: string) =>
+      color ? visibleEtiquettes.has(color as EventColor) : true,
+    [visibleEtiquettes],
   )
 
   // Obtener permisos para calendario nacional
@@ -229,9 +236,9 @@ export default function NationalCalendar({
   // Filtrar eventos basado en colores visibles
   const visibleEvents = useMemo(() => {
     return events.filter((event) =>
-      event.color ? isColorVisible(event.color) : true,
+      event.color ? isEtiquetteVisible(event.color) : true,
     )
-  }, [events, isColorVisible])
+  }, [events, isEtiquetteVisible])
 
   const handleEventAdd = (event: CalendarEvent) => {
     if (permissions.canCreate) {
@@ -257,10 +264,10 @@ export default function NationalCalendar({
 
   return (
     <div className="space-y-4">
-      <LabelsHeader
+      <EtiquettesHeader
         etiquettes={nationalEtiquettes}
-        isColorVisible={isColorVisible}
-        toggleColorVisibility={toggleColorVisibility}
+        isEtiquetteVisible={isEtiquetteVisible}
+        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}
@@ -270,6 +277,7 @@ export default function NationalCalendar({
         initialView="month"
         editable={permissions.canEdit}
         permissions={permissions}
+        customEtiquettes={nationalEtiquettes} // ← Pasar etiquetas específicas del calendario nacional
       />
     </div>
   )
