@@ -8,8 +8,6 @@ export interface CalendarEvent {
   end: Date
   allDay?: boolean
   color?: EventColor
-  label?: string // Etiqueta personalizada opcional
-  labelId?: string // ID de referencia a etiqueta personalizada
   location?: string
   // Información académica para filtrado
   sede?: string
@@ -17,10 +15,11 @@ export interface CalendarEvent {
   programa?: string
 }
 
-export interface CustomLabel {
+export interface Etiquette {
   id: string
   name: string
   color: EventColor
+  isActive: boolean
 }
 
 export type EventColor =

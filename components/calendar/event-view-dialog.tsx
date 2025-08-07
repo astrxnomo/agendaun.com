@@ -4,7 +4,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar1, Clock, MapPin } from "lucide-react"
 
-import { getColorClasses, getEventLabel } from "@/components/calendar/colors"
+import { getColorClasses } from "@/components/calendar/colors"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,36 +17,29 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
-import type { CalendarEvent, CustomLabel } from "@/components/calendar/types"
+import { personalEtiquettes } from "../calendars/personal-calendar"
+
+import type { CalendarEvent } from "@/components/calendar/types"
 
 interface EventViewDialogProps {
   event: CalendarEvent | null
   isOpen: boolean
   onClose: () => void
-  customLabels?: CustomLabel[]
 }
 
 export function EventViewDialog({
   event,
   isOpen,
   onClose,
-  customLabels = [],
 }: EventViewDialogProps) {
   if (!event) return null
 
   const startDate = new Date(event.start)
   const endDate = new Date(event.end)
 
-  // Get color from label or fallback to direct color
-  const getEventColor = () => {
-    if (event.labelId && customLabels.length > 0) {
-      const label = customLabels.find((l) => l.id === event.labelId)
-      return label?.color || "gray"
-    }
-    return event.color || "gray"
-  }
-
-  const colorClasses = getColorClasses(getEventColor())
+  // Usar directamente el color del evento (como en el ejemplo)
+  const eventColor = event.color || "gray"
+  const colorClasses = getColorClasses(eventColor)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -131,7 +124,7 @@ export function EventViewDialog({
           )}
 
           {/* Etiqueta de color */}
-          {(event.color || event.labelId) && (
+          {event.color && (
             <>
               <Separator />
               <Badge
@@ -141,15 +134,9 @@ export function EventViewDialog({
                   colorClasses.eventClasses,
                 )}
               >
-                {(() => {
-                  if (event.labelId && customLabels.length > 0) {
-                    const label = customLabels.find(
-                      (l) => l.id === event.labelId,
-                    )
-                    return label?.name || getEventLabel(event)
-                  }
-                  return getEventLabel(event)
-                })()}
+                {personalEtiquettes.find(
+                  (etiquette) => etiquette.color === event.color,
+                )?.name || "Sin etiqueta"}
               </Badge>
             </>
           )}

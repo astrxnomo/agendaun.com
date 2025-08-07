@@ -46,11 +46,7 @@ import { EventDialog } from "./event-dialog"
 import { EventViewDialog } from "./event-view-dialog"
 import { MonthView } from "./month-view"
 import { type CalendarPermissions, type CalendarType } from "./permissions"
-import {
-  type CalendarEvent,
-  type CalendarView,
-  type CustomLabel,
-} from "./types"
+import { type CalendarEvent, type CalendarView, type Etiquette } from "./types"
 import { addHoursToDate } from "./utils"
 import { WeekView } from "./week-view"
 
@@ -64,9 +60,9 @@ export interface EventCalendarProps {
   editable?: boolean
   calendarType?: CalendarType
   permissions?: CalendarPermissions
-  customLabels?: CustomLabel[]
-  onLabelAdd?: (label: Omit<CustomLabel, "id">) => void
-  onLabelUpdate?: (id: string, updates: Partial<CustomLabel>) => void
+  customLabels?: Etiquette[]
+  onLabelAdd?: (label: Omit<Etiquette, "id">) => void
+  onLabelUpdate?: (id: string, updates: Partial<Etiquette>) => void
   onLabelDelete?: (labelId: string) => void
 }
 
@@ -79,10 +75,6 @@ export function SetupCalendar({
   initialView = "month",
   editable = true,
   permissions,
-  customLabels = [],
-  onLabelAdd,
-  onLabelUpdate,
-  onLabelDelete,
 }: EventCalendarProps) {
   // Use the shared calendar context instead of local state
   const { currentDate, setCurrentDate } = useCalendarContext()
@@ -446,7 +438,6 @@ export function SetupCalendar({
           }}
           onSave={handleEventSave}
           onDelete={handleEventDelete}
-          customLabels={customLabels}
         />
 
         <EventViewDialog
@@ -456,7 +447,6 @@ export function SetupCalendar({
             setIsEventViewDialogOpen(false)
             setSelectedEvent(null)
           }}
-          customLabels={customLabels}
         />
       </CalendarDndProvider>
     </div>

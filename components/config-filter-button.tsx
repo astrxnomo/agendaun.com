@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useIsMobile } from "@/hooks/use-mobile"
 
-import { useFilters } from "./filters-context"
+import { useCalendarContext } from "./calendar/calendar-context"
 
 interface ConfigFilterButtonProps {
   variant?: "nav" | "sidebar"
@@ -36,7 +36,7 @@ export default function ConfigFilterButton({
   const id = useId()
   const isMobile = useIsMobile()
   const { filters, handleFilterChange, activeFiltersCount, formatLabel } =
-    useFilters()
+    useCalendarContext()
 
   // Determinar si mostrar badges (solo en nav y no mobile)
   const showBadges = variant === "nav" && !isMobile

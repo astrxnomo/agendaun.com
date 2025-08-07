@@ -1,6 +1,6 @@
 import { Outfit } from "next/font/google"
 
-import { FiltersProvider } from "@/components/filters-context"
+import { CalendarProvider } from "@/components/calendar/calendar-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 
@@ -31,10 +31,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <FiltersProvider>
-            {children}
-            <Toaster position="bottom-right" />
-          </FiltersProvider>
+          <CalendarProvider>{children}</CalendarProvider>
+          <Toaster position="bottom-right" />
         </ThemeProvider>
       </body>
     </html>

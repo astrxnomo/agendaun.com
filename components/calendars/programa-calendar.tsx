@@ -1,12 +1,17 @@
 "use client"
 
 import { addDays, setHours, setMinutes } from "date-fns"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import { useCalendarContext } from "@/components/calendar/calendar-context"
+import { LabelsHeader } from "@/components/calendar/labels-header"
 import { useCalendarPermissions } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
-import { type CalendarEvent } from "@/components/calendar/types"
+import {
+  type CalendarEvent,
+  type Etiquette,
+  type EventColor,
+} from "@/components/calendar/types"
 
 // Función para calcular días hasta el próximo lunes
 const getDaysUntilNextMonday = (date: Date) => {
@@ -27,7 +32,6 @@ const programaEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 2), // 2 agosto 2025
     allDay: true,
     color: "green",
-    label: "Inducción",
     location: "Aula Magna - Edificio de Ingeniería",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -41,7 +45,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 5), 10), 0), // 5 agosto 2025, 10:00 AM
     allDay: false,
     color: "blue",
-    label: "Clase",
     location: "Aula 301 - Edificio de Ingeniería",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -55,7 +58,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 8), 16), 0), // 8 agosto 2025, 4:00 PM
     allDay: false,
     color: "purple",
-    label: "Laboratorio",
     location: "Lab. de Cómputo 2",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -69,7 +71,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 12), 12), 0), // 12 agosto 2025, 12:00 PM
     allDay: false,
     color: "red",
-    label: "Taller",
     location: "Laboratorio de Anatomía",
     sede: "sede-central",
     facultad: "medicina",
@@ -83,7 +84,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 15), 12), 0), // 15 agosto 2025, 12:00 PM
     allDay: false,
     color: "orange",
-    label: "Presentación",
     location: "Aula 205 - Facultad de Administración",
     sede: "sede-central",
     facultad: "administracion",
@@ -97,7 +97,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 19), 17), 0), // 19 agosto 2025, 5:00 PM
     allDay: false,
     color: "purple",
-    label: "Simulacro",
     location: "Sala de Audiencias - Facultad de Derecho",
     sede: "sede-central",
     facultad: "derecho",
@@ -111,7 +110,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 22), 11), 0), // 22 agosto 2025, 11:00 AM
     allDay: false,
     color: "pink",
-    label: "Práctica Clínica",
     location: "Clínica Universitaria",
     sede: "sede-norte",
     facultad: "psicologia",
@@ -125,7 +123,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 26), 16), 0), // 26 agosto 2025, 4:00 PM
     allDay: false,
     color: "red",
-    label: "Examen",
     location: "Aula Múltiple",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -139,7 +136,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 30), 18), 0), // 30 agosto 2025, 6:00 PM
     allDay: false,
     color: "purple",
-    label: "Evaluación Académica",
     location: "Auditorio de Ingeniería",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -153,7 +149,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 8, 12), 18), 0), // 12 septiembre 2025, 6:00 PM
     allDay: false,
     color: "green",
-    label: "Seminario",
     location: "Laboratorio de IA",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -185,7 +180,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 8, 25), 10), 0), // 25 septiembre 2025, 10:00 AM
     allDay: false,
     color: "pink",
-    label: "Evaluación",
     location: "Aula Magna - Administración",
     sede: "sede-sur",
     facultad: "administracion",
@@ -199,7 +193,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 9, 8), 17), 0), // 8 octubre 2025, 5:00 PM
     allDay: false,
     color: "blue",
-    label: "Visita Técnica",
     location: "Planta Industrial XYZ",
     sede: "sede-este",
     facultad: "ingenieria",
@@ -213,7 +206,6 @@ const programaEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 9, 22), 11), 0), // 22 octubre 2025, 11:00 AM
     allDay: false,
     color: "purple",
-    label: "Sustentación",
     location: "Sala de Jurados - Facultad de Derecho",
     sede: "sede-central",
     facultad: "derecho",
@@ -227,11 +219,50 @@ const programaEvents: CalendarEvent[] = [
     end: new Date(2025, 10, 17), // 17 noviembre 2025
     allDay: true,
     color: "green",
-    label: "Congreso",
     location: "Centro de Convenciones Médicas",
     sede: "sede-central",
     facultad: "ciencias",
     programa: "medicina",
+  },
+]
+
+// Etiquetas específicas para calendario de programa
+const programaEtiquettes: Etiquette[] = [
+  {
+    id: "clases",
+    name: "Clases",
+    color: "blue",
+    isActive: true,
+  },
+  {
+    id: "laboratorios",
+    name: "Laboratorios",
+    color: "purple",
+    isActive: true,
+  },
+  {
+    id: "examenes",
+    name: "Exámenes",
+    color: "pink",
+    isActive: true,
+  },
+  {
+    id: "induccion",
+    name: "Inducción",
+    color: "green",
+    isActive: true,
+  },
+  {
+    id: "presentaciones",
+    name: "Presentaciones",
+    color: "orange",
+    isActive: true,
+  },
+  {
+    id: "actividades-externas",
+    name: "Actividades Externas",
+    color: "red",
+    isActive: true,
   },
 ]
 
@@ -245,7 +276,31 @@ export default function ProgramaCalendar({
   _programName = "Programa Académico",
 }: ProgramaCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(programaEvents)
-  const { isColorVisible, filterEventsByAcademicFilters } = useCalendarContext()
+  const { filterEventsByAcademicFilters } = useCalendarContext()
+
+  // Estado local para colores visibles - comenzamos con todos los colores visibles
+  const [visibleColors, setVisibleColors] = useState<Set<EventColor>>(
+    new Set(programaEtiquettes.map((etiquette) => etiquette.color)),
+  )
+
+  // Función para alternar visibilidad de color
+  const toggleColorVisibility = useCallback((color: string) => {
+    setVisibleColors((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(color as EventColor)) {
+        newSet.delete(color as EventColor)
+      } else {
+        newSet.add(color as EventColor)
+      }
+      return newSet
+    })
+  }, [])
+
+  // Función para verificar si un color es visible
+  const isColorVisible = useCallback(
+    (color?: string) => (color ? visibleColors.has(color as EventColor) : true),
+    [visibleColors],
+  )
 
   // Obtener permisos para calendario de programa
   const permissions = useCalendarPermissions("personal", userRole)
@@ -254,7 +309,7 @@ export default function ProgramaCalendar({
   const visibleEvents = useMemo(() => {
     // Primero filtrar por colores visibles
     const colorFilteredEvents = events.filter((event) =>
-      isColorVisible(event.color),
+      event.color ? isColorVisible(event.color) : true,
     )
 
     // Luego aplicar filtros académicos (sede, facultad, programa)
@@ -284,14 +339,21 @@ export default function ProgramaCalendar({
   }
 
   return (
-    <SetupCalendar
-      events={visibleEvents}
-      onEventAdd={handleEventAdd}
-      onEventUpdate={handleEventUpdate}
-      onEventDelete={handleEventDelete}
-      initialView="week"
-      editable={true}
-      permissions={permissions}
-    />
+    <div className="space-y-4">
+      <LabelsHeader
+        etiquettes={programaEtiquettes}
+        isColorVisible={isColorVisible}
+        toggleColorVisibility={toggleColorVisibility}
+      />
+      <SetupCalendar
+        events={visibleEvents}
+        onEventAdd={handleEventAdd}
+        onEventUpdate={handleEventUpdate}
+        onEventDelete={handleEventDelete}
+        initialView="week"
+        editable={true}
+        permissions={permissions}
+      />
+    </div>
   )
 }

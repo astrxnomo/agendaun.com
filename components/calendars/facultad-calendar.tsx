@@ -1,12 +1,17 @@
 "use client"
 
 import { setHours, setMinutes } from "date-fns"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import { useCalendarContext } from "@/components/calendar/calendar-context"
+import { LabelsHeader } from "@/components/calendar/labels-header"
 import { useCalendarPermissions } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
-import { type CalendarEvent } from "@/components/calendar/types"
+import {
+  type CalendarEvent,
+  type Etiquette,
+  type EventColor,
+} from "@/components/calendar/types"
 
 // Eventos específicos de facultad - eventos académicos y administrativos de facultades (desde agosto 2025)
 const facultadEvents: CalendarEvent[] = [
@@ -18,7 +23,6 @@ const facultadEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 3),
     allDay: true,
     color: "green",
-    label: "Orientación",
     location: "Facultad de Ingeniería",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -31,7 +35,6 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 5), 17), 0), // 5 agosto 2025, 5:00 PM
     allDay: false,
     color: "red",
-    label: "Seminario",
     location: "Auditorio - Facultad de Medicina",
     sede: "sede-central",
     facultad: "medicina",
@@ -44,7 +47,6 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 8), 16), 0), // 8 agosto 2025, 4:00 PM
     allDay: false,
     color: "blue",
-    label: "Consejo Académico",
     location: "Sala de Juntas - Facultad de Ingeniería",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -57,7 +59,6 @@ const facultadEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 14), // 14 agosto 2025
     allDay: true,
     color: "orange",
-    label: "Taller",
     location: "Facultad de Administración",
     sede: "sede-central",
     facultad: "administracion",
@@ -70,7 +71,6 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 16), 12), 0), // 16 agosto 2025, 12:00 PM
     allDay: false,
     color: "purple",
-    label: "Laboratorio",
     location: "Lab. de Química - Facultad de Ciencias",
     sede: "sede-norte",
     facultad: "ciencias",
@@ -83,24 +83,11 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 19), 17), 0), // 19 agosto 2025, 5:00 PM
     allDay: false,
     color: "purple",
-    label: "Conferencia",
     location: "Aula Magna - Facultad de Derecho",
     sede: "sede-central",
     facultad: "derecho",
   },
-  {
-    id: "conferencia-medicina-agosto",
-    title: "Conferencia Internacional de Medicina",
-    description: "Conferencia magistral sobre avances en medicina moderna",
-    start: setMinutes(setHours(new Date(2025, 7, 25), 9), 0), // 25 agosto 2025, 9:00 AM
-    end: setMinutes(setHours(new Date(2025, 7, 25), 17), 0), // 25 agosto 2025, 5:00 PM
-    allDay: false,
-    color: "red",
-    label: "Conferencia",
-    location: "Auditorio - Facultad de Medicina",
-    sede: "sede-central",
-    facultad: "medicina",
-  },
+
   {
     id: "mesa-redonda-psicologia-agosto",
     title: "Mesa Redonda - Salud Mental",
@@ -109,7 +96,6 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 28), 12), 0), // 28 agosto 2025, 12:00 PM
     allDay: false,
     color: "pink",
-    label: "Mesa Redonda",
     location: "Sala de Conferencias - Facultad de Psicología",
     sede: "sede-norte",
     facultad: "psicologia",
@@ -122,7 +108,6 @@ const facultadEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 31), // 31 agosto 2025
     allDay: true,
     color: "green",
-    label: "Exposición",
     location: "Galería - Facultad de Arquitectura",
     sede: "sede-central",
     facultad: "arquitectura",
@@ -136,7 +121,6 @@ const facultadEvents: CalendarEvent[] = [
     end: new Date(2025, 8, 20), // 20 septiembre 2025
     allDay: true,
     color: "green",
-    label: "Evento Académico",
     location: "Facultad de Ingeniería",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -149,7 +133,6 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 25), 17), 0), // 25 agosto 2025, 5:00 PM
     allDay: false,
     color: "red",
-    label: "Conferencia",
     location: "Auditorio - Facultad de Medicina",
     sede: "sede-central",
     facultad: "medicina",
@@ -162,7 +145,6 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 8, 5), 18), 0), // 5 septiembre 2025, 6:00 PM
     allDay: false,
     color: "orange",
-    label: "Evento Estudiantil",
     location: "Hall Principal - Facultad de Administración",
     sede: "sede-central",
     facultad: "administracion",
@@ -175,7 +157,6 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 9, 12), 17), 0), // 12 octubre 2025, 5:00 PM
     allDay: false,
     color: "purple",
-    label: "Simposio",
     location: "Facultad de Derecho",
     sede: "sede-central",
     facultad: "derecho",
@@ -188,7 +169,6 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 9, 18), 16), 0), // 18 octubre 2025, 4:00 PM
     allDay: false,
     color: "pink",
-    label: "Investigación",
     location: "Laboratorio de Psicología",
     sede: "sede-norte",
     facultad: "psicologia",
@@ -201,7 +181,6 @@ const facultadEvents: CalendarEvent[] = [
     end: new Date(2025, 10, 16), // 16 noviembre 2025
     allDay: true,
     color: "green",
-    label: "Congreso",
     location: "Facultad de Arquitectura",
     sede: "sede-central",
     facultad: "arquitectura",
@@ -214,7 +193,6 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 10, 22), 18), 0), // 22 noviembre 2025, 6:00 PM
     allDay: false,
     color: "purple",
-    label: "Taller",
     location: "Aula de Cómputo - Facultad de Economía",
     sede: "sede-sur",
     facultad: "economia",
@@ -227,7 +205,6 @@ const facultadEvents: CalendarEvent[] = [
     end: new Date(2025, 11, 15), // 15 diciembre 2025
     allDay: true,
     color: "pink",
-    label: "Exposición",
     location: "Galería - Facultad de Artes",
     sede: "sede-este",
     facultad: "artes",
@@ -240,10 +217,49 @@ const facultadEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 11, 10), 17), 0), // 10 diciembre 2025, 5:00 PM
     allDay: false,
     color: "indigo",
-    label: "Defensa Académica",
     location: "Facultad de Educación",
     sede: "sede-central",
     facultad: "educacion",
+  },
+]
+
+// Etiquetas específicas para calendario de facultad
+const facultadEtiquettes: Etiquette[] = [
+  {
+    id: "conferencias",
+    name: "Conferencias",
+    color: "red",
+    isActive: true,
+  },
+  {
+    id: "seminarios",
+    name: "Seminarios",
+    color: "blue",
+    isActive: true,
+  },
+  {
+    id: "talleres",
+    name: "Talleres",
+    color: "orange",
+    isActive: true,
+  },
+  {
+    id: "exposiciones",
+    name: "Exposiciones",
+    color: "green",
+    isActive: true,
+  },
+  {
+    id: "investigacion",
+    name: "Investigación",
+    color: "purple",
+    isActive: true,
+  },
+  {
+    id: "eventos-academicos",
+    name: "Eventos Académicos",
+    color: "pink",
+    isActive: true,
   },
 ]
 
@@ -255,7 +271,31 @@ export default function FacultadCalendar({
   editable = false,
 }: FacultadCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(facultadEvents)
-  const { isColorVisible, filterEventsByAcademicFilters } = useCalendarContext()
+  const { filterEventsByAcademicFilters } = useCalendarContext()
+
+  // Estado local para colores visibles - comenzamos con todos los colores visibles
+  const [visibleColors, setVisibleColors] = useState<Set<EventColor>>(
+    new Set(facultadEtiquettes.map((etiquette) => etiquette.color)),
+  )
+
+  // Función para alternar visibilidad de color
+  const toggleColorVisibility = useCallback((color: string) => {
+    setVisibleColors((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(color as EventColor)) {
+        newSet.delete(color as EventColor)
+      } else {
+        newSet.add(color as EventColor)
+      }
+      return newSet
+    })
+  }, [])
+
+  // Función para verificar si un color es visible
+  const isColorVisible = useCallback(
+    (color?: string) => (color ? visibleColors.has(color as EventColor) : true),
+    [visibleColors],
+  )
 
   // Obtener permisos basados en el tipo de calendario
   const permissions = useCalendarPermissions("facultad", "user")
@@ -267,7 +307,7 @@ export default function FacultadCalendar({
   const visibleEvents = useMemo(() => {
     // Primero filtrar por colores visibles
     const colorFilteredEvents = events.filter((event) =>
-      isColorVisible(event.color),
+      event.color ? isColorVisible(event.color) : true,
     )
 
     // Luego aplicar filtros académicos (sede, facultad, programa)
@@ -297,14 +337,21 @@ export default function FacultadCalendar({
   }
 
   return (
-    <SetupCalendar
-      events={visibleEvents}
-      onEventAdd={handleEventAdd}
-      onEventUpdate={handleEventUpdate}
-      onEventDelete={handleEventDelete}
-      initialView="month"
-      editable={isEditable}
-      permissions={permissions}
-    />
+    <div className="space-y-4">
+      <LabelsHeader
+        etiquettes={facultadEtiquettes}
+        isColorVisible={isColorVisible}
+        toggleColorVisibility={toggleColorVisibility}
+      />
+      <SetupCalendar
+        events={visibleEvents}
+        onEventAdd={handleEventAdd}
+        onEventUpdate={handleEventUpdate}
+        onEventDelete={handleEventDelete}
+        initialView="month"
+        editable={isEditable}
+        permissions={permissions}
+      />
+    </div>
   )
 }

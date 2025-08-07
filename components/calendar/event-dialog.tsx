@@ -17,7 +17,7 @@ import {
 } from "@/components/calendar/constants"
 import {
   type CalendarEvent,
-  type CustomLabel,
+  type Etiquette,
   type EventColor,
 } from "@/components/calendar/types"
 import { Button } from "@/components/ui/button"
@@ -55,7 +55,7 @@ interface EventDialogProps {
   onClose: () => void
   onSave: (event: CalendarEvent) => void
   onDelete: (eventId: string) => void
-  customLabels?: CustomLabel[]
+  customLabels?: Etiquette[]
 }
 
 export function EventDialog({
@@ -64,7 +64,6 @@ export function EventDialog({
   onClose,
   onSave,
   onDelete,
-  customLabels = [],
 }: EventDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -74,8 +73,7 @@ export function EventDialog({
   const [endTime, setEndTime] = useState(`${DefaultEndHour}:00`)
   const [allDay, setAllDay] = useState(false)
   const [location, setLocation] = useState("")
-  const [color, setColor] = useState<EventColor>("gray")
-  const [labelId, setLabelId] = useState<string>("")
+  const [color, setColor] = useState<EventColor>("blue")
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   // const [endDateOpen, setEndDateOpen] = useState(false)
@@ -95,7 +93,6 @@ export function EventDialog({
       setAllDay(event.allDay || false)
       setLocation(event.location || "")
       setColor(event.color! || "neutral")
-      setLabelId(event.labelId || "")
       setError(null) // Reset error when opening dialog
     } else {
       resetForm()
@@ -112,7 +109,6 @@ export function EventDialog({
     setAllDay(false)
     setLocation("")
     setColor("gray")
-    setLabelId("")
     setError(null)
   }
 
@@ -186,7 +182,6 @@ export function EventDialog({
       allDay,
       location,
       color,
-      labelId: labelId || undefined,
     })
   }
 
@@ -390,48 +385,26 @@ export function EventDialog({
             <legend className="text-foreground text-sm leading-none font-medium">
               Etiqueta
             </legend>
-            {customLabels.length > 0 ? (
-              <RadioGroup
-                className="flex gap-1.5"
-                value={labelId}
-                onValueChange={(value: string) => setLabelId(value)}
-              >
-                {customLabels.map((label) => (
-                  <RadioGroupItem
-                    key={label.id}
-                    id={`label-${label.id}`}
-                    value={label.id}
-                    aria-label={label.name}
-                    className={cn(
-                      "size-6 shadow-none",
-                      getCircleColorClass(label.color),
-                      `data-[state=checked]:${getCircleColorClass(label.color)}`,
-                    )}
-                  />
-                ))}
-              </RadioGroup>
-            ) : (
-              <RadioGroup
-                className="flex gap-1.5"
-                defaultValue={calendarColors[0]?.value}
-                value={color}
-                onValueChange={(value: EventColor) => setColor(value)}
-              >
-                {calendarColors.map((colorOption) => (
-                  <RadioGroupItem
-                    key={colorOption.value}
-                    id={`color-${colorOption.value}`}
-                    value={colorOption.value}
-                    aria-label={colorOption.label}
-                    className={cn(
-                      "size-6 shadow-none",
-                      getCircleColorClass(colorOption.value),
-                      `data-[state=checked]:${getCircleColorClass(colorOption.value)}`,
-                    )}
-                  />
-                ))}
-              </RadioGroup>
-            )}
+            <RadioGroup
+              className="flex gap-1.5"
+              defaultValue={calendarColors[0]?.value}
+              value={color}
+              onValueChange={(value: EventColor) => setColor(value)}
+            >
+              {calendarColors.map((colorOption) => (
+                <RadioGroupItem
+                  key={colorOption.value}
+                  id={`color-${colorOption.value}`}
+                  value={colorOption.value}
+                  aria-label={colorOption.label}
+                  className={cn(
+                    "size-6 shadow-none",
+                    getCircleColorClass(colorOption.value),
+                    `data-[state=checked]:${getCircleColorClass(colorOption.value)}`,
+                  )}
+                />
+              ))}
+            </RadioGroup>
           </fieldset>
         </div>
         <DialogFooter className="flex-row sm:justify-between">

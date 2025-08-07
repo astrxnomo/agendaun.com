@@ -1,11 +1,15 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
-import { useCalendarContext } from "@/components/calendar/calendar-context"
+import { LabelsHeader } from "@/components/calendar/labels-header"
 import { useCalendarPermissions } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
-import { type CalendarEvent } from "@/components/calendar/types"
+import {
+  type CalendarEvent,
+  type Etiquette,
+  type EventColor,
+} from "@/components/calendar/types"
 
 // Eventos nacionales de Colombia - eventos oficiales del país (desde agosto 2025)
 const nationalEvents: CalendarEvent[] = [
@@ -17,7 +21,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 1),
     allDay: true,
     color: "green",
-    label: "Evento Académico Nacional",
   },
   {
     id: "jornada-vacunacion-agosto",
@@ -27,7 +30,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 5),
     allDay: true,
     color: "red",
-    label: "Salud Pública",
   },
   {
     id: "batalla-boyaca",
@@ -37,7 +39,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 7),
     allDay: true,
     color: "blue",
-    label: "Festivo Nacional",
   },
   {
     id: "semana-ciencia-agosto",
@@ -47,7 +48,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 16), // 16 agosto 2025
     allDay: true,
     color: "purple",
-    label: "Ciencia y Tecnología",
   },
   {
     id: "asuncion",
@@ -57,7 +57,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 18),
     allDay: true,
     color: "purple",
-    label: "Festivo Nacional",
   },
   {
     id: "dia-juventud-agosto",
@@ -67,7 +66,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 24),
     allDay: true,
     color: "orange",
-    label: "Juventud",
   },
   {
     id: "foro-educacion-agosto",
@@ -77,7 +75,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 30), // 30 agosto 2025
     allDay: true,
     color: "blue",
-    label: "Educación Superior",
   },
   {
     id: "dia-raza",
@@ -87,7 +84,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 9, 13),
     allDay: true,
     color: "orange",
-    label: "Festivo Nacional",
   },
   {
     id: "todos-santos",
@@ -97,7 +93,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 10, 3),
     allDay: true,
     color: "purple",
-    label: "Festivo Nacional",
   },
   {
     id: "independencia-cartagena",
@@ -107,7 +102,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 10, 17),
     allDay: true,
     color: "blue",
-    label: "Festivo Nacional",
   },
   {
     id: "inmaculada",
@@ -117,7 +111,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 11, 8),
     allDay: true,
     color: "purple",
-    label: "Festivo Nacional",
   },
   {
     id: "navidad",
@@ -127,7 +120,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2025, 11, 25),
     allDay: true,
     color: "pink",
-    label: "Festivo Nacional",
   },
   {
     id: "new-year-2026",
@@ -137,7 +129,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2026, 0, 1),
     allDay: true,
     color: "blue",
-    label: "Festivo Nacional",
   },
   {
     id: "reyes-magos-2026",
@@ -147,7 +138,6 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2026, 0, 6),
     allDay: true,
     color: "purple",
-    label: "Festivo Nacional",
   },
   {
     id: "san-jose-2026",
@@ -157,7 +147,46 @@ const nationalEvents: CalendarEvent[] = [
     end: new Date(2026, 2, 23),
     allDay: true,
     color: "purple",
-    label: "Festivo Nacional",
+  },
+]
+
+// Etiquetas específicas para calendario nacional
+const nationalEtiquettes: Etiquette[] = [
+  {
+    id: "festividades-religiosas",
+    name: "Festividades Religiosas",
+    color: "purple",
+    isActive: true,
+  },
+  {
+    id: "fiestas-patrias",
+    name: "Fiestas Patrias",
+    color: "blue",
+    isActive: true,
+  },
+  {
+    id: "eventos-academicos",
+    name: "Eventos Académicos",
+    color: "green",
+    isActive: true,
+  },
+  {
+    id: "salud-publica",
+    name: "Salud Pública",
+    color: "red",
+    isActive: true,
+  },
+  {
+    id: "ciencia-tecnologia",
+    name: "Ciencia y Tecnología",
+    color: "orange",
+    isActive: true,
+  },
+  {
+    id: "celebraciones-especiales",
+    name: "Celebraciones Especiales",
+    color: "pink",
+    isActive: true,
   },
 ]
 
@@ -169,14 +198,39 @@ export default function NationalCalendar({
   userRole = "user",
 }: NationalCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(nationalEvents)
-  const { isColorVisible } = useCalendarContext()
+
+  // Estado local para colores visibles - comenzamos con todos los colores visibles
+  const [visibleColors, setVisibleColors] = useState<Set<EventColor>>(
+    new Set(nationalEtiquettes.map((etiquette) => etiquette.color)),
+  )
+
+  // Función para alternar visibilidad de color
+  const toggleColorVisibility = useCallback((color: string) => {
+    setVisibleColors((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(color as EventColor)) {
+        newSet.delete(color as EventColor)
+      } else {
+        newSet.add(color as EventColor)
+      }
+      return newSet
+    })
+  }, [])
+
+  // Función para verificar si un color es visible
+  const isColorVisible = useCallback(
+    (color?: string) => (color ? visibleColors.has(color as EventColor) : true),
+    [visibleColors],
+  )
 
   // Obtener permisos para calendario nacional
   const permissions = useCalendarPermissions("national", userRole)
 
   // Filtrar eventos basado en colores visibles
   const visibleEvents = useMemo(() => {
-    return events.filter((event) => isColorVisible(event.color))
+    return events.filter((event) =>
+      event.color ? isColorVisible(event.color) : true,
+    )
   }, [events, isColorVisible])
 
   const handleEventAdd = (event: CalendarEvent) => {
@@ -202,14 +256,21 @@ export default function NationalCalendar({
   }
 
   return (
-    <SetupCalendar
-      events={visibleEvents}
-      onEventAdd={handleEventAdd}
-      onEventUpdate={handleEventUpdate}
-      onEventDelete={handleEventDelete}
-      initialView="month"
-      editable={permissions.canEdit}
-      permissions={permissions}
-    />
+    <div className="space-y-4">
+      <LabelsHeader
+        etiquettes={nationalEtiquettes}
+        isColorVisible={isColorVisible}
+        toggleColorVisibility={toggleColorVisibility}
+      />
+      <SetupCalendar
+        events={visibleEvents}
+        onEventAdd={handleEventAdd}
+        onEventUpdate={handleEventUpdate}
+        onEventDelete={handleEventDelete}
+        initialView="month"
+        editable={permissions.canEdit}
+        permissions={permissions}
+      />
+    </div>
   )
 }

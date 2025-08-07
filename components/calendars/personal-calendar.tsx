@@ -1,21 +1,16 @@
 "use client"
 
 import { addDays, getDay, setHours, setMinutes } from "date-fns"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
-import { useCalendarContext } from "@/components/calendar/calendar-context"
+import { LabelsHeader } from "@/components/calendar/labels-header"
 import {
   type CalendarType,
   type UserRole,
   useCalendarPermissions,
 } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
-import {
-  type CalendarEvent,
-  type CustomLabel,
-} from "@/components/calendar/types"
-
-import { LabelsHeader } from "../calendar/labels-header"
+import { type CalendarEvent, type Etiquette } from "@/components/calendar/types"
 
 // Función para calcular días hasta el próximo lunes
 const getDaysUntilNextMonday = (date: Date) => {
@@ -27,13 +22,13 @@ const currentDate = new Date()
 const daysUntilNextMonday = getDaysUntilNextMonday(currentDate)
 
 // Etiquetas personalizadas para el calendario personal
-const personalLabels: CustomLabel[] = [
-  { id: "materias", name: "Materias", color: "blue" },
-  { id: "reuniones", name: "Reuniones", color: "orange" },
-  { id: "semilleros", name: "Semilleros", color: "green" },
-  { id: "examenes", name: "Exámenes", color: "red" },
-  { id: "personal", name: "Personal", color: "pink" },
-  { id: "proyectos", name: "Proyectos", color: "purple" },
+export const personalEtiquettes: Etiquette[] = [
+  { id: "materias", name: "Materias", color: "blue", isActive: true },
+  { id: "reuniones", name: "Reuniones", color: "orange", isActive: true },
+  { id: "semilleros", name: "Semilleros", color: "green", isActive: true },
+  { id: "examenes", name: "Exámenes", color: "red", isActive: true },
+  { id: "personal", name: "Personal", color: "pink", isActive: true },
+  { id: "proyectos", name: "Proyectos", color: "purple", isActive: true },
 ]
 
 // Eventos de ejemplo para Mi Calendario con etiquetas personalizadas
@@ -51,7 +46,6 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "blue",
-    labelId: "materias",
     location: "Aula 201",
     sede: "sede-central",
     facultad: "ingenieria",
@@ -70,7 +64,6 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "orange",
-    labelId: "reuniones",
     location: "Biblioteca Central",
   },
   {
@@ -86,7 +79,6 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "green",
-    labelId: "semilleros",
     location: "Laboratorio de IA",
   },
   {
@@ -102,7 +94,6 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "red",
-    labelId: "examenes",
     location: "Aula Magna",
   },
   {
@@ -118,7 +109,6 @@ const personalEvents: CalendarEvent[] = [
       30,
     ),
     color: "pink",
-    labelId: "personal",
     location: "Gimnasio Universitario",
   },
   {
@@ -134,7 +124,6 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "purple",
-    labelId: "proyectos",
     location: "Casa",
   },
   // Eventos de esta semana
@@ -148,7 +137,6 @@ const personalEvents: CalendarEvent[] = [
     ),
     end: setMinutes(setHours(addDays(currentDate, daysUntilNextMonday), 12), 0),
     color: "blue",
-    labelId: "materias",
     location: "Aula 305",
   },
   {
@@ -164,7 +152,6 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "orange",
-    labelId: "reuniones",
     location: "Sala de Juntas",
   },
   {
@@ -180,7 +167,6 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "purple",
-    labelId: "proyectos",
     location: "Auditorio",
   },
   {
@@ -196,7 +182,6 @@ const personalEvents: CalendarEvent[] = [
       0,
     ),
     color: "pink",
-    labelId: "personal",
     location: "Cafetería Universitaria",
   },
   // Evento sin etiqueta para probar
@@ -220,75 +205,52 @@ interface PersonalCalendarProps {
   editable?: boolean
   calendarType?: CalendarType
   userRole?: UserRole
-  labels?: CustomLabel[]
-  onLabelsChange?: (labels: CustomLabel[]) => void
+  labels?: Etiquette[]
+  onLabelsChange?: (labels: Etiquette[]) => void
 }
 
 export default function PersonalCalendar({
   editable = true,
   calendarType = "personal",
   userRole = "user",
-  labels: propsLabels = personalLabels,
-  onLabelsChange,
 }: PersonalCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(personalEvents)
-  const [labels, setLabels] = useState<CustomLabel[]>(propsLabels)
-  const { isLabelVisible } = useCalendarContext()
+
+  // Estado local para las etiquetas de este calendario específico
+  const [visibleColors, setVisibleColors] = useState<string[]>(() => {
+    // Inicializar con todos los colores activos
+    return personalEtiquettes
+      .filter((etiquette) => etiquette.isActive)
+      .map((etiquette) => etiquette.color)
+  })
 
   const permissions = useCalendarPermissions(calendarType, userRole)
   const isEditable = editable && permissions.canEdit
 
-  const handleLabelAdd = (newLabel: Omit<CustomLabel, "id">) => {
-    const label: CustomLabel = {
-      ...newLabel,
-      id: crypto.randomUUID(),
-    }
-    const updatedLabels = [...labels, label]
-    setLabels(updatedLabels)
-    onLabelsChange?.(updatedLabels)
+  // Función para alternar visibilidad de color (local a este calendario)
+  const toggleColorVisibility = (color: string) => {
+    setVisibleColors((prev) => {
+      if (prev.includes(color)) {
+        return prev.filter((c) => c !== color)
+      } else {
+        return [...prev, color]
+      }
+    })
   }
 
-  const handleLabelUpdate = (id: string, updates: Partial<CustomLabel>) => {
-    const updatedLabels = labels.map((label) =>
-      label.id === id ? { ...label, ...updates } : label,
-    )
-    setLabels(updatedLabels)
-    onLabelsChange?.(updatedLabels)
-  }
+  // Función para verificar si un color es visible (local a este calendario)
+  const isColorVisible = useCallback(
+    (color: string | undefined) => {
+      if (!color) return true // Events without a color are always visible
+      return visibleColors.includes(color)
+    },
+    [visibleColors],
+  )
 
-  const handleLabelDelete = (labelId: string) => {
-    const updatedLabels = labels.filter((label) => label.id !== labelId)
-    setLabels(updatedLabels)
-    onLabelsChange?.(updatedLabels)
-
-    // También actualizar eventos que usen esta etiqueta
-    setEvents(
-      events.map((event) => ({
-        ...event,
-        labelId: event.labelId === labelId ? undefined : event.labelId,
-        label: event.label === labelId ? undefined : event.label,
-      })),
-    )
-  }
-
-  const handleLabelToggle = (_labelId: string) => {
-    // Esta función se maneja en el CalendarContext
-    // pero podríamos agregar lógica adicional aquí si fuera necesario
-  }
-  // Filtrar eventos basado en etiquetas visibles
+  // Filtrar eventos basado en colores visibles (solo para este calendario)
   const visibleEvents = useMemo(() => {
-    const isEventVisible = (event: CalendarEvent) => {
-      if (event.labelId) {
-        return isLabelVisible(event.labelId)
-      }
-      if (event.label) {
-        return isLabelVisible(event.label)
-      }
-      return true // Eventos sin etiqueta siempre visibles
-    }
-
-    return events.filter(isEventVisible)
-  }, [events, isLabelVisible])
+    return events.filter((event) => isColorVisible(event.color))
+  }, [events, isColorVisible])
 
   const handleEventAdd = (event: CalendarEvent) => {
     if (permissions.canCreate) {
@@ -315,12 +277,10 @@ export default function PersonalCalendar({
   return (
     <>
       <LabelsHeader
-        editable={isEditable}
-        labels={labels}
-        onLabelAdd={handleLabelAdd}
-        onLabelUpdate={handleLabelUpdate}
-        onLabelDelete={handleLabelDelete}
-        onLabelToggle={handleLabelToggle}
+        etiquettes={personalEtiquettes}
+        isColorVisible={isColorVisible}
+        toggleColorVisibility={toggleColorVisibility}
+        title="Etiquetas Personales"
       />
       <SetupCalendar
         events={visibleEvents}
@@ -331,10 +291,6 @@ export default function PersonalCalendar({
         editable={isEditable}
         permissions={permissions}
         calendarType="personal"
-        customLabels={labels}
-        onLabelAdd={handleLabelAdd}
-        onLabelUpdate={handleLabelUpdate}
-        onLabelDelete={handleLabelDelete}
       />
     </>
   )

@@ -2,27 +2,26 @@
 
 import { createContext, useContext, useState, type ReactNode } from "react"
 
-import { calendarColors } from "@/components/calendar/colors"
-import { useFilters } from "@/components/filters-context"
-
 import { type CalendarEvent } from "./types"
 
+interface Filters {
+  sede: string
+  facultad: string
+  programa: string
+}
+
 interface CalendarContextType {
-  // Date management
+  // Date management - shared across all calendars
   currentDate: Date
   setCurrentDate: (date: Date) => void
 
-  // Etiquette visibility management
-  visibleColors: string[]
-  toggleColorVisibility: (color: string) => void
-  isColorVisible: (color: string | undefined) => boolean
-
-  // Label visibility management
-  hiddenLabels: string[]
-  toggleLabelVisibility: (labelId: string) => void
-  isLabelVisible: (labelId: string | undefined) => boolean
-
-  // Event filtering by academic filters
+  // Academic filters - used by institutional calendars only
+  filters: Filters
+  setFilters: (filters: Filters) => void
+  handleFilterChange: (type: string, value: string) => void
+  clearFilters: () => void
+  activeFiltersCount: number
+  formatLabel: (value: string) => string
   filterEventsByAcademicFilters: (events: CalendarEvent[]) => CalendarEvent[]
 }
 
@@ -44,55 +43,24 @@ interface CalendarProviderProps {
 
 export function CalendarProvider({ children }: CalendarProviderProps) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
-  const { filters } = useFilters()
-
-  // Initialize visibleColors with all available colors by default
-  const [visibleColors, setVisibleColors] = useState<string[]>(() => {
-    return calendarColors.map((color) => color.value)
+  const [filters, setFilters] = useState<Filters>({
+    sede: "",
+    facultad: "",
+    programa: "",
   })
 
-  // Initialize hiddenLabels with empty array (all labels visible by default)
-  const [hiddenLabels, setHiddenLabels] = useState<string[]>([])
-
-  // Toggle visibility of a color
-  const toggleColorVisibility = (color: string) => {
-    setVisibleColors((prev) => {
-      if (prev.includes(color)) {
-        return prev.filter((c) => c !== color)
-      } else {
-        return [...prev, color]
-      }
-    })
+  const handleFilterChange = (type: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [type]: value }))
   }
 
-  // Check if a color is visible
-  const isColorVisible = (color: string | undefined) => {
-    // Events without a color use "gray" by default
-    const eventColor = color || "gray"
-    return visibleColors.includes(eventColor)
+  const clearFilters = () => {
+    setFilters({ sede: "", facultad: "", programa: "" })
   }
 
-  // Toggle visibility of a label
-  const toggleLabelVisibility = (labelId: string) => {
-    setHiddenLabels((prev) => {
-      if (prev.includes(labelId)) {
-        // Si la etiqueta está oculta, la mostramos
-        return prev.filter((id) => id !== labelId)
-      } else {
-        // Si la etiqueta está visible, la ocultamos
-        return [...prev, labelId]
-      }
-    })
-  }
+  const activeFiltersCount = Object.values(filters).filter(Boolean).length
 
-  // Check if a label is visible
-  const isLabelVisible = (labelId: string | undefined) => {
-    // Si no hay labelId, el evento es siempre visible
-    if (!labelId) {
-      return true
-    }
-    // El evento es visible si su etiqueta NO está en la lista de ocultas
-    return !hiddenLabels.includes(labelId)
+  const formatLabel = (value: string) => {
+    return value.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())
   }
 
   // Filter events by academic filters (sede, facultad, programa)
@@ -157,12 +125,12 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
   const value = {
     currentDate,
     setCurrentDate,
-    visibleColors,
-    toggleColorVisibility,
-    isColorVisible,
-    hiddenLabels,
-    toggleLabelVisibility,
-    isLabelVisible,
+    filters,
+    setFilters,
+    handleFilterChange,
+    clearFilters,
+    activeFiltersCount,
+    formatLabel,
     filterEventsByAcademicFilters,
   }
 

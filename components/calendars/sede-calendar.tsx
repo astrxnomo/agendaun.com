@@ -1,12 +1,32 @@
 "use client"
 
 import { setHours, setMinutes } from "date-fns"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import { useCalendarContext } from "@/components/calendar/calendar-context"
+import { LabelsHeader } from "@/components/calendar/labels-header"
 import { useCalendarPermissions } from "@/components/calendar/permissions"
 import { SetupCalendar } from "@/components/calendar/setup-calendar"
-import { type CalendarEvent } from "@/components/calendar/types"
+import { type CalendarEvent, type Etiquette } from "@/components/calendar/types"
+
+// Etiquetas específicas para el calendario de sede
+export const sedeEtiquettes: Etiquette[] = [
+  {
+    id: "administrativo",
+    name: "Administrativo",
+    color: "blue",
+    isActive: true,
+  },
+  { id: "academico", name: "Académico", color: "green", isActive: true },
+  {
+    id: "mantenimiento",
+    name: "Mantenimiento",
+    color: "orange",
+    isActive: true,
+  },
+  { id: "eventos", name: "Eventos", color: "purple", isActive: true },
+  { id: "bienestar", name: "Bienestar", color: "pink", isActive: true },
+]
 
 // Eventos específicos de sede - eventos administrativos y académicos de sede (desde agosto 2025)
 const sedeEvents: CalendarEvent[] = [
@@ -18,7 +38,6 @@ const sedeEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 2),
     allDay: true,
     color: "green",
-    label: "Bienvenida",
     location: "Auditorio Principal - Sede Central",
     sede: "sede-central",
   },
@@ -30,7 +49,6 @@ const sedeEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 6),
     allDay: true,
     color: "blue",
-    label: "Capacitación",
     location: "Centro de Formación - Sede Norte",
     sede: "sede-norte",
   },
@@ -42,7 +60,6 @@ const sedeEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 10), 11), 0), // 10 agosto 2025, 11:00 AM
     allDay: false,
     color: "blue",
-    label: "Reunión Administrativa",
     location: "Sala de Juntas - Sede Central",
     sede: "sede-central",
     facultad: "administracion",
@@ -55,7 +72,6 @@ const sedeEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 14),
     allDay: true,
     color: "orange",
-    label: "Servicios",
     location: "Plaza Central - Sede Sur",
     sede: "sede-sur",
   },
@@ -67,7 +83,6 @@ const sedeEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 7, 20), 18), 0), // 20 agosto 2025, 6:00 PM
     allDay: false,
     color: "green",
-    label: "Proceso Académico",
     location: "Centro de Atención - Sede Norte",
     sede: "sede-norte",
   },
@@ -79,7 +94,6 @@ const sedeEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 23), // 23 agosto 2025
     allDay: true,
     color: "purple",
-    label: "Formación",
     location: "Auditorio - Sede Este",
     sede: "sede-este",
   },
@@ -91,7 +105,6 @@ const sedeEvents: CalendarEvent[] = [
     end: new Date(2025, 7, 28), // 28 agosto 2025
     allDay: true,
     color: "orange",
-    label: "Mantenimiento",
     location: "Todas las sedes",
     sede: "sede-central",
   },
@@ -103,7 +116,6 @@ const sedeEvents: CalendarEvent[] = [
     end: new Date(2025, 8, 3), // 3 septiembre 2025
     allDay: true,
     color: "orange",
-    label: "Mantenimiento",
     location: "Laboratorios - Sede Sur",
     sede: "sede-sur",
     facultad: "ingenieria",
@@ -116,7 +128,6 @@ const sedeEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 8, 15), 18), 0), // 15 septiembre 2025, 6:00 PM
     allDay: false,
     color: "purple",
-    label: "Ceremonia Académica",
     location: "Auditorio Principal - Sede Central",
     sede: "sede-central",
   },
@@ -128,7 +139,6 @@ const sedeEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 9, 10), 16), 0), // 10 octubre 2025, 4:00 PM
     allDay: false,
     color: "pink",
-    label: "Bienestar",
     location: "Plaza Central - Sede Este",
     sede: "sede-este",
   },
@@ -140,7 +150,6 @@ const sedeEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 9, 25), 11), 30), // 25 octubre 2025, 11:30 AM
     allDay: false,
     color: "orange",
-    label: "Seguridad",
     location: "Toda la Sede Norte",
     sede: "sede-norte",
   },
@@ -152,7 +161,6 @@ const sedeEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 10, 5), 17), 0), // 5 noviembre 2025, 5:00 PM
     allDay: false,
     color: "blue",
-    label: "Consejo Académico",
     location: "Sala del Consejo - Sede Central",
     sede: "sede-central",
   },
@@ -164,7 +172,6 @@ const sedeEvents: CalendarEvent[] = [
     end: setMinutes(setHours(new Date(2025, 10, 18), 17), 0), // 18 noviembre 2025, 5:00 PM
     allDay: false,
     color: "green",
-    label: "Investigación",
     location: "Centro de Investigaciones - Sede Sur",
     sede: "sede-sur",
     facultad: "ciencias",
@@ -178,10 +185,37 @@ interface SedeCalendarProps {
 
 export default function SedeCalendar({ userRole = "user" }: SedeCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(sedeEvents)
-  const { isColorVisible, filterEventsByAcademicFilters } = useCalendarContext()
+  const { filterEventsByAcademicFilters } = useCalendarContext()
+
+  // Estado local para las etiquetas de este calendario específico
+  const [visibleColors, setVisibleColors] = useState<string[]>(() => {
+    return sedeEtiquettes
+      .filter((etiquette) => etiquette.isActive)
+      .map((etiquette) => etiquette.color)
+  })
 
   // Obtener permisos para calendario de sede
   const permissions = useCalendarPermissions("department", userRole)
+
+  // Función para alternar visibilidad de color (local a este calendario)
+  const toggleColorVisibility = (color: string) => {
+    setVisibleColors((prev) => {
+      if (prev.includes(color)) {
+        return prev.filter((c) => c !== color)
+      } else {
+        return [...prev, color]
+      }
+    })
+  }
+
+  // Función para verificar si un color es visible (local a este calendario)
+  const isColorVisible = useCallback(
+    (color: string | undefined) => {
+      if (!color) return true
+      return visibleColors.includes(color)
+    },
+    [visibleColors],
+  )
 
   // Filtrar eventos basado en colores visibles Y filtros académicos
   const visibleEvents = useMemo(() => {
@@ -217,14 +251,22 @@ export default function SedeCalendar({ userRole = "user" }: SedeCalendarProps) {
   }
 
   return (
-    <SetupCalendar
-      events={visibleEvents}
-      onEventAdd={handleEventAdd}
-      onEventUpdate={handleEventUpdate}
-      onEventDelete={handleEventDelete}
-      initialView="month"
-      editable={false}
-      permissions={permissions}
-    />
+    <>
+      <LabelsHeader
+        etiquettes={sedeEtiquettes}
+        isColorVisible={isColorVisible}
+        toggleColorVisibility={toggleColorVisibility}
+        title="Etiquetas de Sede"
+      />
+      <SetupCalendar
+        events={visibleEvents}
+        onEventAdd={handleEventAdd}
+        onEventUpdate={handleEventUpdate}
+        onEventDelete={handleEventDelete}
+        initialView="month"
+        editable={false}
+        permissions={permissions}
+      />
+    </>
   )
 }
