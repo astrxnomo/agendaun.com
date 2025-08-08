@@ -32,7 +32,7 @@ export const sedeEtiquettes: Etiquette[] = [
   { id: "bienestar", name: "Bienestar", color: "pink", isActive: true },
   {
     id: "sin-etiqueta",
-    name: "Sin Etiqueta",
+    name: "Sin etiqueta",
     color: "gray",
     isActive: true,
   },

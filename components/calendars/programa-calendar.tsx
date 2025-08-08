@@ -265,7 +265,7 @@ const programaEtiquettes: Etiquette[] = [
   },
   {
     id: "sin-etiqueta",
-    name: "Sin Etiqueta",
+    name: "Sin etiqueta",
     color: "gray",
     isActive: true,
   },

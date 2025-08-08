@@ -33,7 +33,7 @@ export const personalEtiquettes: Etiquette[] = [
   { id: "proyectos", name: "Proyectos", color: "purple", isActive: true },
   {
     id: "sin-etiqueta",
-    name: "Sin Etiqueta",
+    name: "Sin etiqueta",
     color: "gray",
     isActive: true,
   },
@@ -195,7 +195,7 @@ const personalEvents: CalendarEvent[] = [
   // Evento sin etiqueta para probar
   {
     id: "evento-sin-etiqueta",
-    title: "Evento Sin Etiqueta",
+    title: "Evento Sin etiqueta",
     description: "Este evento no tiene etiqueta asignada",
     start: setMinutes(
       setHours(addDays(currentDate, daysUntilNextMonday + 4), 16),

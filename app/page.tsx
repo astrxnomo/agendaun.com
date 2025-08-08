@@ -12,20 +12,12 @@ import {
   MapPinIcon as MapPinHouse,
   Rocket,
   School,
-  Sparkles,
 } from "lucide-react"
 import Link from "next/link"
 
 import { PageHeader } from "@/components/page-header"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 export default function DashboardIntro() {
@@ -79,225 +71,251 @@ export default function DashboardIntro() {
   return (
     <>
       <PageHeader breadcrumbs={breadcrumbs} />
-      <main className="flex flex-1 flex-col gap-10 px-4 py-6 md:px-10 lg:px-16 xl:px-24">
+      <main className="flex flex-1 flex-col px-4 py-2 md:px-10 lg:px-16 xl:px-24">
         {/* Hero introductorio */}
-        <section className="bg-card rounded-xl border p-6 md:p-8">
-          <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+        <section className="mb-16 overflow-hidden rounded px-8 py-12 md:px-12">
+          <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
             <div className="max-w-2xl">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
-                <Sparkles className="text-primary h-3.5 w-3.5" />
-                <span className="text-muted-foreground">Bienvenido a</span>
-                <span className="font-medium">HorarioU</span>
-              </div>
-              <h1 className="mb-2 text-3xl leading-tight font-bold md:text-4xl">
-                Organiza tu vida universitaria de forma sencilla
+              <h1 className="mb-4 text-4xl leading-tight font-bold tracking-tight md:text-5xl">
+                Organiza tu vida universitaria{" "}
+                <span className="text-primary">de forma sencilla</span>
               </h1>
-              <p className="text-muted-foreground text-base">
+              <p className="text-muted-foreground mb-8 text-lg">
                 Explora calendarios institucionales, consulta horarios de
                 servicios y administra tu agenda personal desde un solo lugar.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Button asChild>
+              <div className="flex flex-wrap gap-4">
+                <Button size="lg" asChild className="rounded">
                   <Link href="/my-calendar">
                     Abrir mi calendario
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline">
+                <Button size="lg" variant="outline" asChild className="rounded">
                   <Link href="/calendar">Ver calendarios</Link>
                 </Button>
               </div>
             </div>
+
             <div className="w-full max-w-sm">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Cómo empezar</CardTitle>
-                  <CardDescription>
-                    Tres pasos rápidos para sacarle provecho a HorarioU
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
+              <div className="bg-background/60 rounded p-6 backdrop-blur-sm">
+                <h3 className="mb-2 text-lg font-semibold">Cómo empezar</h3>
+                <p className="text-muted-foreground mb-6 text-sm">
+                  Tres pasos rápidos para sacarle provecho a HorarioU
+                </p>
+                <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="bg-primary/10 text-primary mt-0.5 rounded-md p-1.5">
+                    <div className="bg-primary/20 text-primary mt-1 rounded-lg p-2">
                       <BadgeCheck className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">
-                        Explora los calendarios
-                      </p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="font-medium">Explora los calendarios</p>
+                      <p className="text-muted-foreground text-sm">
                         Revisa el calendario nacional, por sede, facultad y
                         programa.
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="bg-primary/10 text-primary mt-0.5 rounded-md p-1.5">
+                    <div className="bg-primary/20 text-primary mt-1 rounded-lg p-2">
                       <BadgeCheck className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Agrega tus eventos</p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="font-medium">Agrega tus eventos</p>
+                      <p className="text-muted-foreground text-sm">
                         Crea recordatorios y añade actividades a tu calendario
                         personal.
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="bg-primary/10 text-primary mt-0.5 rounded-md p-1.5">
+                    <div className="bg-primary/20 text-primary mt-1 rounded-lg p-2">
                       <BadgeCheck className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">Consulta horarios</p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="font-medium">Consulta horarios</p>
+                      <p className="text-muted-foreground text-sm">
                         Encuentra rápidamente horarios de atención y servicios.
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Accesos rápidos */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Accesos rápidos</h2>
-            <Badge variant="outline">{quickLinks.length} accesos</Badge>
+        <section className="mb-16">
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">Accesos rápidos</h2>
+              <p className="text-muted-foreground">
+                Navega directamente a cualquier sección
+              </p>
+            </div>
+            <Badge variant="secondary" className="rounded">
+              {quickLinks.length} accesos
+            </Badge>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {quickLinks.map((link) => {
               const Icon = link.icon
               return (
-                <Button
+                <Link
                   key={link.title}
-                  asChild
-                  variant="outline"
-                  className="h-auto justify-start p-4"
+                  href={link.href}
+                  className="group bg-muted/30 hover:bg-muted/50 relative overflow-hidden rounded p-6 transition-all duration-200 hover:shadow-lg"
                 >
-                  <Link href={link.href}>
-                    <span className="bg-primary/10 text-primary mr-3 grid size-9 place-items-center rounded-md">
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <span className="flex min-w-0 flex-col text-left">
-                      <span className="truncate font-medium">{link.title}</span>
-                      <span className="text-muted-foreground text-xs">
+                  <div className="relative flex items-start gap-4">
+                    <div className="text-primary rounded p-3">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="group-hover:text-primary font-semibold transition-colors">
+                        {link.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm">
                         {link.description}
-                      </span>
-                    </span>
-                  </Link>
-                </Button>
+                      </p>
+                    </div>
+                    <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100" />
+                  </div>
+                </Link>
               )
             })}
           </div>
         </section>
 
-        <Separator />
+        <Separator className="mb-16" />
 
         {/* Secciones principales */}
-        <section className="grid gap-6 lg:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <CalendarDays className="text-primary h-5 w-5" />
-                <CardTitle>Calendarios</CardTitle>
+        <section className="mb-16">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold">Explora por categorías</h2>
+            <p className="text-muted-foreground">
+              Descubre todo lo que HorarioU tiene para ofrecerte
+            </p>
+          </div>
+          <div className="grid gap-8 lg:grid-cols-3">
+            {/* Calendarios */}
+            <div className="group bg-muted/30 rounded p-8">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="text-primary rounded">
+                  <CalendarDays className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold">Calendarios</h3>
               </div>
-              <CardDescription>
-                Toda la información institucional en diferentes vistas.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <ul className="text-muted-foreground list-inside list-disc text-sm">
-                <li>Nacional: festivos y fechas país</li>
-                <li>Sede: cronograma por campus</li>
-                <li>Facultad y Programa: fechas académicas</li>
+              <p className="text-muted-foreground mb-6">
+                Toda la información institucional en diferentes vistas
+                organizadas por nivel.
+              </p>
+              <ul className="text-muted-foreground mb-6 space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <div className="bg-primary size-1.5 rounded" />
+                  Nacional: festivos y fechas país
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="bg-primary size-1.5 rounded" />
+                  Sede: cronograma por campus
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="bg-primary size-1.5 rounded" />
+                  Facultad y Programa: fechas académicas
+                </li>
               </ul>
               <div className="flex flex-wrap gap-2">
-                <Button asChild size="sm">
+                <Button asChild size="sm" className="rounded">
                   <Link href="/calendar">Ver todo</Link>
                 </Button>
-                <Button asChild size="sm" variant="outline">
+                <Button asChild size="sm" variant="outline" className="rounded">
                   <Link href="/calendar/national">Nacional</Link>
                 </Button>
-                <Button asChild size="sm" variant="outline">
-                  <Link href="/calendar/sede">Sede</Link>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <Link href="/calendar/facultad">Facultad</Link>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <Link href="/calendar/programa">Programa</Link>
-                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Clock className="text-primary h-5 w-5" />
-                <CardTitle>Horarios</CardTitle>
+            {/* Horarios */}
+            <div className="group bg-muted/30 rounded p-8">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="text-primary rounded">
+                  <Clock className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold">Horarios</h3>
               </div>
-              <CardDescription>
-                Disponibilidades y atención de servicios universitarios.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <ul className="text-muted-foreground list-inside list-disc text-sm">
-                <li>Administrativos, docentes y laboratorios</li>
-                <li>Acceso unificado por categorías</li>
+              <p className="text-muted-foreground mb-6">
+                Disponibilidades y atención de todos los servicios
+                universitarios.
+              </p>
+              <ul className="text-muted-foreground mb-6 space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <div className="bg-primary size-1.5 rounded" />
+                  Administrativos, docentes y laboratorios
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="bg-primary size-1.5 rounded" />
+                  Acceso unificado por categorías
+                </li>
               </ul>
-              <Button asChild>
+              <Button asChild className="rounded">
                 <Link href="/schedules">Abrir horarios</Link>
               </Button>
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card className="relative overflow-hidden">
-            <div className="bg-primary/10 pointer-events-none absolute -top-10 -right-10 size-28 rounded-full" />
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Rocket className="text-primary h-5 w-5" />
-                <CardTitle>Tu espacio</CardTitle>
+            {/* Tu espacio */}
+            <div className="group bg-muted/30 relative overflow-hidden rounded p-8">
+              <div className="relative">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="text-primary rounded">
+                    <Rocket className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-xl font-bold">Tu espacio</h3>
+                </div>
+                <p className="text-muted-foreground mb-6">
+                  Construye tu agenda personal con recordatorios y eventos
+                  personalizados.
+                </p>
+                <ul className="text-muted-foreground mb-6 space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <div className="bg-primary size-1.5 rounded" />
+                    Eventos personales y etiquetas
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="bg-primary size-1.5 rounded" />
+                    Vistas diaria, semanal y mensual
+                  </li>
+                </ul>
+                <div className="flex gap-2">
+                  <Button asChild className="rounded">
+                    <Link href="/my-calendar">Mi calendario</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="rounded">
+                    <Link href="/calendar">Combinar</Link>
+                  </Button>
+                </div>
               </div>
-              <CardDescription>
-                Construye tu agenda personal con recordatorios y eventos.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <ul className="text-muted-foreground list-inside list-disc text-sm">
-                <li>Eventos personales y etiquetas</li>
-                <li>Vistas diaria, semanal y mensual</li>
-              </ul>
-              <div className="flex gap-2">
-                <Button asChild>
-                  <Link href="/my-calendar">Abrir mi calendario</Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link href="/calendar">Combinar con institucional</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </section>
 
         {/* Tips y atajos */}
-        <section className="bg-muted/30 rounded-xl border p-5 md:p-6">
-          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/10 text-primary grid size-9 place-items-center rounded-md">
-                <Hand className="h-4 w-4" />
+        <section className="rounded bg-gradient-to-r from-amber-50/50 via-orange-50/50 to-red-50/50 p-6 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-red-950/20">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-4">
+              <div className="rounded bg-amber-500/10 p-3 text-amber-600 dark:text-amber-400">
+                <Hand className="h-5 w-5" />
               </div>
               <div>
-                <p className="font-medium">Atajos y consejos</p>
+                <h3 className="font-semibold">Atajos y consejos</h3>
                 <p className="text-muted-foreground text-sm">
-                  Usa Cmd/Ctrl + B para mostrar u ocultar la barra lateral
-                  rápidamente.
+                  Usa{" "}
+                  <kbd className="bg-muted rounded px-1.5 py-0.5 text-xs">
+                    Cmd/Ctrl + B
+                  </kbd>{" "}
+                  para mostrar u ocultar la barra lateral rápidamente.
                 </p>
               </div>
             </div>
-            <Badge variant="secondary" className="shrink-0">
+            <Badge variant="secondary" className="rounded">
               Consejo
             </Badge>
           </div>
