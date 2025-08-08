@@ -49,9 +49,6 @@ export default function Search() {
           />
           <span className="text-muted-foreground/70 font-normal">Buscar</span>
         </span>
-        <kbd className="bg-background text-muted-foreground/70 ms-12 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
-          Ctrl K
-        </kbd>
       </button>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />

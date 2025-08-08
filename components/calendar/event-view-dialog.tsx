@@ -82,8 +82,8 @@ export function EventViewDialog({
                       })}
                     </p>
                     <p>
-                      {format(startDate, "HH:mm", { locale: es })} -{" "}
-                      {format(endDate, "HH:mm", { locale: es })}
+                      {format(startDate, "hh:mm a", { locale: es })} -{" "}
+                      {format(endDate, "hh:mm a", { locale: es })}
                       {format(startDate, "yyyy-MM-dd") !==
                         format(endDate, "yyyy-MM-dd") && (
                         <span className="ml-1">

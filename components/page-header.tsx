@@ -2,7 +2,6 @@
 
 import { Fragment, type ReactNode } from "react"
 
-import { NavActions } from "@/components/nav-actions"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,6 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 interface BreadcrumbItem {
   label: string
@@ -28,6 +28,8 @@ export function PageHeader({ breadcrumbs, action }: PageHeaderProps) {
 
   return (
     <header className="bg-background sticky top-0 z-40 flex h-12 shrink-0 items-center gap-2 border-b px-4">
+      <SidebarTrigger />
+
       <Breadcrumb>
         <BreadcrumbList>
           {/* Mobile: solo página actual */}
@@ -54,11 +56,13 @@ export function PageHeader({ breadcrumbs, action }: PageHeaderProps) {
           ))}
         </BreadcrumbList>
       </Breadcrumb>
-      {action && (
-        <div className="ml-auto flex items-center gap-3">{action}</div>
-      )}
-      <div className={`${action ? "" : "ml-auto"} px-3`}>
-        <NavActions />
+
+      <div className="ml-auto flex gap-4">
+        {/* <div className="text-muted-foreground flex items-center gap-1 text-xs">
+          <Clock className="inline size-3" />
+          Actualizado Oct 08
+        </div> */}
+        {action && <>{action}</>}
       </div>
     </header>
   )

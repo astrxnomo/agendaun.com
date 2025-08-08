@@ -65,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
+              <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <GraduationCap className="size-4" />
                 </div>
@@ -82,19 +82,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuButton asChild tooltip="Inicio">
-              <Link href="/dashboard">
+              <Link href="/">
                 <Home />
                 <span>Inicio</span>
               </Link>
             </SidebarMenuButton>
             <SidebarMenuButton asChild tooltip="Mi calendario">
-              <Link href="/dashboard/my-calendar">
+              <Link href="/my-calendar">
                 <Calendar />
                 <span>Mi calendario</span>
               </Link>
             </SidebarMenuButton>
             <SidebarMenuButton asChild tooltip="Mis favoritos">
-              <Link href="/dashboard/events">
+              <Link href="/events">
                 <Star />
                 <span>Mis favoritos</span>
               </Link>
@@ -108,7 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <Collapsible asChild>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Calendarios">
-                  <Link href="/dashboard/calendar">
+                  <Link href="/calendar">
                     <CalendarDays />
                     <span>Calendarios</span>
                   </Link>
@@ -123,7 +123,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/calendar/national">
+                        <Link href="/calendar/national">
                           <Flag className="size-4" />
                           <span>Nacional</span>
                         </Link>
@@ -131,7 +131,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/calendar/sede">
+                        <Link href="/calendar/sede">
                           <MapPinHouse />
                           <span>Sede</span>
                         </Link>
@@ -139,7 +139,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/calendar/facultad">
+                        <Link href="/calendar/facultad">
                           <School />
                           <span>Facultad</span>
                         </Link>
@@ -147,7 +147,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/calendar/programa">
+                        <Link href="/calendar/programa">
                           <GraduationCap />
                           <span>Programa</span>
                         </Link>
@@ -160,7 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <Collapsible asChild defaultOpen={true}>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Horarios">
-                  <Link href="/dashboard/schedules">
+                  <Link href="/schedules">
                     <Clock />
                     <span>Horarios</span>
                   </Link>
@@ -175,7 +175,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/schedules/offices">
+                        <Link href="/schedules/offices">
                           <Building2 className="size-4" />
                           <span>Oficinas</span>
                         </Link>
@@ -183,7 +183,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/services/library">
+                        <Link href="/services/library">
                           <BookMarked className="size-4" />
                           <span>Bibliotecas</span>
                         </Link>
@@ -191,7 +191,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/schedules/professors">
+                        <Link href="/schedules/professors">
                           <SquareUser className="size-4" />
                           <span>Profesores</span>
                         </Link>
@@ -200,7 +200,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/schedules/tutoring">
+                        <Link href="/schedules/tutoring">
                           <NotepadText className="size-4" />
                           <span>Monitorias</span>
                         </Link>
@@ -208,7 +208,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/schedules/labs">
+                        <Link href="/schedules/labs">
                           <FlaskConical className="size-4" />
                           <span>Laboratorios</span>
                         </Link>
@@ -216,7 +216,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/schedules/transport">
+                        <Link href="/schedules/transport">
                           <Bus className="size-4" />
                           <span>Transportes</span>
                         </Link>
@@ -230,7 +230,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <Collapsible asChild>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Eventos">
-                  <Link href="/dashboard/events">
+                  <Link href="/events">
                     <MapPinned />
                     <span>Eventos</span>
                   </Link>
@@ -245,7 +245,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/events?type=academic">
+                        <Link href="/events?type=academic">
                           <GraduationCap className="size-4" />
                           <span>Académicos</span>
                         </Link>
@@ -253,7 +253,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/events?type=cultural">
+                        <Link href="/events?type=cultural">
                           <Palette className="size-4" />
                           <span>Culturales</span>
                         </Link>
@@ -261,7 +261,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/events?type=sports">
+                        <Link href="/events?type=sports">
                           <Trophy className="size-4" />
                           <span>Deportivos</span>
                         </Link>
@@ -269,7 +269,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/events?type=conferences">
+                        <Link href="/events?type=conferences">
                           <Presentation className="size-4" />
                           <span>Conferencias</span>
                         </Link>
@@ -277,7 +277,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/dashboard/events?type=workshops">
+                        <Link href="/events?type=workshops">
                           <Users className="size-4" />
                           <span>Talleres</span>
                         </Link>

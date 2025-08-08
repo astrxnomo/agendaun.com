@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 
 export default function Page() {
-  const [isEditable, setIsEditable] = useState(true)
+  const [isEditable, setIsEditable] = useState(false)
 
   const toggleEditMode = () => {
     setIsEditable(!isEditable)
@@ -17,11 +17,13 @@ export default function Page() {
   return (
     <>
       <PageHeader
-        breadcrumbs={[{ label: "Mi Calendario", isCurrentPage: true }]}
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Mi Calendario", isCurrentPage: true },
+        ]}
         action={
           <Button
             variant={isEditable ? "outline" : "default"}
-            size="sm"
             onClick={toggleEditMode}
             className="flex items-center gap-2"
             title={
@@ -32,12 +34,12 @@ export default function Page() {
           >
             {isEditable ? (
               <>
-                <Eye className="h-4 w-4" />
+                <Eye />
                 Lectura
               </>
             ) : (
               <>
-                <Edit className="h-4 w-4" />
+                <Edit />
                 Editar
               </>
             )}

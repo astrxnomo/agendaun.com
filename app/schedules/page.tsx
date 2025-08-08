@@ -26,50 +26,50 @@ const scheduleCategories = [
     title: "Oficinas",
     description: "Horarios de atención de oficinas administrativas",
     icon: Building2,
-    href: "/dashboard/schedules/offices",
+    href: "/schedules/offices",
     color: "bg-blue-500",
   },
   {
     title: "Profesores",
     description: "Horarios de atención y oficina de profesores",
     icon: SquareUser,
-    href: "/dashboard/schedules/professors",
+    href: "/schedules/professors",
     color: "bg-green-500",
   },
   {
     title: "Monitorías",
     description: "Horarios de monitorías y tutorías académicas",
     icon: NotepadText,
-    href: "/dashboard/schedules/tutoring",
+    href: "/schedules/tutoring",
     color: "bg-purple-500",
   },
   {
     title: "Laboratorios",
     description: "Horarios de disponibilidad de laboratorios",
     icon: FlaskConical,
-    href: "/dashboard/schedules/labs",
+    href: "/schedules/labs",
     color: "bg-orange-500",
   },
   {
     title: "Bibliotecas",
     description: "Horarios de atención de bibliotecas",
     icon: BookMarked,
-    href: "/dashboard/services/library",
+    href: "/services/library",
     color: "bg-indigo-500",
   },
   {
     title: "Transportes",
     description: "Horarios de rutas de transporte universitario",
     icon: Bus,
-    href: "/dashboard/services/transport",
+    href: "/services/transport",
     color: "bg-red-500",
   },
 ]
 
 export default function SchedulesPage() {
   const breadcrumbs = [
-    { label: "Inicio", href: "/dashboard" },
-    { label: "Horarios", href: "/dashboard/schedules", isCurrentPage: true },
+    { label: "Inicio", href: "/" },
+    { label: "Horarios", href: "/schedules", isCurrentPage: true },
   ]
 
   return (

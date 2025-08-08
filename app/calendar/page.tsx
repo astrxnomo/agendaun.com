@@ -1,9 +1,11 @@
+"use client"
+
 import {
   Building2,
   CalendarDays,
   Flag,
   GraduationCap,
-  MapPinHouse,
+  MapPinIcon as MapPinHouse,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -22,29 +24,25 @@ export default function CalendarPage() {
     <>
       <PageHeader
         breadcrumbs={[
-          { label: "Inicio", href: "/dashboard" },
-          { label: "Calendarioss", isCurrentPage: true },
+          { label: "Inicio", href: "/" },
+          { label: "Calendarios", isCurrentPage: true },
         ]}
       />
       <div className="border-b p-6">
-        <div className="">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Calendarios Académicos
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Gestiona y visualiza eventos por nivel académico
-          </p>
-        </div>
+        <h1 className="text-3xl font-bold">Calendarios Académicos</h1>
+        <p className="text-muted-foreground mt-2">
+          Gestiona y visualiza eventos por nivel académico
+        </p>
       </div>
 
-      <div className="p-6">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="p-6 md:p-10 lg:p-20">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Calendario Nacional */}
           <Card className="group transition-all hover:shadow-lg">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                  <Flag className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                  <Flag className="text-primary h-6 w-6" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Nacional</CardTitle>
@@ -55,12 +53,12 @@ export default function CalendarPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-smtext-muted-foreground mb-4">
                 Calendario con fechas importantes a nivel nacional de Colombia,
                 incluyendo días festivos y celebraciones oficiales.
               </p>
               <Button asChild className="w-full transition-transform">
-                <Link href="/dashboard/calendar/national">
+                <Link href="/calendar/national">
                   <CalendarDays className="mr-2 h-4 w-4" />
                   Ver Calendario Nacional
                 </Link>
@@ -72,8 +70,8 @@ export default function CalendarPage() {
           <Card className="group transition-all hover:shadow-lg">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-                  <MapPinHouse className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                  <MapPinHouse className="text-primary h-6 w-6" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Sede</CardTitle>
@@ -84,12 +82,12 @@ export default function CalendarPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-smtext-muted-foreground mb-4">
                 Calendario con eventos, actividades y fechas importantes
                 específicas de tu sede universitaria.
               </p>
               <Button asChild className="w-full transition-transform">
-                <Link href="/dashboard/calendar/sede">
+                <Link href="/calendar/sede">
                   <CalendarDays className="mr-2 h-4 w-4" />
                   Ver Calendario de Sede
                 </Link>
@@ -101,8 +99,8 @@ export default function CalendarPage() {
           <Card className="group transition-all hover:shadow-lg">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/20">
-                  <Building2 className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                  <Building2 className="text-primary h-6 w-6" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Facultad</CardTitle>
@@ -113,12 +111,12 @@ export default function CalendarPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-smtext-muted-foreground mb-4">
                 Calendario con eventos, conferencias y actividades específicas
                 de tu facultad dentro de la universidad.
               </p>
               <Button asChild className="w-full transition-transform">
-                <Link href="/dashboard/calendar/facultad">
+                <Link href="/calendar/facultad">
                   <CalendarDays className="mr-2 h-4 w-4" />
                   Ver Calendario de Facultad
                 </Link>
@@ -130,8 +128,8 @@ export default function CalendarPage() {
           <Card className="group transition-all hover:shadow-lg">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
-                  <GraduationCap className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                  <GraduationCap className="text-primary h-6 w-6" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">Programa</CardTitle>
@@ -142,12 +140,12 @@ export default function CalendarPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-smtext-muted-foreground mb-4">
                 Calendario personalizado con eventos académicos específicos de
                 tu programa de estudios.
               </p>
               <Button asChild className="w-full transition-transform">
-                <Link href="/dashboard/calendar/programa">
+                <Link href="/calendar/programa">
                   <CalendarDays className="mr-2 h-4 w-4" />
                   Ver Calendario de Programa
                 </Link>

@@ -99,7 +99,7 @@ export function SetupCalendar({
         case "m":
           setView("month")
           break
-        case "w":
+        case "s":
           setView("week")
           break
         case "d":
