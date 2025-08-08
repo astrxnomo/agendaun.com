@@ -1,9 +1,34 @@
 "use client"
-import { MapPinHouse } from "lucide-react"
-import { useId } from "react"
+import {
+  Check,
+  ChevronsUpDown,
+  GraduationCap,
+  MapPinHouse,
+  School,
+  Settings2,
+} from "lucide-react"
+import { useId, useMemo, useState } from "react"
 
+import { useCalendarContext } from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import {
   Popover,
@@ -11,20 +36,158 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useIsMobile } from "@/hooks/use-mobile"
 
-import { useCalendarContext } from "./calendar/calendar-context"
+// Estructura jerárquica de sedes -> facultades -> programas
+type AcademicStructure = Record<
+  string,
+  {
+    name: string
+    facultades: Record<
+      string,
+      {
+        name: string
+        programas: Record<string, string>
+      }
+    >
+  }
+>
+
+const academicStructure: AcademicStructure = {
+  "sede-central": {
+    name: "Sede Central",
+    facultades: {
+      ingenieria: {
+        name: "Facultad de Ingeniería",
+        programas: {
+          "ingenieria-sistemas": "Ingeniería de Sistemas",
+          "ingenieria-industrial": "Ingeniería Industrial",
+          "ingenieria-civil": "Ingeniería Civil",
+          "ingenieria-electronica": "Ingeniería Electrónica",
+        },
+      },
+      medicina: {
+        name: "Facultad de Medicina",
+        programas: {
+          medicina: "Medicina",
+          enfermeria: "Enfermería",
+          fisioterapia: "Fisioterapia",
+        },
+      },
+      administracion: {
+        name: "Facultad de Administración",
+        programas: {
+          "administracion-empresas": "Administración de Empresas",
+          contaduria: "Contaduría Pública",
+          economia: "Economía",
+        },
+      },
+      derecho: {
+        name: "Facultad de Derecho",
+        programas: {
+          derecho: "Derecho",
+          "ciencias-politicas": "Ciencias Políticas",
+        },
+      },
+      ciencias: {
+        name: "Facultad de Ciencias",
+        programas: {
+          biologia: "Biología",
+          quimica: "Química",
+          fisica: "Física",
+          matematicas: "Matemáticas",
+        },
+      },
+    },
+  },
+  "sede-norte": {
+    name: "Sede Norte",
+    facultades: {
+      ingenieria: {
+        name: "Facultad de Ingeniería",
+        programas: {
+          "ingenieria-sistemas": "Ingeniería de Sistemas",
+          "ingenieria-ambiental": "Ingeniería Ambiental",
+        },
+      },
+      psicologia: {
+        name: "Facultad de Psicología",
+        programas: {
+          psicologia: "Psicología",
+          "trabajo-social": "Trabajo Social",
+        },
+      },
+      ciencias: {
+        name: "Facultad de Ciencias",
+        programas: {
+          biologia: "Biología",
+          "medicina-veterinaria": "Medicina Veterinaria",
+        },
+      },
+    },
+  },
+  "sede-sur": {
+    name: "Sede Sur",
+    facultades: {
+      administracion: {
+        name: "Facultad de Administración",
+        programas: {
+          "administracion-empresas": "Administración de Empresas",
+          mercadeo: "Mercadeo y Publicidad",
+          turismo: "Administración Turística",
+        },
+      },
+      comunicacion: {
+        name: "Facultad de Comunicación",
+        programas: {
+          "comunicacion-social": "Comunicación Social",
+          periodismo: "Periodismo",
+          publicidad: "Publicidad",
+        },
+      },
+      artes: {
+        name: "Facultad de Artes",
+        programas: {
+          "artes-visuales": "Artes Visuales",
+          musica: "Música",
+          "artes-escenicas": "Artes Escénicas",
+        },
+      },
+    },
+  },
+  "sede-este": {
+    name: "Sede Este",
+    facultades: {
+      ingenieria: {
+        name: "Facultad de Ingeniería",
+        programas: {
+          "ingenieria-industrial": "Ingeniería Industrial",
+          "ingenieria-mecanica": "Ingeniería Mecánica",
+        },
+      },
+      educacion: {
+        name: "Facultad de Educación",
+        programas: {
+          "licenciatura-matematicas": "Licenciatura en Matemáticas",
+          "licenciatura-espanol": "Licenciatura en Español",
+          "licenciatura-ingles": "Licenciatura en Inglés",
+          pedagogia: "Pedagogía",
+        },
+      },
+      agronomia: {
+        name: "Facultad de Agronomía",
+        programas: {
+          agronomia: "Agronomía",
+          zootecnia: "Zootecnia",
+        },
+      },
+    },
+  },
+}
 
 interface ConfigFilterButtonProps {
   variant?: "nav" | "sidebar"
@@ -35,8 +198,88 @@ export default function ConfigFilterButton({
 }: ConfigFilterButtonProps) {
   const id = useId()
   const isMobile = useIsMobile()
-  const { filters, handleFilterChange, activeFiltersCount, formatLabel } =
-    useCalendarContext()
+  const [open, setOpen] = useState(false)
+  const [sedeOpen, setSedeOpen] = useState(false)
+  const [facultadOpen, setFacultadOpen] = useState(false)
+  const [programaOpen, setProgramaOpen] = useState(false)
+  const { academicFilters, setAcademicFilter } = useCalendarContext()
+
+  // Get available facultades based on selected sede
+  const availableFacultades = useMemo(() => {
+    if (!academicFilters.sede || !academicStructure[academicFilters.sede]) {
+      return {}
+    }
+    return academicStructure[academicFilters.sede].facultades
+  }, [academicFilters.sede])
+
+  // Get available programas based on selected sede and facultad
+  const availableProgramas = useMemo(() => {
+    if (!academicFilters.sede || !academicFilters.facultad) {
+      return {}
+    }
+    const sede = academicStructure[academicFilters.sede]
+    const facultad = sede?.facultades[academicFilters.facultad]
+    return facultad?.programas || {}
+  }, [academicFilters.sede, academicFilters.facultad])
+
+  // Handle sede change - reset facultad and programa when sede changes
+  const handleSedeChange = (value: string) => {
+    setAcademicFilter("sede", value)
+    // Reset dependent filters
+    if (academicFilters.facultad) {
+      setAcademicFilter("facultad", "")
+    }
+    if (academicFilters.programa) {
+      setAcademicFilter("programa", "")
+    }
+  }
+
+  // Handle facultad change - reset programa when facultad changes
+  const handleFacultadChange = (value: string) => {
+    setAcademicFilter("facultad", value)
+    // Reset dependent filter
+    if (academicFilters.programa) {
+      setAcademicFilter("programa", "")
+    }
+  }
+
+  // Handle programa change
+  const handleProgramaChange = (value: string) => {
+    setAcademicFilter("programa", value)
+  }
+
+  // Calculate active filters count
+  const activeFiltersCount =
+    Object.values(academicFilters).filter(Boolean).length
+
+  // Format labels for display
+  const formatLabel = (value: string) => {
+    return value
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+  }
+
+  // Check if configuration is complete
+  const isConfigComplete = activeFiltersCount >= 3
+
+  // Get current selection display
+  const getCurrentSelectionText = () => {
+    if (!academicFilters.sede) return "Sin configurar"
+
+    const parts = []
+    if (academicFilters.sede) {
+      parts.push(academicStructure[academicFilters.sede]?.name)
+    }
+    if (academicFilters.facultad) {
+      parts.push(availableFacultades[academicFilters.facultad]?.name)
+    }
+    if (academicFilters.programa) {
+      parts.push(availableProgramas[academicFilters.programa])
+    }
+
+    return parts.join(" • ")
+  }
 
   // Determinar si mostrar badges (solo en nav y no mobile)
   const showBadges = variant === "nav" && !isMobile
@@ -45,139 +288,301 @@ export default function ConfigFilterButton({
   const buttonSize = variant === "sidebar" ? "sm" : "sm"
   const showText = variant === "nav" && !isMobile
 
-  // Contenido común del popover
-  const renderPopoverContent = () => (
-    <PopoverContent className="w-72 p-4">
-      <div className="space-y-4">
-        <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium">
-          Establecer mi sede
-          {activeFiltersCount < 3 && (
-            <Badge
-              variant="secondary"
-              className="bg-orange-100 text-[10px] text-orange-700"
-            >
-              Requerido
-            </Badge>
-          )}
-        </div>
+  // Contenido del diálogo
+  const renderDialogContent = () => (
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <div className="bg-muted flex size-8 items-center justify-center rounded-lg">
+            <Settings2 className="size-4" />
+          </div>
+          Configuración Académica
+        </DialogTitle>
+        <DialogDescription>
+          Selecciona tu ubicación académica para personalizar tu experiencia.
+        </DialogDescription>
+      </DialogHeader>
 
-        <form>
-          <div className="space-y-4">
+      <div className="space-y-6">
+        {/* Status Section - Solo mostrar si no está completo */}
+        {!isConfigComplete && (
+          <div className="flex items-center gap-3 rounded-lg border border-dashed border-amber-200 bg-amber-50/50 p-3 dark:border-amber-600 dark:bg-amber-800/30">
+            <div className="flex size-6 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900">
+              <Settings2 className="size-3 text-amber-500 dark:text-amber-400" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-amber-600 dark:text-amber-200">
+                Configuración requerida
+              </p>
+              <p className="text-xs text-amber-500 dark:text-amber-400">
+                Completa todos los campos para personalizar tu experiencia
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Configuration Form */}
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h3 className="text-sm font-medium">Información Académica</h3>
+            <p className="text-muted-foreground text-xs">
+              Esta información se utilizará para filtrar horarios
+            </p>
+          </div>
+
+          <div className="grid gap-4">
             {/* Sede */}
             <div className="space-y-2">
-              <Label htmlFor={`${id}-sede`} className="text-sm font-medium">
+              <Label
+                htmlFor={`${id}-sede`}
+                className="flex items-center text-sm font-medium"
+              >
+                <MapPinHouse className="mr-1 size-4" />
                 Sede
               </Label>
-              <Select
-                value={filters.sede}
-                onValueChange={(value) => handleFilterChange("sede", value)}
-              >
-                <SelectTrigger id={`${id}-sede`}>
-                  <SelectValue placeholder="Seleccionar sede" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sede-central">Sede Central</SelectItem>
-                  <SelectItem value="sede-norte">Sede Norte</SelectItem>
-                  <SelectItem value="sede-sur">Sede Sur</SelectItem>
-                  <SelectItem value="sede-este">Sede Este</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover open={sedeOpen} onOpenChange={setSedeOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={sedeOpen}
+                    className={`w-full justify-between py-6 ${
+                      !academicFilters.sede
+                        ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
+                        : ""
+                    }`}
+                  >
+                    {academicFilters.sede
+                      ? academicStructure[academicFilters.sede]?.name
+                      : "Selecciona tu sede"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar sede..." />
+                    <CommandList>
+                      <CommandEmpty>No se encontró ninguna sede.</CommandEmpty>
+                      <CommandGroup>
+                        {Object.entries(academicStructure).map(
+                          ([key, sede]) => (
+                            <CommandItem
+                              key={key}
+                              value={sede.name}
+                              onSelect={() => {
+                                handleSedeChange(key)
+                                setSedeOpen(false)
+                              }}
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${
+                                  academicFilters.sede === key
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                }`}
+                              />
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">{sede.name}</span>
+                                <span className="text-muted-foreground text-xs">
+                                  {Object.keys(sede.facultades).length}{" "}
+                                  facultades disponibles
+                                </span>
+                              </div>
+                            </CommandItem>
+                          ),
+                        )}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Facultad */}
             <div className="space-y-2">
-              <Label htmlFor={`${id}-facultad`} className="text-sm font-medium">
+              <Label
+                htmlFor={`${id}-facultad`}
+                className="flex items-center text-sm font-medium"
+              >
+                <School className="mr-1 size-4" />
                 Facultad
               </Label>
-              <Select
-                value={filters.facultad}
-                onValueChange={(value) => handleFilterChange("facultad", value)}
-              >
-                <SelectTrigger id={`${id}-facultad`}>
-                  <SelectValue placeholder="Seleccionar facultad" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ingenieria">
-                    Facultad de Ingeniería
-                  </SelectItem>
-                  <SelectItem value="ciencias">Facultad de Ciencias</SelectItem>
-                  <SelectItem value="administracion">
-                    Facultad de Administración
-                  </SelectItem>
-                  <SelectItem value="ciencias-humanas">
-                    Facultad de Ciencias Humanas
-                  </SelectItem>
-                  <SelectItem value="derecho">Facultad de Derecho</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover open={facultadOpen} onOpenChange={setFacultadOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={facultadOpen}
+                    disabled={!academicFilters.sede}
+                    className={`w-full justify-between py-6 ${
+                      !academicFilters.facultad && academicFilters.sede
+                        ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
+                        : ""
+                    }`}
+                  >
+                    {academicFilters.facultad
+                      ? availableFacultades[academicFilters.facultad]?.name
+                      : !academicFilters.sede
+                        ? "Primero selecciona una sede"
+                        : "Selecciona tu facultad"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar facultad..." />
+                    <CommandList>
+                      <CommandEmpty>
+                        No se encontró ninguna facultad.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {Object.entries(availableFacultades).map(
+                          ([key, facultad]) => (
+                            <CommandItem
+                              key={key}
+                              value={facultad.name}
+                              onSelect={() => {
+                                handleFacultadChange(key)
+                                setFacultadOpen(false)
+                              }}
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${
+                                  academicFilters.facultad === key
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                }`}
+                              />
+                              <div className="flex flex-col items-start">
+                                <span className="font-medium">
+                                  {facultad.name}
+                                </span>
+                                <span className="text-muted-foreground text-xs">
+                                  {Object.keys(facultad.programas).length}{" "}
+                                  programas disponibles
+                                </span>
+                              </div>
+                            </CommandItem>
+                          ),
+                        )}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Programa */}
             <div className="space-y-2">
-              <Label htmlFor={`${id}-programa`} className="text-sm font-medium">
+              <Label
+                htmlFor={`${id}-programa`}
+                className="flex items-center text-sm font-medium"
+              >
+                <GraduationCap className="mr-1 size-4" />
                 Programa
               </Label>
-              <Select
-                value={filters.programa}
-                onValueChange={(value) => handleFilterChange("programa", value)}
-              >
-                <SelectTrigger id={`${id}-programa`}>
-                  <SelectValue placeholder="Seleccionar programa" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ingenieria-sistemas">
-                    Ingeniería de Sistemas
-                  </SelectItem>
-                  <SelectItem value="ingenieria-industrial">
-                    Ingeniería Industrial
-                  </SelectItem>
-                  <SelectItem value="administracion-empresas">
-                    Administración de Empresas
-                  </SelectItem>
-                  <SelectItem value="psicologia">Psicología</SelectItem>
-                  <SelectItem value="derecho">Derecho</SelectItem>
-                  <SelectItem value="medicina">Medicina</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover open={programaOpen} onOpenChange={setProgramaOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={programaOpen}
+                    disabled={!academicFilters.facultad}
+                    className={`w-full justify-between py-6 ${
+                      !academicFilters.programa && academicFilters.facultad
+                        ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
+                        : ""
+                    }`}
+                  >
+                    {academicFilters.programa
+                      ? availableProgramas[academicFilters.programa]
+                      : !academicFilters.facultad
+                        ? "Primero selecciona una facultad"
+                        : "Selecciona tu programa"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar programa..." />
+                    <CommandList>
+                      <CommandEmpty>
+                        No se encontró ningún programa.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {Object.entries(availableProgramas).map(
+                          ([key, programa]) => (
+                            <CommandItem
+                              key={key}
+                              value={programa}
+                              onSelect={() => {
+                                handleProgramaChange(key)
+                                setProgramaOpen(false)
+                              }}
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${
+                                  academicFilters.programa === key
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                }`}
+                              />
+                              {programa}
+                            </CommandItem>
+                          ),
+                        )}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
-        </form>
+        </div>
       </div>
-    </PopoverContent>
+
+      <DialogFooter>
+        <Button variant="outline" onClick={() => setOpen(false)}>
+          Cancelar
+        </Button>
+        <Button onClick={() => setOpen(false)} disabled={!isConfigComplete}>
+          {isConfigComplete ? "Guardar" : "Completar"}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   )
 
-  // Si es variant sidebar, usar el estilo de SidebarMenuButton
   if (variant === "sidebar") {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <Popover>
-            <PopoverTrigger asChild>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
               <SidebarMenuButton
                 size="lg"
-                className={`data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground ${
-                  activeFiltersCount < 3
-                    ? "animate-pulse border-2 border-orange-300"
+                className={
+                  !isConfigComplete
+                    ? "animate-pulse border border-dashed border-amber-300 dark:border-amber-500"
                     : ""
-                }`}
+                }
                 tooltip={
-                  activeFiltersCount < 3
-                    ? "<Configura tu ubicación académica para personalizar tu vista"
-                    : "Configuración de ubicación académica"
+                  !isConfigComplete
+                    ? "Configura tu ubicación académica"
+                    : "Configuración académica"
                 }
               >
                 <div
                   className={`relative flex aspect-square size-8 items-center justify-center rounded-lg ${
-                    activeFiltersCount < 3
-                      ? "bg-orange-500 text-white"
+                    !isConfigComplete
+                      ? "bg-amber-500 text-white dark:bg-amber-500"
                       : "bg-primary text-primary-foreground"
                   }`}
                 >
                   <MapPinHouse className="size-4" />
-                  {activeFiltersCount < 3 && (
+                  {!isConfigComplete && (
                     <Badge
                       variant="secondary"
-                      className="absolute -top-1 -right-1 min-w-4 bg-orange-200 px-1 text-[8px] text-orange-800"
+                      className="absolute -top-2 -right-2 min-w-4 animate-ping bg-amber-200 px-1 text-[8px] text-amber-600 dark:bg-amber-600 dark:text-amber-200"
                     >
                       !
                     </Badge>
@@ -185,16 +590,18 @@ export default function ConfigFilterButton({
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
-                    {activeFiltersCount < 3 ? "Establecer sede" : "Mi sede"}
+                    {!isConfigComplete ? "Establecer sede" : "Mi sede"}
                   </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    Sede, facultad y programa
+                    {isConfigComplete
+                      ? getCurrentSelectionText()
+                      : "Sede, facultad y programa"}
                   </span>
                 </div>
               </SidebarMenuButton>
-            </PopoverTrigger>
-            {renderPopoverContent()}
-          </Popover>
+            </DialogTrigger>
+            {renderDialogContent()}
+          </Dialog>
         </SidebarMenuItem>
       </SidebarMenu>
     )
@@ -202,49 +609,45 @@ export default function ConfigFilterButton({
 
   return (
     <div className="flex items-center gap-2">
-      <Popover>
-        <PopoverTrigger asChild>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
           <Button
             size={buttonSize}
-            className={`relative ${
-              activeFiltersCount < 3
-                ? "animate-pulse border-2 border-orange-300 bg-orange-400 hover:bg-orange-400/90"
+            className={
+              !isConfigComplete
+                ? "relative animate-pulse border border-dashed border-amber-300 bg-amber-500 text-white hover:bg-amber-500/90 dark:border-amber-500 dark:bg-amber-500 dark:hover:bg-amber-500/90"
                 : ""
-            }`}
-            aria-label={
-              activeFiltersCount < 3
-                ? "<Configura tu ubicación académica"
-                : "Configuración de ubicación académica"
             }
+            aria-label="Configuración académica"
           >
-            <MapPinHouse size={16} aria-hidden="true" />
-            {activeFiltersCount < 3 && (
+            <MapPinHouse size={16} />
+            {showText && "Mi sede"}
+            {!isConfigComplete && (
               <Badge
                 variant="secondary"
-                className="absolute -top-1 -right-1 min-w-4 bg-orange-200 px-1 text-[8px] text-orange-800"
+                className="absolute -top-2 -right-2 min-w-4 animate-ping bg-amber-200 px-1 text-[8px] text-amber-600 dark:bg-amber-600 dark:text-amber-200"
               >
                 !
               </Badge>
             )}
-            {showText && "Mi sede"}
           </Button>
-        </PopoverTrigger>
-        {renderPopoverContent()}
-      </Popover>
+        </DialogTrigger>
+        {renderDialogContent()}
+      </Dialog>
       {/* Active filters badges - solo en nav y no mobile */}
-      {showBadges && filters.sede && (
+      {showBadges && academicFilters.sede && (
         <Badge variant="secondary" className="text-xs">
-          {formatLabel(filters.sede)}
+          {formatLabel(academicFilters.sede)}
         </Badge>
       )}
-      {showBadges && filters.facultad && (
+      {showBadges && academicFilters.facultad && (
         <Badge variant="secondary" className="text-xs">
-          {formatLabel(filters.facultad)}
+          {formatLabel(academicFilters.facultad)}
         </Badge>
       )}
-      {showBadges && filters.programa && (
+      {showBadges && academicFilters.programa && (
         <Badge variant="secondary" className="text-xs">
-          {formatLabel(filters.programa)}
+          {formatLabel(academicFilters.programa)}
         </Badge>
       )}
     </div>

@@ -25,7 +25,10 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+import ConfigFilterButton from "@/components/config-filter-button"
+import { LoginForm } from "@/components/login-form"
 import { NavUser } from "@/components/nav-user"
+import ThemeToggle from "@/components/theme-toggle"
 import {
   Collapsible,
   CollapsibleContent,
@@ -46,10 +49,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
-
-import ConfigFilterButton from "./config-filter-button"
-import { LoginForm } from "./login-form"
-import ThemeToggle from "./theme-toggle"
 
 const data = {
   user: {

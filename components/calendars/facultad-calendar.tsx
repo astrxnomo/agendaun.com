@@ -1,17 +1,16 @@
 "use client"
 
 import { setHours, setMinutes } from "date-fns"
-import { useCallback, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
-import { useCalendarContext } from "@/components/calendar/calendar-context"
-import { EtiquettesHeader } from "@/components/calendar/etiquettes-header"
-import { useCalendarPermissions } from "@/components/calendar/permissions"
-import { SetupCalendar } from "@/components/calendar/setup-calendar"
 import {
+  EtiquettesHeader,
+  SetupCalendar,
+  useCalendarManager,
+  useCalendarPermissions,
   type CalendarEvent,
   type Etiquette,
-  type EventColor,
-} from "@/components/calendar/types"
+} from "@/components/calendar"
 
 // Eventos específicos de facultad - eventos académicos y administrativos de facultades (desde agosto 2025)
 const facultadEvents: CalendarEvent[] = [
@@ -270,85 +269,72 @@ const facultadEtiquettes: Etiquette[] = [
 ]
 
 interface FacultadCalendarProps {
+  userRole?: "admin" | "editor" | "moderator" | "user"
   editable?: boolean
 }
 
 export default function FacultadCalendar({
+  userRole = "user",
   editable = false,
 }: FacultadCalendarProps) {
-  const [events, setEvents] = useState<CalendarEvent[]>(facultadEvents)
-  const { filterEventsByAcademicFilters } = useCalendarContext()
+  const calendar = useCalendarManager("facultad")
+  const initializationExecuted = useRef(false)
 
-  // Estado local para colores visibles - comenzamos con todos los colores visibles
-  const [visibleEtiquettes, setVisibleEtiquettes] = useState<Set<EventColor>>(
-    new Set(facultadEtiquettes.map((etiquette) => etiquette.color)),
-  )
+  // Initialize etiquettes only once
+  useEffect(() => {
+    if (!initializationExecuted.current) {
+      calendar.setCalendarEtiquettes(facultadEtiquettes)
+      initializationExecuted.current = true
+    }
+  }, [calendar])
 
-  // Función para alternar visibilidad de color
-  const toggleEtiquetteVisibility = useCallback((color: string) => {
-    setVisibleEtiquettes((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(color as EventColor)) {
-        newSet.delete(color as EventColor)
-      } else {
-        newSet.add(color as EventColor)
-      }
-      return newSet
-    })
-  }, [])
+  // Calculate permissions based on user role
+  const calendarType = "facultad"
+  const permissions = useCalendarPermissions(calendarType, userRole)
 
-  // Función para verificar si un color es visible
-  const isEtiquetteVisible = useCallback(
-    (color?: string) =>
-      color ? visibleEtiquettes.has(color as EventColor) : true,
-    [visibleEtiquettes],
-  )
-
-  // Obtener permisos basados en el tipo de calendario
-  const permissions = useCalendarPermissions("facultad", "user")
-
-  // El calendario es editable si se permite explícitamente Y el usuario tiene permisos
+  // Override editable if provided via props
   const isEditable = editable && permissions.canEdit
 
-  // Filtrar eventos basado en colores visibles Y filtros académicos
+  // Filter events based on academic filters and etiquette visibility
   const visibleEvents = useMemo(() => {
-    // Primero filtrar por colores visibles
-    const colorFilteredEvents = events.filter((event) =>
-      event.color ? isEtiquetteVisible(event.color) : true,
-    )
+    return facultadEvents.filter((event) => {
+      // Apply academic filters with cumulative logic (ALL active filters must match)
+      const { sede, facultad, programa } = calendar.academicFilters
 
-    // Luego aplicar filtros académicos (sede, facultad, programa)
-    return filterEventsByAcademicFilters(colorFilteredEvents)
-  }, [events, isEtiquetteVisible, filterEventsByAcademicFilters])
+      // All active filters must match (cumulative filtering)
+      if (sede && event.sede && event.sede !== sede) return false
+      if (facultad && event.facultad && event.facultad !== facultad)
+        return false
+      if (programa && event.programa && event.programa !== programa)
+        return false
 
+      // Apply etiquette visibility
+      return calendar.isEtiquetteVisible(event.color)
+    })
+  }, [calendar])
+
+  // Event handlers
   const handleEventAdd = (event: CalendarEvent) => {
-    if (permissions.canCreate) {
-      setEvents([...events, event])
-    }
+    // TODO: Implement event addition logic
+    console.log("Adding event:", event)
   }
 
-  const handleEventUpdate = (updatedEvent: CalendarEvent) => {
-    if (permissions.canEdit) {
-      setEvents(
-        events.map((event) =>
-          event.id === updatedEvent.id ? updatedEvent : event,
-        ),
-      )
-    }
+  const handleEventUpdate = (event: CalendarEvent) => {
+    // TODO: Implement event update logic
+    console.log("Updating event:", event)
   }
 
   const handleEventDelete = (eventId: string) => {
-    if (permissions.canDelete) {
-      setEvents(events.filter((event) => event.id !== eventId))
-    }
+    // TODO: Implement event deletion logic
+    console.log("Deleting event:", eventId)
   }
 
   return (
     <>
       <EtiquettesHeader
         etiquettes={facultadEtiquettes}
-        isEtiquetteVisible={isEtiquetteVisible}
-        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
+        isEtiquetteVisible={calendar.isEtiquetteVisible}
+        toggleEtiquetteVisibility={calendar.toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}

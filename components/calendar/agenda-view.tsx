@@ -5,10 +5,12 @@ import { es } from "date-fns/locale"
 import { Calendar } from "lucide-react"
 import { useMemo } from "react"
 
-import { AgendaDaysToShow } from "./constants"
-import { EventItem } from "./event-item"
-import { type CalendarEvent } from "./types"
-import { getAgendaEventsForDay } from "./utils"
+import {
+  AgendaDaysToShow,
+  EventItem,
+  getAgendaEventsForDay,
+  type CalendarEvent,
+} from "@/components/calendar"
 
 interface AgendaViewProps {
   currentDate: Date

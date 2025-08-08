@@ -1,10 +1,7 @@
 "use client"
 
+import { getEtiquetteColor, type Etiquette } from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
-
-import { getEtiquetteColor } from "./utils"
-
-import type { Etiquette } from "./types"
 
 interface EtiquettesHeaderProps {
   etiquettes: Etiquette[]
@@ -18,7 +15,7 @@ export function EtiquettesHeader({
   toggleEtiquetteVisibility,
 }: EtiquettesHeaderProps) {
   return (
-    <div className="bg-background sticky top-0 z-10 border-b shadow-sm">
+    <div className="bg-background sticky top-12 z-30 border-b">
       <div className="scrollbar-none flex h-12 shrink-0 items-center gap-2 overflow-x-auto px-4">
         <span className="text-muted-foreground mr-2 shrink-0 text-sm font-medium">
           Etiquetas

@@ -1,15 +1,15 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
-import { EtiquettesHeader } from "@/components/calendar/etiquettes-header"
-import { useCalendarPermissions } from "@/components/calendar/permissions"
-import { SetupCalendar } from "@/components/calendar/setup-calendar"
 import {
+  EtiquettesHeader,
+  SetupCalendar,
+  useCalendarManager,
+  useCalendarPermissions,
   type CalendarEvent,
   type Etiquette,
-  type EventColor,
-} from "@/components/calendar/types"
+} from "@/components/calendar"
 
 // Eventos nacionales de Colombia - eventos oficiales del país (desde agosto 2025)
 const nationalEvents: CalendarEvent[] = [
@@ -203,71 +203,51 @@ interface NationalCalendarProps {
 export default function NationalCalendar({
   userRole = "user",
 }: NationalCalendarProps) {
-  const [events, setEvents] = useState<CalendarEvent[]>(nationalEvents)
+  const calendar = useCalendarManager("national")
+  const initializationExecuted = useRef(false)
 
-  // Estado local para colores visibles - comenzamos con todos los colores visibles
-  const [visibleEtiquettes, setVisibleEtiquettes] = useState<Set<EventColor>>(
-    new Set(nationalEtiquettes.map((etiquette) => etiquette.color)),
-  )
-
-  // Función para alternar visibilidad de color
-  const toggleEtiquetteVisibility = useCallback((color: string) => {
-    setVisibleEtiquettes((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(color as EventColor)) {
-        newSet.delete(color as EventColor)
-      } else {
-        newSet.add(color as EventColor)
-      }
-      return newSet
-    })
-  }, [])
-
-  // Función para verificar si un color es visible
-  const isEtiquetteVisible = useCallback(
-    (color?: string) =>
-      color ? visibleEtiquettes.has(color as EventColor) : true,
-    [visibleEtiquettes],
-  )
-
-  // Obtener permisos para calendario nacional
-  const permissions = useCalendarPermissions("national", userRole)
-
-  // Filtrar eventos basado en colores visibles
-  const visibleEvents = useMemo(() => {
-    return events.filter((event) =>
-      event.color ? isEtiquetteVisible(event.color) : true,
-    )
-  }, [events, isEtiquetteVisible])
-
-  const handleEventAdd = (event: CalendarEvent) => {
-    if (permissions.canCreate) {
-      setEvents([...events, event])
+  // Initialize etiquettes only once
+  useEffect(() => {
+    if (!initializationExecuted.current) {
+      calendar.setCalendarEtiquettes(nationalEtiquettes)
+      initializationExecuted.current = true
     }
+  }, [calendar])
+
+  // Calculate permissions based on user role
+  const calendarType = "national"
+  const permissions = useCalendarPermissions(calendarType, userRole)
+
+  // Filter events based on etiquette visibility (national calendar doesn't use academic filters)
+  const visibleEvents = useMemo(() => {
+    return nationalEvents.filter((event) => {
+      // Apply etiquette visibility
+      return calendar.isEtiquetteVisible(event.color)
+    })
+  }, [calendar])
+
+  // Event handlers
+  const handleEventAdd = (event: CalendarEvent) => {
+    // TODO: Implement event addition logic
+    console.log("Adding event:", event)
   }
 
-  const handleEventUpdate = (updatedEvent: CalendarEvent) => {
-    if (permissions.canEdit) {
-      setEvents(
-        events.map((event) =>
-          event.id === updatedEvent.id ? updatedEvent : event,
-        ),
-      )
-    }
+  const handleEventUpdate = (event: CalendarEvent) => {
+    // TODO: Implement event update logic
+    console.log("Updating event:", event)
   }
 
   const handleEventDelete = (eventId: string) => {
-    if (permissions.canDelete) {
-      setEvents(events.filter((event) => event.id !== eventId))
-    }
+    // TODO: Implement event deletion logic
+    console.log("Deleting event:", eventId)
   }
 
   return (
-    <div className="space-y-4">
+    <>
       <EtiquettesHeader
         etiquettes={nationalEtiquettes}
-        isEtiquetteVisible={isEtiquetteVisible}
-        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
+        isEtiquetteVisible={calendar.isEtiquetteVisible}
+        toggleEtiquetteVisibility={calendar.toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}
@@ -279,6 +259,6 @@ export default function NationalCalendar({
         permissions={permissions}
         customEtiquettes={nationalEtiquettes} // ← Pasar etiquetas específicas del calendario nacional
       />
-    </div>
+    </>
   )
 }

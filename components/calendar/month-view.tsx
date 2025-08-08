@@ -16,6 +16,17 @@ import { es } from "date-fns/locale"
 import React, { useEffect, useMemo, useState } from "react"
 
 import {
+  DraggableEvent,
+  DroppableCell,
+  EventItem,
+  getAllEventsForDay,
+  getEventsForDay,
+  getSpanningEventsForDay,
+  sortEvents,
+  useEventVisibility,
+  type CalendarEvent,
+} from "@/components/calendar"
+import {
   DefaultStartHour,
   EventGap,
   EventHeight,
@@ -25,18 +36,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-
-import { DraggableEvent } from "./draggable-event"
-import { DroppableCell } from "./droppable-cell"
-import { EventItem } from "./event-item"
-import { useEventVisibility } from "./hooks/use-event-visibility"
-import { type CalendarEvent } from "./types"
-import {
-  getAllEventsForDay,
-  getEventsForDay,
-  getSpanningEventsForDay,
-  sortEvents,
-} from "./utils"
 
 interface MonthViewProps {
   currentDate: Date

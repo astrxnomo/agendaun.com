@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment } from "react"
+import { Fragment, type ReactNode } from "react"
 
 import { NavActions } from "@/components/nav-actions"
 import {
@@ -20,9 +20,10 @@ interface BreadcrumbItem {
 
 interface PageHeaderProps {
   breadcrumbs: BreadcrumbItem[]
+  action?: ReactNode
 }
 
-export function PageHeader({ breadcrumbs }: PageHeaderProps) {
+export function PageHeader({ breadcrumbs, action }: PageHeaderProps) {
   const currentPage = breadcrumbs.find((item) => item.isCurrentPage)
 
   return (
@@ -53,7 +54,10 @@ export function PageHeader({ breadcrumbs }: PageHeaderProps) {
           ))}
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="ml-auto px-3">
+      {action && (
+        <div className="ml-auto flex items-center gap-3">{action}</div>
+      )}
+      <div className={`${action ? "" : "ml-auto"} px-3`}>
         <NavActions />
       </div>
     </header>

@@ -1,15 +1,17 @@
 "use client"
 
 import { setHours, setMinutes } from "date-fns"
-import { useMemo } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
-import { EtiquettesHeader } from "@/components/calendar/etiquettes-header"
-import { useAcademicFilters } from "@/components/calendar/hooks/use-academic-filters"
-import { useCalendarEvents } from "@/components/calendar/hooks/use-calendar-events"
-import { useCalendarFilters } from "@/components/calendar/hooks/use-calendar-filters"
-import { useCalendarPermissions } from "@/components/calendar/permissions"
-import { SetupCalendar } from "@/components/calendar/setup-calendar"
-import { type CalendarEvent, type Etiquette } from "@/components/calendar/types"
+import {
+  type CalendarEvent,
+  type Etiquette,
+  EtiquettesHeader,
+  SetupCalendar,
+  type UserRole,
+  useCalendarManager,
+  useCalendarPermissions,
+} from "@/components/calendar"
 
 // Etiquetas específicas para el calendario de sede
 export const sedeEtiquettes: Etiquette[] = [
@@ -187,54 +189,69 @@ const sedeEvents: CalendarEvent[] = [
 ]
 
 interface SedeCalendarProps {
-  userRole?: "admin" | "editor" | "moderator" | "user"
+  userRole?: UserRole
   sedeName?: string
 }
 
 export default function SedeCalendar({ userRole = "user" }: SedeCalendarProps) {
-  // 1. Eventos
-  const { events, addEvent, updateEvent, deleteEvent } =
-    useCalendarEvents(sedeEvents)
-
-  // 2. Filtros académicos PRIMERO
-  const { filterEventsByAcademicFilters } = useAcademicFilters()
-  const academicFilteredEvents = useMemo(() => {
-    return filterEventsByAcademicFilters(events)
-  }, [events, filterEventsByAcademicFilters])
-
-  // 3. Filtros de etiquetas DESPUÉS (con eventos ya filtrados)
-  const { visibleEvents, toggleEtiquetteVisibility, isEtiquetteVisible } =
-    useCalendarFilters({
-      etiquettes: sedeEtiquettes,
-      events: academicFilteredEvents,
-    })
-
+  const [events, setEvents] = useState<CalendarEvent[]>(sedeEvents)
+  const calendarManager = useCalendarManager("sede")
   const permissions = useCalendarPermissions("department", userRole)
 
-  const handleEventAdd = (event: CalendarEvent) => {
-    if (permissions.canCreate) {
-      addEvent(event)
+  // Initialize etiquettes for this calendar only once using useEffect
+  const etiquettesInitialized = useRef(false)
+
+  useEffect(() => {
+    if (!etiquettesInitialized.current) {
+      calendarManager.setCalendarEtiquettes(sedeEtiquettes)
+      etiquettesInitialized.current = true
     }
+  }, [calendarManager])
+
+  // Filter events based on visible colors and academic filters
+  const visibleEvents = useMemo(() => {
+    return events.filter((event) => {
+      // Check etiquette visibility
+      if (!calendarManager.isEtiquetteVisible(event.color)) {
+        return false
+      }
+
+      // Apply academic filters with cumulative logic (ALL active filters must match)
+      const { sede, facultad, programa } = calendarManager.academicFilters
+
+      // All active filters must match (cumulative filtering)
+      if (sede && event.sede && event.sede !== sede) return false
+      if (facultad && event.facultad && event.facultad !== facultad)
+        return false
+      if (programa && event.programa && event.programa !== programa)
+        return false
+
+      return true
+    })
+  }, [events, calendarManager])
+
+  const handleEventAdd = (event: CalendarEvent) => {
+    setEvents([...events, event])
   }
 
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
-    if (permissions.canEdit) {
-      updateEvent(updatedEvent.id, updatedEvent)
-    }
+    setEvents(
+      events.map((event) =>
+        event.id === updatedEvent.id ? updatedEvent : event,
+      ),
+    )
   }
 
   const handleEventDelete = (eventId: string) => {
-    if (permissions.canDelete) {
-      deleteEvent(eventId)
-    }
+    setEvents(events.filter((event) => event.id !== eventId))
   }
 
   return (
     <>
       <EtiquettesHeader
         etiquettes={sedeEtiquettes}
-        isEtiquetteVisible={isEtiquetteVisible}
-        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
+        isEtiquetteVisible={calendarManager.isEtiquetteVisible}
+        toggleEtiquetteVisibility={calendarManager.toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}
@@ -242,7 +259,7 @@ export default function SedeCalendar({ userRole = "user" }: SedeCalendarProps) {
         onEventUpdate={handleEventUpdate}
         onEventDelete={handleEventDelete}
         initialView="month"
-        editable={false}
+        editable={permissions.canEdit}
         permissions={permissions}
         customEtiquettes={sedeEtiquettes}
       />

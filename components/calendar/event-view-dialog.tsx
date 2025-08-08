@@ -4,6 +4,11 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar1, Clock, MapPin } from "lucide-react"
 
+import {
+  getEtiquetteColor,
+  type CalendarEvent,
+  type Etiquette,
+} from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,10 +20,6 @@ import {
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
-
-import { getEtiquetteColor } from "./utils"
-
-import type { CalendarEvent, Etiquette } from "@/components/calendar/types"
 
 interface EventViewDialogProps {
   event: CalendarEvent | null

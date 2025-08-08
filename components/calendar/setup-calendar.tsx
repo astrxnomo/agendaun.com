@@ -22,6 +22,25 @@ import {
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import {
+  addHoursToDate,
+  AgendaDaysToShow,
+  AgendaView,
+  CalendarDndProvider,
+  DayView,
+  EventDialog,
+  EventGap,
+  EventHeight,
+  EventViewDialog,
+  MonthView,
+  useCalendarContext,
+  WeekCellsHeight,
+  WeekView,
+  type CalendarEvent,
+  type CalendarPermissions,
+  type CalendarView,
+  type Etiquette,
+} from "@/components/calendar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -31,24 +50,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-
-import { AgendaView } from "./agenda-view"
-import { useCalendarContext } from "./calendar-context"
-import { CalendarDndProvider } from "./calendar-dnd-context"
-import {
-  AgendaDaysToShow,
-  EventGap,
-  EventHeight,
-  WeekCellsHeight,
-} from "./constants"
-import { DayView } from "./day-view"
-import { EventDialog } from "./event-dialog"
-import { EventViewDialog } from "./event-view-dialog"
-import { MonthView } from "./month-view"
-import { type CalendarPermissions } from "./permissions"
-import { type CalendarEvent, type CalendarView, type Etiquette } from "./types"
-import { addHoursToDate } from "./utils"
-import { WeekView } from "./week-view"
 
 export interface EventCalendarProps {
   events?: CalendarEvent[]

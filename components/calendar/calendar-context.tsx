@@ -8,27 +8,44 @@ import {
   type ReactNode,
 } from "react"
 
-import { type CalendarEvent } from "./types"
+import type { Etiquette } from "@/components/calendar"
 
-interface Filters {
+// Tipos para filtros académicos
+export interface AcademicFilters {
   sede: string
   facultad: string
   programa: string
 }
 
+// Tipo para identificar calendarios
+export type CalendarId =
+  | "personal"
+  | "national"
+  | "sede"
+  | "facultad"
+  | "programa"
+
 interface CalendarContextType {
-  // Date management - shared across all calendars
+  // Date management
   currentDate: Date
   setCurrentDate: (date: Date) => void
 
-  // Academic filters - used by institutional calendars only
-  filters: Filters
-  setFilters: (filters: Filters) => void
-  handleFilterChange: (type: string, value: string) => void
-  clearFilters: () => void
-  activeFiltersCount: number
-  formatLabel: (value: string) => string
-  filterEventsByAcademicFilters: (events: CalendarEvent[]) => CalendarEvent[]
+  // Etiquette visibility management per calendar
+  visibleEtiquettes: Record<CalendarId, string[]>
+  toggleEtiquetteVisibility: (calendarId: CalendarId, color: string) => void
+  isEtiquetteVisible: (
+    calendarId: CalendarId,
+    color: string | undefined,
+  ) => boolean
+  setCalendarEtiquettes: (
+    calendarId: CalendarId,
+    etiquettes: Etiquette[],
+  ) => void
+
+  // Academic filters (shared across calendars)
+  academicFilters: AcademicFilters
+  setAcademicFilter: (filterType: keyof AcademicFilters, value: string) => void
+  clearAcademicFilters: () => void
 }
 
 const CalendarContext = createContext<CalendarContextType | undefined>(
@@ -49,98 +66,102 @@ interface CalendarProviderProps {
 
 export function CalendarProvider({ children }: CalendarProviderProps) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
-  const [filters, setFilters] = useState<Filters>({
+
+  // Initialize visibleEtiquettes per calendar (empty by default)
+  const [visibleEtiquettes, setVisibleEtiquettes] = useState<
+    Record<CalendarId, string[]>
+  >({
+    personal: [],
+    national: [],
+    sede: [],
+    facultad: [],
+    programa: [],
+  })
+
+  // Initialize academic filters
+  const [academicFilters, setAcademicFilters] = useState<AcademicFilters>({
     sede: "",
     facultad: "",
     programa: "",
   })
 
-  const handleFilterChange = (type: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [type]: value }))
-  }
+  // Set calendar etiquettes and initialize visibility based on isActive
+  const setCalendarEtiquettes = useCallback(
+    (calendarId: CalendarId, etiquettes: Etiquette[]) => {
+      const activeColors = etiquettes
+        .filter((etiquette) => etiquette.isActive)
+        .map((etiquette) => etiquette.color)
 
-  const clearFilters = () => {
-    setFilters({ sede: "", facultad: "", programa: "" })
-  }
+      setVisibleEtiquettes((prev) => ({
+        ...prev,
+        [calendarId]: activeColors,
+      }))
+    },
+    [],
+  )
 
-  const activeFiltersCount = Object.values(filters).filter(Boolean).length
+  // Toggle visibility of a color for a specific calendar
+  const toggleEtiquetteVisibility = useCallback(
+    (calendarId: CalendarId, color: string) => {
+      setVisibleEtiquettes((prev) => {
+        const currentCalendarEtiquettes = prev[calendarId] || []
 
-  const formatLabel = (value: string) => {
-    return value.replace("-", " ").replace(/\b\w/g, (l) => l.toUpperCase())
-  }
-
-  // Filter events by academic filters (sede, facultad, programa)
-  const filterEventsByAcademicFilters = useCallback(
-    (events: CalendarEvent[]) => {
-      return events.filter((event) => {
-        // NIVEL NACIONAL: Si no hay filtros activos, mostrar todos los eventos
-        if (!filters.sede && !filters.facultad && !filters.programa) {
-          return true
+        if (currentCalendarEtiquettes.includes(color)) {
+          return {
+            ...prev,
+            [calendarId]: currentCalendarEtiquettes.filter((c) => c !== color),
+          }
+        } else {
+          return {
+            ...prev,
+            [calendarId]: [...currentCalendarEtiquettes, color],
+          }
         }
-
-        // NIVEL SEDE: Si solo hay filtro de sede, mostrar eventos de esa sede
-        if (filters.sede && !filters.facultad && !filters.programa) {
-          // Mostrar eventos que pertenecen a esta sede
-          // También incluir eventos sin sede específica (eventos nacionales que aplican a todas las sedes)
-          return !event.sede || event.sede === filters.sede
-        }
-
-        // NIVEL FACULTAD: Si hay sede y facultad, mostrar eventos de esa facultad
-        if (filters.sede && filters.facultad && !filters.programa) {
-          // Si el evento no tiene sede, debe mostrarse (es nacional)
-          if (!event.sede) return true
-          // Si tiene sede, debe coincidir con la sede filtrada
-          if (event.sede !== filters.sede) return false
-
-          // Si el evento no tiene facultad, debe mostrarse (es de toda la sede)
-          if (!event.facultad) return true
-          // Si tiene facultad, debe coincidir con la facultad filtrada
-          return event.facultad === filters.facultad
-        }
-
-        // NIVEL PROGRAMA: Si hay sede, facultad y programa, mostrar eventos específicos del programa
-        if (filters.sede && filters.facultad && filters.programa) {
-          // Si el evento no tiene sede, debe mostrarse (es nacional)
-          if (!event.sede) return true
-          // Si tiene sede, debe coincidir con la sede filtrada
-          if (event.sede !== filters.sede) return false
-
-          // Si el evento no tiene facultad, debe mostrarse (es de toda la sede)
-          if (!event.facultad) return true
-          // Si tiene facultad, debe coincidir con la facultad filtrada
-          if (event.facultad !== filters.facultad) return false
-
-          // Si el evento no tiene programa, debe mostrarse (es de toda la facultad)
-          if (!event.programa) return true
-          // Si tiene programa, debe coincidir con el programa filtrado
-          return event.programa === filters.programa
-        }
-
-        // Casos edge: filtros parciales incompletos
-        if (filters.facultad && !filters.sede) {
-          return !event.facultad || event.facultad === filters.facultad
-        }
-
-        if (filters.programa && !filters.facultad) {
-          return !event.programa || event.programa === filters.programa
-        }
-
-        return true
       })
     },
-    [filters],
+    [],
   )
+
+  // Check if a color is visible for a specific calendar
+  const isEtiquetteVisible = useCallback(
+    (calendarId: CalendarId, color: string | undefined) => {
+      if (!color) return true // Events without a color are always visible
+      const calendarEtiquettes = visibleEtiquettes[calendarId] || []
+      return calendarEtiquettes.includes(color)
+    },
+    [visibleEtiquettes],
+  )
+
+  // Set individual academic filter
+  const setAcademicFilter = useCallback(
+    (filterType: keyof AcademicFilters, value: string) => {
+      setAcademicFilters((prev) => ({
+        ...prev,
+        [filterType]: value,
+      }))
+    },
+    [],
+  )
+
+  // Clear all academic filters
+  const clearAcademicFilters = useCallback(() => {
+    setAcademicFilters({
+      sede: "",
+      facultad: "",
+      programa: "",
+    })
+  }, [])
 
   const value = {
     currentDate,
     setCurrentDate,
-    filters,
-    setFilters,
-    handleFilterChange,
-    clearFilters,
-    activeFiltersCount,
-    formatLabel,
-    filterEventsByAcademicFilters,
+    visibleEtiquettes,
+    toggleEtiquetteVisibility,
+    isEtiquetteVisible,
+    setCalendarEtiquettes,
+    academicFilters,
+    setAcademicFilter,
+    clearAcademicFilters,
   }
 
   return (

@@ -15,18 +15,19 @@ import { es } from "date-fns/locale"
 import React, { useMemo } from "react"
 
 import {
+  DraggableEvent,
+  DroppableCell,
+  EventItem,
+  isMultiDayEvent,
+  useCurrentTimeIndicator,
+  type CalendarEvent,
+} from "@/components/calendar"
+import {
   EndHour,
   StartHour,
   WeekCellsHeight,
 } from "@/components/calendar/constants"
 import { cn } from "@/lib/utils"
-
-import { DraggableEvent } from "./draggable-event"
-import { DroppableCell } from "./droppable-cell"
-import { EventItem } from "./event-item"
-import { useCurrentTimeIndicator } from "./hooks/use-current-time-indicator"
-import { type CalendarEvent } from "./types"
-import { isMultiDayEvent } from "./utils"
 
 interface DayViewProps {
   currentDate: Date

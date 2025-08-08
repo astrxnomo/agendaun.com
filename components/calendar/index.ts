@@ -3,14 +3,17 @@
 // Component exports
 export { AgendaView } from "./agenda-view"
 export { CalendarDndProvider, useCalendarDnd } from "./calendar-dnd-context"
+export { useCalendarPermissions } from "./calendar-permissions"
 export { DayView } from "./day-view"
 export { DraggableEvent } from "./draggable-event"
 export { DroppableCell } from "./droppable-cell"
+export { EtiquettesHeader } from "./etiquettes-header"
 export { EventDialog } from "./event-dialog"
 export { EventItem } from "./event-item"
+export { EventViewDialog } from "./event-view-dialog"
 export { EventsPopup } from "./events-popup"
 export { MonthView } from "./month-view"
-export { SetupCalendar as EventCalendar } from "./setup-calendar"
+export { SetupCalendar } from "./setup-calendar"
 export { WeekView } from "./week-view"
 
 // Constants and utility exports
@@ -18,8 +21,22 @@ export * from "./constants"
 export * from "./utils"
 
 // Hook exports
+export * from "@/components/calendar/calendar-context"
+export * from "@/components/calendar/hooks/use-calendar-manager"
 export * from "@/components/calendar/hooks/use-current-time-indicator"
 export * from "@/components/calendar/hooks/use-event-visibility"
 
 // Type exports
-export type { CalendarEvent, CalendarView, EventColor } from "./types"
+export type {
+  CalendarEvent,
+  CalendarView,
+  Etiquette,
+  EventColor,
+} from "./types"
+
+export type {
+  CalendarPermissions,
+  CalendarType,
+  UserPermissions,
+  UserRole,
+} from "./calendar-permissions"

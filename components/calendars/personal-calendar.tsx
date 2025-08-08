@@ -1,18 +1,18 @@
 "use client"
 
 import { addDays, getDay, setHours, setMinutes } from "date-fns"
+import { useEffect, useMemo, useRef, useState } from "react"
 
-import { useCalendarEvents } from "@/components/calendar/hooks/use-calendar-events"
-import { useCalendarFilters } from "@/components/calendar/hooks/use-calendar-filters"
 import {
+  type CalendarEvent,
   type CalendarType,
+  type Etiquette,
+  EtiquettesHeader,
+  SetupCalendar,
   type UserRole,
+  useCalendarManager,
   useCalendarPermissions,
-} from "@/components/calendar/permissions"
-import { SetupCalendar } from "@/components/calendar/setup-calendar"
-import { type CalendarEvent, type Etiquette } from "@/components/calendar/types"
-
-import { EtiquettesHeader } from "../calendar/etiquettes-header"
+} from "@/components/calendar"
 
 // Función para calcular días hasta el próximo lunes
 const getDaysUntilNextMonday = (date: Date) => {
@@ -222,42 +222,49 @@ export default function PersonalCalendar({
   calendarType = "personal",
   userRole = "user",
 }: PersonalCalendarProps) {
-  const { events, addEvent, updateEvent, deleteEvent } =
-    useCalendarEvents(personalEvents)
-
-  const { visibleEvents, toggleEtiquetteVisibility, isEtiquetteVisible } =
-    useCalendarFilters({
-      etiquettes: personalEtiquettes,
-      events,
-    })
-
+  const [events, setEvents] = useState<CalendarEvent[]>(personalEvents)
+  const calendarManager = useCalendarManager("personal")
   const permissions = useCalendarPermissions(calendarType, userRole)
-  const isEditable = editable && permissions.canEdit
+
+  // Initialize etiquettes for this calendar only once using useEffect
+  const etiquettesInitialized = useRef(false)
+
+  useEffect(() => {
+    if (!etiquettesInitialized.current) {
+      calendarManager.setCalendarEtiquettes(personalEtiquettes)
+      etiquettesInitialized.current = true
+    }
+  }, [calendarManager])
+
+  // Filter events based on visible colors
+  const visibleEvents = useMemo(() => {
+    return events.filter((event) =>
+      calendarManager.isEtiquetteVisible(event.color),
+    )
+  }, [events, calendarManager])
 
   const handleEventAdd = (event: CalendarEvent) => {
-    if (permissions.canCreate) {
-      addEvent(event)
-    }
+    setEvents([...events, event])
   }
 
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
-    if (permissions.canEdit) {
-      updateEvent(updatedEvent.id, updatedEvent)
-    }
+    setEvents(
+      events.map((event) =>
+        event.id === updatedEvent.id ? updatedEvent : event,
+      ),
+    )
   }
 
   const handleEventDelete = (eventId: string) => {
-    if (permissions.canDelete) {
-      deleteEvent(eventId)
-    }
+    setEvents(events.filter((event) => event.id !== eventId))
   }
 
   return (
     <>
       <EtiquettesHeader
         etiquettes={personalEtiquettes}
-        isEtiquetteVisible={isEtiquetteVisible}
-        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
+        isEtiquetteVisible={calendarManager.isEtiquetteVisible}
+        toggleEtiquetteVisibility={calendarManager.toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}
@@ -265,7 +272,7 @@ export default function PersonalCalendar({
         onEventUpdate={handleEventUpdate}
         onEventDelete={handleEventDelete}
         initialView="week"
-        editable={isEditable}
+        editable={editable}
         permissions={permissions}
         customEtiquettes={personalEtiquettes}
       />

@@ -5,6 +5,7 @@ import { es } from "date-fns/locale"
 import { Calendar1, Trash } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
+import { getEtiquetteIndicatorColor } from "@/components/calendar"
 import {
   DefaultEndHour,
   DefaultStartHour,
@@ -40,8 +41,6 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-
-import { getEtiquetteIndicatorColor } from "./utils"
 
 interface EventDialogProps {
   event: CalendarEvent | null

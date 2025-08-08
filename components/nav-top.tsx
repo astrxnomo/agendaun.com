@@ -1,7 +1,7 @@
-import ConfigFilterButton from "./config-filter-button"
-import Notifications from "./notifications-button"
-import Search from "./search-dialog"
-import { SidebarTrigger } from "./ui/sidebar"
+import ConfigFilterButton from "@/components/config-filter-button"
+import Notifications from "@/components/notifications-button"
+import Search from "@/components/search-dialog"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 export default function NavSearch() {
   return (

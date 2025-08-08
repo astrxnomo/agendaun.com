@@ -1,17 +1,16 @@
 "use client"
 
 import { addDays, setHours, setMinutes } from "date-fns"
-import { useCallback, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
-import { useCalendarContext } from "@/components/calendar/calendar-context"
-import { EtiquettesHeader } from "@/components/calendar/etiquettes-header"
-import { useCalendarPermissions } from "@/components/calendar/permissions"
-import { SetupCalendar } from "@/components/calendar/setup-calendar"
 import {
+  EtiquettesHeader,
+  SetupCalendar,
+  useCalendarManager,
+  useCalendarPermissions,
   type CalendarEvent,
   type Etiquette,
-  type EventColor,
-} from "@/components/calendar/types"
+} from "@/components/calendar"
 
 // Función para calcular días hasta el próximo lunes
 const getDaysUntilNextMonday = (date: Date) => {
@@ -280,76 +279,61 @@ interface ProgramaCalendarProps {
 export default function ProgramaCalendar({
   userRole = "user",
 }: ProgramaCalendarProps) {
-  const [events, setEvents] = useState<CalendarEvent[]>(programaEvents)
-  const { filterEventsByAcademicFilters } = useCalendarContext()
+  const calendar = useCalendarManager("programa")
+  const initializationExecuted = useRef(false)
 
-  // Estado local para colores visibles - comenzamos con todos los colores visibles
-  const [visibleEtiquettes, setVisibleEtiquettes] = useState<Set<EventColor>>(
-    new Set(programaEtiquettes.map((etiquette) => etiquette.color)),
-  )
-
-  // Función para alternar visibilidad de color
-  const toggleEtiquetteVisibility = useCallback((color: string) => {
-    setVisibleEtiquettes((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(color as EventColor)) {
-        newSet.delete(color as EventColor)
-      } else {
-        newSet.add(color as EventColor)
-      }
-      return newSet
-    })
-  }, [])
-
-  // Función para verificar si un color es visible
-  const isEtiquetteVisible = useCallback(
-    (color?: string) =>
-      color ? visibleEtiquettes.has(color as EventColor) : true,
-    [visibleEtiquettes],
-  )
-
-  // Obtener permisos para calendario de programa
-  const permissions = useCalendarPermissions("personal", userRole)
-
-  // Filtrar eventos basado en colores visibles Y filtros académicos
-  const visibleEvents = useMemo(() => {
-    // Primero filtrar por colores visibles
-    const colorFilteredEvents = events.filter((event) =>
-      event.color ? isEtiquetteVisible(event.color) : true,
-    )
-
-    // Luego aplicar filtros académicos (sede, facultad, programa)
-    return filterEventsByAcademicFilters(colorFilteredEvents)
-  }, [events, isEtiquetteVisible, filterEventsByAcademicFilters])
-
-  const handleEventAdd = (event: CalendarEvent) => {
-    if (permissions.canCreate) {
-      setEvents([...events, event])
+  // Initialize etiquettes only once
+  useEffect(() => {
+    if (!initializationExecuted.current) {
+      calendar.setCalendarEtiquettes(programaEtiquettes)
+      initializationExecuted.current = true
     }
+  }, [calendar])
+
+  // Calculate permissions based on user role
+  const calendarType = "facultad" // programa uses facultad type permissions
+  const permissions = useCalendarPermissions(calendarType, userRole)
+
+  // Filter events based on academic filters and etiquette visibility
+  const visibleEvents = useMemo(() => {
+    return programaEvents.filter((event) => {
+      // Apply academic filters with cumulative logic (ALL active filters must match)
+      const { sede, facultad, programa } = calendar.academicFilters
+
+      // All active filters must match (cumulative filtering)
+      if (sede && event.sede && event.sede !== sede) return false
+      if (facultad && event.facultad && event.facultad !== facultad)
+        return false
+      if (programa && event.programa && event.programa !== programa)
+        return false
+
+      // Apply etiquette visibility
+      return calendar.isEtiquetteVisible(event.color)
+    })
+  }, [calendar])
+
+  // Event handlers
+  const handleEventAdd = (event: CalendarEvent) => {
+    // TODO: Implement event addition logic
+    console.log("Adding event:", event)
   }
 
-  const handleEventUpdate = (updatedEvent: CalendarEvent) => {
-    if (permissions.canEdit) {
-      setEvents(
-        events.map((event) =>
-          event.id === updatedEvent.id ? updatedEvent : event,
-        ),
-      )
-    }
+  const handleEventUpdate = (event: CalendarEvent) => {
+    // TODO: Implement event update logic
+    console.log("Updating event:", event)
   }
 
   const handleEventDelete = (eventId: string) => {
-    if (permissions.canDelete) {
-      setEvents(events.filter((event) => event.id !== eventId))
-    }
+    // TODO: Implement event deletion logic
+    console.log("Deleting event:", eventId)
   }
 
   return (
     <>
       <EtiquettesHeader
         etiquettes={programaEtiquettes}
-        isEtiquetteVisible={isEtiquetteVisible}
-        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
+        isEtiquetteVisible={calendar.isEtiquetteVisible}
+        toggleEtiquetteVisibility={calendar.toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}
