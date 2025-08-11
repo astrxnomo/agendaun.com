@@ -1,6 +1,8 @@
 import ConfigFilterButton from "@/components/config-filter-button"
-import Notifications from "@/components/notifications-button"
 import Search from "@/components/search-dialog"
+
+import Notifications from "./notifications-button"
+import ThemeToggle from "./theme-toggle"
 
 export default function NavSearch() {
   return (
@@ -20,6 +22,8 @@ export default function NavSearch() {
         {/* Right side */}
         <div className="flex flex-1 items-center justify-end gap-2">
           <Notifications />
+
+          <ThemeToggle />
         </div>
       </div>
     </header>

@@ -299,244 +299,216 @@ export default function ConfigFilterButton({
           Configuración Académica
         </DialogTitle>
         <DialogDescription>
-          Selecciona tu ubicación académica para personalizar tu experiencia.
+          Configura tu sede, facultad y programa para personalizar tu
+          experiencia. Esto te permitirá acceder a horarios y eventos relevantes
+          para ti.
         </DialogDescription>
       </DialogHeader>
 
       <div className="space-y-6">
-        {/* Status Section - Solo mostrar si no está completo */}
-        {!isConfigComplete && (
-          <div className="flex items-center gap-3 rounded-lg border border-dashed border-amber-200 bg-amber-50/50 p-3 dark:border-amber-600 dark:bg-amber-800/30">
-            <div className="flex size-6 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900">
-              <Settings2 className="size-3 text-amber-500 dark:text-amber-400" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-amber-600 dark:text-amber-200">
-                Configuración requerida
-              </p>
-              <p className="text-xs text-amber-500 dark:text-amber-400">
-                Completa todos los campos para personalizar tu experiencia
-              </p>
-            </div>
-          </div>
-        )}
-
         {/* Configuration Form */}
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium">Información Académica</h3>
-            <p className="text-muted-foreground text-xs">
-              Esta información se utilizará para filtrar horarios
-            </p>
+        <div className="grid gap-4">
+          {/* Sede */}
+          <div className="space-y-2">
+            <Label
+              htmlFor={`${id}-sede`}
+              className="flex items-center text-sm font-medium"
+            >
+              <MapPinHouse className="mr-1 size-4" />
+              Sede
+            </Label>
+            <Popover open={sedeOpen} onOpenChange={setSedeOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={sedeOpen}
+                  className={`w-full justify-between py-6 ${
+                    !academicFilters.sede
+                      ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
+                      : ""
+                  }`}
+                >
+                  {academicFilters.sede
+                    ? academicStructure[academicFilters.sede]?.name
+                    : "Selecciona tu sede"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Buscar sede..." />
+                  <CommandList>
+                    <CommandEmpty>No se encontró ninguna sede.</CommandEmpty>
+                    <CommandGroup>
+                      {Object.entries(academicStructure).map(([key, sede]) => (
+                        <CommandItem
+                          key={key}
+                          value={sede.name}
+                          onSelect={() => {
+                            handleSedeChange(key)
+                            setSedeOpen(false)
+                          }}
+                        >
+                          <Check
+                            className={`mr-2 h-4 w-4 ${
+                              academicFilters.sede === key
+                                ? "opacity-100"
+                                : "opacity-0"
+                            }`}
+                          />
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">{sede.name}</span>
+                            <span className="text-muted-foreground text-xs">
+                              {Object.keys(sede.facultades).length} facultades
+                              disponibles
+                            </span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
-          <div className="grid gap-4">
-            {/* Sede */}
-            <div className="space-y-2">
-              <Label
-                htmlFor={`${id}-sede`}
-                className="flex items-center text-sm font-medium"
-              >
-                <MapPinHouse className="mr-1 size-4" />
-                Sede
-              </Label>
-              <Popover open={sedeOpen} onOpenChange={setSedeOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={sedeOpen}
-                    className={`w-full justify-between py-6 ${
-                      !academicFilters.sede
-                        ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
-                        : ""
-                    }`}
-                  >
-                    {academicFilters.sede
-                      ? academicStructure[academicFilters.sede]?.name
-                      : "Selecciona tu sede"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Buscar sede..." />
-                    <CommandList>
-                      <CommandEmpty>No se encontró ninguna sede.</CommandEmpty>
-                      <CommandGroup>
-                        {Object.entries(academicStructure).map(
-                          ([key, sede]) => (
-                            <CommandItem
-                              key={key}
-                              value={sede.name}
-                              onSelect={() => {
-                                handleSedeChange(key)
-                                setSedeOpen(false)
-                              }}
-                            >
-                              <Check
-                                className={`mr-2 h-4 w-4 ${
-                                  academicFilters.sede === key
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                }`}
-                              />
-                              <div className="flex flex-col items-start">
-                                <span className="font-medium">{sede.name}</span>
-                                <span className="text-muted-foreground text-xs">
-                                  {Object.keys(sede.facultades).length}{" "}
-                                  facultades disponibles
-                                </span>
-                              </div>
-                            </CommandItem>
-                          ),
-                        )}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
+          {/* Facultad */}
+          <div className="space-y-2">
+            <Label
+              htmlFor={`${id}-facultad`}
+              className="flex items-center text-sm font-medium"
+            >
+              <School className="mr-1 size-4" />
+              Facultad
+            </Label>
+            <Popover open={facultadOpen} onOpenChange={setFacultadOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={facultadOpen}
+                  disabled={!academicFilters.sede}
+                  className={`w-full justify-between py-6 ${
+                    !academicFilters.facultad && academicFilters.sede
+                      ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
+                      : ""
+                  }`}
+                >
+                  {academicFilters.facultad
+                    ? availableFacultades[academicFilters.facultad]?.name
+                    : !academicFilters.sede
+                      ? "Primero selecciona una sede"
+                      : "Selecciona tu facultad"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Buscar facultad..." />
+                  <CommandList>
+                    <CommandEmpty>
+                      No se encontró ninguna facultad.
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {Object.entries(availableFacultades).map(
+                        ([key, facultad]) => (
+                          <CommandItem
+                            key={key}
+                            value={facultad.name}
+                            onSelect={() => {
+                              handleFacultadChange(key)
+                              setFacultadOpen(false)
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                academicFilters.facultad === key
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              }`}
+                            />
+                            <div className="flex flex-col items-start">
+                              <span className="font-medium">
+                                {facultad.name}
+                              </span>
+                              <span className="text-muted-foreground text-xs">
+                                {Object.keys(facultad.programas).length}{" "}
+                                programas disponibles
+                              </span>
+                            </div>
+                          </CommandItem>
+                        ),
+                      )}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
 
-            {/* Facultad */}
-            <div className="space-y-2">
-              <Label
-                htmlFor={`${id}-facultad`}
-                className="flex items-center text-sm font-medium"
-              >
-                <School className="mr-1 size-4" />
-                Facultad
-              </Label>
-              <Popover open={facultadOpen} onOpenChange={setFacultadOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={facultadOpen}
-                    disabled={!academicFilters.sede}
-                    className={`w-full justify-between py-6 ${
-                      !academicFilters.facultad && academicFilters.sede
-                        ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
-                        : ""
-                    }`}
-                  >
-                    {academicFilters.facultad
-                      ? availableFacultades[academicFilters.facultad]?.name
-                      : !academicFilters.sede
-                        ? "Primero selecciona una sede"
-                        : "Selecciona tu facultad"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Buscar facultad..." />
-                    <CommandList>
-                      <CommandEmpty>
-                        No se encontró ninguna facultad.
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {Object.entries(availableFacultades).map(
-                          ([key, facultad]) => (
-                            <CommandItem
-                              key={key}
-                              value={facultad.name}
-                              onSelect={() => {
-                                handleFacultadChange(key)
-                                setFacultadOpen(false)
-                              }}
-                            >
-                              <Check
-                                className={`mr-2 h-4 w-4 ${
-                                  academicFilters.facultad === key
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                }`}
-                              />
-                              <div className="flex flex-col items-start">
-                                <span className="font-medium">
-                                  {facultad.name}
-                                </span>
-                                <span className="text-muted-foreground text-xs">
-                                  {Object.keys(facultad.programas).length}{" "}
-                                  programas disponibles
-                                </span>
-                              </div>
-                            </CommandItem>
-                          ),
-                        )}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Programa */}
-            <div className="space-y-2">
-              <Label
-                htmlFor={`${id}-programa`}
-                className="flex items-center text-sm font-medium"
-              >
-                <GraduationCap className="mr-1 size-4" />
-                Programa
-              </Label>
-              <Popover open={programaOpen} onOpenChange={setProgramaOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={programaOpen}
-                    disabled={!academicFilters.facultad}
-                    className={`w-full justify-between py-6 ${
-                      !academicFilters.programa && academicFilters.facultad
-                        ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
-                        : ""
-                    }`}
-                  >
-                    {academicFilters.programa
-                      ? availableProgramas[academicFilters.programa]
-                      : !academicFilters.facultad
-                        ? "Primero selecciona una facultad"
-                        : "Selecciona tu programa"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Buscar programa..." />
-                    <CommandList>
-                      <CommandEmpty>
-                        No se encontró ningún programa.
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {Object.entries(availableProgramas).map(
-                          ([key, programa]) => (
-                            <CommandItem
-                              key={key}
-                              value={programa}
-                              onSelect={() => {
-                                handleProgramaChange(key)
-                                setProgramaOpen(false)
-                              }}
-                            >
-                              <Check
-                                className={`mr-2 h-4 w-4 ${
-                                  academicFilters.programa === key
-                                    ? "opacity-100"
-                                    : "opacity-0"
-                                }`}
-                              />
-                              {programa}
-                            </CommandItem>
-                          ),
-                        )}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
+          {/* Programa */}
+          <div className="space-y-2">
+            <Label
+              htmlFor={`${id}-programa`}
+              className="flex items-center text-sm font-medium"
+            >
+              <GraduationCap className="mr-1 size-4" />
+              Programa
+            </Label>
+            <Popover open={programaOpen} onOpenChange={setProgramaOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={programaOpen}
+                  disabled={!academicFilters.facultad}
+                  className={`w-full justify-between py-6 ${
+                    !academicFilters.programa && academicFilters.facultad
+                      ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
+                      : ""
+                  }`}
+                >
+                  {academicFilters.programa
+                    ? availableProgramas[academicFilters.programa]
+                    : !academicFilters.facultad
+                      ? "Primero selecciona una facultad"
+                      : "Selecciona tu programa"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Buscar programa..." />
+                  <CommandList>
+                    <CommandEmpty>No se encontró ningún programa.</CommandEmpty>
+                    <CommandGroup>
+                      {Object.entries(availableProgramas).map(
+                        ([key, programa]) => (
+                          <CommandItem
+                            key={key}
+                            value={programa}
+                            onSelect={() => {
+                              handleProgramaChange(key)
+                              setProgramaOpen(false)
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                academicFilters.programa === key
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              }`}
+                            />
+                            {programa}
+                          </CommandItem>
+                        ),
+                      )}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
@@ -637,16 +609,19 @@ export default function ConfigFilterButton({
       {/* Active filters badges - solo en nav y no mobile */}
       {showBadges && academicFilters.sede && (
         <Badge variant="secondary" className="text-xs">
+          <MapPinHouse />
           {formatLabel(academicFilters.sede)}
         </Badge>
       )}
       {showBadges && academicFilters.facultad && (
         <Badge variant="secondary" className="text-xs">
+          <School />
           {formatLabel(academicFilters.facultad)}
         </Badge>
       )}
       {showBadges && academicFilters.programa && (
         <Badge variant="secondary" className="text-xs">
+          <GraduationCap />
           {formatLabel(academicFilters.programa)}
         </Badge>
       )}

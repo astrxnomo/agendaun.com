@@ -19,7 +19,6 @@ import {
   Presentation,
   School,
   SquareUser,
-  Star,
   Trophy,
   Users,
 } from "lucide-react"
@@ -28,7 +27,6 @@ import Link from "next/link"
 import ConfigFilterButton from "@/components/config-filter-button"
 import { LoginForm } from "@/components/login-form"
 import { NavUser } from "@/components/nav-user"
-import ThemeToggle from "@/components/theme-toggle"
 import {
   Collapsible,
   CollapsibleContent,
@@ -67,10 +65,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
                 <div className="bg-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <GraduationCap className="size-4" />
+                  <BookMarked size={18} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">HorarioU</span>
+                  <span className="truncate font-medium">AgendaUN</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -90,12 +88,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link href="/my-calendar">
                 <Calendar />
                 <span>Mi calendario</span>
-              </Link>
-            </SidebarMenuButton>
-            <SidebarMenuButton asChild tooltip="Mis favoritos">
-              <Link href="/events">
-                <Star />
-                <span>Mis favoritos</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenu>
@@ -293,7 +285,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={data.user} />
         <ConfigFilterButton variant="sidebar" />
         <LoginForm />
-        <ThemeToggle />
       </SidebarFooter>
     </Sidebar>
   )
