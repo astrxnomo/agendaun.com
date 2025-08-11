@@ -21,6 +21,7 @@ interface DraggableEventProps {
   multiDayWidth?: number
   isFirstDay?: boolean
   isLastDay?: boolean
+  draggable?: boolean
   "aria-hidden"?: boolean | "true" | "false"
 }
 
@@ -34,6 +35,7 @@ export function DraggableEvent({
   multiDayWidth,
   isFirstDay = true,
   isLastDay = true,
+  draggable = true,
   "aria-hidden": ariaHidden,
 }: DraggableEventProps) {
   const { activeId } = useCalendarDnd()
@@ -132,8 +134,8 @@ export function DraggableEvent({
         onClick={onClick}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        dndListeners={listeners}
-        dndAttributes={attributes}
+        dndListeners={draggable ? listeners : undefined}
+        dndAttributes={draggable ? attributes : undefined}
         aria-hidden={ariaHidden}
       />
     </div>

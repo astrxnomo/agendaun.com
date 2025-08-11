@@ -32,4 +32,4 @@ export type EventColor =
   | "pink" // Rosa distintivo
   | "teal" // Verde azulado
   | "yellow" // Amarillo brillante
-  | "indigo" // Añil profundo
+  | "lime" // Añil profundo

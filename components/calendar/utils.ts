@@ -31,8 +31,8 @@ export function getEtiquetteColor(color?: EventColor): string {
       return "bg-teal-200/50 hover:bg-teal-200/40 text-teal-900/90 shadow-teal-700/8 dark:bg-teal-400/25 dark:hover:bg-teal-400/20 dark:text-teal-200"
     case "yellow":
       return "bg-yellow-200/50 hover:bg-yellow-200/40 text-yellow-900/90 shadow-yellow-700/8 dark:bg-yellow-400/25 dark:hover:bg-yellow-400/20 dark:text-yellow-200"
-    case "indigo":
-      return "bg-indigo-200/50 hover:bg-indigo-200/40 text-indigo-900/90 shadow-indigo-700/8 dark:bg-indigo-400/25 dark:hover:bg-indigo-400/20 dark:text-indigo-200"
+    case "lime":
+      return "bg-lime-200/50 hover:bg-lime-200/40 text-lime-900/90 shadow-lime-700/8 dark:bg-lime-400/25 dark:hover:bg-lime-400/20 dark:text-lime-200"
     default:
       return "bg-gray-200/50 hover:bg-gray-200/40 text-gray-900/90 shadow-gray-700/8 dark:bg-gray-400/25 dark:hover:bg-gray-400/20 dark:text-gray-200"
   }
@@ -60,8 +60,8 @@ export function getEtiquetteIndicatorColor(color?: EventColor): string {
       return "bg-teal-500 dark:bg-teal-400"
     case "yellow":
       return "bg-yellow-500 dark:bg-yellow-400"
-    case "indigo":
-      return "bg-indigo-500 dark:bg-indigo-400"
+    case "lime":
+      return "bg-lime-500 dark:bg-lime-400"
     default:
       return "bg-gray-400 dark:bg-gray-500"
   }

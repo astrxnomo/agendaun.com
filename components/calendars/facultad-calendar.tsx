@@ -215,7 +215,7 @@ const facultadEvents: CalendarEvent[] = [
     start: setMinutes(setHours(new Date(2025, 11, 10), 8), 0), // 10 diciembre 2025, 8:00 AM
     end: setMinutes(setHours(new Date(2025, 11, 10), 17), 0), // 10 diciembre 2025, 5:00 PM
     allDay: false,
-    color: "indigo",
+    color: "lime",
     location: "Facultad de Educación",
     sede: "sede-central",
     facultad: "educacion",

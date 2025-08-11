@@ -396,6 +396,8 @@ export function SetupCalendar({
               events={events}
               onEventSelect={handleEventSelect}
               onEventCreate={handleEventCreate}
+              editable={editable}
+              permissions={permissions}
             />
           )}
           {view === "week" && (
@@ -404,6 +406,8 @@ export function SetupCalendar({
               events={events}
               onEventSelect={handleEventSelect}
               onEventCreate={handleEventCreate}
+              editable={editable}
+              permissions={permissions}
             />
           )}
           {view === "day" && (
@@ -412,6 +416,8 @@ export function SetupCalendar({
               events={events}
               onEventSelect={handleEventSelect}
               onEventCreate={handleEventCreate}
+              editable={editable}
+              permissions={permissions}
             />
           )}
           {view === "agenda" && (

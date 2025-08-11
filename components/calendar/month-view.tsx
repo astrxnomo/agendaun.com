@@ -42,6 +42,8 @@ interface MonthViewProps {
   events: CalendarEvent[]
   onEventSelect: (event: CalendarEvent) => void
   onEventCreate: (startTime: Date) => void
+  editable?: boolean
+  permissions?: { canEdit?: boolean }
 }
 
 export function MonthView({
@@ -49,6 +51,8 @@ export function MonthView({
   events,
   onEventSelect,
   onEventCreate,
+  editable = false,
+  permissions,
 }: MonthViewProps) {
   const days = useMemo(() => {
     const monthStart = startOfMonth(currentDate)
@@ -212,6 +216,7 @@ export function MonthView({
                               onClick={(e) => handleEventClick(event, e)}
                               isFirstDay={isFirstDay}
                               isLastDay={isLastDay}
+                              draggable={permissions?.canEdit && editable}
                             />
                           </div>
                         )

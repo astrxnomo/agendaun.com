@@ -39,6 +39,8 @@ interface WeekViewProps {
   events: CalendarEvent[]
   onEventSelect: (event: CalendarEvent) => void
   onEventCreate: (startTime: Date) => void
+  editable?: boolean
+  permissions?: { canEdit?: boolean }
 }
 
 interface PositionedEvent {
@@ -55,6 +57,8 @@ export function WeekView({
   events,
   onEventSelect,
   onEventCreate,
+  editable = false,
+  permissions,
 }: WeekViewProps) {
   const days = useMemo(() => {
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
@@ -352,6 +356,7 @@ export function WeekView({
                     onClick={(e) => handleEventClick(positionedEvent.event, e)}
                     showTime
                     height={positionedEvent.height}
+                    draggable={permissions?.canEdit && editable}
                   />
                 </div>
               </div>

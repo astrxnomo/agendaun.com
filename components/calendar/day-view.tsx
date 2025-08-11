@@ -34,6 +34,8 @@ interface DayViewProps {
   events: CalendarEvent[]
   onEventSelect: (event: CalendarEvent) => void
   onEventCreate: (startTime: Date) => void
+  editable?: boolean
+  permissions?: { canEdit?: boolean }
 }
 
 interface PositionedEvent {
@@ -50,6 +52,8 @@ export function DayView({
   events,
   onEventSelect,
   onEventCreate,
+  editable = false,
+  permissions,
 }: DayViewProps) {
   const hours = useMemo(() => {
     const dayStart = startOfDay(currentDate)
@@ -262,6 +266,7 @@ export function DayView({
                   onClick={(e) => handleEventClick(positionedEvent.event, e)}
                   showTime
                   height={positionedEvent.height}
+                  draggable={permissions?.canEdit && editable}
                 />
               </div>
             </div>

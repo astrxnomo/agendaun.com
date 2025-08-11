@@ -153,39 +153,57 @@ const nationalEvents: CalendarEvent[] = [
 // Etiquetas específicas para calendario nacional
 const nationalEtiquettes: Etiquette[] = [
   {
-    id: "festividades-religiosas",
-    name: "Festividades Religiosas",
-    color: "purple",
-    isActive: true,
-  },
-  {
-    id: "fiestas-patrias",
-    name: "Fiestas Patrias",
+    id: "academico",
+    name: "Académico",
     color: "blue",
     isActive: true,
   },
   {
-    id: "eventos-academicos",
-    name: "Eventos Académicos",
+    id: "deportivo",
+    name: "Deportivo",
     color: "green",
     isActive: true,
   },
   {
-    id: "salud-publica",
-    name: "Salud Pública",
-    color: "red",
-    isActive: true,
-  },
-  {
-    id: "ciencia-tecnologia",
-    name: "Ciencia y Tecnología",
+    id: "cultural",
+    name: "Cultural",
     color: "orange",
     isActive: true,
   },
   {
-    id: "celebraciones-especiales",
-    name: "Celebraciones Especiales",
+    id: "social",
+    name: "Social",
+    color: "purple",
+    isActive: true,
+  },
+  {
+    id: "administrativo",
+    name: "Administrativo",
+    color: "red",
+    isActive: true,
+  },
+  {
+    id: "bienestar",
+    name: "Bienestar",
     color: "pink",
+    isActive: true,
+  },
+  {
+    id: "test3",
+    name: "Bienestar",
+    color: "teal",
+    isActive: true,
+  },
+  {
+    id: "test2",
+    name: "Bienestar",
+    color: "yellow",
+    isActive: true,
+  },
+  {
+    id: "test1",
+    name: "Bienestar",
+    color: "lime",
     isActive: true,
   },
   {

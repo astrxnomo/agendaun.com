@@ -1,8 +1,8 @@
 "use client"
 
 import {
+  ArrowRight,
   Building2,
-  CalendarDays,
   Flag,
   GraduationCap,
   MapPinIcon as MapPinHouse,
@@ -10,14 +10,45 @@ import {
 import Link from "next/link"
 
 import { PageHeader } from "@/components/page-header"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+
+const calendarLinks = [
+  {
+    title: "Nacional",
+    href: "/calendar/national",
+    icon: Flag,
+    description: "Festividades y días festivos oficiales",
+    details:
+      "Calendario con fechas importantes a nivel nacional de Colombia, incluyendo días festivos y celebraciones oficiales.",
+    cta: "Ver Calendario Nacional",
+  },
+  {
+    title: "Sede",
+    href: "/calendar/sede",
+    icon: MapPinHouse,
+    description: "Eventos específicos de tu sede",
+    details:
+      "Calendario con eventos, actividades y fechas importantes específicas de tu sede universitaria.",
+    cta: "Ver Calendario de Sede",
+  },
+  {
+    title: "Facultad",
+    href: "/calendar/facultad",
+    icon: Building2,
+    description: "Eventos académicos de tu facultad",
+    details:
+      "Calendario con eventos, conferencias y actividades específicas de tu facultad dentro de la universidad.",
+    cta: "Ver Calendario de Facultad",
+  },
+  {
+    title: "Programa",
+    href: "/calendar/programa",
+    icon: GraduationCap,
+    description: "Eventos académicos de tu carrera",
+    details:
+      "Calendario personalizado con eventos académicos específicos de tu programa de estudios.",
+    cta: "Ver Calendario de Programa",
+  },
+]
 
 export default function CalendarPage() {
   return (
@@ -37,121 +68,34 @@ export default function CalendarPage() {
 
       <div className="p-6 md:p-10 lg:p-20">
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Calendario Nacional */}
-          <Card className="group transition-all hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
-                  <Flag className="text-primary h-6 w-6" />
+          {calendarLinks.map((link) => {
+            const Icon = link.icon
+            return (
+              <Link
+                key={link.title}
+                href={link.href}
+                className="group bg-muted/40 hover:bg-muted/60 hover:border-primary/30 relative overflow-hidden rounded-xl border border-transparent p-6 transition-all duration-200 hover:shadow-xl"
+              >
+                <div className="relative flex items-start gap-4">
+                  <span className="bg-primary/10 text-primary rounded-lg p-3">
+                    <Icon className="h-6 w-6" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <h3 className="group-hover:text-primary text-lg font-semibold transition-colors">
+                      {link.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      {link.description}
+                    </p>
+                    <p className="text-muted-foreground mt-2 text-xs">
+                      {link.details}
+                    </p>
+                  </span>
+                  <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100" />
                 </div>
-                <div>
-                  <CardTitle className="text-lg">Nacional</CardTitle>
-                  <CardDescription>
-                    Festividades y días festivos oficiales
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-smtext-muted-foreground mb-4">
-                Calendario con fechas importantes a nivel nacional de Colombia,
-                incluyendo días festivos y celebraciones oficiales.
-              </p>
-              <Button asChild className="w-full transition-transform">
-                <Link href="/calendar/national">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Ver Calendario Nacional
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Calendario de Sede */}
-          <Card className="group transition-all hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
-                  <MapPinHouse className="text-primary h-6 w-6" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Sede</CardTitle>
-                  <CardDescription>
-                    Eventos específicos de tu sede
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-smtext-muted-foreground mb-4">
-                Calendario con eventos, actividades y fechas importantes
-                específicas de tu sede universitaria.
-              </p>
-              <Button asChild className="w-full transition-transform">
-                <Link href="/calendar/sede">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Ver Calendario de Sede
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Calendario de Facultad */}
-          <Card className="group transition-all hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
-                  <Building2 className="text-primary h-6 w-6" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Facultad</CardTitle>
-                  <CardDescription>
-                    Eventos académicos de tu facultad
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-smtext-muted-foreground mb-4">
-                Calendario con eventos, conferencias y actividades específicas
-                de tu facultad dentro de la universidad.
-              </p>
-              <Button asChild className="w-full transition-transform">
-                <Link href="/calendar/facultad">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Ver Calendario de Facultad
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Calendario de Programa */}
-          <Card className="group transition-all hover:shadow-lg">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
-                  <GraduationCap className="text-primary h-6 w-6" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">Programa</CardTitle>
-                  <CardDescription>
-                    Eventos académicos de tu carrera
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-smtext-muted-foreground mb-4">
-                Calendario personalizado con eventos académicos específicos de
-                tu programa de estudios.
-              </p>
-              <Button asChild className="w-full transition-transform">
-                <Link href="/calendar/programa">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Ver Calendario de Programa
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </>
