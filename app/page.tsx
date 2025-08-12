@@ -83,7 +83,12 @@ export default function DashboardIntro() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="rounded">
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="rounded bg-transparent"
+              >
                 <Link href="/calendar">Explorar otros calendarios</Link>
               </Button>
             </div>

@@ -40,6 +40,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/contexts/auth-context"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 // Estructura jerárquica de sedes -> facultades -> programas
@@ -203,6 +204,7 @@ export default function ConfigFilterButton({
   const [facultadOpen, setFacultadOpen] = useState(false)
   const [programaOpen, setProgramaOpen] = useState(false)
   const { academicFilters, setAcademicFilter } = useCalendarContext()
+  const { user } = useAuth()
 
   // Get available facultades based on selected sede
   const availableFacultades = useMemo(() => {
@@ -222,6 +224,9 @@ export default function ConfigFilterButton({
     return facultad?.programas || {}
   }, [academicFilters.sede, academicFilters.facultad])
 
+  if (!user) {
+    return null
+  }
   // Handle sede change - reset facultad and programa when sede changes
   const handleSedeChange = (value: string) => {
     setAcademicFilter("sede", value)

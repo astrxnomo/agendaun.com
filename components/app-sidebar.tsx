@@ -43,13 +43,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
-const data = {
-  user: {
-    name: "Usuario",
-    email: "estudiante@unal.edu.co",
-    avatar: "/avatars/user.jpg",
-  },
-}
+import type React from "react"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -220,73 +214,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </CollapsibleContent>
               </SidebarMenuItem>
             </Collapsible>
-
-            {/* <Collapsible asChild>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Eventos">
-                  <Link href="/events">
-                    <MapPinned />
-                    <span>Eventos</span>
-                  </Link>
-                </SidebarMenuButton>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuAction className="data-[state=open]:rotate-90">
-                    <ChevronRight />
-                    <span className="sr-only">Expandir Eventos</span>
-                  </SidebarMenuAction>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <Link href="/events?type=academic">
-                          <GraduationCap className="size-4" />
-                          <span>Académicos</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <Link href="/events?type=cultural">
-                          <Palette className="size-4" />
-                          <span>Culturales</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <Link href="/events?type=sports">
-                          <Trophy className="size-4" />
-                          <span>Deportivos</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <Link href="/events?type=conferences">
-                          <Presentation className="size-4" />
-                          <span>Conferencias</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
-                        <Link href="/events?type=workshops">
-                          <Users className="size-4" />
-                          <span>Talleres</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible> */}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
         <ConfigFilterButton variant="sidebar" />
+        <NavUser />
         <LoginForm />
       </SidebarFooter>
     </Sidebar>

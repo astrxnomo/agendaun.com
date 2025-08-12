@@ -6,8 +6,10 @@ import NavSearch from "@/components/nav-top"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
+import { AuthProvider } from "@/contexts/auth-context"
 
 import type { Metadata } from "next"
+
 import "./globals.css"
 
 const outfit = Outfit({
@@ -33,15 +35,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <CalendarProvider>
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>
-                <NavSearch />
-                {children}
-              </SidebarInset>
-            </SidebarProvider>
-          </CalendarProvider>
+          <AuthProvider>
+            <CalendarProvider>
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                  <NavSearch />
+                  {children}
+                </SidebarInset>
+              </SidebarProvider>
+            </CalendarProvider>
+          </AuthProvider>
           <Toaster position="bottom-right" />
         </ThemeProvider>
       </body>
