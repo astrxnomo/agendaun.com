@@ -2,10 +2,10 @@
 
 import {
   ArrowRight,
-  Building2,
-  Flag,
   GraduationCap,
-  MapPinIcon as MapPinHouse,
+  Landmark,
+  School,
+  University,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -15,7 +15,7 @@ const calendarLinks = [
   {
     title: "Nacional",
     href: "/calendar/national",
-    icon: Flag,
+    icon: Landmark,
     description: "Festividades y días festivos oficiales",
     details:
       "Calendario con fechas importantes a nivel nacional de Colombia, incluyendo días festivos y celebraciones oficiales.",
@@ -24,7 +24,7 @@ const calendarLinks = [
   {
     title: "Sede",
     href: "/calendar/sede",
-    icon: MapPinHouse,
+    icon: School,
     description: "Eventos específicos de tu sede",
     details:
       "Calendario con eventos, actividades y fechas importantes específicas de tu sede universitaria.",
@@ -33,7 +33,7 @@ const calendarLinks = [
   {
     title: "Facultad",
     href: "/calendar/facultad",
-    icon: Building2,
+    icon: University,
     description: "Eventos académicos de tu facultad",
     details:
       "Calendario con eventos, conferencias y actividades específicas de tu facultad dentro de la universidad.",

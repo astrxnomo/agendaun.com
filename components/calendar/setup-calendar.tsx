@@ -438,7 +438,7 @@ export function SetupCalendar({
           }}
           onSave={handleEventSave}
           onDelete={handleEventDelete}
-          customEtiquettes={etiquettes} // ← Pasar etiquetas al diálogo
+          customEtiquettes={etiquettes}
         />
 
         <EventViewDialog
@@ -448,7 +448,7 @@ export function SetupCalendar({
             setIsEventViewDialogOpen(false)
             setSelectedEvent(null)
           }}
-          etiquettes={etiquettes} // ← Pasar etiquetas al diálogo de vista
+          etiquettes={etiquettes}
         />
       </CalendarDndProvider>
     </div>

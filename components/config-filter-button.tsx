@@ -3,9 +3,9 @@ import {
   Check,
   ChevronsUpDown,
   GraduationCap,
-  MapPinHouse,
   School,
   Settings2,
+  University,
 } from "lucide-react"
 import { useId, useMemo, useState } from "react"
 
@@ -314,7 +314,7 @@ export default function ConfigFilterButton({
               htmlFor={`${id}-sede`}
               className="flex items-center text-sm font-medium"
             >
-              <MapPinHouse className="mr-1 size-4" />
+              <School className="mr-1 size-4" />
               Sede
             </Label>
             <Popover open={sedeOpen} onOpenChange={setSedeOpen}>
@@ -379,7 +379,7 @@ export default function ConfigFilterButton({
               htmlFor={`${id}-facultad`}
               className="flex items-center text-sm font-medium"
             >
-              <School className="mr-1 size-4" />
+              <University className="mr-1 size-4" />
               Facultad
             </Label>
             <Popover open={facultadOpen} onOpenChange={setFacultadOpen}>
@@ -550,7 +550,7 @@ export default function ConfigFilterButton({
                       : "bg-primary text-primary-foreground"
                   }`}
                 >
-                  <MapPinHouse className="size-4" />
+                  <School className="size-4" />
                   {!isConfigComplete && (
                     <Badge
                       variant="secondary"
@@ -592,7 +592,7 @@ export default function ConfigFilterButton({
             }
             aria-label="Configuración académica"
           >
-            <MapPinHouse size={16} />
+            <School size={16} />
             {showText && "Mi sede"}
             {!isConfigComplete && (
               <Badge
@@ -609,7 +609,7 @@ export default function ConfigFilterButton({
       {/* Active filters badges - solo en nav y no mobile */}
       {showBadges && academicFilters.sede && (
         <Badge variant="secondary" className="text-xs">
-          <MapPinHouse />
+          <School />
           {formatLabel(academicFilters.sede)}
         </Badge>
       )}

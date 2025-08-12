@@ -5,10 +5,10 @@ import {
   BadgeCheck,
   Calendar,
   Clock,
-  Flag,
   GraduationCap,
-  MapPinIcon as MapPinHouse,
+  Landmark,
   School,
+  University,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -30,19 +30,19 @@ export default function DashboardIntro() {
     {
       title: "Calendario Nacional",
       href: "/calendar/national",
-      icon: Flag,
+      icon: Landmark,
       description: "Fechas y eventos importantes para toda la universidad.",
     },
     {
       title: "Calendario Sede",
       href: "/calendar/sede",
-      icon: MapPinHouse,
+      icon: School,
       description: "Actividades y eventos exclusivos de tu sede.",
     },
     {
       title: "Calendario Facultad",
       href: "/calendar/facultad",
-      icon: School,
+      icon: University,
       description: "Fechas clave y eventos propios de tu facultad.",
     },
     {

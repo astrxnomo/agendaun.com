@@ -77,19 +77,26 @@ export function EventViewDialog({
                 ) : (
                   <div>
                     <p className="capitalize">
+                      {format(startDate, "yyyy-MM-dd") !==
+                        format(endDate, "yyyy-MM-dd") && "Inicia: "}
                       {format(startDate, "EEEE, d 'de' MMMM 'de' yyyy", {
                         locale: es,
                       })}
                     </p>
+                    <p className="capitalize">
+                      {format(startDate, "yyyy-MM-dd") !==
+                        format(endDate, "yyyy-MM-dd") && (
+                        <span>
+                          Finaliza:{" "}
+                          {format(endDate, "EEEE, d 'de' MMMM 'de' yyyy", {
+                            locale: es,
+                          })}
+                        </span>
+                      )}
+                    </p>
                     <p>
                       {format(startDate, "hh:mm a", { locale: es })} -{" "}
                       {format(endDate, "hh:mm a", { locale: es })}
-                      {format(startDate, "yyyy-MM-dd") !==
-                        format(endDate, "yyyy-MM-dd") && (
-                        <span className="ml-1">
-                          (+ {format(endDate, "d 'de' MMMM", { locale: es })})
-                        </span>
-                      )}
                     </p>
                   </div>
                 )}

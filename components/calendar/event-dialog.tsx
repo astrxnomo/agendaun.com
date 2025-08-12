@@ -2,7 +2,7 @@
 
 import { format, isBefore } from "date-fns"
 import { es } from "date-fns/locale"
-import { Calendar1, Trash } from "lucide-react"
+import { CalendarIcon, Trash } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 import { getEtiquetteIndicatorColor } from "@/components/calendar"
@@ -71,7 +71,7 @@ export function EventDialog({
   const [etiquette, setEtiquette] = useState<string | null>(null) // Nueva state para etiqueta seleccionada
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
-  // const [endDateOpen, setEndDateOpen] = useState(false)
+  const [endDateOpen, setEndDateOpen] = useState(false)
 
   useEffect(() => {
     if (event) {
@@ -234,7 +234,7 @@ export function EventDialog({
 
           <div className="flex gap-4">
             <div className="flex-1 *:not-first:mt-1.5">
-              <Label htmlFor="start-date">Fecha</Label>
+              <Label htmlFor="start-date">Fecha de inicio</Label>
               <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -255,7 +255,7 @@ export function EventDialog({
                         ? format(startDate, "PPP", { locale: es })
                         : "Seleccionar fecha"}
                     </span>
-                    <Calendar1
+                    <CalendarIcon
                       size={16}
                       className="text-muted-foreground/80 shrink-0"
                       aria-hidden="true"
@@ -283,58 +283,8 @@ export function EventDialog({
                 </PopoverContent>
               </Popover>
             </div>
-          </div>
-
-          <div className="flex gap-4">
-            {/* <div className="flex-1 *:not-first:mt-1.5">
-              <Label htmlFor="end-date">Fecha de Fin</Label>
-              <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                id="end-date"
-                variant={"outline"}
-                className={cn(
-                  "group bg-background hover:bg-background border-input w-full justify-between px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px]",
-                  !endDate && "text-muted-foreground",
-                )}
-                >
-                <span
-                  className={cn(
-                  "truncate",
-                  !endDate && "text-muted-foreground",
-                  )}
-                >
-                  {endDate
-                  ? format(endDate, "PPP", { locale: es })
-                  : "Seleccionar fecha"}
-                </span>
-                <Calendar1
-                  size={16}
-                  className="text-muted-foreground/80 shrink-0"
-                  aria-hidden="true"
-                />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-2" align="start">
-                <Calendar
-                mode="single"
-                selected={endDate}
-                defaultMonth={endDate}
-                weekStartsOn={1}
-                disabled={{ before: startDate }}
-                onSelect={(date) => {
-                  if (date) {
-                  setEndDate(date)
-                  setError(null)
-                  setEndDateOpen(false)
-                  }
-                }}
-                />
-              </PopoverContent>
-              </Popover>
-            </div> */}
             {!allDay && (
-              <div className="flex-1 *:not-first:mt-1.5">
+              <div className="min-w-28 *:not-first:mt-1.5">
                 <Label htmlFor="start-time">Hora de Inicio</Label>
                 <Select value={startTime} onValueChange={setStartTime}>
                   <SelectTrigger id="start-time">
@@ -350,8 +300,59 @@ export function EventDialog({
                 </Select>
               </div>
             )}
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex-1 *:not-first:mt-1.5">
+              <Label htmlFor="end-date">Fecha de Fin</Label>
+              <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="end-date"
+                    variant={"outline"}
+                    className={cn(
+                      "group bg-background hover:bg-background border-input w-full justify-between px-3 font-normal outline-offset-0 outline-none focus-visible:outline-[3px]",
+                      !endDate && "text-muted-foreground",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "truncate",
+                        !endDate && "text-muted-foreground",
+                      )}
+                    >
+                      {endDate
+                        ? format(endDate, "PPP", { locale: es })
+                        : "Seleccionar fecha"}
+                    </span>
+                    <CalendarIcon
+                      size={16}
+                      className="text-muted-foreground/80 shrink-0"
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    defaultMonth={endDate}
+                    weekStartsOn={1}
+                    disabled={{ before: startDate }}
+                    onSelect={(date) => {
+                      if (date) {
+                        setEndDate(date)
+                        setError(null)
+                        setEndDateOpen(false)
+                      }
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
             {!allDay && (
-              <div className="flex-1 *:not-first:mt-1.5">
+              <div className="min-w-28 *:not-first:mt-1.5">
                 <Label htmlFor="end-time">Hora de Fin</Label>
                 <Select value={endTime} onValueChange={setEndTime}>
                   <SelectTrigger id="end-time">

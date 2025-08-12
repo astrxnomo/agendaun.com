@@ -8,19 +8,14 @@ import {
   CalendarDays,
   ChevronRight,
   Clock,
-  Flag,
   FlaskConical,
   GraduationCap,
   Home,
-  MapPinHouse,
-  MapPinned,
+  Landmark,
   NotepadText,
-  Palette,
-  Presentation,
   School,
   SquareUser,
-  Trophy,
-  Users,
+  University,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -96,7 +91,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Universidad</SidebarGroupLabel>
           <SidebarMenu>
-            <Collapsible asChild>
+            <SidebarMenuButton asChild tooltip="Inicio">
+              <Link href="/">
+                <BookMarked />
+                <span>Agenda </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenu>
+          <SidebarMenu>
+            <Collapsible asChild defaultOpen={true}>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Calendarios">
                   <Link href="/calendar">
@@ -115,7 +118,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
                         <Link href="/calendar/national">
-                          <Flag className="size-4" />
+                          <Landmark className="size-4" />
                           <span>Nacional</span>
                         </Link>
                       </SidebarMenuSubButton>
@@ -123,7 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
                         <Link href="/calendar/sede">
-                          <MapPinHouse />
+                          <School />
                           <span>Sede</span>
                         </Link>
                       </SidebarMenuSubButton>
@@ -131,7 +134,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
                         <Link href="/calendar/facultad">
-                          <School />
+                          <University />
                           <span>Facultad</span>
                         </Link>
                       </SidebarMenuSubButton>
@@ -218,7 +221,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
             </Collapsible>
 
-            <Collapsible asChild>
+            {/* <Collapsible asChild>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Eventos">
                   <Link href="/events">
@@ -277,7 +280,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>
-            </Collapsible>
+            </Collapsible> */}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
