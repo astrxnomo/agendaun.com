@@ -25,11 +25,16 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useAuth } from "@/contexts/auth-context"
+import { deleteSession } from "@/lib/auth"
 
-export function NavUser() {
+import type { User } from "@/types/auth"
+
+interface NavUserProps {
+  user?: User | null // Usuario desde SSR
+}
+
+export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
-  const { user, logout } = useAuth()
 
   // Si no hay usuario autenticado, no mostrar nada
   if (!user) {
@@ -38,7 +43,7 @@ export function NavUser() {
 
   const handleLogout = async () => {
     try {
-      await logout()
+      await deleteSession()
     } catch (error) {
       console.error("Error during logout:", error)
     }
@@ -65,11 +70,13 @@ export function NavUser() {
             >
               <Avatar className="h-8 w-8 rounded">
                 <AvatarFallback className="bg-primary text-sidebar-primary-foreground h-8 w-8 rounded">
-                  {getInitials(user.email)}
+                  {getInitials(user.name || user.email)}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.email}</span>
+                <span className="truncate font-medium">
+                  {user.name || user.email}
+                </span>
                 <span className="truncate text-[10px]">
                   Universidad Nacional de Colombia
                 </span>
@@ -78,7 +85,7 @@ export function NavUser() {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -87,11 +94,13 @@ export function NavUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarFallback className="bg-primary text-sidebar-primary-foreground h-8 w-8 rounded">
-                    {getInitials(user.email)}
+                    {getInitials(user.name || user.email)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.email}</span>
+                  <span className="truncate font-medium">
+                    {user.name || user.email}
+                  </span>
                   <span className="truncate text-[10px]">
                     Universidad Nacional de Colombia
                   </span>

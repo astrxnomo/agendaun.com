@@ -1,4 +1,5 @@
 "use client"
+
 import {
   Check,
   ChevronsUpDown,
@@ -9,7 +10,6 @@ import {
 } from "lucide-react"
 import { useId, useMemo, useState } from "react"
 
-import { useCalendarContext } from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -40,8 +40,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useAuth } from "@/contexts/auth-context"
-import { useIsMobile } from "@/hooks/use-mobile"
+
+import type { User } from "@/types/auth"
 
 // Estructura jerárquica de sedes -> facultades -> programas
 type AcademicStructure = Record<
@@ -59,16 +59,18 @@ type AcademicStructure = Record<
 >
 
 const academicStructure: AcademicStructure = {
-  "sede-central": {
-    name: "Sede Central",
+  "sede-bogota": {
+    name: "Sede Bogotá",
     facultades: {
       ingenieria: {
         name: "Facultad de Ingeniería",
         programas: {
-          "ingenieria-sistemas": "Ingeniería de Sistemas",
+          "ingenieria-sistemas": "Ingeniería de Sistemas y Computación",
           "ingenieria-industrial": "Ingeniería Industrial",
           "ingenieria-civil": "Ingeniería Civil",
           "ingenieria-electronica": "Ingeniería Electrónica",
+          "ingenieria-mecanica": "Ingeniería Mecánica",
+          "ingenieria-quimica": "Ingeniería Química",
         },
       },
       medicina: {
@@ -77,21 +79,8 @@ const academicStructure: AcademicStructure = {
           medicina: "Medicina",
           enfermeria: "Enfermería",
           fisioterapia: "Fisioterapia",
-        },
-      },
-      administracion: {
-        name: "Facultad de Administración",
-        programas: {
-          "administracion-empresas": "Administración de Empresas",
-          contaduria: "Contaduría Pública",
-          economia: "Economía",
-        },
-      },
-      derecho: {
-        name: "Facultad de Derecho",
-        programas: {
-          derecho: "Derecho",
-          "ciencias-politicas": "Ciencias Políticas",
+          fonoaudiologia: "Fonoaudiología",
+          "terapia-ocupacional": "Terapia Ocupacional",
         },
       },
       ciencias: {
@@ -101,110 +90,157 @@ const academicStructure: AcademicStructure = {
           quimica: "Química",
           fisica: "Física",
           matematicas: "Matemáticas",
+          estadistica: "Estadística",
+          geologia: "Geología",
+        },
+      },
+      "ciencias-economicas": {
+        name: "Facultad de Ciencias Económicas",
+        programas: {
+          "administracion-empresas": "Administración de Empresas",
+          "contaduria-publica": "Contaduría Pública",
+          economia: "Economía",
+        },
+      },
+      derecho: {
+        name: "Facultad de Derecho, Ciencias Políticas y Sociales",
+        programas: {
+          derecho: "Derecho",
+          "ciencias-politicas": "Ciencias Políticas",
+          sociologia: "Sociología",
+          antropologia: "Antropología",
+        },
+      },
+      "ciencias-humanas": {
+        name: "Facultad de Ciencias Humanas",
+        programas: {
+          psicologia: "Psicología",
+          filosofia: "Filosofía",
+          historia: "Historia",
+          geografia: "Geografía",
+          "trabajo-social": "Trabajo Social",
+        },
+      },
+      artes: {
+        name: "Facultad de Artes",
+        programas: {
+          "artes-plasticas": "Artes Plásticas",
+          musica: "Música",
+          "diseno-grafico": "Diseño Gráfico",
+          "diseno-industrial": "Diseño Industrial",
         },
       },
     },
   },
-  "sede-norte": {
-    name: "Sede Norte",
+  "sede-medellin": {
+    name: "Sede Medellín",
     facultades: {
-      ingenieria: {
-        name: "Facultad de Ingeniería",
+      minas: {
+        name: "Facultad de Minas",
         programas: {
-          "ingenieria-sistemas": "Ingeniería de Sistemas",
-          "ingenieria-ambiental": "Ingeniería Ambiental",
-        },
-      },
-      psicologia: {
-        name: "Facultad de Psicología",
-        programas: {
-          psicologia: "Psicología",
-          "trabajo-social": "Trabajo Social",
+          "ingenieria-minas": "Ingeniería de Minas y Metalurgia",
+          "ingenieria-geologica": "Ingeniería Geológica",
+          "ingenieria-petroleos": "Ingeniería de Petróleos",
+          "ingenieria-materiales": "Ingeniería de Materiales",
         },
       },
       ciencias: {
         name: "Facultad de Ciencias",
         programas: {
           biologia: "Biología",
-          "medicina-veterinaria": "Medicina Veterinaria",
+          matematicas: "Matemáticas",
+          fisica: "Física",
+          quimica: "Química",
+        },
+      },
+      "ciencias-agrarias": {
+        name: "Facultad de Ciencias Agrarias",
+        programas: {
+          agronomia: "Ingeniería Agronómica",
+          zootecnia: "Zootecnia",
+          "ingenieria-forestal": "Ingeniería Forestal",
         },
       },
     },
   },
-  "sede-sur": {
-    name: "Sede Sur",
+  "sede-manizales": {
+    name: "Sede Manizales",
     facultades: {
+      "ingenieria-arquitectura": {
+        name: "Facultad de Ingeniería y Arquitectura",
+        programas: {
+          "ingenieria-civil": "Ingeniería Civil",
+          "ingenieria-electronica": "Ingeniería Electrónica",
+          arquitectura: "Arquitectura",
+          "ingenieria-quimica": "Ingeniería Química",
+        },
+      },
+      "ciencias-exactas": {
+        name: "Facultad de Ciencias Exactas y Naturales",
+        programas: {
+          biologia: "Biología",
+          matematicas: "Matemáticas",
+          fisica: "Física",
+          quimica: "Química",
+        },
+      },
       administracion: {
         name: "Facultad de Administración",
         programas: {
-          "administracion-empresas": "Administración de Empresas",
-          mercadeo: "Mercadeo y Publicidad",
-          turismo: "Administración Turística",
-        },
-      },
-      comunicacion: {
-        name: "Facultad de Comunicación",
-        programas: {
-          "comunicacion-social": "Comunicación Social",
-          periodismo: "Periodismo",
-          publicidad: "Publicidad",
-        },
-      },
-      artes: {
-        name: "Facultad de Artes",
-        programas: {
-          "artes-visuales": "Artes Visuales",
-          musica: "Música",
-          "artes-escenicas": "Artes Escénicas",
+          "administracion-negocios": "Administración de Negocios",
+          "gestion-cultural": "Gestión Cultural y Comunicativa",
         },
       },
     },
   },
-  "sede-este": {
-    name: "Sede Este",
+  "sede-palmira": {
+    name: "Sede Palmira",
     facultades: {
-      ingenieria: {
-        name: "Facultad de Ingeniería",
+      "ciencias-agropecuarias": {
+        name: "Facultad de Ciencias Agropecuarias",
+        programas: {
+          agronomia: "Ingeniería Agronómica",
+          zootecnia: "Zootecnia",
+          "ingenieria-agricola": "Ingeniería Agrícola",
+        },
+      },
+      "ingenieria-administracion": {
+        name: "Facultad de Ingeniería y Administración",
         programas: {
           "ingenieria-industrial": "Ingeniería Industrial",
-          "ingenieria-mecanica": "Ingeniería Mecánica",
-        },
-      },
-      educacion: {
-        name: "Facultad de Educación",
-        programas: {
-          "licenciatura-matematicas": "Licenciatura en Matemáticas",
-          "licenciatura-espanol": "Licenciatura en Español",
-          "licenciatura-ingles": "Licenciatura en Inglés",
-          pedagogia: "Pedagogía",
-        },
-      },
-      agronomia: {
-        name: "Facultad de Agronomía",
-        programas: {
-          agronomia: "Agronomía",
-          zootecnia: "Zootecnia",
+          "administracion-empresas": "Administración de Empresas",
         },
       },
     },
   },
+}
+
+interface AcademicFilters {
+  sede: string
+  facultad: string
+  programa: string
 }
 
 interface ConfigFilterButtonProps {
   variant?: "nav" | "sidebar"
+  user?: User | null
+  initialFilters?: AcademicFilters
+  onFiltersChange?: (filters: AcademicFilters) => void
 }
 
 export default function ConfigFilterButton({
   variant = "nav",
+  user,
+  initialFilters = { sede: "", facultad: "", programa: "" },
+  onFiltersChange,
 }: ConfigFilterButtonProps) {
   const id = useId()
-  const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
   const [sedeOpen, setSedeOpen] = useState(false)
   const [facultadOpen, setFacultadOpen] = useState(false)
   const [programaOpen, setProgramaOpen] = useState(false)
-  const { academicFilters, setAcademicFilter } = useCalendarContext()
-  const { user } = useAuth()
+  const [academicFilters, setAcademicFilters] =
+    useState<AcademicFilters>(initialFilters)
 
   // Get available facultades based on selected sede
   const availableFacultades = useMemo(() => {
@@ -224,33 +260,34 @@ export default function ConfigFilterButton({
     return facultad?.programas || {}
   }, [academicFilters.sede, academicFilters.facultad])
 
+  // Update filters and notify parent
+  const updateFilter = (key: keyof AcademicFilters, value: string) => {
+    const newFilters = { ...academicFilters, [key]: value }
+    setAcademicFilters(newFilters)
+    onFiltersChange?.(newFilters)
+  }
+
   if (!user) {
     return null
   }
+
   // Handle sede change - reset facultad and programa when sede changes
   const handleSedeChange = (value: string) => {
-    setAcademicFilter("sede", value)
-    // Reset dependent filters
-    if (academicFilters.facultad) {
-      setAcademicFilter("facultad", "")
-    }
-    if (academicFilters.programa) {
-      setAcademicFilter("programa", "")
-    }
+    const newFilters = { sede: value, facultad: "", programa: "" }
+    setAcademicFilters(newFilters)
+    onFiltersChange?.(newFilters)
   }
 
   // Handle facultad change - reset programa when facultad changes
   const handleFacultadChange = (value: string) => {
-    setAcademicFilter("facultad", value)
-    // Reset dependent filter
-    if (academicFilters.programa) {
-      setAcademicFilter("programa", "")
-    }
+    const newFilters = { ...academicFilters, facultad: value, programa: "" }
+    setAcademicFilters(newFilters)
+    onFiltersChange?.(newFilters)
   }
 
   // Handle programa change
   const handleProgramaChange = (value: string) => {
-    setAcademicFilter("programa", value)
+    updateFilter("programa", value)
   }
 
   // Calculate active filters count
@@ -287,11 +324,11 @@ export default function ConfigFilterButton({
   }
 
   // Determinar si mostrar badges (solo en nav y no mobile)
-  const showBadges = variant === "nav" && !isMobile
+  const showBadges = variant === "nav"
 
   // Determinar el tamaño y variante del botón
   const buttonSize = variant === "sidebar" ? "sm" : "sm"
-  const showText = variant === "nav" && !isMobile
+  const showText = variant === "nav"
 
   // Contenido del diálogo
   const renderDialogContent = () => (
@@ -356,11 +393,7 @@ export default function ConfigFilterButton({
                           }}
                         >
                           <Check
-                            className={`mr-2 h-4 w-4 ${
-                              academicFilters.sede === key
-                                ? "opacity-100"
-                                : "opacity-0"
-                            }`}
+                            className={`mr-2 h-4 w-4 ${academicFilters.sede === key ? "opacity-100" : "opacity-0"}`}
                           />
                           <div className="flex flex-col items-start">
                             <span className="font-medium">{sede.name}</span>
@@ -427,11 +460,7 @@ export default function ConfigFilterButton({
                             }}
                           >
                             <Check
-                              className={`mr-2 h-4 w-4 ${
-                                academicFilters.facultad === key
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              }`}
+                              className={`mr-2 h-4 w-4 ${academicFilters.facultad === key ? "opacity-100" : "opacity-0"}`}
                             />
                             <div className="flex flex-col items-start">
                               <span className="font-medium">
@@ -499,11 +528,7 @@ export default function ConfigFilterButton({
                             }}
                           >
                             <Check
-                              className={`mr-2 h-4 w-4 ${
-                                academicFilters.programa === key
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              }`}
+                              className={`mr-2 h-4 w-4 ${academicFilters.programa === key ? "opacity-100" : "opacity-0"}`}
                             />
                             {programa}
                           </CommandItem>
@@ -523,7 +548,7 @@ export default function ConfigFilterButton({
           Cancelar
         </Button>
         <Button onClick={() => setOpen(false)} disabled={!isConfigComplete}>
-          {isConfigComplete ? "Guardar" : "Completar"}
+          {isConfigComplete ? "Guardar" : "Completar configuración"}
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -611,23 +636,23 @@ export default function ConfigFilterButton({
         </DialogTrigger>
         {renderDialogContent()}
       </Dialog>
-      {/* Active filters badges - solo en nav y no mobile */}
+      {/* Active filters badges */}
       {showBadges && academicFilters.sede && (
         <Badge variant="secondary" className="text-xs">
-          <School />
-          {formatLabel(academicFilters.sede)}
+          <School className="mr-1 size-3" />
+          {academicStructure[academicFilters.sede]?.name}
         </Badge>
       )}
       {showBadges && academicFilters.facultad && (
         <Badge variant="secondary" className="text-xs">
-          <School />
-          {formatLabel(academicFilters.facultad)}
+          <University className="mr-1 size-3" />
+          {availableFacultades[academicFilters.facultad]?.name}
         </Badge>
       )}
       {showBadges && academicFilters.programa && (
         <Badge variant="secondary" className="text-xs">
-          <GraduationCap />
-          {formatLabel(academicFilters.programa)}
+          <GraduationCap className="mr-1 size-3" />
+          {availableProgramas[academicFilters.programa]}
         </Badge>
       )}
     </div>

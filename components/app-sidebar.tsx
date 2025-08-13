@@ -12,6 +12,7 @@ import {
   GraduationCap,
   Home,
   Landmark,
+  LogIn,
   NotepadText,
   School,
   SquareUser,
@@ -19,9 +20,8 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+import { NavUser } from "@/components/auth/nav-user"
 import ConfigFilterButton from "@/components/config-filter-button"
-import { LoginForm } from "@/components/login-form"
-import { NavUser } from "@/components/nav-user"
 import {
   Collapsible,
   CollapsibleContent,
@@ -43,9 +43,20 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
+import type { User } from "@/types/auth"
 import type React from "react"
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user?: User | null // Usuario desde SSR
+}
+
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
+  const handleFiltersChange = (filters: any) => {
+    // Aquí puedes manejar los cambios de filtros
+    // Por ejemplo, guardar en localStorage o enviar al servidor
+    console.log("Filtros actualizados:", filters)
+  }
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -85,10 +96,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Universidad</SidebarGroupLabel>
           <SidebarMenu>
-            <SidebarMenuButton asChild tooltip="Inicio">
-              <Link href="/">
+            <SidebarMenuButton asChild tooltip="Agenda">
+              <Link href="/calendar">
                 <BookMarked />
-                <span>Agenda </span>
+                <span>Agenda</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenu>
@@ -111,7 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/calendar/national">
+                        <Link href="/calendar/nacional">
                           <Landmark className="size-4" />
                           <span>Nacional</span>
                         </Link>
@@ -171,7 +182,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/services/library">
+                        <Link href="/schedules/library">
                           <BookMarked className="size-4" />
                           <span>Bibliotecas</span>
                         </Link>
@@ -185,7 +196,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
-
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
                         <Link href="/schedules/tutoring">
@@ -218,9 +228,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <ConfigFilterButton variant="sidebar" />
-        <NavUser />
-        <LoginForm />
+        <ConfigFilterButton
+          variant="sidebar"
+          user={user}
+          onFiltersChange={handleFiltersChange}
+        />
+        <NavUser user={user} />
+        {!user && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" tooltip="Iniciar sesión" asChild>
+                <Link href="/auth/login">
+                  <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                    <LogIn className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">Iniciar sesión</span>
+                    <span className="text-muted-foreground truncate text-xs">
+                      Accede con tu correo
+                    </span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
       </SidebarFooter>
     </Sidebar>
   )

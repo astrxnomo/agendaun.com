@@ -1,6 +1,7 @@
 "use client"
 
 import { addDays, getDay, setHours, setMinutes } from "date-fns"
+import { Edit, Eye } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import {
@@ -13,6 +14,10 @@ import {
   useCalendarManager,
   useCalendarPermissions,
 } from "@/components/calendar"
+import { PageHeader } from "@/components/page-header"
+import { Button } from "@/components/ui/button"
+
+import type { User } from "@/types/auth"
 
 // Función para calcular días hasta el próximo lunes
 const getDaysUntilNextMonday = (date: Date) => {
@@ -210,19 +215,19 @@ const personalEvents: CalendarEvent[] = [
 ]
 
 interface PersonalCalendarProps {
-  editable?: boolean
   calendarType?: CalendarType
   userRole?: UserRole
-  labels?: Etiquette[]
+  _user?: User | null
   onLabelsChange?: (labels: Etiquette[]) => void
 }
 
 export default function PersonalCalendar({
-  editable = true,
   calendarType = "personal",
   userRole = "user",
+  _user,
 }: PersonalCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(personalEvents)
+  const [editable, setEditable] = useState(false)
   const calendarManager = useCalendarManager("personal")
   const permissions = useCalendarPermissions(calendarType, userRole)
 
@@ -243,6 +248,10 @@ export default function PersonalCalendar({
     )
   }, [events, calendarManager])
 
+  const toggleEditMode = () => {
+    setEditable(!editable)
+  }
+
   const handleEventAdd = (event: CalendarEvent) => {
     setEvents([...events, event])
   }
@@ -261,6 +270,36 @@ export default function PersonalCalendar({
 
   return (
     <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Mi Calendario", isCurrentPage: true },
+        ]}
+        action={
+          <Button
+            variant={editable ? "outline" : "default"}
+            onClick={toggleEditMode}
+            className="flex items-center gap-2"
+            title={
+              editable
+                ? "Cambiar a modo solo lectura - No podrás editar eventos"
+                : "Habilitar edición - Podrás crear, editar y eliminar eventos"
+            }
+          >
+            {editable ? (
+              <>
+                <Eye />
+                Lectura
+              </>
+            ) : (
+              <>
+                <Edit />
+                Editar
+              </>
+            )}
+          </Button>
+        }
+      />
       <EtiquettesHeader
         etiquettes={personalEtiquettes}
         isEtiquetteVisible={calendarManager.isEtiquetteVisible}

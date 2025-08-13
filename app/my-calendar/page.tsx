@@ -1,52 +1,13 @@
-"use client"
-
-import { Edit, Eye } from "lucide-react"
-import { useState } from "react"
-
+import { AuthRequired } from "@/components/auth/auth-required"
 import PersonalCalendar from "@/components/calendars/personal-calendar"
-import { PageHeader } from "@/components/page-header"
-import { Button } from "@/components/ui/button"
+import { getUser } from "@/lib/auth"
 
-export default function Page() {
-  const [isEditable, setIsEditable] = useState(false)
+export default async function MyCalendarClient() {
+  const user = await getUser()
 
-  const toggleEditMode = () => {
-    setIsEditable(!isEditable)
+  if (!user) {
+    return <AuthRequired />
   }
 
-  return (
-    <>
-      <PageHeader
-        breadcrumbs={[
-          { label: "Inicio", href: "/" },
-          { label: "Mi Calendario", isCurrentPage: true },
-        ]}
-        action={
-          <Button
-            variant={isEditable ? "outline" : "default"}
-            onClick={toggleEditMode}
-            className="flex items-center gap-2"
-            title={
-              isEditable
-                ? "Cambiar a modo solo lectura - No podrás editar eventos"
-                : "Habilitar edición - Podrás crear, editar y eliminar eventos"
-            }
-          >
-            {isEditable ? (
-              <>
-                <Eye />
-                Lectura
-              </>
-            ) : (
-              <>
-                <Edit />
-                Editar
-              </>
-            )}
-          </Button>
-        }
-      />
-      <PersonalCalendar editable={isEditable} />
-    </>
-  )
+  return <PersonalCalendar _user={user} />
 }

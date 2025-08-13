@@ -1,18 +1,18 @@
-import { Home, MonitorX } from "lucide-react"
+import { Lock } from "lucide-react"
 import Link from "next/link"
 
-import { PageHeader } from "@/components/page-header"
-import { Button } from "@/components/ui/button"
+import { PageHeader } from "../page-header"
+import { Button } from "../ui/button"
 
-export default function NotFound() {
-  const breadcrumbs = [
-    { label: "Inicio", href: "/" },
-    { label: "404", isCurrentPage: true },
-  ]
-
+export function AuthRequired() {
   return (
     <>
-      <PageHeader breadcrumbs={breadcrumbs} />
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Acceso restringido", isCurrentPage: true },
+        ]}
+      />
       <main className="flex min-h-[70vh] w-full items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm space-y-10 text-center">
           {/* Header Section */}
@@ -20,9 +20,9 @@ export default function NotFound() {
             {/* Icon with elegant background */}
             <div className="flex justify-center">
               <div className="relative">
-                <div className="bg-destructive/10 absolute inset-0 scale-150 rounded-full blur-xl"></div>
-                <div className="from-destructive/5 to-destructive/10 border-destructive/20 relative rounded-2xl border bg-gradient-to-br p-6 shadow-sm">
-                  <MonitorX className="text-destructive size-8" />
+                <div className="absolute inset-0 scale-150 rounded-full bg-amber-500/10 blur-xl"></div>
+                <div className="relative rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-amber-500/10 p-6 shadow-sm">
+                  <Lock className="size-8 text-amber-600 dark:text-amber-400" />
                 </div>
               </div>
             </div>
@@ -30,10 +30,10 @@ export default function NotFound() {
             {/* Title and Description */}
             <div className="space-y-3">
               <h1 className="text-foreground text-2xl font-semibold tracking-tight">
-                Página no encontrada
+                Acceso restringido
               </h1>
               <p className="text-muted-foreground mx-auto max-w-xs text-sm leading-relaxed">
-                La página que intentas visitar no existe o cambió de ubicación.
+                Esta página requiere autenticación para acceder a su contenido.
               </p>
             </div>
           </div>
@@ -42,23 +42,20 @@ export default function NotFound() {
           <div className="space-y-6">
             <Button
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 w-full gap-2 rounded-xl font-medium shadow-sm transition-all duration-200 hover:shadow-md"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 w-full rounded-xl font-medium shadow-sm transition-all duration-200 hover:shadow-md"
               asChild
             >
-              <Link href="/">
-                <Home className="h-4 w-4" />
-                Volver al inicio
-              </Link>
+              <Link href="/auth/login">Iniciar sesión</Link>
             </Button>
 
             {/* Footer */}
             <div className="border-border/30 border-t pt-4 text-center">
               <p className="text-muted-foreground/80 text-xs">
-                Usa el{" "}
+                Usa tu correo institucional{" "}
                 <span className="text-muted-foreground font-medium">
-                  panel lateral
+                  (@unal.edu.co)
                 </span>{" "}
-                para navegar
+                para acceder
               </p>
             </div>
           </div>

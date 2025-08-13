@@ -1,13 +1,40 @@
-import { Account, Client, Databases, Storage } from "appwrite"
+import { Account, Client, Databases } from "node-appwrite"
 
-const client = new Client()
+const createAdminClient = async () => {
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+    .setKey(process.env.NEXT_APPWRITE_KEY!)
 
-client
-  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-  .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+  return {
+    get account() {
+      return new Account(client)
+    },
 
-export const account = new Account(client)
-export const databases = new Databases(client)
-export const storage = new Storage(client)
+    get databases() {
+      return new Databases(client)
+    },
+  }
+}
 
-export { client }
+const createSessionClient = async (session: string) => {
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+
+  if (session) {
+    client.setSession(session)
+  }
+
+  return {
+    get account() {
+      return new Account(client)
+    },
+
+    get databases() {
+      return new Databases(client)
+    },
+  }
+}
+
+export { createAdminClient, createSessionClient }
