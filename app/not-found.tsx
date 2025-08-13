@@ -15,9 +15,7 @@ export default function NotFound() {
       <PageHeader breadcrumbs={breadcrumbs} />
       <main className="flex min-h-[70vh] w-full items-center justify-center px-6 py-16">
         <div className="w-full max-w-md space-y-10 text-center">
-          {/* Header Section */}
           <div className="space-y-6">
-            {/* Icon with elegant background */}
             <div className="flex justify-center">
               <div className="relative">
                 <div className="bg-destructive/10 absolute inset-0 scale-150 rounded-full blur-xl"></div>

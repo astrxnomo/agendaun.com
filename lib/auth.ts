@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { ID } from "node-appwrite"
 
 import { createAdminClient, createSessionClient } from "./appwrite"
 
@@ -24,7 +25,6 @@ export async function sendMagicLink(
 ): Promise<{ success: boolean; error?: string }> {
   const data = Object.fromEntries(formData)
   const email = data.email as string
-  const from = data.from as string
 
   if (!email || typeof email !== "string") {
     return { success: false, error: "invalid_email" }
@@ -33,11 +33,10 @@ export async function sendMagicLink(
   const { account } = await createAdminClient()
 
   try {
-    // Usar NEXT_PUBLIC_SITE_URL para construir la URL del callback
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-    const callbackUrl = `${baseUrl}/auth/callback${from ? `?from=${encodeURIComponent(from)}` : ""}`
+    const callbackUrl = `${baseUrl}/auth/callback`
 
-    await account.createMagicURLToken("unique()", email, callbackUrl)
+    await account.createMagicURLToken(ID.unique(), email, callbackUrl)
     return { success: true }
   } catch (error) {
     console.error("Error sending magic link:", error)
