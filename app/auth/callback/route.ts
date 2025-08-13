@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
 
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
   // Si no hay parámetros, redirigir al login con error
   if (!userId || !secret) {
     const loginUrl = new URL(
-      "/login",
+      "/auth/login",
       process.env.NEXT_PUBLIC_SITE_URL || request.url,
     )
     loginUrl.searchParams.set("error", "invalid_token")
@@ -29,10 +30,12 @@ export async function GET(request: NextRequest) {
         const { account: sessionAccount } = await createSessionClient(
           existingSession.value,
         )
-        await sessionAccount.get() // Si esto funciona, ya hay una sesión válida
+        await sessionAccount.get()
 
-        // Redirigir a la página solicitada o al inicio
-        const redirectUrl = from ? decodeURIComponent(from) : "/"
+        // Revalidar para actualizar el estado de autenticación
+        revalidatePath("/", "layout")
+
+        const redirectUrl = from ? decodeURIComponent(from) : "/my-calendar"
         const finalUrl = new URL(
           redirectUrl,
           process.env.NEXT_PUBLIC_SITE_URL || request.url,
@@ -64,6 +67,9 @@ export async function GET(request: NextRequest) {
       expires: new Date(session.expire),
       path: "/",
     })
+
+    // Revalidar para actualizar el estado de autenticación
+    revalidatePath("/", "layout")
 
     return response
   } catch (error) {

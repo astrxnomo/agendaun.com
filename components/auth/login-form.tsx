@@ -1,6 +1,6 @@
 "use client"
 
-import { Loader2, Mail, MailCheck, Shield } from "lucide-react"
+import { Loader2, Mail, MailCheck, RotateCw, Shield } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
@@ -138,12 +138,12 @@ export default function LoginForm({
             {/* Title and Description */}
             <div className="space-y-3">
               <h1 className="text-foreground text-2xl font-semibold tracking-tight">
-                {emailSent ? "¡Enlace Enviado!" : "Iniciar Sesión"}
+                {emailSent ? "¡Enlace enviado!" : "Iniciar sesión"}
               </h1>
-              <p className="text-muted-foreground mx-auto max-w-xs text-sm leading-relaxed">
+              <p className="text-muted-foreground mx-auto text-sm leading-relaxed">
                 {emailSent
-                  ? "Revisa tu correo y haz clic en el enlace para acceder a tu cuenta"
-                  : "Ingresa tu correo institucional para acceder a AgendaUN"}
+                  ? "Revisa tu correo y haz clic en el enlace para acceder"
+                  : "Ingresa tu correo institucional para acceder"}
               </p>
             </div>
           </div>
@@ -210,12 +210,15 @@ export default function LoginForm({
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Enviando enlace...</span>
-                  </div>
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Enviando enlace...
+                  </>
                 ) : (
-                  "Enviar enlace de acceso"
+                  <>
+                    <Mail />
+                    Enviar enlace de acceso
+                  </>
                 )}
               </Button>
             </form>
@@ -224,9 +227,7 @@ export default function LoginForm({
               {/* Success Message */}
               <div className="bg-primary/5 border-primary/20 rounded border p-5 backdrop-blur-sm">
                 <div className="space-y-2 text-center">
-                  <p className="text-primary/90 text-sm font-medium">
-                    Enlace enviado a
-                  </p>
+                  <p className="text-sm">Enlace enviado a</p>
                   <p className="text-primary text-sm font-semibold">{email}</p>
                 </div>
               </div>
@@ -247,7 +248,8 @@ export default function LoginForm({
                   }}
                   className="border-border/50 hover:bg-muted/50 h-11 w-full rounded transition-all duration-200"
                 >
-                  Enviar a otro correo
+                  <RotateCw />
+                  Enviar otro enlace
                 </Button>
               </div>
             </div>
@@ -256,11 +258,7 @@ export default function LoginForm({
           {/* Footer */}
           <div className="border-border/30 border-t pt-8 text-center">
             <p className="text-muted-foreground/80 text-xs">
-              Solo estudiantes y personal de la{" "}
-              <span className="text-muted-foreground font-medium">
-                Universidad Nacional
-              </span>{" "}
-              pueden acceder
+              Enviaremos un enlace de acceso a tu correo institucional
             </p>
           </div>
         </div>

@@ -5,6 +5,7 @@ const createAdminClient = async () => {
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
     .setKey(process.env.NEXT_APPWRITE_KEY!)
+    .setLocale("es-co")
 
   return {
     get account() {
@@ -21,6 +22,7 @@ const createSessionClient = async (session: string) => {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+    .setLocale("es-co")
 
   if (session) {
     client.setSession(session)

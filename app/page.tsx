@@ -17,8 +17,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
 export default function DashboardIntro() {
-  const breadcrumbs = [{ label: "Inicio", href: "/", isCurrentPage: true }]
-
   const quickLinks = [
     {
       title: "Mi calendario",
@@ -62,10 +60,12 @@ export default function DashboardIntro() {
 
   return (
     <>
-      <PageHeader breadcrumbs={breadcrumbs} />
-      <main className="flex flex-1 flex-col px-4 py-4 md:px-10 lg:px-20 xl:px-40">
+      <PageHeader
+        breadcrumbs={[{ label: "Inicio", href: "/", isCurrentPage: true }]}
+      />
+      <main className="flex flex-1 flex-col items-center p-4 lg:p-10">
         {/* Hero introductorio */}
-        <section className="from-primary/5 to-background mb-20 flex flex-col items-center gap-18 overflow-hidden rounded-xl bg-gradient-to-br px-8 py-14 md:flex-row md:px-16">
+        <section className="from-primary/5 to-background mb-20 flex flex-col items-center gap-20 overflow-hidden rounded bg-gradient-to-br px-8 py-14 md:flex-row md:px-16">
           <div className="max-w-2xl">
             <h1 className="mb-4 text-4xl leading-tight font-bold tracking-tight md:text-5xl">
               Mantente al día de lo que pasa en la{" "}
@@ -93,8 +93,8 @@ export default function DashboardIntro() {
               </Button>
             </div>
           </div>
-          <div className="hidden w-full max-w-sm md:block">
-            <div className="bg-background/70 rounded-xl p-8 shadow-lg backdrop-blur-sm">
+          <div className="hidden w-full max-w-sm lg:block">
+            <div className="bg-background/70 rounded p-8 shadow-lg backdrop-blur-sm">
               <h3 className="mb-2 text-lg font-semibold">
                 Cómo aprovechar AgendaUN
               </h3>
@@ -150,7 +150,7 @@ export default function DashboardIntro() {
         </section>
 
         {/* Accesos rápidos */}
-        <section className="mb-20">
+        <section className="mb-20 md:px-16">
           <div className="mb-8 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">Accesos rápidos</h2>
@@ -169,7 +169,7 @@ export default function DashboardIntro() {
                 <Link
                   key={link.title}
                   href={link.href}
-                  className="group bg-muted/40 hover:bg-muted/60 hover:border-primary/30 relative overflow-hidden rounded-xl border border-transparent p-6 transition-all duration-200 hover:shadow-xl"
+                  className="group bg-muted/40 hover:bg-muted/60 hover:border-primary/30 relative overflow-hidden rounded border border-transparent p-6 transition-all duration-200 hover:shadow-xl"
                 >
                   <div className="relative flex items-start gap-4">
                     <span className="bg-primary/10 text-primary rounded-lg p-3">

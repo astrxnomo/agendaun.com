@@ -50,7 +50,7 @@ const calendarLinks = [
   },
 ]
 
-export default function CalendarPage() {
+export default function Page() {
   return (
     <>
       <PageHeader

@@ -45,7 +45,7 @@ export default async function RootLayout({
               </SidebarInset>
             </SidebarProvider>
           </CalendarProvider>
-          <Toaster position="bottom-right" />
+          <Toaster position="bottom-right" richColors />
         </ThemeProvider>
       </body>
     </html>

@@ -14,7 +14,7 @@ export default function NotFound() {
     <>
       <PageHeader breadcrumbs={breadcrumbs} />
       <main className="flex min-h-[70vh] w-full items-center justify-center px-6 py-16">
-        <div className="w-full max-w-sm space-y-10 text-center">
+        <div className="w-full max-w-md space-y-10 text-center">
           {/* Header Section */}
           <div className="space-y-6">
             {/* Icon with elegant background */}
@@ -27,31 +27,24 @@ export default function NotFound() {
               </div>
             </div>
 
-            {/* Title and Description */}
             <div className="space-y-3">
               <h1 className="text-foreground text-2xl font-semibold tracking-tight">
                 Página no encontrada
               </h1>
-              <p className="text-muted-foreground mx-auto max-w-xs text-sm leading-relaxed">
+              <p className="text-muted-foreground mx-auto text-sm leading-relaxed">
                 La página que intentas visitar no existe o cambió de ubicación.
               </p>
             </div>
           </div>
 
-          {/* Button */}
           <div className="space-y-6">
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 w-full gap-2 rounded-xl font-medium shadow-sm transition-all duration-200 hover:shadow-md"
-              asChild
-            >
+            <Button variant="outline" asChild>
               <Link href="/">
-                <Home className="h-4 w-4" />
-                Volver al inicio
+                <Home />
+                Inicio
               </Link>
             </Button>
 
-            {/* Footer */}
             <div className="border-border/30 border-t pt-4 text-center">
               <p className="text-muted-foreground/80 text-xs">
                 Usa el{" "}

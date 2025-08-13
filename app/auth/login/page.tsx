@@ -13,14 +13,12 @@ interface LoginPageProps {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const user = await getUser()
 
-  // Si ya está autenticado, redirigir
   if (user) {
     const params = await searchParams
-    const redirectTo = params?.from || "/"
+    const redirectTo = params?.from || "/my-calendar"
     redirect(redirectTo)
   }
 
-  // Resolver searchParams para pasarlos al componente cliente
   const resolvedSearchParams = await searchParams
 
   return <LoginForm searchParams={resolvedSearchParams} />

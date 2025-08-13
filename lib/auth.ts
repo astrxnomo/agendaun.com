@@ -3,9 +3,9 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
-import { type User } from "@/types/auth"
-
 import { createAdminClient, createSessionClient } from "./appwrite"
+
+import type { User } from "@/types/auth"
 
 export async function getUser(): Promise<User | null> {
   const cookieStore = await cookies()
@@ -57,5 +57,5 @@ export async function deleteSession(): Promise<void> {
   }
 
   cookieStore.delete("session")
-  redirect("/login")
+  redirect("/")
 }

@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react"
+import { Lock, LogIn } from "lucide-react"
 import Link from "next/link"
 
 import { PageHeader } from "../page-header"
@@ -14,7 +14,7 @@ export function AuthRequired() {
         ]}
       />
       <main className="flex min-h-[70vh] w-full items-center justify-center px-6 py-16">
-        <div className="w-full max-w-sm space-y-10 text-center">
+        <div className="w-full max-w-md space-y-8 text-center">
           {/* Header Section */}
           <div className="space-y-6">
             {/* Icon with elegant background */}
@@ -32,20 +32,19 @@ export function AuthRequired() {
               <h1 className="text-foreground text-2xl font-semibold tracking-tight">
                 Acceso restringido
               </h1>
-              <p className="text-muted-foreground mx-auto max-w-xs text-sm leading-relaxed">
-                Esta página requiere autenticación para acceder a su contenido.
+              <p className="text-muted-foreground mx-auto text-sm leading-relaxed">
+                Necesitas iniciar sesión para acceder a esta página
               </p>
             </div>
           </div>
 
           {/* Button */}
           <div className="space-y-6">
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 w-full rounded-xl font-medium shadow-sm transition-all duration-200 hover:shadow-md"
-              asChild
-            >
-              <Link href="/auth/login">Iniciar sesión</Link>
+            <Button size="lg" asChild>
+              <Link href="/auth/login">
+                <LogIn />
+                Iniciar sesión
+              </Link>
             </Button>
 
             {/* Footer */}

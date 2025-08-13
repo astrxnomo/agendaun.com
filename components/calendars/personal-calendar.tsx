@@ -19,16 +19,14 @@ import { Button } from "@/components/ui/button"
 
 import type { User } from "@/types/auth"
 
-// Función para calcular días hasta el próximo lunes
 const getDaysUntilNextMonday = (date: Date) => {
-  const day = getDay(date) // 0 es domingo, 1 es lunes, 6 es sábado
+  const day = getDay(date)
   return day === 1 ? 0 : day === 0 ? 1 : 8 - day
 }
 
 const currentDate = new Date()
 const daysUntilNextMonday = getDaysUntilNextMonday(currentDate)
 
-// Etiquetas personalizadas para el calendario personal
 export const personalEtiquettes: Etiquette[] = [
   { id: "materias", name: "Materias", color: "blue", isActive: true },
   { id: "reuniones", name: "Reuniones", color: "orange", isActive: true },
@@ -44,7 +42,6 @@ export const personalEtiquettes: Etiquette[] = [
   },
 ]
 
-// Eventos de ejemplo para Mi Calendario con etiquetas personalizadas
 const personalEvents: CalendarEvent[] = [
   {
     id: "calculo-1",
@@ -197,7 +194,6 @@ const personalEvents: CalendarEvent[] = [
     color: "pink",
     location: "Cafetería Universitaria",
   },
-  // Evento sin etiqueta para probar
   {
     id: "evento-sin-etiqueta",
     title: "Evento Sin etiqueta",
@@ -231,7 +227,6 @@ export default function PersonalCalendar({
   const calendarManager = useCalendarManager("personal")
   const permissions = useCalendarPermissions(calendarType, userRole)
 
-  // Initialize etiquettes for this calendar only once using useEffect
   const etiquettesInitialized = useRef(false)
 
   useEffect(() => {
@@ -241,7 +236,6 @@ export default function PersonalCalendar({
     }
   }, [calendarManager])
 
-  // Filter events based on visible colors
   const visibleEvents = useMemo(() => {
     return events.filter((event) =>
       calendarManager.isEtiquetteVisible(event.color),
