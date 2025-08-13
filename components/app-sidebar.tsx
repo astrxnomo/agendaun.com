@@ -122,7 +122,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/calendar/nacional">
+                        <Link href="/calendar/national">
                           <Landmark className="size-4" />
                           <span>Nacional</span>
                         </Link>

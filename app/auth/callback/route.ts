@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
 
   // Si no hay parámetros, redirigir al login con error
   if (!userId || !secret) {
-    const loginUrl = new URL("/auth/login", request.url)
+    const loginUrl = new URL(
+      "/login",
+      process.env.NEXT_PUBLIC_SITE_URL || request.url,
+    )
     loginUrl.searchParams.set("error", "invalid_token")
     return NextResponse.redirect(loginUrl)
   }
@@ -30,7 +33,11 @@ export async function GET(request: NextRequest) {
 
         // Redirigir a la página solicitada o al inicio
         const redirectUrl = from ? decodeURIComponent(from) : "/"
-        return NextResponse.redirect(new URL(redirectUrl, request.url))
+        const finalUrl = new URL(
+          redirectUrl,
+          process.env.NEXT_PUBLIC_SITE_URL || request.url,
+        )
+        return NextResponse.redirect(finalUrl)
       } catch {
         // La sesión existente no es válida, continuar con la nueva
         cookieStore.delete("session")
@@ -43,7 +50,11 @@ export async function GET(request: NextRequest) {
 
     // Crear la respuesta de redirección
     const redirectUrl = from ? decodeURIComponent(from) : "/"
-    const response = NextResponse.redirect(new URL(redirectUrl, request.url))
+    const finalUrl = new URL(
+      redirectUrl,
+      process.env.NEXT_PUBLIC_SITE_URL || request.url,
+    )
+    const response = NextResponse.redirect(finalUrl)
 
     // Establecer la cookie de sesión en la respuesta
     response.cookies.set("session", session.secret, {
@@ -59,7 +70,10 @@ export async function GET(request: NextRequest) {
     console.error("Auth callback error:", error)
 
     // Redirigir al login con error
-    const loginUrl = new URL("/auth/login", request.url)
+    const loginUrl = new URL(
+      "/auth/login",
+      process.env.NEXT_PUBLIC_SITE_URL || request.url,
+    )
     loginUrl.searchParams.set("error", "auth_failed")
     return NextResponse.redirect(loginUrl)
   }
