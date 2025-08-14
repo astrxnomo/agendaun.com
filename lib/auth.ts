@@ -33,10 +33,10 @@ export async function sendMagicLink(
   const { account } = await createAdminClient()
 
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-    const callbackUrl = `${baseUrl}/auth/callback`
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
+    const verifyUrl = `${baseUrl}/auth/verify`
 
-    await account.createMagicURLToken(ID.unique(), email, callbackUrl)
+    await account.createMagicURLToken(ID.unique(), email, verifyUrl)
     return { success: true }
   } catch (error) {
     console.error("Error sending magic link:", error)
@@ -57,4 +57,18 @@ export async function deleteSession(): Promise<void> {
 
   cookieStore.delete("session")
   redirect("/")
+}
+
+export async function createSession(userId: string, secret: string) {
+  const { account } = await createAdminClient()
+  const session = await account.createSession(userId, secret)
+
+  const cookieStore = await cookies()
+  cookieStore.set("session", session.secret, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    expires: new Date(session.expire),
+    path: "/",
+  })
 }

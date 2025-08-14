@@ -13,11 +13,10 @@ export function AuthRequired() {
           { label: "Acceso restringido", isCurrentPage: true },
         ]}
       />
+
       <main className="flex min-h-[70vh] w-full items-center justify-center px-6 py-16">
         <div className="w-full max-w-md space-y-8 text-center">
-          {/* Header Section */}
           <div className="space-y-6">
-            {/* Icon with elegant background */}
             <div className="flex justify-center">
               <div className="relative">
                 <div className="absolute inset-0 scale-150 rounded-full bg-amber-500/10 blur-xl"></div>
@@ -27,7 +26,6 @@ export function AuthRequired() {
               </div>
             </div>
 
-            {/* Title and Description */}
             <div className="space-y-3">
               <h1 className="text-foreground text-2xl font-semibold tracking-tight">
                 Acceso restringido
@@ -38,7 +36,6 @@ export function AuthRequired() {
             </div>
           </div>
 
-          {/* Button */}
           <div className="space-y-6">
             <Button size="lg" asChild>
               <Link href="/auth/login">
@@ -47,7 +44,6 @@ export function AuthRequired() {
               </Link>
             </Button>
 
-            {/* Footer */}
             <div className="border-border/30 border-t pt-4 text-center">
               <p className="text-muted-foreground/80 text-xs">
                 Usa tu correo institucional{" "}

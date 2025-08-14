@@ -5,14 +5,15 @@ import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 
 export default function NotFound() {
-  const breadcrumbs = [
-    { label: "Inicio", href: "/" },
-    { label: "404", isCurrentPage: true },
-  ]
-
   return (
     <>
-      <PageHeader breadcrumbs={breadcrumbs} />
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "404", isCurrentPage: true },
+        ]}
+      />
+
       <main className="flex min-h-[70vh] w-full items-center justify-center px-6 py-16">
         <div className="w-full max-w-md space-y-10 text-center">
           <div className="space-y-6">
