@@ -1,10 +1,10 @@
 import { Lock, LogIn } from "lucide-react"
 import Link from "next/link"
 
-import { PageHeader } from "../page-header"
-import { Button } from "../ui/button"
+import { PageHeader } from "@/components/page-header"
+import { Button } from "@/components/ui/button"
 
-export function AuthRequired() {
+export default function UnauthorizedPage() {
   return (
     <>
       <PageHeader

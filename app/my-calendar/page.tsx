@@ -1,4 +1,5 @@
-import { AuthRequired } from "@/components/auth/auth-required"
+import { redirect } from "next/navigation"
+
 import PersonalCalendar from "@/components/calendars/personal-calendar"
 import { getUser } from "@/lib/auth"
 
@@ -6,7 +7,7 @@ export default async function Page() {
   const user = await getUser()
 
   if (!user) {
-    return <AuthRequired />
+    redirect("/auth/unauthorized")
   }
 
   return <PersonalCalendar _user={user} />
