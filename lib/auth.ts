@@ -62,12 +62,12 @@ export async function deleteSession(): Promise<void> {
 export async function createSession(userId: string, secret: string) {
   const { account } = await createAdminClient()
   const session = await account.createSession(userId, secret)
-
   const cookieStore = await cookies()
+
   cookieStore.set("session", session.secret, {
     httpOnly: true,
     sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     expires: new Date(session.expire),
     path: "/",
   })
