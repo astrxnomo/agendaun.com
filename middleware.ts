@@ -1,29 +1,52 @@
+// middleware.ts
 import { NextResponse } from "next/server"
+
+import { createSessionClient } from "@/lib/appwrite"
 
 import type { NextRequest } from "next/server"
 
-// Rutas que requieren autenticación (pero se manejan en el componente)
-const protectedRoutes = ["/my-calendar", "/profile", "/settings"]
-
-// Rutas públicas que no requieren autenticación
-const publicRoutes = ["/", "/calendar", "/schedules", "/login", "/auth"]
+const protectedRoutes = ["/profile", "/settings", "/calendars/my-calendar"]
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const sessionCookie = request.cookies.get("session")?.value
 
-  // Permitir todas las rutas - la autenticación se maneja en los componentes
+  if (pathname.startsWith("/auth")) {
+    if (sessionCookie) {
+      try {
+        const { account } = await createSessionClient(sessionCookie)
+        await account.get()
+        return NextResponse.redirect(
+          new URL("/calendars/my-calendar", request.url),
+        )
+      } catch {}
+    }
+    return NextResponse.next()
+  }
+
+  const isProtectedRoute =
+    pathname.startsWith("/calendars") || protectedRoutes.includes(pathname)
+
+  if (isProtectedRoute) {
+    if (!sessionCookie) {
+      return NextResponse.redirect(new URL("/auth/unauthorized", request.url))
+    }
+    try {
+      const { account } = await createSessionClient(sessionCookie)
+      await account.get()
+      return NextResponse.next()
+    } catch {
+      const response = NextResponse.redirect(
+        new URL("/auth/unauthorized", request.url),
+      )
+      response.cookies.delete("session")
+      return response
+    }
+  }
+
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }
