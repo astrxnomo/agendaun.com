@@ -1,11 +1,10 @@
-// middleware.ts
 import { NextResponse } from "next/server"
 
 import { createSessionClient } from "@/lib/appwrite"
 
 import type { NextRequest } from "next/server"
 
-const protectedRoutes = ["/profile", "/settings", "/calendars/my-calendar"]
+const protectedRoutes = ["/admin"]
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

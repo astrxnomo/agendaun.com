@@ -51,9 +51,3 @@ export interface Session {
   factors: string[]
   secret: string
 }
-
-export interface AuthError {
-  message: string
-  code?: number
-  type?: string
-}

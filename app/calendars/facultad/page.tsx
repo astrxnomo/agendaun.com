@@ -7,7 +7,7 @@ export default function FacultadCalendarPage() {
       <PageHeader
         breadcrumbs={[
           { label: "Inicio", href: "/" },
-          { label: "Calendarios", href: "/calendar" },
+          { label: "Calendarios", href: "/calendars" },
           { label: "Facultad", isCurrentPage: true },
         ]}
       />

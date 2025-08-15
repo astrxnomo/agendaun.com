@@ -1,14 +1,170 @@
-import { redirect } from "next/navigation"
+"use client"
 
-import LoginForm from "@/components/auth/login-form"
-import { getUser } from "@/lib/auth"
+import { Loader2, Mail, MailCheck, RotateCw } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
 
-export default async function LoginPage() {
-  const user = await getUser()
+import { PageHeader } from "@/components/page-header"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { sendMagicLink } from "@/lib/auth"
 
-  if (user) {
-    redirect("/my-calendar")
+import type React from "react"
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!email.trim()) {
+      return toast.error("Por favor ingresa tu correo electrónico")
+    }
+
+    if (!email.endsWith("@unal.edu.co")) {
+      return toast.error("Debes usar tu correo institucional (@unal.edu.co)")
+    }
+
+    setIsLoading(true)
+
+    try {
+      const formData = new FormData()
+      formData.append("email", email)
+
+      const result = await sendMagicLink(formData)
+
+      if (result.success) {
+        setEmailSent(true)
+        toast.success("¡Enlace enviado! Revisa tu correo electrónico")
+      } else {
+        toast.error("No se pudo enviar el enlace. Intenta de nuevo.")
+      }
+    } catch {
+      toast.error("Error enviando el enlace de acceso")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  return <LoginForm />
+  return (
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Iniciar sesión", isCurrentPage: true },
+        ]}
+      />
+
+      <main className="flex min-h-[75vh] w-full items-center justify-center px-6 py-16">
+        <div className="w-full max-w-sm space-y-10">
+          {/* Header Section */}
+          <div className="space-y-6 text-center">
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="bg-primary/10 absolute inset-0 scale-150 rounded-full blur-xl"></div>
+                <div
+                  className={`from-primary/5 to-primary/10 border-primary/10 relative rounded-2xl border bg-gradient-to-br p-6 shadow-sm ${emailSent ? "animate-pulse" : ""}`}
+                >
+                  {emailSent ? (
+                    <MailCheck className="text-primary size-8" />
+                  ) : (
+                    <Mail className="text-primary size-8" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="text-foreground text-2xl font-semibold tracking-tight">
+                {emailSent ? "¡Enlace enviado!" : "Iniciar sesión"}
+              </h1>
+              <p className="text-muted-foreground mx-auto text-sm leading-relaxed">
+                {emailSent
+                  ? "Revisa tu correo y haz clic en el enlace para acceder"
+                  : "Ingresa tu correo institucional para acceder"}
+              </p>
+            </div>
+          </div>
+
+          {!emailSent ? (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-3">
+                <Label
+                  htmlFor="email"
+                  className="text-foreground text-sm font-medium"
+                >
+                  Correo institucional
+                </Label>
+                <Input
+                  id="email"
+                  placeholder="usuario@unal.edu.co"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  required
+                  className="bg-background/50 border-border/50 focus:border-primary/50 focus:ring-primary/20 placeholder:text-muted-foreground/60 h-12 rounded px-4 transition-all duration-200"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 w-full rounded font-medium shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Enviando enlace...
+                  </>
+                ) : (
+                  <>
+                    <Mail />
+                    Enviar enlace de acceso
+                  </>
+                )}
+              </Button>
+            </form>
+          ) : (
+            <div className="space-y-6">
+              <div className="bg-primary/5 border-primary/20 rounded border p-5 backdrop-blur-sm">
+                <div className="space-y-2 text-center">
+                  <p className="text-sm">Enlace enviado a</p>
+                  <p className="text-primary text-sm font-semibold">{email}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-center">
+                <p className="text-muted-foreground text-xs">
+                  El enlace expira en{" "}
+                  <span className="font-medium">1 hora</span>
+                </p>
+
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEmailSent(false)
+                    setEmail("")
+                  }}
+                  className="border-border/50 hover:bg-muted/50 h-11 w-full rounded transition-all duration-200"
+                >
+                  <RotateCw />
+                  Enviar otro enlace
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="border-border/30 border-t pt-8 text-center">
+            <p className="text-muted-foreground/80 text-xs">
+              Enviaremos un enlace de acceso a tu correo institucional
+            </p>
+          </div>
+        </div>
+      </main>
+    </>
+  )
 }

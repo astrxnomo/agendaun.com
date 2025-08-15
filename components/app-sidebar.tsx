@@ -47,16 +47,10 @@ import type { User } from "@/types/auth"
 import type React from "react"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  user?: User | null // Usuario desde SSR
+  user?: User | null
 }
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
-  const handleFiltersChange = (filters: any) => {
-    // Aquí puedes manejar los cambios de filtros
-    // Por ejemplo, guardar en localStorage o enviar al servidor
-    console.log("Filtros actualizados:", filters)
-  }
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -85,7 +79,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
               </Link>
             </SidebarMenuButton>
             <SidebarMenuButton asChild tooltip="Mi calendario">
-              <Link href="/my-calendar">
+              <Link href="/calendars/my-calendar">
                 <Calendar />
                 <span>Mi calendario</span>
               </Link>
@@ -97,7 +91,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
           <SidebarGroupLabel>Universidad</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuButton asChild tooltip="Agenda">
-              <Link href="/calendar">
+              <Link href="/calendars">
                 <BookMarked />
                 <span>Agenda</span>
               </Link>
@@ -107,7 +101,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
             <Collapsible asChild defaultOpen={true}>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Calendarios">
-                  <Link href="/calendar">
+                  <Link href="/calendars">
                     <CalendarDays />
                     <span>Calendarios</span>
                   </Link>
@@ -122,7 +116,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/calendar/national">
+                        <Link href="/calendars/national">
                           <Landmark className="size-4" />
                           <span>Nacional</span>
                         </Link>
@@ -130,7 +124,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/calendar/sede">
+                        <Link href="/calendars/sede">
                           <School />
                           <span>Sede</span>
                         </Link>
@@ -138,7 +132,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/calendar/facultad">
+                        <Link href="/calendars/facultad">
                           <University />
                           <span>Facultad</span>
                         </Link>
@@ -146,7 +140,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/calendar/programa">
+                        <Link href="/calendars/programa">
                           <GraduationCap />
                           <span>Programa</span>
                         </Link>
@@ -228,11 +222,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <ConfigFilterButton
-          variant="sidebar"
-          user={user}
-          onFiltersChange={handleFiltersChange}
-        />
+        <ConfigFilterButton variant="sidebar" user={user} />
         <NavUser user={user} />
         {!user && (
           <SidebarMenu>

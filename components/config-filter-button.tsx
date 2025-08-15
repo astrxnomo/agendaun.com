@@ -326,10 +326,6 @@ export default function ConfigFilterButton({
   // Determinar si mostrar badges (solo en nav y no mobile)
   const showBadges = variant === "nav"
 
-  // Determinar el tamaño y variante del botón
-  const buttonSize = variant === "sidebar" ? "sm" : "sm"
-  const showText = variant === "nav"
-
   // Contenido del diálogo
   const renderDialogContent = () => (
     <DialogContent className="sm:max-w-md">
@@ -614,7 +610,6 @@ export default function ConfigFilterButton({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
-            size={buttonSize}
             className={
               !isConfigComplete
                 ? "relative animate-pulse border border-dashed border-amber-300 bg-amber-500 text-white hover:bg-amber-500/90 dark:border-amber-500 dark:bg-amber-500 dark:hover:bg-amber-500/90"
@@ -623,7 +618,7 @@ export default function ConfigFilterButton({
             aria-label="Configuración académica"
           >
             <School size={16} />
-            {showText && "Mi sede"}
+            Mi sede
             {!isConfigComplete && (
               <Badge
                 variant="secondary"

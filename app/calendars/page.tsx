@@ -14,7 +14,7 @@ import { PageHeader } from "@/components/page-header"
 const calendarLinks = [
   {
     title: "Nacional",
-    href: "/calendar/national",
+    href: "/calendars/national",
     icon: Landmark,
     description: "Festividades y días festivos oficiales",
     details:
@@ -23,7 +23,7 @@ const calendarLinks = [
   },
   {
     title: "Sede",
-    href: "/calendar/sede",
+    href: "/calendars/sede",
     icon: School,
     description: "Eventos específicos de tu sede",
     details:
@@ -32,7 +32,7 @@ const calendarLinks = [
   },
   {
     title: "Facultad",
-    href: "/calendar/facultad",
+    href: "/calendars/facultad",
     icon: University,
     description: "Eventos académicos de tu facultad",
     details:
@@ -41,7 +41,7 @@ const calendarLinks = [
   },
   {
     title: "Programa",
-    href: "/calendar/programa",
+    href: "/calendars/programa",
     icon: GraduationCap,
     description: "Eventos académicos de tu carrera",
     details:

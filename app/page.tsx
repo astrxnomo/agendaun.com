@@ -20,32 +20,32 @@ export default function DashboardIntro() {
   const quickLinks = [
     {
       title: "Mi calendario",
-      href: "/my-calendar",
+      href: "/calendars/my-calendar",
       icon: Calendar,
       description:
         "Tu espacio personal para organizar tus clases, eventos y recordatorios.",
     },
     {
       title: "Calendario Nacional",
-      href: "/calendar/national",
+      href: "/calendars/national",
       icon: Landmark,
       description: "Fechas y eventos importantes para toda la universidad.",
     },
     {
       title: "Calendario Sede",
-      href: "/calendar/sede",
+      href: "/calendars/sede",
       icon: School,
       description: "Actividades y eventos exclusivos de tu sede.",
     },
     {
       title: "Calendario Facultad",
-      href: "/calendar/facultad",
+      href: "/calendars/facultad",
       icon: University,
       description: "Fechas clave y eventos propios de tu facultad.",
     },
     {
       title: "Calendario Programa",
-      href: "/calendar/programa",
+      href: "/calendars/programa",
       icon: GraduationCap,
       description:
         "Información y actividades específicas de tu programa académico.",
@@ -78,7 +78,7 @@ export default function DashboardIntro() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Button size="lg" asChild className="rounded shadow">
-                <Link href="/my-calendar">
+                <Link href="/calendars/my-calendar">
                   Ir a mi calendario
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -89,7 +89,7 @@ export default function DashboardIntro() {
                 asChild
                 className="rounded bg-transparent"
               >
-                <Link href="/calendar">Explorar otros calendarios</Link>
+                <Link href="/calendars">Explorar otros calendarios</Link>
               </Button>
             </div>
           </div>

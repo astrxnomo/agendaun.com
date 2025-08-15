@@ -7,7 +7,7 @@ export default function ProgramaCalendarPage() {
       <PageHeader
         breadcrumbs={[
           { label: "Inicio", href: "/" },
-          { label: "Calendarios", href: "/calendar" },
+          { label: "Calendarios", href: "/calendars" },
           { label: "Programa", isCurrentPage: true },
         ]}
       />
