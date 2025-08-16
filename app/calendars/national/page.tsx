@@ -3,12 +3,11 @@ import { PageHeader } from "@/components/page-header"
 import { getCalendarBySlug } from "@/lib/data/calendars/get-calendar"
 import { getEtiquettesByCalendarSlug } from "@/lib/data/etiquettes/get-etiquettes"
 import { getEventsByCalendarSlug } from "@/lib/data/events/get-events"
-import { type Calendars, type Etiquettes, type Events } from "@/types/db"
 
 export default async function NationalCalendarPage() {
-  const calendar: Calendars = await getCalendarBySlug("national")
-  const events: Events[] = await getEventsByCalendarSlug("national")
-  const etiquettes: Etiquettes[] = await getEtiquettesByCalendarSlug("national")
+  const calendar = await getCalendarBySlug("national")
+  const events = await getEventsByCalendarSlug("national")
+  const etiquettes = await getEtiquettesByCalendarSlug("national")
 
   return (
     <>

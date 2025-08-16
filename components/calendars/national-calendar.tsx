@@ -38,9 +38,7 @@ export default function NationalCalendar({
 
   const visibleEvents = useMemo(() => {
     return events.filter((event) => {
-      return (
-        event.etiquettes && calendar.isEtiquetteVisible(event.etiquettes.color)
-      )
+      return event.etiquettes && calendar.isEtiquetteVisible(event.etiquettes)
     })
   }, [events, calendar])
 

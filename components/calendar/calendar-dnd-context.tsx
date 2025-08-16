@@ -23,11 +23,12 @@ import {
   type ReactNode,
 } from "react"
 
-import { EventItem, type CalendarEvent } from "@/components/calendar"
+import { EventItem } from "@/components/calendar"
+import { CalendarView, type Events } from "@/types/db"
 
 // Define the context type
 type CalendarDndContextType = {
-  activeEvent: CalendarEvent | null
+  activeEvent: Events | null
   activeId: UniqueIdentifier | null
   activeView: "month" | "week" | "day" | null
   currentTime: Date | null
@@ -62,18 +63,18 @@ export const useCalendarDnd = () => useContext(CalendarDndContext)
 // Props for the provider
 interface CalendarDndProviderProps {
   children: ReactNode
-  onEventUpdate: (event: CalendarEvent) => void
+  onEventUpdate: (event: Events) => void
 }
 
 export function CalendarDndProvider({
   children,
   onEventUpdate,
 }: CalendarDndProviderProps) {
-  const [activeEvent, setActiveEvent] = useState<CalendarEvent | null>(null)
+  const [activeEvent, setActiveEvent] = useState<Events | null>(null)
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
-  const [activeView, setActiveView] = useState<"month" | "week" | "day" | null>(
-    null,
-  )
+  const [activeView, setActiveView] = useState<
+    CalendarView.MONTH | CalendarView.WEEK | CalendarView.DAY | null
+  >(null)
   const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [eventHeight, setEventHeight] = useState<number | null>(null)
   const [isMultiDay, setIsMultiDay] = useState(false)
@@ -126,15 +127,15 @@ export function CalendarDndProvider({
     }
 
     const {
-      event: calendarEvent,
+      event: Events,
       view,
       height,
       isMultiDay: eventIsMultiDay,
       multiDayWidth: eventMultiDayWidth,
       dragHandlePosition: eventDragHandlePosition,
     } = active.data.current as {
-      event: CalendarEvent
-      view: "month" | "week" | "day"
+      event: Events
+      view: CalendarView.MONTH | CalendarView.WEEK | CalendarView.DAY
       height?: number
       isMultiDay?: boolean
       multiDayWidth?: number
@@ -148,10 +149,10 @@ export function CalendarDndProvider({
       }
     }
 
-    setActiveEvent(calendarEvent)
+    setActiveEvent(Events)
     setActiveId(active.id)
     setActiveView(view)
-    setCurrentTime(new Date(calendarEvent.start))
+    setCurrentTime(new Date(Events.start))
     setIsMultiDay(eventIsMultiDay || false)
     setMultiDayWidth(eventMultiDayWidth || null)
     setDragHandlePosition(eventDragHandlePosition || null)
@@ -170,7 +171,7 @@ export function CalendarDndProvider({
       const { date, time } = over.data.current as { date: Date; time?: number }
 
       // Update time for week/day views
-      if (time !== undefined && activeView !== "month") {
+      if (time !== undefined && activeView !== CalendarView.MONTH) {
         const newTime = new Date(date)
 
         // Calculate hours and minutes with 15-minute precision
@@ -197,7 +198,7 @@ export function CalendarDndProvider({
         ) {
           setCurrentTime(newTime)
         }
-      } else if (activeView === "month") {
+      } else if (activeView === CalendarView.MONTH) {
         // For month view, just update the date but preserve time
         const newTime = new Date(date)
         if (currentTime) {
@@ -246,7 +247,7 @@ export function CalendarDndProvider({
       }
 
       const activeData = active.data.current as {
-        event?: CalendarEvent
+        event?: Events
         view?: string
       }
       const overData = over.data.current as { date?: Date; time?: number }
@@ -256,7 +257,7 @@ export function CalendarDndProvider({
         throw new Error("Missing required event data")
       }
 
-      const calendarEvent = activeData.event
+      const Events = activeData.event
       const date = overData.date
       const time = overData.time
 
@@ -287,8 +288,8 @@ export function CalendarDndProvider({
       }
 
       // Calculate new end time based on the original duration
-      const originalStart = new Date(calendarEvent.start)
-      const originalEnd = new Date(calendarEvent.end)
+      const originalStart = new Date(Events.start)
+      const originalEnd = new Date(Events.end)
       const durationMinutes = differenceInMinutes(originalEnd, originalStart)
       const newEnd = addMinutes(newStart, durationMinutes)
 
@@ -303,7 +304,7 @@ export function CalendarDndProvider({
       if (hasStartTimeChanged) {
         // Update the event only if the time has changed
         onEventUpdate({
-          ...calendarEvent,
+          ...Events,
           start: newStart,
           end: newEnd,
         })
@@ -359,7 +360,7 @@ export function CalendarDndProvider({
                 event={activeEvent}
                 view={activeView}
                 isDragging={true}
-                showTime={activeView !== "month"}
+                showTime={activeView !== CalendarView.MONTH}
                 currentTime={currentTime || undefined}
                 isFirstDay={dragHandlePosition?.data?.isFirstDay !== false}
                 isLastDay={dragHandlePosition?.data?.isLastDay !== false}

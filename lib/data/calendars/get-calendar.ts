@@ -12,5 +12,6 @@ export async function getCalendarBySlug(
     "689ff45a00220a375290",
     [Query.equal("slug", slug)],
   )
-  return (result.documents[0] as Calendars) || null
+
+  return result.documents[0] as Calendars
 }

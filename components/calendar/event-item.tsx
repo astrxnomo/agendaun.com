@@ -2,14 +2,12 @@
 
 import { differenceInMinutes, format, getMinutes, isPast } from "date-fns"
 import { es } from "date-fns/locale"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 
-import {
-  getBorderRadiusClasses,
-  getEtiquetteColor,
-  type CalendarEvent,
-} from "@/components/calendar"
+import { getBorderRadiusClasses, getColor } from "@/components/calendar"
+import { getEtiquetteColor } from "@/lib/data/etiquettes/get-etiquettes"
 import { cn } from "@/lib/utils"
+import { CalendarView, EtiquetteColor, type Events } from "@/types/db"
 
 import type { DraggableAttributes } from "@dnd-kit/core"
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities"
@@ -25,7 +23,7 @@ const formatTimeWithOptionalMinutes = (date: Date) => {
 }
 
 interface EventWrapperProps {
-  event: CalendarEvent
+  event: Events
   isFirstDay?: boolean
   isLastDay?: boolean
   isDragging?: boolean
@@ -68,7 +66,7 @@ function EventWrapper({
     <button
       className={cn(
         "focus-visible:border-ring focus-visible:ring-ring/50 flex h-full w-full overflow-hidden px-1 text-left font-medium backdrop-blur-md transition outline-none select-none focus-visible:ring-[3px] data-dragging:cursor-grabbing data-dragging:shadow-lg data-past-event:line-through sm:px-2",
-        getEtiquetteColor(event.color),
+        getColor(event.color),
         getBorderRadiusClasses(isFirstDay, isLastDay),
         className,
       )}
@@ -86,8 +84,8 @@ function EventWrapper({
 }
 
 interface EventItemProps {
-  event: CalendarEvent
-  view: "month" | "week" | "day" | "agenda"
+  event: Events
+  view: CalendarView
   isDragging?: boolean
   onClick?: (e: React.MouseEvent) => void
   showTime?: boolean
@@ -118,7 +116,17 @@ export function EventItem({
   onMouseDown,
   onTouchStart,
 }: EventItemProps) {
-  const eventColor = event.color
+  const [eventColor, setEventColor] = useState<EtiquetteColor>(
+    EtiquetteColor.GRAY,
+  )
+
+  useEffect(() => {
+    void getEtiquetteColor(event.calendar_id, event.etiquette_id).then(
+      (color) => {
+        setEventColor(color)
+      },
+    )
+  }, [event.calendar_id, event.etiquette_id])
 
   // Use the provided currentTime (for dragging) or the event's actual time
   const displayStart = useMemo(() => {
@@ -151,7 +159,7 @@ export function EventItem({
     return `${formatTimeWithOptionalMinutes(displayStart)} - ${formatTimeWithOptionalMinutes(displayEnd)}`
   }
 
-  if (view === "month") {
+  if (view === CalendarView.MONTH) {
     return (
       <EventWrapper
         event={event}
@@ -183,7 +191,7 @@ export function EventItem({
     )
   }
 
-  if (view === "week" || view === "day") {
+  if (view === CalendarView.WEEK || view === CalendarView.DAY) {
     return (
       <EventWrapper
         event={event}
@@ -194,7 +202,9 @@ export function EventItem({
         className={cn(
           "py-1",
           durationMinutes < 45 ? "items-center" : "flex-col",
-          view === "week" ? "text-[10px] sm:text-[13px]" : "text-[13px]",
+          view === CalendarView.WEEK
+            ? "text-[10px] sm:text-[13px]"
+            : "text-[13px]",
           className,
         )}
         currentTime={currentTime}
@@ -231,7 +241,7 @@ export function EventItem({
     <button
       className={cn(
         "focus-visible:border-ring focus-visible:ring-ring/50 flex w-full flex-col gap-1 rounded p-2 text-left transition outline-none focus-visible:ring-[3px] data-past-event:line-through data-past-event:opacity-90",
-        getEtiquetteColor(eventColor),
+        getColor(eventColor),
         className,
       )}
       data-past-event={isPast(new Date(event.end)) || undefined}
