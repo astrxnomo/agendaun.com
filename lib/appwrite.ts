@@ -12,7 +12,7 @@ const createAdminClient = async () => {
       return new Account(client)
     },
 
-    get databases() {
+    get database() {
       return new Databases(client)
     },
   }
@@ -33,10 +33,11 @@ const createSessionClient = async (session: string) => {
       return new Account(client)
     },
 
-    get databases() {
+    get database() {
       return new Databases(client)
     },
   }
 }
 
 export { createAdminClient, createSessionClient }
+

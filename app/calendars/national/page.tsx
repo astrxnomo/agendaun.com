@@ -1,7 +1,15 @@
 import NationalCalendar from "@/components/calendars/national-calendar"
 import { PageHeader } from "@/components/page-header"
+import { getCalendarBySlug } from "@/lib/data/calendars/get-calendar"
+import { getEtiquettesByCalendarSlug } from "@/lib/data/etiquettes/get-etiquettes"
+import { getEventsByCalendarSlug } from "@/lib/data/events/get-events"
+import { type Calendars, type Etiquettes, type Events } from "@/types/db"
 
-export default function NationalCalendarPage() {
+export default async function NationalCalendarPage() {
+  const calendar: Calendars = await getCalendarBySlug("national")
+  const events: Events[] = await getEventsByCalendarSlug("national")
+  const etiquettes: Etiquettes[] = await getEtiquettesByCalendarSlug("national")
+
   return (
     <>
       <PageHeader
@@ -17,7 +25,12 @@ export default function NationalCalendarPage() {
           Festividades y días festivos oficiales de Colombia
         </p>
       </div>
-      <NationalCalendar userRole="user" />
+      <NationalCalendar
+        calendar={calendar}
+        userRole="user"
+        events={events}
+        etiquettes={etiquettes}
+      />
     </>
   )
 }
