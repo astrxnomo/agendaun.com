@@ -18,7 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { deleteSession } from "@/lib/auth"
+import { deleteSession } from "@/lib/appwrite/auth"
 
 import type { User } from "@/types/auth"
 

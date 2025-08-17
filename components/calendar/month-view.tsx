@@ -24,6 +24,7 @@ import {
   getSpanningEventsForDay,
   sortEvents,
   useEventVisibility,
+  type CalendarEvent,
 } from "@/components/calendar"
 import {
   DefaultStartHour,
@@ -35,12 +36,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CalendarView, type Events } from "@/types/db"
 
 interface MonthViewProps {
   currentDate: Date
-  events: Events[]
-  onEventSelect: (event: Events) => void
+  events: CalendarEvent[]
+  onEventSelect: (event: CalendarEvent) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
   permissions?: { canEdit?: boolean }
@@ -85,7 +85,7 @@ export function MonthView({
     return result
   }, [days])
 
-  const handleEventClick = (event: Events, e: React.MouseEvent) => {
+  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }
@@ -125,7 +125,10 @@ export function MonthView({
               const spanningEvents = getSpanningEventsForDay(events, day)
               const isCurrentMonth = isSameMonth(day, currentDate)
               const cellId = `month-cell-${day.toISOString()}`
-              const allDayEvents: Events[] = [...spanningEvents, ...dayEvents]
+              const allDayEvents: CalendarEvent[] = [
+                ...spanningEvents,
+                ...dayEvents,
+              ]
               const allEvents = getAllEventsForDay(events, day)
 
               const isReferenceCell = weekIndex === 0 && dayIndex === 0
@@ -182,7 +185,7 @@ export function MonthView({
                               <EventItem
                                 onClick={(e) => handleEventClick(event, e)}
                                 event={event}
-                                view={CalendarView.MONTH}
+                                view="month"
                                 isFirstDay={isFirstDay}
                                 isLastDay={isLastDay}
                               >
@@ -203,13 +206,13 @@ export function MonthView({
 
                         return (
                           <div
-                            key={event.$id}
+                            key={event.id}
                             className="aria-hidden:hidden"
                             aria-hidden={isHidden ? "true" : undefined}
                           >
                             <DraggableEvent
                               event={event}
-                              view={CalendarView.MONTH}
+                              view="month"
                               onClick={(e) => handleEventClick(event, e)}
                               isFirstDay={isFirstDay}
                               isLastDay={isLastDay}
@@ -254,12 +257,12 @@ export function MonthView({
 
                                   return (
                                     <EventItem
-                                      key={event.$id}
+                                      key={event.id}
                                       onClick={(e) =>
                                         handleEventClick(event, e)
                                       }
                                       event={event}
-                                      view={CalendarView.MONTH}
+                                      view="month"
                                       isFirstDay={isFirstDay}
                                       isLastDay={isLastDay}
                                     />

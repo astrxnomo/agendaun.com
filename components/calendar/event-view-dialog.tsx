@@ -1,7 +1,14 @@
+"use client"
+
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar1, Clock, MapPin } from "lucide-react"
 
+import {
+  getEtiquetteColor,
+  type CalendarEvent,
+  type Etiquette,
+} from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,15 +19,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
-import { getEtiquetteColor } from "@/lib/data/etiquettes/get-etiquettes"
 import { cn } from "@/lib/utils"
-import { type Etiquettes, type Events } from "@/types/db"
 
 interface EventViewDialogProps {
-  event: Events | null
+  event: CalendarEvent | null
   isOpen: boolean
   onClose: () => void
-  etiquettes?: Etiquettes[] // ← Nueva prop para etiquetas disponibles
+  etiquettes?: Etiquette[] // ← Nueva prop para etiquetas disponibles
 }
 
 export function EventViewDialog({
@@ -34,10 +39,7 @@ export function EventViewDialog({
   const startDate = new Date(event.start)
   const endDate = new Date(event.end)
 
-  const etiquetteColor = getEtiquetteColor(
-    event.etiquette_id,
-    event.calendar_id,
-  )
+  const etiquetteColor = getEtiquetteColor(event.color)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

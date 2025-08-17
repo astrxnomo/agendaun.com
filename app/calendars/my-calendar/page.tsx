@@ -1,5 +1,5 @@
 import PersonalCalendar from "@/components/calendars/personal-calendar"
-import { getUser } from "@/lib/auth"
+import { getUser } from "@/lib/appwrite/auth"
 
 export default async function Page() {
   const user = await getUser()

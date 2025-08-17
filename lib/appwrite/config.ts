@@ -1,3 +1,7 @@
+"use server"
+
+import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 import { Account, Client, Databases } from "node-appwrite"
 
 const createAdminClient = async () => {
@@ -18,15 +22,19 @@ const createAdminClient = async () => {
   }
 }
 
-const createSessionClient = async (session: string) => {
+const createSessionClient = async () => {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
     .setLocale("es-co")
 
-  if (session) {
-    client.setSession(session)
+  const session = (await cookies()).get("session")
+
+  if (!session?.value) {
+    redirect("/auth/unauthorized")
   }
+
+  client.setSession(session.value)
 
   return {
     get account() {
@@ -40,4 +48,3 @@ const createSessionClient = async (session: string) => {
 }
 
 export { createAdminClient, createSessionClient }
-

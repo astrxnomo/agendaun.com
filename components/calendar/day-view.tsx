@@ -20,6 +20,7 @@ import {
   EventItem,
   isMultiDayEvent,
   useCurrentTimeIndicator,
+  type CalendarEvent,
 } from "@/components/calendar"
 import {
   EndHour,
@@ -27,19 +28,18 @@ import {
   WeekCellsHeight,
 } from "@/components/calendar/constants"
 import { cn } from "@/lib/utils"
-import { CalendarView, type Events } from "@/types/db"
 
 interface DayViewProps {
   currentDate: Date
-  events: Events[]
-  onEventSelect: (event: Events) => void
+  events: CalendarEvent[]
+  onEventSelect: (event: CalendarEvent) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
   permissions?: { canEdit?: boolean }
 }
 
 interface PositionedEvent {
-  event: Events
+  event: CalendarEvent
   top: number
   height: number
   left: number
@@ -116,7 +116,7 @@ export function DayView({
     })
 
     // Track columns for overlapping events
-    const columns: { event: Events; end: Date }[][] = []
+    const columns: { event: CalendarEvent; end: Date }[][] = []
 
     sortedEvents.forEach((event) => {
       const eventStart = new Date(event.start)
@@ -182,7 +182,7 @@ export function DayView({
     return result
   }, [currentDate, timeEvents])
 
-  const handleEventClick = (event: Events, e: React.MouseEvent) => {
+  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }
@@ -215,7 +215,7 @@ export function DayView({
                     key={`spanning-${event.id}`}
                     onClick={(e) => handleEventClick(event, e)}
                     event={event}
-                    view={CalendarView.MONTH}
+                    view="month"
                     isFirstDay={isFirstDay}
                     isLastDay={isLastDay}
                   >
@@ -249,7 +249,7 @@ export function DayView({
           {/* Positioned events */}
           {positionedEvents.map((positionedEvent) => (
             <div
-              key={positionedEvent.event.$id}
+              key={positionedEvent.event.id}
               className="absolute z-10 px-0.5"
               style={{
                 top: `${positionedEvent.top}px`,
@@ -262,7 +262,7 @@ export function DayView({
               <div className="h-full w-full">
                 <DraggableEvent
                   event={positionedEvent.event}
-                  view={CalendarView.DAY}
+                  view="day"
                   onClick={(e) => handleEventClick(positionedEvent.event, e)}
                   showTime
                   height={positionedEvent.height}

@@ -1,9 +1,9 @@
 // Hook para usar el contexto del calendario con un ID específico
-import { type Etiquettes } from "@/types/db"
+import { useCalendarContext, type CalendarId } from "../calendar-context"
 
-import { useCalendarContext } from "../calendar-context"
+import type { Etiquette } from "../types"
 
-export function useCalendarManager(calendarId: string) {
+export function useCalendarManager(calendarId: CalendarId) {
   const context = useCalendarContext()
 
   return {
@@ -16,7 +16,7 @@ export function useCalendarManager(calendarId: string) {
       context.isEtiquetteVisible(calendarId, color),
     toggleEtiquetteVisibility: (color: string) =>
       context.toggleEtiquetteVisibility(calendarId, color),
-    setCalendarEtiquettes: (etiquettes: Etiquettes[]) =>
+    setCalendarEtiquettes: (etiquettes: Etiquette[]) =>
       context.setCalendarEtiquettes(calendarId, etiquettes),
 
     // Academic filters (shared)

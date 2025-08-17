@@ -4,16 +4,13 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { ID } from "node-appwrite"
 
-import { createAdminClient, createSessionClient } from "./appwrite"
+import { createAdminClient, createSessionClient } from "@/lib/appwrite/config"
 
 import type { User } from "@/types/auth"
 
 export async function getUser(): Promise<User | null> {
-  const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get("session")
-
   try {
-    const { account } = await createSessionClient(sessionCookie?.value ?? "")
+    const { account } = await createSessionClient()
     return (await account.get()) as User
   } catch {
     return null
@@ -46,10 +43,9 @@ export async function sendMagicLink(
 
 export async function deleteSession(): Promise<void> {
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get("session")
 
   try {
-    const { account } = await createSessionClient(sessionCookie?.value ?? "")
+    const { account } = await createSessionClient()
     await account.deleteSession("current")
   } catch (error) {
     console.error("Error deleting session:", error)

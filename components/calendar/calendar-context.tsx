@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react"
 
-import { type Etiquettes } from "@/types/db"
+import type { Etiquette } from "@/components/calendar"
 
 // Tipos para filtros académicos
 export interface AcademicFilters {
@@ -17,16 +17,30 @@ export interface AcademicFilters {
   programa: string
 }
 
+// Tipo para identificar calendarios
+export type CalendarId =
+  | "personal"
+  | "national"
+  | "sede"
+  | "facultad"
+  | "programa"
+
 interface CalendarContextType {
   // Date management
   currentDate: Date
   setCurrentDate: (date: Date) => void
 
   // Etiquette visibility management per calendar
-  visibleEtiquettes: Record<string, string[]>
-  toggleEtiquetteVisibility: (calendarId: string, color: string) => void
-  isEtiquetteVisible: (calendarId: string, color: string | undefined) => boolean
-  setCalendarEtiquettes: (calendarId: string, etiquettes: Etiquettes[]) => void
+  visibleEtiquettes: Record<CalendarId, string[]>
+  toggleEtiquetteVisibility: (calendarId: CalendarId, color: string) => void
+  isEtiquetteVisible: (
+    calendarId: CalendarId,
+    color: string | undefined,
+  ) => boolean
+  setCalendarEtiquettes: (
+    calendarId: CalendarId,
+    etiquettes: Etiquette[],
+  ) => void
 
   // Academic filters (shared across calendars)
   academicFilters: AcademicFilters
@@ -55,7 +69,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
 
   // Initialize visibleEtiquettes per calendar (empty by default)
   const [visibleEtiquettes, setVisibleEtiquettes] = useState<
-    Record<string, string[]>
+    Record<CalendarId, string[]>
   >({
     personal: [],
     national: [],
@@ -73,7 +87,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
 
   // Set calendar etiquettes and initialize visibility based on isActive
   const setCalendarEtiquettes = useCallback(
-    (calendarId: string, etiquettes: Etiquettes[]) => {
+    (calendarId: CalendarId, etiquettes: Etiquette[]) => {
       const activeColors = etiquettes
         .filter((etiquette) => etiquette.isActive)
         .map((etiquette) => etiquette.color)
@@ -88,7 +102,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
 
   // Toggle visibility of a color for a specific calendar
   const toggleEtiquetteVisibility = useCallback(
-    (calendarId: string, color: string) => {
+    (calendarId: CalendarId, color: string) => {
       setVisibleEtiquettes((prev) => {
         const currentCalendarEtiquettes = prev[calendarId] || []
 
@@ -110,7 +124,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
 
   // Check if a color is visible for a specific calendar
   const isEtiquetteVisible = useCallback(
-    (calendarId: string, color: string | undefined) => {
+    (calendarId: CalendarId, color: string | undefined) => {
       if (!color) return true // Events without a color are always visible
       const calendarEtiquettes = visibleEtiquettes[calendarId] || []
       return calendarEtiquettes.includes(color)

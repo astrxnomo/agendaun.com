@@ -36,7 +36,10 @@ import {
   useCalendarContext,
   WeekCellsHeight,
   WeekView,
+  type CalendarEvent,
   type CalendarPermissions,
+  type CalendarView,
+  type Etiquette,
 } from "@/components/calendar"
 import { Button } from "@/components/ui/button"
 import {
@@ -47,18 +50,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-import { CalendarView, type Etiquettes, type Events } from "@/types/db"
 
 export interface EventCalendarProps {
-  events?: Events[]
-  onEventAdd?: (event: Events) => void
-  onEventUpdate?: (event: Events) => void
+  events?: CalendarEvent[]
+  onEventAdd?: (event: CalendarEvent) => void
+  onEventUpdate?: (event: CalendarEvent) => void
   onEventDelete?: (eventId: string) => void
   className?: string
   initialView?: CalendarView
   editable?: boolean
   permissions?: CalendarPermissions
-  customEtiquettes?: Etiquettes[] // ← Usa tu modelo de Etiquettes
+  customEtiquettes?: Etiquette[] // ← Nueva prop para las etiquetas disponibles
 }
 
 export function SetupCalendar({
@@ -67,7 +69,7 @@ export function SetupCalendar({
   onEventUpdate,
   onEventDelete,
   className,
-  initialView = CalendarView.MONTH,
+  initialView = "month",
   editable = true,
   permissions,
   customEtiquettes: etiquettes = [], // ← Recibir etiquetas con default vacío
@@ -77,7 +79,7 @@ export function SetupCalendar({
   const [view, setView] = useState<CalendarView>(initialView)
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [isEventViewDialogOpen, setIsEventViewDialogOpen] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<Events | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
 
   // Add keyboard shortcuts for view switching
   useEffect(() => {
@@ -95,16 +97,16 @@ export function SetupCalendar({
 
       switch (e.key.toLowerCase()) {
         case "m":
-          setView(CalendarView.MONTH)
+          setView("month")
           break
         case "s":
-          setView(CalendarView.WEEK)
+          setView("week")
           break
         case "d":
-          setView(CalendarView.DAY)
+          setView("day")
           break
         case "a":
-          setView(CalendarView.AGENDA)
+          setView("agenda")
           break
       }
     }
@@ -117,26 +119,26 @@ export function SetupCalendar({
   }, [isEventDialogOpen])
 
   const handlePrevious = () => {
-    if (view === CalendarView.MONTH) {
+    if (view === "month") {
       setCurrentDate(subMonths(currentDate, 1))
-    } else if (view === CalendarView.WEEK) {
+    } else if (view === "week") {
       setCurrentDate(subWeeks(currentDate, 1))
-    } else if (view === CalendarView.DAY) {
+    } else if (view === "day") {
       setCurrentDate(addDays(currentDate, -1))
-    } else if (view === CalendarView.AGENDA) {
+    } else if (view === "agenda") {
       // For agenda view, go back 30 days (a full month)
       setCurrentDate(addDays(currentDate, -AgendaDaysToShow))
     }
   }
 
   const handleNext = () => {
-    if (view === CalendarView.MONTH) {
+    if (view === "month") {
       setCurrentDate(addMonths(currentDate, 1))
-    } else if (view === CalendarView.WEEK) {
+    } else if (view === "week") {
       setCurrentDate(addWeeks(currentDate, 1))
-    } else if (view === CalendarView.DAY) {
+    } else if (view === "day") {
       setCurrentDate(addDays(currentDate, 1))
-    } else if (view === CalendarView.AGENDA) {
+    } else if (view === "agenda") {
       // For agenda view, go forward 30 days (a full month)
       setCurrentDate(addDays(currentDate, AgendaDaysToShow))
     }
@@ -146,8 +148,11 @@ export function SetupCalendar({
     setCurrentDate(new Date())
   }
 
-  const handleEventSelect = (event: Events) => {
+  const handleEventSelect = (event: CalendarEvent) => {
     setSelectedEvent(event)
+
+    // Si el usuario tiene permisos de edición, abrir dialog de edición
+    // Si no, abrir dialog de solo lectura
     if (permissions?.canEdit && editable) {
       setIsEventDialogOpen(true)
     } else {
@@ -173,7 +178,8 @@ export function SetupCalendar({
       startTime.setMilliseconds(0)
     }
 
-    const newEvent: Events = {
+    const newEvent: CalendarEvent = {
+      id: "",
       title: "",
       start: startTime,
       end: addHoursToDate(startTime, 1),
@@ -183,19 +189,25 @@ export function SetupCalendar({
     setIsEventDialogOpen(true)
   }
 
-  const handleEventSave = (event: Events) => {
+  const handleEventSave = (event: CalendarEvent) => {
     if (event.id) {
       onEventUpdate?.(event)
+      // Show toast notification when an event is updated
       toast(`Evento "${event.title}" actualizado`, {
-        /* ... */
+        description: format(new Date(event.start), "MMM d, yyyy", {
+          locale: es,
+        }),
       })
     } else {
       onEventAdd?.({
         ...event,
         id: Math.random().toString(36).substring(2, 11),
       })
+      // Show toast notification when an event is added
       toast(`Evento "${event.title}" agregado`, {
-        /* ... */
+        description: format(new Date(event.start), "MMM d, yyyy", {
+          locale: es,
+        }),
       })
     }
     setIsEventDialogOpen(false)
@@ -218,17 +230,21 @@ export function SetupCalendar({
     }
   }
 
-  const handleEventUpdate = (updatedEvent: Events) => {
+  const handleEventUpdate = (updatedEvent: CalendarEvent) => {
     onEventUpdate?.(updatedEvent)
+
+    // Show toast notification when an event is updated via drag and drop
     toast(`Evento "${updatedEvent.title}" movido`, {
-      /* ... */
+      description: format(new Date(updatedEvent.start), "MMM d, yyyy", {
+        locale: es,
+      }),
     })
   }
 
   const viewTitle = useMemo(() => {
-    if (view === CalendarView.MONTH) {
+    if (view === "month") {
       return format(currentDate, "MMMM yyyy", { locale: es })
-    } else if (view === CalendarView.WEEK) {
+    } else if (view === "week") {
       const start = startOfWeek(currentDate, { weekStartsOn: 1 })
       const end = endOfWeek(currentDate, { weekStartsOn: 1 })
       if (isSameMonth(start, end)) {
@@ -236,7 +252,7 @@ export function SetupCalendar({
       } else {
         return `${format(start, "MMM", { locale: es })} - ${format(end, "MMM yyyy", { locale: es })}`
       }
-    } else if (view === CalendarView.DAY) {
+    } else if (view === "day") {
       return (
         <>
           <span className="min-sm:hidden" aria-hidden="true">
@@ -250,7 +266,7 @@ export function SetupCalendar({
           </span>
         </>
       )
-    } else if (view === CalendarView.AGENDA) {
+    } else if (view === "agenda") {
       // Show the month range for agenda view
       const start = currentDate
       const end = addDays(currentDate, AgendaDaysToShow - 1)
@@ -340,13 +356,13 @@ export function SetupCalendar({
                     className="gap-1.5 max-sm:h-8 max-sm:gap-1 max-sm:px-2!"
                   >
                     <CalendarCog />
-                    {view === CalendarView.MONTH
+                    {view === "month"
                       ? "Mes"
-                      : view === CalendarView.WEEK
+                      : view === "week"
                         ? "Semana"
-                        : view === CalendarView.DAY
+                        : view === "day"
                           ? "Día"
-                          : CalendarView.AGENDA}
+                          : "Agenda"}
                     <ChevronDownIcon
                       className="-me-1 opacity-60"
                       size={16}
@@ -355,16 +371,16 @@ export function SetupCalendar({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="min-w-32">
-                  <DropdownMenuItem onClick={() => setView(CalendarView.MONTH)}>
+                  <DropdownMenuItem onClick={() => setView("month")}>
                     Mes <DropdownMenuShortcut>M</DropdownMenuShortcut>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setView(CalendarView.WEEK)}>
+                  <DropdownMenuItem onClick={() => setView("week")}>
                     Semana <DropdownMenuShortcut>S</DropdownMenuShortcut>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setView(CalendarView.DAY)}>
+                  <DropdownMenuItem onClick={() => setView("day")}>
                     Día <DropdownMenuShortcut>D</DropdownMenuShortcut>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setView(CalendarView.AGENDA)}>
+                  <DropdownMenuItem onClick={() => setView("agenda")}>
                     Agenda <DropdownMenuShortcut>A</DropdownMenuShortcut>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -374,7 +390,7 @@ export function SetupCalendar({
         </div>
 
         <div className="flex flex-1 flex-col">
-          {view === CalendarView.MONTH && (
+          {view === "month" && (
             <MonthView
               currentDate={currentDate}
               events={events}
@@ -384,7 +400,7 @@ export function SetupCalendar({
               permissions={permissions}
             />
           )}
-          {view === CalendarView.WEEK && (
+          {view === "week" && (
             <WeekView
               currentDate={currentDate}
               events={events}
@@ -394,7 +410,7 @@ export function SetupCalendar({
               permissions={permissions}
             />
           )}
-          {view === CalendarView.DAY && (
+          {view === "day" && (
             <DayView
               currentDate={currentDate}
               events={events}
@@ -404,7 +420,7 @@ export function SetupCalendar({
               permissions={permissions}
             />
           )}
-          {view === CalendarView.AGENDA && (
+          {view === "agenda" && (
             <AgendaView
               currentDate={currentDate}
               events={events}

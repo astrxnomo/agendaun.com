@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { createSessionClient } from "@/lib/appwrite"
+import { createSessionClient } from "@/lib/appwrite/config"
 
 import type { NextRequest } from "next/server"
 
@@ -8,18 +8,14 @@ const protectedRoutes = ["/admin"]
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const sessionCookie = request.cookies.get("session")?.value
-
-  if (pathname.startsWith("/auth")) {
-    if (sessionCookie) {
-      try {
-        const { account } = await createSessionClient(sessionCookie)
-        await account.get()
-        return NextResponse.redirect(
-          new URL("/calendars/my-calendar", request.url),
-        )
-      } catch {}
-    }
+  if (request.nextUrl.pathname.startsWith("/auth")) {
+    try {
+      const { account } = await createSessionClient()
+      await account.get()
+      return NextResponse.redirect(
+        new URL("/calendars/my-calendar", request.url),
+      )
+    } catch {}
     return NextResponse.next()
   }
 
@@ -27,11 +23,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/calendars") || protectedRoutes.includes(pathname)
 
   if (isProtectedRoute) {
-    if (!sessionCookie) {
-      return NextResponse.redirect(new URL("/auth/unauthorized", request.url))
-    }
     try {
-      const { account } = await createSessionClient(sessionCookie)
+      const { account } = await createSessionClient()
       await account.get()
       return NextResponse.next()
     } catch {

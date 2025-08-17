@@ -5,12 +5,15 @@ import { CSS } from "@dnd-kit/utilities"
 import { differenceInDays } from "date-fns"
 import { useRef, useState } from "react"
 
-import { EventItem, useCalendarDnd } from "@/components/calendar"
-import { type CalendarView, type Events } from "@/types/db"
+import {
+  EventItem,
+  useCalendarDnd,
+  type CalendarEvent,
+} from "@/components/calendar"
 
 interface DraggableEventProps {
-  event: Events
-  view: CalendarView.MONTH | CalendarView.WEEK | CalendarView.DAY
+  event: CalendarEvent
+  view: "month" | "week" | "day"
   showTime?: boolean
   onClick?: (e: React.MouseEvent) => void
   height?: number
@@ -46,11 +49,11 @@ export function DraggableEvent({
   const eventStart = new Date(event.start)
   const eventEnd = new Date(event.end)
   const isMultiDayEvent =
-    isMultiDay || event.all_day || differenceInDays(eventEnd, eventStart) >= 1
+    isMultiDay || event.allDay || differenceInDays(eventEnd, eventStart) >= 1
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
-      id: `${event.$id}-${view}`,
+      id: `${event.id}-${view}`,
       data: {
         event,
         view,

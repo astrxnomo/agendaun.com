@@ -8,39 +8,42 @@ import {
   useCalendarManager,
   useCalendarPermissions,
   type CalendarEvent,
+  type Etiquette,
 } from "@/components/calendar"
-import { type Calendars, type Etiquettes, type Events } from "@/types/db"
 
 interface NationalCalendarProps {
   userRole?: "admin" | "editor" | "moderator" | "user"
-  events: Events[]
-  etiquettes: Etiquettes[]
-  calendar: Calendars
+  events?: CalendarEvent[]
+  etiquettes?: Etiquette[]
 }
+
 export default function NationalCalendar({
   userRole = "user",
-  events,
-  etiquettes,
-  calendar,
+  events = [],
+  etiquettes = [],
 }: NationalCalendarProps) {
-  const managedCalendar = useCalendarManager(calendar.slug)
+  const calendar = useCalendarManager("national")
   const initializationExecuted = useRef(false)
 
+  // Initialize etiquettes only once
   useEffect(() => {
-    if (!initializationExecuted.current && etiquettes.length > 0) {
-      managedCalendar.setCalendarEtiquettes(etiquettes)
+    if (!initializationExecuted.current) {
+      calendar.setCalendarEtiquettes(etiquettes)
       initializationExecuted.current = true
     }
-  }, [managedCalendar, etiquettes])
+  }, [calendar])
 
+  // Calculate permissions based on user role
   const calendarType = "national"
   const permissions = useCalendarPermissions(calendarType, userRole)
 
+  // Filter events based on etiquette visibility (national calendar doesn't use academic filters)
   const visibleEvents = useMemo(() => {
     return events.filter((event) => {
-      return event.etiquettes && calendar.isEtiquetteVisible(event.etiquettes)
+      // Apply etiquette visibility
+      return calendar.isEtiquetteVisible(event.color)
     })
-  }, [events, calendar])
+  }, [calendar])
 
   // Event handlers
   const handleEventAdd = (event: CalendarEvent) => {
@@ -62,18 +65,18 @@ export default function NationalCalendar({
     <>
       <EtiquettesHeader
         etiquettes={etiquettes}
-        isEtiquetteVisible={managedCalendar.isEtiquetteVisible}
-        toggleEtiquetteVisibility={managedCalendar.toggleEtiquetteVisibility}
+        isEtiquetteVisible={calendar.isEtiquetteVisible}
+        toggleEtiquetteVisibility={calendar.toggleEtiquetteVisibility}
       />
       <SetupCalendar
         events={visibleEvents}
         onEventAdd={handleEventAdd}
         onEventUpdate={handleEventUpdate}
         onEventDelete={handleEventDelete}
-        initialView={calendar.defaultView}
+        initialView="month"
         editable={permissions.canEdit}
         permissions={permissions}
-        customEtiquettes={etiquettes}
+        customEtiquettes={etiquettes} // ← Pasar etiquetas específicas del calendario nacional
       />
     </>
   )

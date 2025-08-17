@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { sendMagicLink } from "@/lib/auth"
+import { sendMagicLink } from "@/lib/appwrite/auth"
 
 import type React from "react"
 

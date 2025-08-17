@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { createSession } from "@/lib/auth"
+import { createSession } from "@/lib/appwrite/auth"
 import { cn } from "@/lib/utils"
 
 import { PageHeader } from "../page-header"

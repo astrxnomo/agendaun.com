@@ -25,6 +25,7 @@ import {
   EventItem,
   isMultiDayEvent,
   useCurrentTimeIndicator,
+  type CalendarEvent,
 } from "@/components/calendar"
 import {
   EndHour,
@@ -32,19 +33,18 @@ import {
   WeekCellsHeight,
 } from "@/components/calendar/constants"
 import { cn } from "@/lib/utils"
-import { CalendarView, type Events } from "@/types/db"
 
 interface WeekViewProps {
   currentDate: Date
-  events: Events[]
-  onEventSelect: (event: Events) => void
+  events: CalendarEvent[]
+  onEventSelect: (event: CalendarEvent) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
   permissions?: { canEdit?: boolean }
 }
 
 interface PositionedEvent {
-  event: Events
+  event: CalendarEvent
   top: number
   height: number
   left: number
@@ -139,7 +139,7 @@ export function WeekView({
       const dayStart = startOfDay(day)
 
       // Track columns for overlapping events
-      const columns: { event: Events; end: Date }[][] = []
+      const columns: { event: CalendarEvent; end: Date }[][] = []
 
       sortedEvents.forEach((event) => {
         const eventStart = new Date(event.start)
@@ -212,7 +212,7 @@ export function WeekView({
     return result
   }, [days, events])
 
-  const handleEventClick = (event: Events, e: React.MouseEvent) => {
+  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }
@@ -285,7 +285,7 @@ export function WeekView({
                         key={`spanning-${event.id}`}
                         onClick={(e) => handleEventClick(event, e)}
                         event={event}
-                        view={CalendarView.MONTH}
+                        view="month"
                         isFirstDay={isFirstDay}
                         isLastDay={isLastDay}
                       >
@@ -334,7 +334,7 @@ export function WeekView({
             {/* Positioned events */}
             {(processedDayEvents[dayIndex] ?? []).map((positionedEvent) => (
               <div
-                key={positionedEvent.event.$id}
+                key={positionedEvent.event.id}
                 className="absolute z-10 px-0.5"
                 style={{
                   top: `${positionedEvent.top}px`,
@@ -348,7 +348,7 @@ export function WeekView({
                 <div className="h-full w-full">
                   <DraggableEvent
                     event={positionedEvent.event}
-                    view={CalendarView.WEEK}
+                    view="week"
                     onClick={(e) => handleEventClick(positionedEvent.event, e)}
                     showTime
                     height={positionedEvent.height}

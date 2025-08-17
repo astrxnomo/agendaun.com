@@ -6,7 +6,7 @@ import NavTop from "@/components/nav-top"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
-import { getUser } from "@/lib/auth"
+import { getUser } from "@/lib/appwrite/auth"
 
 import type { Metadata } from "next"
 

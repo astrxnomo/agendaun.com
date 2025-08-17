@@ -40,15 +40,17 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { type Etiquettes, type Events } from "@/types/db"
+
+import type { CalendarEvent, Etiquette } from "@/components/calendar/types"
 
 interface EventDialogProps {
-  event: Events | null
+  event: CalendarEvent | null
   isOpen: boolean
   onClose: () => void
-  onSave: (event: Events) => void
+  onSave: (event: CalendarEvent) => void
   onDelete: (eventId: string) => void
-  customEtiquettes?: Etiquettes[]
+  customEtiquettes?: Etiquette[] // ← Nueva prop para etiquetas disponibles
+  customLabels?: Etiquette[]
 }
 
 export function EventDialog({
@@ -162,34 +164,31 @@ export function EventDialog({
       end.setHours(23, 59, 59, 999)
     }
 
+    // Validate that end date is not before start date
     if (isBefore(end, start)) {
       setError("End date cannot be before start date")
       return
     }
 
+    // Use generic title if empty
     const eventTitle = title.trim() ? title : "(sin título)"
 
     // Determinar el color basado en la etiqueta seleccionada
     const selectedEtiquetteObj = etiquette
-      ? customEtiquettes.find((etiq) => etiq.$id === etiquette)
+      ? customEtiquettes.find((etiq) => etiq.id === etiquette)
       : null
-    const eventColor = selectedEtiquetteObj?.color ?? "gray"
+    const eventColor = selectedEtiquetteObj?.color || "gray"
 
-    // Construir el objeto evento correctamente
-    const newEvent: Events = {
-      ...(event ?? {}), // Si estás editando, conserva las propiedades existentes
+    onSave({
+      id: event?.id || "",
       title: eventTitle,
       description,
       start,
       end,
-      allDay: allDay,
+      allDay,
       location,
-      color: eventColor, // ← Asegúrate que el tipo sea Color
-      etiquette_id: etiquette ?? "", // ← Usa el id de la etiqueta seleccionada
-      // ...agrega otras propiedades requeridas por tu modelo si es necesario
-    }
-
-    onSave(newEvent)
+      color: eventColor,
+    })
   }
 
   const handleDelete = () => {
@@ -403,7 +402,7 @@ export function EventDialog({
               {/* Etiquetas disponibles */}
               {customEtiquettes.map((etiq) => (
                 <label
-                  key={etiq.$id}
+                  key={etiq.id}
                   className={cn(
                     "relative flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
                     etiquette === etiq.id
@@ -411,7 +410,7 @@ export function EventDialog({
                       : "border-input hover:bg-muted",
                   )}
                 >
-                  <RadioGroupItem value={etiq.$id} className="sr-only" />
+                  <RadioGroupItem value={etiq.id} className="sr-only" />
                   <div
                     className={cn(
                       "size-3 rounded-full border border-gray-400",

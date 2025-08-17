@@ -9,13 +9,13 @@ import {
   AgendaDaysToShow,
   EventItem,
   getAgendaEventsForDay,
+  type CalendarEvent,
 } from "@/components/calendar"
-import { CalendarView, type Events } from "@/types/db"
 
 interface AgendaViewProps {
   currentDate: Date
-  events: Events[]
-  onEventSelect: (event: Events) => void
+  events: CalendarEvent[]
+  onEventSelect: (event: CalendarEvent) => void
 }
 
 export function AgendaView({
@@ -30,7 +30,7 @@ export function AgendaView({
     )
   }, [currentDate])
 
-  const handleEventClick = (event: Events, e: React.MouseEvent) => {
+  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }
@@ -70,9 +70,9 @@ export function AgendaView({
               <div className="mt-6 space-y-2">
                 {dayEvents.map((event) => (
                   <EventItem
-                    key={event.$id}
+                    key={event.id}
                     event={event}
-                    view={CalendarView.AGENDA}
+                    view="agenda"
                     onClick={(e) => handleEventClick(event, e)}
                   />
                 ))}

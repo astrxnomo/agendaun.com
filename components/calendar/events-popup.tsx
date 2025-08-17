@@ -6,14 +6,15 @@ import { XIcon } from "lucide-react"
 import { useEffect, useMemo, useRef } from "react"
 
 import { EventItem } from "@/components/calendar/event-item"
-import { CalendarView, type Events } from "@/types/db"
+
+import type { CalendarEvent } from "@/components/calendar/types"
 
 interface EventsPopupProps {
   date: Date
-  events: Events[]
+  events: CalendarEvent[]
   position: { top: number; left: number }
   onClose: () => void
-  onEventSelect: (event: Events) => void
+  onEventSelect: (event: CalendarEvent) => void
 }
 
 export function EventsPopup({
@@ -56,7 +57,7 @@ export function EventsPopup({
     }
   }, [onClose])
 
-  const handleEventClick = (event: Events) => {
+  const handleEventClick = (event: CalendarEvent) => {
     onEventSelect(event)
     onClose()
   }
@@ -119,13 +120,13 @@ export function EventsPopup({
 
             return (
               <div
-                key={event.$id}
+                key={event.id}
                 className="cursor-pointer"
                 onClick={() => handleEventClick(event)}
               >
                 <EventItem
                   event={event}
-                  view={CalendarView.AGENDA}
+                  view="agenda"
                   isFirstDay={isFirstDay}
                   isLastDay={isLastDay}
                 />
