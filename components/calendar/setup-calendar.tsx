@@ -150,9 +150,7 @@ export function SetupCalendar({
   const handleEventSelect = (event: Events) => {
     setSelectedEvent(event)
 
-    // Si el usuario tiene permisos de edición, abrir dialog de edición
-    // Si no, abrir dialog de solo lectura
-    if (permissions?.canEdit && editable) {
+    if (permissions?.canUpdate && editable) {
       setIsEventDialogOpen(true)
     } else {
       setIsEventViewDialogOpen(true)
@@ -160,7 +158,7 @@ export function SetupCalendar({
   }
 
   const handleEventCreate = (startTime: Date) => {
-    if (!editable || !permissions?.canCreate) return // No permitir creación si no es editable o no tiene permisos
+    if (!permissions?.canCreate) return // No permitir creación si no tiene permisos
 
     // Snap to 15-minute intervals
     const minutes = startTime.getMinutes()
@@ -350,7 +348,7 @@ export function SetupCalendar({
               </Button>
             </div>
             <div className="flex items-center justify-between gap-2">
-              {editable && permissions?.canCreate && (
+              {editable && (
                 <Button
                   className="max-sm:h-8 max-sm:px-2.5!"
                   onClick={() => {

@@ -34,6 +34,7 @@ import {
 import { cn } from "@/lib/utils"
 
 import type { Etiquettes, Events } from "@/types"
+import type { CalendarPermissions } from "./hooks/use-calendar-permissions"
 
 interface WeekViewProps {
   currentDate: Date
@@ -42,7 +43,7 @@ interface WeekViewProps {
   onEventSelect: (event: Events) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
-  permissions?: { canEdit?: boolean }
+  permissions?: CalendarPermissions
 }
 
 interface PositionedEvent {
@@ -357,7 +358,12 @@ export function WeekView({
                     onClick={(e) => handleEventClick(positionedEvent.event, e)}
                     showTime
                     height={positionedEvent.height}
-                    draggable={permissions?.canEdit && editable}
+                    draggable={
+                      (permissions?.canUpdate ||
+                        permissions?.canCreate ||
+                        permissions?.canDelete) &&
+                      editable
+                    }
                   />
                 </div>
               </div>

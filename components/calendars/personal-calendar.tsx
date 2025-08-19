@@ -1,22 +1,22 @@
 "use client"
 
 import { Edit, Eye } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import {
   EtiquettesHeader,
+  EtiquettesManager,
   SetupCalendar,
   useCalendarManager,
   useCalendarPermissions,
 } from "@/components/calendar"
+import { useEventHandlers } from "@/components/calendar/hooks/use-event-handlers"
 import { getEventColor } from "@/components/calendar/utils"
 import { Button } from "@/components/ui/button"
-import {
-  createEvent,
-  deleteEvent,
-  updateEvent,
-} from "@/lib/actions/events.actions"
+import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
+
+import { PageHeader } from "../page-header"
 
 import type { Calendars, Etiquettes, Events } from "@/types"
 
@@ -32,33 +32,50 @@ export default function PersonalCalendar({
   calendar,
 }: PersonalCalendarProps) {
   const [personalEvents, setPersonalEvents] = useState<Events[]>(events)
+  const [personalEtiquettes, setPersonalEtiquettes] =
+    useState<Etiquettes[]>(etiquettes)
   const [editable, setEditable] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
   const calendarManager = useCalendarManager("personal")
-  const permissions = useCalendarPermissions()
-  const initializationExecuted = useRef(false)
+  const { permissions } = useCalendarPermissions(calendar?.$id)
 
-  // Initialize etiquettes only once
+  const eventHandlers = useEventHandlers({
+    calendar: calendar!,
+    permissions,
+    onEventsUpdate: setPersonalEvents,
+  })
+
   useEffect(() => {
-    if (!initializationExecuted.current && etiquettes.length > 0) {
-      calendarManager.setCalendarEtiquettes(etiquettes)
-      initializationExecuted.current = true
+    if (personalEtiquettes.length > 0) {
+      calendarManager.setCalendarEtiquettes(personalEtiquettes)
     }
-  }, [calendarManager, etiquettes])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personalEtiquettes, calendarManager.setCalendarEtiquettes])
 
-  // Update local events when props change
-  useEffect(() => {
-    setPersonalEvents(events)
-  }, [events])
+  // Sincronizar con props
+  useEffect(() => setPersonalEvents(events), [events])
+  useEffect(() => setPersonalEtiquettes(etiquettes), [etiquettes])
 
-  // Filter events based on etiquette visibility
+  const refreshEtiquettes = async () => {
+    if (!calendar?.$id) return
+
+    try {
+      const updatedEtiquettes = await getEtiquettes(calendar.$id)
+      setPersonalEtiquettes(updatedEtiquettes)
+      calendarManager.setCalendarEtiquettes(updatedEtiquettes)
+    } catch (error) {
+      console.error("Error refreshing etiquettes:", error)
+      toast.error("Error al actualizar las etiquetas")
+    }
+  }
+
   const visibleEvents = useMemo(() => {
     return personalEvents.filter((event) => {
-      const color = getEventColor(event, etiquettes)
+      const color = getEventColor(event, personalEtiquettes)
       return calendarManager.isEtiquetteVisible(color)
     })
-  }, [personalEvents, calendarManager, etiquettes])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personalEvents, personalEtiquettes, calendarManager.isEtiquetteVisible])
 
   const toggleEditMode = () => {
     if (!permissions.canUpdate) {
@@ -66,96 +83,6 @@ export default function PersonalCalendar({
       return
     }
     setEditable(!editable)
-  }
-
-  const handleEventAdd = async (event: Events) => {
-    if (!calendar?.$id) {
-      toast.error("Error: No se encontró el calendario personal")
-      return
-    }
-
-    if (!permissions.canCreate) {
-      toast.error("No tienes permisos para crear eventos")
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const eventWithCalendar = {
-        ...event,
-        calendar_id: calendar.$id,
-      }
-
-      const newEvent = await createEvent(eventWithCalendar)
-      if (newEvent) {
-        setPersonalEvents((prev) => [...prev, newEvent])
-        toast.success("Evento creado exitosamente")
-      } else {
-        toast.error("Error al crear el evento")
-      }
-    } catch (error) {
-      console.error("Error creating event:", error)
-      toast.error("Error al crear el evento")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleEventUpdate = async (updatedEvent: Events) => {
-    if (!updatedEvent.$id) {
-      toast.error("Error: Evento sin ID válido")
-      return
-    }
-
-    if (!permissions.canUpdate) {
-      toast.error("No tienes permisos para actualizar eventos")
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const result = await updateEvent(updatedEvent.$id, updatedEvent)
-      if (result) {
-        setPersonalEvents((prev) =>
-          prev.map((event) =>
-            event.$id === updatedEvent.$id ? result : event,
-          ),
-        )
-        toast.success("Evento actualizado exitosamente")
-      } else {
-        toast.error("Error al actualizar el evento")
-      }
-    } catch (error) {
-      console.error("Error updating event:", error)
-      toast.error("Error al actualizar el evento")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleEventDelete = async (eventId: string) => {
-    if (!permissions.canDelete) {
-      toast.error("No tienes permisos para eliminar eventos")
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const success = await deleteEvent(eventId)
-      if (success) {
-        setPersonalEvents((prev) =>
-          prev.filter((event) => event.$id !== eventId),
-        )
-        toast.success("Evento eliminado exitosamente")
-      } else {
-        toast.error("Error al eliminar el evento")
-      }
-    } catch (error) {
-      console.error("Error deleting event:", error)
-      toast.error("Error al eliminar el evento")
-    } finally {
-      setIsLoading(false)
-    }
   }
 
   if (!calendar) {
@@ -170,57 +97,80 @@ export default function PersonalCalendar({
   }
 
   return (
-    <div>
-      <div className="mb-4 flex justify-end">
-        <Button
-          variant={editable ? "outline" : "default"}
-          onClick={toggleEditMode}
-          disabled={isLoading || !permissions.canUpdate}
-          className="flex items-center gap-2"
-          title={
-            editable
-              ? "Cambiar a modo solo lectura - No podrás editar eventos"
-              : "Habilitar edición - Podrás crear, editar y eliminar eventos"
-          }
-        >
-          {editable ? (
-            <>
-              <Eye />
-              Lectura
-            </>
-          ) : (
-            <>
-              <Edit />
-              Editar
-            </>
-          )}
-        </Button>
-      </div>
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Mi Calendario", isCurrentPage: true },
+        ]}
+        action={
+          permissions.canUpdate ? (
+            <Button
+              variant={editable ? "outline" : "default"}
+              onClick={toggleEditMode}
+              disabled={eventHandlers.isLoading}
+              className="flex items-center gap-2"
+              title={
+                editable
+                  ? "Cambiar a modo solo lectura - No podrás editar eventos"
+                  : "Habilitar edición - Podrás crear, editar y eliminar eventos"
+              }
+            >
+              {editable ? (
+                <>
+                  <Eye />
+                  Lectura
+                </>
+              ) : (
+                <>
+                  <Edit />
+                  Editar
+                </>
+              )}
+            </Button>
+          ) : null
+        }
+      />
 
       <EtiquettesHeader
-        etiquettes={etiquettes}
+        etiquettes={personalEtiquettes}
         isEtiquetteVisible={calendarManager.isEtiquetteVisible}
         toggleEtiquetteVisibility={calendarManager.toggleEtiquetteVisibility}
+        etiquettesManager={
+          editable && (
+            <EtiquettesManager
+              etiquettes={personalEtiquettes}
+              calendarId={calendar.$id}
+              onUpdate={refreshEtiquettes}
+            />
+          )
+        }
       />
 
       <div className="flex-1">
         <SetupCalendar
           events={visibleEvents}
           onEventAdd={
-            editable && permissions.canCreate ? handleEventAdd : undefined
+            editable && permissions.canCreate
+              ? eventHandlers.handleEventAdd
+              : undefined
           }
           onEventUpdate={
-            editable && permissions.canUpdate ? handleEventUpdate : undefined
+            editable && permissions.canUpdate
+              ? eventHandlers.handleEventUpdate
+              : undefined
           }
           onEventDelete={
-            editable && permissions.canDelete ? handleEventDelete : undefined
+            editable && permissions.canDelete
+              ? eventHandlers.handleEventDelete
+              : undefined
           }
-          initialView="week"
+          initialView={calendar.defaultView}
           editable={editable}
           permissions={permissions}
-          etiquettes={etiquettes}
+          etiquettes={personalEtiquettes}
         />
       </div>
-    </div>
+    </>
   )
 }

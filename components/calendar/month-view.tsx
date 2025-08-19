@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/popover"
 
 import type { Etiquettes, Events } from "@/types"
+import type { CalendarPermissions } from "./hooks/use-calendar-permissions"
 
 interface MonthViewProps {
   currentDate: Date
@@ -45,7 +46,7 @@ interface MonthViewProps {
   onEventSelect: (event: Events) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
-  permissions?: { canEdit?: boolean }
+  permissions?: CalendarPermissions
 }
 
 export function MonthView({
@@ -218,7 +219,12 @@ export function MonthView({
                               onClick={(e) => handleEventClick(event, e)}
                               isFirstDay={isFirstDay}
                               isLastDay={isLastDay}
-                              draggable={permissions?.canEdit && editable}
+                              draggable={
+                                (permissions?.canUpdate ||
+                                  permissions?.canCreate ||
+                                  permissions?.canDelete) &&
+                                editable
+                              }
                             />
                           </div>
                         )

@@ -7,6 +7,7 @@ export { DayView } from "./day-view"
 export { DraggableEvent } from "./draggable-event"
 export { DroppableCell } from "./droppable-cell"
 export { EtiquettesHeader } from "./etiquettes-header"
+export { EtiquettesManager } from "./etiquettes-manager"
 export { EventDialog } from "./event-dialog"
 export { EventItem } from "./event-item"
 export { EventViewDialog } from "./event-view-dialog"
@@ -28,4 +29,3 @@ export * from "@/components/calendar/hooks/use-event-visibility"
 
 // Types
 export type { CalendarPermissions } from "./hooks/use-calendar-permissions"
-

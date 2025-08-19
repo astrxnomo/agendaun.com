@@ -9,12 +9,14 @@ interface EtiquettesHeaderProps {
   etiquettes: Etiquettes[]
   isEtiquetteVisible: (color: string | undefined) => boolean
   toggleEtiquetteVisibility: (color: string) => void
+  etiquettesManager: React.ReactNode
 }
 
 export function EtiquettesHeader({
   etiquettes,
   isEtiquetteVisible,
   toggleEtiquetteVisibility,
+  etiquettesManager,
 }: EtiquettesHeaderProps) {
   return (
     <div className="bg-background sticky top-12 z-30 border-b">
@@ -43,6 +45,7 @@ export function EtiquettesHeader({
             </Badge>
           ))}
         </div>
+        {etiquettesManager}
       </div>
     </div>
   )
