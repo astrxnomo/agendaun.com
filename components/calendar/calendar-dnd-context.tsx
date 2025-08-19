@@ -23,11 +23,13 @@ import {
   type ReactNode,
 } from "react"
 
-import { EventItem, type CalendarEvent } from "@/components/calendar"
+import { EventItem } from "@/components/calendar"
+
+import type { Etiquettes, Events } from "@/types"
 
 // Define the context type
 type CalendarDndContextType = {
-  activeEvent: CalendarEvent | null
+  activeEvent: Events | null
   activeId: UniqueIdentifier | null
   activeView: "month" | "week" | "day" | null
   currentTime: Date | null
@@ -62,14 +64,16 @@ export const useCalendarDnd = () => useContext(CalendarDndContext)
 // Props for the provider
 interface CalendarDndProviderProps {
   children: ReactNode
-  onEventUpdate: (event: CalendarEvent) => void
+  etiquettes: Etiquettes[]
+  onEventUpdate: (event: Events) => void
 }
 
 export function CalendarDndProvider({
   children,
+  etiquettes,
   onEventUpdate,
 }: CalendarDndProviderProps) {
-  const [activeEvent, setActiveEvent] = useState<CalendarEvent | null>(null)
+  const [activeEvent, setActiveEvent] = useState<Events | null>(null)
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
   const [activeView, setActiveView] = useState<"month" | "week" | "day" | null>(
     null,
@@ -133,7 +137,7 @@ export function CalendarDndProvider({
       multiDayWidth: eventMultiDayWidth,
       dragHandlePosition: eventDragHandlePosition,
     } = active.data.current as {
-      event: CalendarEvent
+      event: Events
       view: "month" | "week" | "day"
       height?: number
       isMultiDay?: boolean
@@ -246,7 +250,7 @@ export function CalendarDndProvider({
       }
 
       const activeData = active.data.current as {
-        event?: CalendarEvent
+        event?: Events
         view?: string
       }
       const overData = over.data.current as { date?: Date; time?: number }
@@ -357,6 +361,7 @@ export function CalendarDndProvider({
             >
               <EventItem
                 event={activeEvent}
+                etiquettes={etiquettes}
                 view={activeView}
                 isDragging={true}
                 showTime={activeView !== "month"}

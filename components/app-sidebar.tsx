@@ -42,17 +42,14 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useAuthContext } from "@/contexts/auth-context"
 
-import type { User } from "@/types/auth"
-import type React from "react"
+export function AppSidebar() {
+  const { user, isLoading } = useAuthContext()
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  user?: User | null
-}
-
-export function AppSidebar({ user, ...props }: AppSidebarProps) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -222,26 +219,48 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <ConfigFilterButton variant="sidebar" user={user} />
-        <NavUser user={user} />
-        {!user && (
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" tooltip="Iniciar sesión" asChild>
-                <Link href="/auth/login">
-                  <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                    <LogIn className="size-4" />
-                  </div>
+        {isLoading ? (
+          <>
+            <Skeleton className="h-10 w-full" />
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton size="lg" disabled>
+                  <Skeleton className="flex aspect-square size-8 rounded-lg" />
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">Iniciar sesión</span>
-                    <span className="text-muted-foreground truncate text-xs">
-                      Accede con tu correo
-                    </span>
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="mt-1 h-3 w-32" />
                   </div>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </>
+        ) : (
+          <>
+            <ConfigFilterButton variant="sidebar" />
+            {user ? (
+              <NavUser />
+            ) : (
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton size="lg" tooltip="Iniciar sesión" asChild>
+                    <Link href="/auth/login">
+                      <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                        <LogIn className="size-4" />
+                      </div>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium">
+                          Iniciar sesión
+                        </span>
+                        <span className="text-muted-foreground truncate text-xs">
+                          Accede con tu correo
+                        </span>
+                      </div>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            )}
+          </>
         )}
       </SidebarFooter>
     </Sidebar>

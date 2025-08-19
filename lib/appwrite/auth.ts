@@ -2,20 +2,10 @@
 
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { ID } from "node-appwrite"
+import { Account, Client, ID } from "node-appwrite"
+import { cache } from "react"
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/config"
-
-import type { User } from "@/types/auth"
-
-export async function getUser(): Promise<User | null> {
-  try {
-    const { account } = await createSessionClient()
-    return (await account.get()) as User
-  } catch {
-    return null
-  }
-}
 
 export async function sendMagicLink(
   formData: FormData,
@@ -41,19 +31,29 @@ export async function sendMagicLink(
   }
 }
 
-export async function deleteSession(): Promise<void> {
-  const cookieStore = await cookies()
+export const verifySession = cache(async () => {
+  const session = (await cookies()).get("session")
 
-  try {
-    const { account } = await createSessionClient()
-    await account.deleteSession("current")
-  } catch (error) {
-    console.error("Error deleting session:", error)
+  if (!session?.value) {
+    redirect("/auth/unauthorized")
   }
 
-  cookieStore.delete("session")
-  redirect("/")
-}
+  const client = new Client()
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+    .setLocale("es-co")
+    .setSession(session.value)
+
+  const account = new Account(client)
+
+  try {
+    await account.get()
+    return session.value
+  } catch (error) {
+    console.error("Invalid session:", error)
+    redirect("/auth/unauthorized")
+  }
+})
 
 export async function createSession(userId: string, secret: string) {
   const { account } = await createAdminClient()
@@ -67,4 +67,31 @@ export async function createSession(userId: string, secret: string) {
     expires: new Date(session.expire),
     path: "/",
   })
+}
+
+export const getUser = cache(async () => {
+  try {
+    const { account } = await createSessionClient()
+    return await account.get()
+  } catch (error) {
+    console.error("Error getting current user:", error)
+    return null
+  }
+})
+
+export const hasValidSession = cache(async () => {
+  const session = (await cookies()).get("session")
+  return !!session?.value
+})
+
+export async function deleteSession(): Promise<void> {
+  const cookieStore = await cookies()
+
+  try {
+    const { account } = await createSessionClient()
+    await account.deleteSession("current")
+  } catch (error) {
+    console.error("Error deleting session:", error)
+  }
+  cookieStore.delete("session")
 }

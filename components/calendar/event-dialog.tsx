@@ -41,16 +41,16 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
-import type { CalendarEvent, Etiquette } from "@/components/calendar/types"
+import type { Etiquettes, Events } from "@/types"
 
 interface EventDialogProps {
-  event: CalendarEvent | null
+  event: Events | Partial<Events> | null
   isOpen: boolean
   onClose: () => void
-  onSave: (event: CalendarEvent) => void
+  onSave: (event: Events) => void
   onDelete: (eventId: string) => void
-  customEtiquettes?: Etiquette[] // ← Nueva prop para etiquetas disponibles
-  customLabels?: Etiquette[]
+  customEtiquettes?: Etiquettes[] // ← Nueva prop para etiquetas disponibles
+  customLabels?: Etiquettes[]
 }
 
 export function EventDialog({
@@ -79,20 +79,20 @@ export function EventDialog({
       setTitle(event.title || "")
       setDescription(event.description || "")
 
-      const start = new Date(event.start)
-      const end = new Date(event.end)
+      const start = event.start ? new Date(event.start) : new Date()
+      const end = event.end ? new Date(event.end) : new Date()
 
       setStartDate(start)
       setEndDate(end)
       setStartTime(formatTimeForInput(start))
       setEndTime(formatTimeForInput(end))
-      setAllDay(event.allDay || false)
+      setAllDay(event.all_day || false)
       setLocation(event.location || "")
-      // Buscar la etiqueta que corresponde al color del evento
+      // Buscar la etiqueta que corresponde al evento por etiquette_id
       const matchingEtiquette = customEtiquettes.find(
-        (etiq) => etiq.color === event.color,
+        (etiq) => etiq.$id === event.etiquette_id,
       )
-      setEtiquette(matchingEtiquette?.id || null)
+      setEtiquette(matchingEtiquette?.$id || null)
       setError(null) // Reset error when opening dialog
     } else {
       resetForm()
@@ -175,25 +175,31 @@ export function EventDialog({
 
     // Determinar el color basado en la etiqueta seleccionada
     const selectedEtiquetteObj = etiquette
-      ? customEtiquettes.find((etiq) => etiq.id === etiquette)
+      ? customEtiquettes.find((etiq) => etiq.$id === etiquette)
       : null
-    const eventColor = selectedEtiquetteObj?.color || "gray"
 
     onSave({
-      id: event?.id || "",
+      ...event,
+      $id: event?.$id || "",
       title: eventTitle,
       description,
       start,
       end,
-      allDay,
+      all_day: allDay,
       location,
-      color: eventColor,
-    })
+      etiquette_id: selectedEtiquetteObj?.$id || "",
+      // Preserve other required fields from Events type
+      $collectionId: event?.$collectionId || "",
+      $databaseId: event?.$databaseId || "",
+      $createdAt: event?.$createdAt || "",
+      $updatedAt: event?.$updatedAt || "",
+      $permissions: event?.$permissions || [],
+    } as Events)
   }
 
   const handleDelete = () => {
-    if (event?.id) {
-      onDelete(event.id)
+    if (event?.$id) {
+      onDelete(event.$id)
     }
   }
 
@@ -402,15 +408,15 @@ export function EventDialog({
               {/* Etiquetas disponibles */}
               {customEtiquettes.map((etiq) => (
                 <label
-                  key={etiq.id}
+                  key={etiq.$id}
                   className={cn(
                     "relative flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
-                    etiquette === etiq.id
+                    etiquette === etiq.$id
                       ? "border-primary bg-primary/5"
                       : "border-input hover:bg-muted",
                   )}
                 >
-                  <RadioGroupItem value={etiq.id} className="sr-only" />
+                  <RadioGroupItem value={etiq.$id} className="sr-only" />
                   <div
                     className={cn(
                       "size-3 rounded-full border border-gray-400",

@@ -1,6 +1,7 @@
 "use client"
 
 import { ChevronsUpDown, Cog, LogOut } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -18,18 +19,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useAuthContext } from "@/contexts/auth-context"
 import { deleteSession } from "@/lib/appwrite/auth"
 
-import type { User } from "@/types/auth"
-
-interface NavUserProps {
-  user?: User | null // Usuario desde SSR
-}
-
-export function NavUser({ user }: NavUserProps) {
+export function NavUser() {
   const { isMobile } = useSidebar()
+  const { user, setUser } = useAuthContext()
+  const router = useRouter()
 
-  // Si no hay usuario autenticado, no mostrar nada
   if (!user) {
     return null
   }
@@ -37,6 +34,8 @@ export function NavUser({ user }: NavUserProps) {
   const handleLogout = async () => {
     try {
       await deleteSession()
+      setUser(null)
+      router.push("/")
     } catch (error) {
       console.error("Error during logout:", error)
     }

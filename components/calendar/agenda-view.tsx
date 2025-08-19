@@ -9,18 +9,21 @@ import {
   AgendaDaysToShow,
   EventItem,
   getAgendaEventsForDay,
-  type CalendarEvent,
 } from "@/components/calendar"
+
+import type { Etiquettes, Events } from "@/types"
 
 interface AgendaViewProps {
   currentDate: Date
-  events: CalendarEvent[]
-  onEventSelect: (event: CalendarEvent) => void
+  events: Events[]
+  etiquettes: Etiquettes[]
+  onEventSelect: (event: Events) => void
 }
 
 export function AgendaView({
   currentDate,
   events,
+  etiquettes,
   onEventSelect,
 }: AgendaViewProps) {
   // Show events for the next days based on constant
@@ -30,7 +33,7 @@ export function AgendaView({
     )
   }, [currentDate])
 
-  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
+  const handleEventClick = (event: Events, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }
@@ -70,8 +73,9 @@ export function AgendaView({
               <div className="mt-6 space-y-2">
                 {dayEvents.map((event) => (
                   <EventItem
-                    key={event.id}
+                    key={event.$id}
                     event={event}
+                    etiquettes={etiquettes}
                     view="agenda"
                     onClick={(e) => handleEventClick(event, e)}
                   />

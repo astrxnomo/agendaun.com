@@ -344,7 +344,7 @@ export default function FacultadCalendar({
         initialView="month"
         editable={isEditable}
         permissions={permissions}
-        customEtiquettes={facultadEtiquettes} // ← Pasar etiquetas específicas del calendario de facultad
+        etiquettes={facultadEtiquettes} // ← Pasar etiquetas específicas del calendario de facultad
       />
     </>
   )

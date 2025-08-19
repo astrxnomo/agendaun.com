@@ -261,7 +261,7 @@ export default function SedeCalendar({ userRole = "user" }: SedeCalendarProps) {
         initialView="month"
         editable={permissions.canEdit}
         permissions={permissions}
-        customEtiquettes={sedeEtiquettes}
+        etiquettes={sedeEtiquettes}
       />
     </>
   )

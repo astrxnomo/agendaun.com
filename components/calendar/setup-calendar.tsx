@@ -36,10 +36,7 @@ import {
   useCalendarContext,
   WeekCellsHeight,
   WeekView,
-  type CalendarEvent,
   type CalendarPermissions,
-  type CalendarView,
-  type Etiquette,
 } from "@/components/calendar"
 import { Button } from "@/components/ui/button"
 import {
@@ -51,16 +48,20 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
+import type { Etiquettes, Events } from "@/types"
+
+type CalendarView = "month" | "week" | "day" | "agenda"
+
 export interface EventCalendarProps {
-  events?: CalendarEvent[]
-  onEventAdd?: (event: CalendarEvent) => void
-  onEventUpdate?: (event: CalendarEvent) => void
+  events?: Events[]
+  onEventAdd?: (event: Events) => void
+  onEventUpdate?: (event: Events) => void
   onEventDelete?: (eventId: string) => void
   className?: string
   initialView?: CalendarView
   editable?: boolean
   permissions?: CalendarPermissions
-  customEtiquettes?: Etiquette[] // ← Nueva prop para las etiquetas disponibles
+  etiquettes?: Etiquettes[] // ← Nueva prop para las etiquetas disponibles
 }
 
 export function SetupCalendar({
@@ -72,16 +73,14 @@ export function SetupCalendar({
   initialView = "month",
   editable = true,
   permissions,
-  customEtiquettes: etiquettes = [], // ← Recibir etiquetas con default vacío
+  etiquettes = [],
 }: EventCalendarProps) {
-  // Use the shared calendar context instead of local state
   const { currentDate, setCurrentDate } = useCalendarContext()
   const [view, setView] = useState<CalendarView>(initialView)
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [isEventViewDialogOpen, setIsEventViewDialogOpen] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<Events | null>(null)
 
-  // Add keyboard shortcuts for view switching
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if user is typing in an input, textarea or contentEditable element
@@ -148,7 +147,7 @@ export function SetupCalendar({
     setCurrentDate(new Date())
   }
 
-  const handleEventSelect = (event: CalendarEvent) => {
+  const handleEventSelect = (event: Events) => {
     setSelectedEvent(event)
 
     // Si el usuario tiene permisos de edición, abrir dialog de edición
@@ -178,19 +177,31 @@ export function SetupCalendar({
       startTime.setMilliseconds(0)
     }
 
-    const newEvent: CalendarEvent = {
-      id: "",
+    const newEvent: Events = {
+      $id: "",
       title: "",
       start: startTime,
       end: addHoursToDate(startTime, 1),
-      allDay: false,
+      all_day: false,
+      description: "",
+      location: "",
+      etiquette_id: "",
+      sede_id: "",
+      faculties_id: "",
+      programs_id: "",
+      calendar_id: "",
+      $collectionId: "",
+      $databaseId: "",
+      $createdAt: "",
+      $updatedAt: "",
+      $permissions: [],
     }
     setSelectedEvent(newEvent)
     setIsEventDialogOpen(true)
   }
 
-  const handleEventSave = (event: CalendarEvent) => {
-    if (event.id) {
+  const handleEventSave = (event: Events) => {
+    if (event.$id) {
       onEventUpdate?.(event)
       // Show toast notification when an event is updated
       toast(`Evento "${event.title}" actualizado`, {
@@ -230,7 +241,7 @@ export function SetupCalendar({
     }
   }
 
-  const handleEventUpdate = (updatedEvent: CalendarEvent) => {
+  const handleEventUpdate = (updatedEvent: Events) => {
     onEventUpdate?.(updatedEvent)
 
     // Show toast notification when an event is updated via drag and drop
@@ -292,7 +303,10 @@ export function SetupCalendar({
         } as React.CSSProperties
       }
     >
-      <CalendarDndProvider onEventUpdate={handleEventUpdate}>
+      <CalendarDndProvider
+        etiquettes={etiquettes}
+        onEventUpdate={handleEventUpdate}
+      >
         <div
           className={cn(
             "flex flex-col justify-between gap-2 px-4 py-5 sm:flex-row sm:items-center",
@@ -394,6 +408,7 @@ export function SetupCalendar({
             <MonthView
               currentDate={currentDate}
               events={events}
+              etiquettes={etiquettes}
               onEventSelect={handleEventSelect}
               onEventCreate={handleEventCreate}
               editable={editable}
@@ -404,6 +419,7 @@ export function SetupCalendar({
             <WeekView
               currentDate={currentDate}
               events={events}
+              etiquettes={etiquettes}
               onEventSelect={handleEventSelect}
               onEventCreate={handleEventCreate}
               editable={editable}
@@ -418,12 +434,14 @@ export function SetupCalendar({
               onEventCreate={handleEventCreate}
               editable={editable}
               permissions={permissions}
+              etiquettes={etiquettes}
             />
           )}
           {view === "agenda" && (
             <AgendaView
               currentDate={currentDate}
               events={events}
+              etiquettes={etiquettes}
               onEventSelect={handleEventSelect}
             />
           )}

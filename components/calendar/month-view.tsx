@@ -24,7 +24,6 @@ import {
   getSpanningEventsForDay,
   sortEvents,
   useEventVisibility,
-  type CalendarEvent,
 } from "@/components/calendar"
 import {
   DefaultStartHour,
@@ -37,10 +36,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
+import type { Etiquettes, Events } from "@/types"
+
 interface MonthViewProps {
   currentDate: Date
-  events: CalendarEvent[]
-  onEventSelect: (event: CalendarEvent) => void
+  events: Events[]
+  etiquettes: Etiquettes[]
+  onEventSelect: (event: Events) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
   permissions?: { canEdit?: boolean }
@@ -49,6 +51,7 @@ interface MonthViewProps {
 export function MonthView({
   currentDate,
   events,
+  etiquettes,
   onEventSelect,
   onEventCreate,
   editable = false,
@@ -85,7 +88,7 @@ export function MonthView({
     return result
   }, [days])
 
-  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
+  const handleEventClick = (event: Events, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }
@@ -125,10 +128,7 @@ export function MonthView({
               const spanningEvents = getSpanningEventsForDay(events, day)
               const isCurrentMonth = isSameMonth(day, currentDate)
               const cellId = `month-cell-${day.toISOString()}`
-              const allDayEvents: CalendarEvent[] = [
-                ...spanningEvents,
-                ...dayEvents,
-              ]
+              const allDayEvents: Events[] = [...spanningEvents, ...dayEvents]
               const allEvents = getAllEventsForDay(events, day)
 
               const isReferenceCell = weekIndex === 0 && dayIndex === 0
@@ -178,19 +178,20 @@ export function MonthView({
                         if (!isFirstDay) {
                           return (
                             <div
-                              key={`spanning-${event.id}-${day.toISOString().slice(0, 10)}`}
+                              key={`spanning-${event.$id}-${day.toISOString().slice(0, 10)}`}
                               className="aria-hidden:hidden"
                               aria-hidden={isHidden ? "true" : undefined}
                             >
                               <EventItem
                                 onClick={(e) => handleEventClick(event, e)}
                                 event={event}
+                                etiquettes={etiquettes}
                                 view="month"
                                 isFirstDay={isFirstDay}
                                 isLastDay={isLastDay}
                               >
                                 <div className="invisible" aria-hidden={true}>
-                                  {!event.allDay && (
+                                  {!event.all_day && (
                                     <span>
                                       {format(new Date(event.start), "h:mm", {
                                         locale: es,
@@ -206,12 +207,13 @@ export function MonthView({
 
                         return (
                           <div
-                            key={event.id}
+                            key={event.$id}
                             className="aria-hidden:hidden"
                             aria-hidden={isHidden ? "true" : undefined}
                           >
                             <DraggableEvent
                               event={event}
+                              etiquettes={etiquettes}
                               view="month"
                               onClick={(e) => handleEventClick(event, e)}
                               isFirstDay={isFirstDay}
@@ -257,11 +259,12 @@ export function MonthView({
 
                                   return (
                                     <EventItem
-                                      key={event.id}
+                                      key={event.$id}
                                       onClick={(e) =>
                                         handleEventClick(event, e)
                                       }
                                       event={event}
+                                      etiquettes={etiquettes}
                                       view="month"
                                       isFirstDay={isFirstDay}
                                       isLastDay={isLastDay}

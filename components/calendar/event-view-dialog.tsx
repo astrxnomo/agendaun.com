@@ -4,11 +4,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar1, Clock, MapPin } from "lucide-react"
 
-import {
-  getEtiquetteColor,
-  type CalendarEvent,
-  type Etiquette,
-} from "@/components/calendar"
+import { getEtiquetteColor, getEventColor } from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,25 +17,28 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
+import type { Etiquettes, Events } from "@/types"
+
 interface EventViewDialogProps {
-  event: CalendarEvent | null
+  event: Events | null
   isOpen: boolean
   onClose: () => void
-  etiquettes?: Etiquette[] // ← Nueva prop para etiquetas disponibles
+  etiquettes?: Etiquettes[] // ← Nueva prop para etiquetas disponibles
 }
 
 export function EventViewDialog({
   event,
   isOpen,
   onClose,
-  etiquettes: etiquettes = [], // ← Prefijo underscore para indicar que no se usa aún
+  etiquettes = [], // Valor por defecto para evitar errores
 }: EventViewDialogProps) {
   if (!event) return null
 
   const startDate = new Date(event.start)
   const endDate = new Date(event.end)
 
-  const etiquetteColor = getEtiquetteColor(event.color)
+  const eventColor = getEventColor(event, etiquettes)
+  const etiquetteColor = getEtiquetteColor(eventColor)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -67,7 +66,7 @@ export function EventViewDialog({
             <div className="flex-1">
               <p className="text-sm font-medium">Fecha y hora</p>
               <div className="text-muted-foreground text-sm">
-                {event.allDay ? (
+                {event.all_day ? (
                   <p>
                     {format(startDate, "EEEE, d 'de' MMMM 'de' yyyy", {
                       locale: es,
@@ -131,15 +130,16 @@ export function EventViewDialog({
           )}
 
           {/* Etiqueta de color */}
-          {event.color && (
+          {eventColor && (
             <>
               <Separator />
               <Badge
                 variant="secondary"
-                className={cn("border text-xs capitalize", etiquetteColor)}
+                className={cn("border text-xs", etiquetteColor)}
               >
-                {etiquettes.find((etiquette) => etiquette.color === event.color)
-                  ?.name || "Sin etiqueta"}
+                {etiquettes.find(
+                  (etiquette) => etiquette.$id === event.etiquette_id,
+                )?.name || "Sin etiqueta"}
               </Badge>
             </>
           )}

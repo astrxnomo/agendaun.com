@@ -5,14 +5,12 @@ import { CSS } from "@dnd-kit/utilities"
 import { differenceInDays } from "date-fns"
 import { useRef, useState } from "react"
 
-import {
-  EventItem,
-  useCalendarDnd,
-  type CalendarEvent,
-} from "@/components/calendar"
+import { EventItem, useCalendarDnd } from "@/components/calendar"
+import { type Etiquettes, type Events } from "@/types"
 
 interface DraggableEventProps {
-  event: CalendarEvent
+  event: Events
+  etiquettes?: Etiquettes[]
   view: "month" | "week" | "day"
   showTime?: boolean
   onClick?: (e: React.MouseEvent) => void
@@ -27,6 +25,7 @@ interface DraggableEventProps {
 
 export function DraggableEvent({
   event,
+  etiquettes,
   view,
   showTime,
   onClick,
@@ -53,7 +52,7 @@ export function DraggableEvent({
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
-      id: `${event.id}-${view}`,
+      id: `${event.$id}-${view}`,
       data: {
         event,
         view,
@@ -78,7 +77,7 @@ export function DraggableEvent({
   }
 
   // Don't render if this event is being dragged
-  if (isDragging || activeId === `${event.id}-${view}`) {
+  if (isDragging || activeId === `${event.$id}-${view}`) {
     return (
       <div
         ref={setNodeRef}
@@ -126,6 +125,7 @@ export function DraggableEvent({
     >
       <EventItem
         event={event}
+        etiquettes={etiquettes}
         view={view}
         showTime={showTime}
         isFirstDay={isFirstDay}

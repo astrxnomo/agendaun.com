@@ -1,10 +1,12 @@
 "use client"
 
-import { getEtiquetteColor, type Etiquette } from "@/components/calendar"
+import { getEtiquetteColor } from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 
+import type { Etiquettes } from "@/types"
+
 interface EtiquettesHeaderProps {
-  etiquettes: Etiquette[]
+  etiquettes: Etiquettes[]
   isEtiquetteVisible: (color: string | undefined) => boolean
   toggleEtiquetteVisibility: (color: string) => void
 }
@@ -24,7 +26,7 @@ export function EtiquettesHeader({
         <div className="flex shrink-0 items-center gap-1">
           {etiquettes.map((etiquette) => (
             <Badge
-              key={etiquette.id}
+              key={etiquette.$id}
               variant={
                 isEtiquetteVisible(etiquette.color) ? "default" : "secondary"
               }

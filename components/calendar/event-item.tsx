@@ -7,10 +7,11 @@ import { useMemo } from "react"
 import {
   getBorderRadiusClasses,
   getEtiquetteColor,
-  type CalendarEvent,
+  getEventColor,
 } from "@/components/calendar"
 import { cn } from "@/lib/utils"
 
+import type { Etiquettes, Events } from "@/types"
 import type { DraggableAttributes } from "@dnd-kit/core"
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities"
 
@@ -25,7 +26,8 @@ const formatTimeWithOptionalMinutes = (date: Date) => {
 }
 
 interface EventWrapperProps {
-  event: CalendarEvent
+  event: Events
+  etiquettes?: Etiquettes[]
   isFirstDay?: boolean
   isLastDay?: boolean
   isDragging?: boolean
@@ -42,6 +44,7 @@ interface EventWrapperProps {
 // Shared wrapper component for event styling
 function EventWrapper({
   event,
+  etiquettes,
   isFirstDay = true,
   isLastDay = true,
   isDragging,
@@ -54,6 +57,10 @@ function EventWrapper({
   onMouseDown,
   onTouchStart,
 }: EventWrapperProps) {
+  // Calculate color using etiquettes
+  const eventColor = getEventColor(event, etiquettes || [])
+  const colorClass = getEtiquetteColor(eventColor)
+
   // Always use the currentTime (if provided) to determine if the event is in the past
   const displayEnd = currentTime
     ? new Date(
@@ -68,7 +75,7 @@ function EventWrapper({
     <button
       className={cn(
         "focus-visible:border-ring focus-visible:ring-ring/50 flex h-full w-full overflow-hidden px-1 text-left font-medium backdrop-blur-md transition outline-none select-none focus-visible:ring-[3px] data-dragging:cursor-grabbing data-dragging:shadow-lg data-past-event:line-through sm:px-2",
-        getEtiquetteColor(event.color),
+        colorClass,
         getBorderRadiusClasses(isFirstDay, isLastDay),
         className,
       )}
@@ -86,7 +93,8 @@ function EventWrapper({
 }
 
 interface EventItemProps {
-  event: CalendarEvent
+  event: Events
+  etiquettes?: Etiquettes[]
   view: "month" | "week" | "day" | "agenda"
   isDragging?: boolean
   onClick?: (e: React.MouseEvent) => void
@@ -104,6 +112,7 @@ interface EventItemProps {
 
 export function EventItem({
   event,
+  etiquettes = [],
   view,
   isDragging,
   onClick,
@@ -118,7 +127,8 @@ export function EventItem({
   onMouseDown,
   onTouchStart,
 }: EventItemProps) {
-  const eventColor = event.color
+  const eventColor = getEventColor(event, etiquettes)
+  const colorClass = getEtiquetteColor(eventColor)
 
   // Use the provided currentTime (for dragging) or the event's actual time
   const displayStart = useMemo(() => {
@@ -140,7 +150,7 @@ export function EventItem({
   }, [displayStart, displayEnd])
 
   const getEventTime = () => {
-    if (event.allDay) return "Todo el dia"
+    if (event.all_day) return "Todo el dia"
 
     // For short events (less than 45 minutes), only show start time
     if (durationMinutes < 45) {
@@ -155,6 +165,7 @@ export function EventItem({
     return (
       <EventWrapper
         event={event}
+        etiquettes={etiquettes}
         isFirstDay={isFirstDay}
         isLastDay={isLastDay}
         isDragging={isDragging}
@@ -171,7 +182,7 @@ export function EventItem({
       >
         {children || (
           <span className="truncate">
-            {!event.allDay && (
+            {!event.all_day && (
               <span className="truncate font-normal uppercase opacity-70 sm:text-xs">
                 {formatTimeWithOptionalMinutes(displayStart)}{" "}
               </span>
@@ -187,6 +198,7 @@ export function EventItem({
     return (
       <EventWrapper
         event={event}
+        etiquettes={etiquettes}
         isFirstDay={isFirstDay}
         isLastDay={isLastDay}
         isDragging={isDragging}
@@ -231,7 +243,7 @@ export function EventItem({
     <button
       className={cn(
         "focus-visible:border-ring focus-visible:ring-ring/50 flex w-full flex-col gap-1 rounded p-2 text-left transition outline-none focus-visible:ring-[3px] data-past-event:line-through data-past-event:opacity-90",
-        getEtiquetteColor(eventColor),
+        colorClass,
         className,
       )}
       data-past-event={isPast(new Date(event.end)) || undefined}
@@ -243,7 +255,7 @@ export function EventItem({
     >
       <div className="text-sm font-medium">{event.title}</div>
       <div className="text-xs opacity-70">
-        {event.allDay ? (
+        {event.all_day ? (
           <span>Todo el dia</span>
         ) : (
           <span className="uppercase">

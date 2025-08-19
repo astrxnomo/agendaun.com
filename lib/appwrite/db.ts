@@ -20,10 +20,28 @@ export async function db() {
 
   collections.forEach((collection) => {
     api[collection.name] = {
-      create: async (payload: any, id: string = ID.unique()) =>
-        database.createDocument(DATABASE_ID, collection.id, id, payload),
-      update: async (id: string, payload: any) =>
-        database.updateDocument(DATABASE_ID, collection.id, id, payload),
+      create: async (
+        payload: any,
+        permissions: string[] = [],
+        id: string = ID.unique(),
+      ) =>
+        database.createDocument(
+          DATABASE_ID,
+          collection.id,
+          id,
+          payload,
+          permissions,
+        ),
+      update: async (id: string, payload: any, permissions?: string[]) =>
+        permissions
+          ? database.updateDocument(
+              DATABASE_ID,
+              collection.id,
+              id,
+              payload,
+              permissions,
+            )
+          : database.updateDocument(DATABASE_ID, collection.id, id, payload),
       delete: async (id: string) =>
         database.deleteDocument(DATABASE_ID, collection.id, id),
       get: async (id: string) =>

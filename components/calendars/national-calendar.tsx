@@ -7,14 +7,19 @@ import {
   SetupCalendar,
   useCalendarManager,
   useCalendarPermissions,
-  type CalendarEvent,
-  type Etiquette,
 } from "@/components/calendar"
+import {
+  createEvent,
+  deleteEvent,
+  updateEvent,
+} from "@/lib/actions/events.actions"
+
+import type { Etiquettes, Events } from "@/types"
 
 interface NationalCalendarProps {
   userRole?: "admin" | "editor" | "moderator" | "user"
-  events?: CalendarEvent[]
-  etiquettes?: Etiquette[]
+  events?: Events[]
+  etiquettes?: Etiquettes[]
 }
 
 export default function NationalCalendar({
@@ -31,34 +36,48 @@ export default function NationalCalendar({
       calendar.setCalendarEtiquettes(etiquettes)
       initializationExecuted.current = true
     }
-  }, [calendar])
+  }, [calendar, etiquettes])
 
   // Calculate permissions based on user role
   const calendarType = "national"
   const permissions = useCalendarPermissions(calendarType, userRole)
 
-  // Filter events based on etiquette visibility (national calendar doesn't use academic filters)
+  // Filter events based on etiquette visibility
   const visibleEvents = useMemo(() => {
     return events.filter((event) => {
-      // Apply etiquette visibility
-      return calendar.isEtiquetteVisible(event.color)
+      // Para eventos de la base de datos, buscar la etiqueta por etiquette_id
+      const etiquette = etiquettes.find((e) => e.$id === event.etiquette_id)
+      const color = etiquette?.color || "gray"
+      return calendar.isEtiquetteVisible(color)
     })
-  }, [calendar])
+  }, [events, etiquettes, calendar])
 
   // Event handlers
-  const handleEventAdd = (event: CalendarEvent) => {
-    // TODO: Implement event addition logic
-    console.log("Adding event:", event)
+  const handleEventAdd = async (event: Events) => {
+    try {
+      await createEvent(event)
+      console.log("Event added successfully")
+    } catch (error) {
+      console.error("Error adding event:", error)
+    }
   }
 
-  const handleEventUpdate = (event: CalendarEvent) => {
-    // TODO: Implement event update logic
-    console.log("Updating event:", event)
+  const handleEventUpdate = async (event: Events) => {
+    try {
+      await updateEvent(event.$id, event)
+      console.log("Event updated successfully")
+    } catch (error) {
+      console.error("Error updating event:", error)
+    }
   }
 
-  const handleEventDelete = (eventId: string) => {
-    // TODO: Implement event deletion logic
-    console.log("Deleting event:", eventId)
+  const handleEventDelete = async (eventId: string) => {
+    try {
+      await deleteEvent(eventId)
+      console.log("Event deleted successfully")
+    } catch (error) {
+      console.error("Error deleting event:", error)
+    }
   }
 
   return (
@@ -76,7 +95,7 @@ export default function NationalCalendar({
         initialView="month"
         editable={permissions.canEdit}
         permissions={permissions}
-        customEtiquettes={etiquettes} // ← Pasar etiquetas específicas del calendario nacional
+        etiquettes={etiquettes}
       />
     </>
   )

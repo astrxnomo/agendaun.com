@@ -343,7 +343,7 @@ export default function ProgramaCalendar({
         initialView="week"
         editable={true}
         permissions={permissions}
-        customEtiquettes={programaEtiquettes} // ← Pasar etiquetas específicas del calendario de programa
+        etiquettes={programaEtiquettes} // ← Pasar etiquetas específicas del calendario de programa
       />
     </>
   )

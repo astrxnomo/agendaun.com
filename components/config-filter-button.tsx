@@ -40,8 +40,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-
-import type { User } from "@/types/auth"
+import { useAuthContext } from "@/contexts/auth-context"
 
 // Estructura jerárquica de sedes -> facultades -> programas
 type AcademicStructure = Record<
@@ -223,17 +222,16 @@ interface AcademicFilters {
 
 interface ConfigFilterButtonProps {
   variant?: "nav" | "sidebar"
-  user?: User | null
   initialFilters?: AcademicFilters
   onFiltersChange?: (filters: AcademicFilters) => void
 }
 
 export default function ConfigFilterButton({
   variant = "nav",
-  user,
   initialFilters = { sede: "", facultad: "", programa: "" },
   onFiltersChange,
 }: ConfigFilterButtonProps) {
+  const { user } = useAuthContext()
   const id = useId()
   const [open, setOpen] = useState(false)
   const [sedeOpen, setSedeOpen] = useState(false)

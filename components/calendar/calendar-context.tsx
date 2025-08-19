@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react"
 
-import type { Etiquette } from "@/components/calendar"
+import type { Etiquettes } from "@/types"
 
 // Tipos para filtros académicos
 export interface AcademicFilters {
@@ -39,7 +39,7 @@ interface CalendarContextType {
   ) => boolean
   setCalendarEtiquettes: (
     calendarId: CalendarId,
-    etiquettes: Etiquette[],
+    etiquettes: Etiquettes[],
   ) => void
 
   // Academic filters (shared across calendars)
@@ -87,7 +87,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
 
   // Set calendar etiquettes and initialize visibility based on isActive
   const setCalendarEtiquettes = useCallback(
-    (calendarId: CalendarId, etiquettes: Etiquette[]) => {
+    (calendarId: CalendarId, etiquettes: Etiquettes[]) => {
       const activeColors = etiquettes
         .filter((etiquette) => etiquette.isActive)
         .map((etiquette) => etiquette.color)

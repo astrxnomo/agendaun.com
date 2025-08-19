@@ -6,10 +6,9 @@ import NavTop from "@/components/nav-top"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
-import { getUser } from "@/lib/appwrite/auth"
+import { AuthContextProvider } from "@/contexts/auth-context"
 
 import type { Metadata } from "next"
-
 import "./globals.css"
 
 const outfit = Outfit({
@@ -26,27 +25,28 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const user = await getUser()
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${outfit.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <CalendarProvider>
-            <SidebarProvider>
-              <AppSidebar user={user} />
-              <SidebarInset>
-                <NavTop user={user} />
-                {children}
-              </SidebarInset>
-            </SidebarProvider>
-          </CalendarProvider>
-          <Toaster position="bottom-right" richColors />
-        </ThemeProvider>
+        <AuthContextProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <CalendarProvider>
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                  <NavTop />
+                  {children}
+                </SidebarInset>
+              </SidebarProvider>
+            </CalendarProvider>
+            <Toaster position="bottom-right" richColors />
+          </ThemeProvider>
+        </AuthContextProvider>
       </body>
     </html>
   )

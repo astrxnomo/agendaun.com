@@ -1,39 +1,49 @@
 import { NextResponse } from "next/server"
 
-import { createSessionClient } from "@/lib/appwrite/config"
+import { getUser, hasValidSession } from "@/lib/appwrite/auth"
 
 import type { NextRequest } from "next/server"
 
-const protectedRoutes = ["/admin"]
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  if (request.nextUrl.pathname.startsWith("/auth")) {
-    try {
-      const { account } = await createSessionClient()
-      await account.get()
-      return NextResponse.redirect(
-        new URL("/calendars/my-calendar", request.url),
-      )
-    } catch {}
+
+  // Redirect authenticated users away from auth pages
+  if (pathname.startsWith("/auth")) {
+    const hasSession = await hasValidSession()
+    if (hasSession) {
+      const user = await getUser()
+      if (user) {
+        return NextResponse.redirect(
+          new URL("/calendars/my-calendar", request.url),
+        )
+      }
+    }
     return NextResponse.next()
   }
 
   const isProtectedRoute =
-    pathname.startsWith("/calendars") || protectedRoutes.includes(pathname)
+    pathname.startsWith("/calendars") || pathname.startsWith("/admin")
 
   if (isProtectedRoute) {
-    try {
-      const { account } = await createSessionClient()
-      await account.get()
-      return NextResponse.next()
-    } catch {
+    const hasSession = await hasValidSession()
+    if (!hasSession) {
       const response = NextResponse.redirect(
         new URL("/auth/unauthorized", request.url),
       )
       response.cookies.delete("session")
       return response
     }
+
+    const user = await getUser()
+    if (!user) {
+      const response = NextResponse.redirect(
+        new URL("/auth/unauthorized", request.url),
+      )
+      response.cookies.delete("session")
+      return response
+    }
+
+    return NextResponse.next()
   }
 
   return NextResponse.next()
