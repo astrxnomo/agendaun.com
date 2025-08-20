@@ -32,10 +32,7 @@ export default function UniversalCalendar({
 }: UniversalCalendarProps) {
   const [editable, setEditable] = useState(false)
 
-  // Hook unificado que maneja todo automáticamente
   const cal = useCalendar()
-
-  // Las etiquetas se inicializan automáticamente en el context provider
 
   const refreshEtiquettes = async () => {
     try {

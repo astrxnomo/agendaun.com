@@ -1,9 +1,3 @@
-/**
- * @fileoverview Academic Actions - Database Management
- * @description Acciones para manejo de sedes, facultades y programas académicos
- * @category Server Actions
- */
-
 "use server"
 
 import { Query } from "node-appwrite"
@@ -171,7 +165,7 @@ export async function getProgramsByFaculty(
   try {
     const data = await db()
     const result = await data.programs.list([
-      Query.equal("faculties_id", facultyId),
+      Query.equal("faculty_id", facultyId), // Corregido: faculty_id no faculties_id
       Query.orderAsc("name"),
       Query.limit(100),
     ])

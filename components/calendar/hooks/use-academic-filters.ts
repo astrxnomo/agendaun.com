@@ -60,17 +60,10 @@ interface UseAcademicFiltersReturn {
 
 // ===== HOOK =====
 
-/**
- * Hook para manejar filtros académicos con datos de la base de datos
- * Carga las sedes inicialmente y las facultades/programas dinámicamente
- * @param initialFilters - Filtros iniciales
- * @returns Interfaz completa para manejo de filtros académicos
- */
 export function useAcademicFilters(
   initialFilters: AcademicFilters = { sede: "", facultad: "", programa: "" },
 ): UseAcademicFiltersReturn {
   // ===== STATE =====
-
   const [filters, setFilters] = useState<AcademicFilters>(initialFilters)
   const [academicData, setAcademicData] = useState<AcademicData>({
     sedes: [],
@@ -82,20 +75,17 @@ export function useAcademicFilters(
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingFacultades, setIsLoadingFacultades] = useState(false)
   const [isLoadingProgramas, setIsLoadingProgramas] = useState(false)
-
-  // Error state
   const [error, setError] = useState<string | null>(null)
 
   // ===== COMPUTED VALUES =====
-
   const availableFacultades = academicData.facultades
   const availableProgramas = academicData.programas
   const activeFiltersCount = Object.values(filters).filter(Boolean).length
   const isComplete = activeFiltersCount >= 3
 
-  // ===== EFFECTS =====
+  // ===== LOAD DATA FUNCTIONS =====
 
-  // Load initial sedes
+  // Load sedes (only once)
   useEffect(() => {
     async function loadSedes() {
       try {
@@ -117,7 +107,7 @@ export function useAcademicFilters(
   // Load facultades when sede changes
   useEffect(() => {
     async function loadFacultades() {
-      if (!filters.sede) {
+      if (!filters.sede || academicData.sedes.length === 0) {
         setAcademicData((prev) => ({ ...prev, facultades: [], programas: [] }))
         return
       }
@@ -126,17 +116,16 @@ export function useAcademicFilters(
         setIsLoadingFacultades(true)
         setError(null)
 
-        // Find sede by slug
-        const sede = academicData.sedes.find((s) => s.slug === filters.sede)
+        const sede = academicData.sedes.find((s) => s.$id === filters.sede)
         if (!sede) {
-          throw new Error("Sede no encontrada")
+          throw new Error(`Sede no encontrada: ${filters.sede}`)
         }
 
         const facultades = await getFacultiesBySede(sede.$id)
         setAcademicData((prev) => ({ ...prev, facultades, programas: [] }))
       } catch (err) {
-        setError("Error al cargar las facultades")
         console.error("Error loading facultades:", err)
+        setError("Error al cargar las facultades")
       } finally {
         setIsLoadingFacultades(false)
       }
@@ -148,7 +137,16 @@ export function useAcademicFilters(
   // Load programas when facultad changes
   useEffect(() => {
     async function loadProgramas() {
-      if (!filters.facultad) {
+      console.log("🔍 Loading programas - estado:", {
+        facultadFiltro: filters.facultad,
+        facultadesDisponibles: academicData.facultades.map((f) => ({
+          id: f.$id,
+          name: f.name,
+        })),
+        facultadesCount: academicData.facultades.length,
+      })
+
+      if (!filters.facultad || academicData.facultades.length === 0) {
         setAcademicData((prev) => ({ ...prev, programas: [] }))
         return
       }
@@ -157,19 +155,29 @@ export function useAcademicFilters(
         setIsLoadingProgramas(true)
         setError(null)
 
-        // Find facultad by slug
         const facultad = academicData.facultades.find(
-          (f) => f.slug === filters.facultad,
+          (f) => f.$id === filters.facultad,
         )
+
+        console.log("🏛️ Facultad encontrada:", facultad)
+
         if (!facultad) {
-          throw new Error("Facultad no encontrada")
+          throw new Error(`Facultad no encontrada: ${filters.facultad}`)
         }
 
+        console.log(
+          "📡 Cargando programas para facultad:",
+          facultad.name,
+          "ID:",
+          facultad.$id,
+        )
         const programas = await getProgramsByFaculty(facultad.$id)
+        console.log("✅ Programas cargados:", programas.length, programas)
+
         setAcademicData((prev) => ({ ...prev, programas }))
       } catch (err) {
-        setError("Error al cargar los programas")
         console.error("Error loading programas:", err)
+        setError("Error al cargar los programas")
       } finally {
         setIsLoadingProgramas(false)
       }
@@ -183,10 +191,7 @@ export function useAcademicFilters(
   const setFilter = useCallback(
     (filterType: keyof AcademicFilters, value: string) => {
       setFilters((prev) => {
-        const newFilters = { ...prev }
-
-        // Update the specific filter
-        newFilters[filterType] = value
+        const newFilters = { ...prev, [filterType]: value }
 
         // Reset dependent filters
         if (filterType === "sede") {
@@ -207,31 +212,17 @@ export function useAcademicFilters(
   }, [])
 
   // ===== RETURN =====
-
   return {
-    // Data
     academicData,
-
-    // Current filters
     filters,
-
-    // Loading states
     isLoading,
     isLoadingFacultades,
     isLoadingProgramas,
-
-    // Error state
     error,
-
-    // Actions
     setFilter,
     clearFilters,
-
-    // Computed data
     availableFacultades,
     availableProgramas,
-
-    // Validation
     isComplete,
     activeFiltersCount,
   }

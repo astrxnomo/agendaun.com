@@ -21,16 +21,6 @@ interface EventVisibilityResult {
   getVisibleEventCount: (totalEvents: number) => number
 }
 
-// ===== HOOK =====
-
-/**
- * Hook para calcular la visibilidad de eventos basada en la altura del contenedor
- * Usa ResizeObserver para actualizaciones eficientes
- * @param options - Configuración de altura y espaciado de eventos
- * @param options.eventHeight - Altura de cada evento en píxeles
- * @param options.eventGap - Espacio entre eventos en píxeles
- * @returns Ref del contenedor, altura y función para calcular eventos visibles
- */
 export function useEventVisibility({
   eventHeight,
   eventGap,

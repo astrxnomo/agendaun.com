@@ -17,18 +17,11 @@ export { WeekView } from "./week-view"
 // Enhanced Calendar System
 export { CalendarProvider, useCalendarContext } from "./calendar-context"
 export { CalendarDataProvider } from "./calendar-data-context"
-export {
-  CompactCalendar,
-  default as EnhancedCalendar,
-  MinimalCalendar,
-  StatsCalendar,
-} from "./enhanced-calendar"
+
 export { default as UniversalCalendar } from "./universal-calendar"
 
 // Hook exports - Enhanced System
 export { useAcademicFilters } from "./hooks/use-academic-filters"
-export { useCalendarState } from "./hooks/use-calendar-state"
-export { useSmartCalendar } from "./hooks/use-smart-calendar"
 
 // Constants and utility exports
 export * from "./constants"

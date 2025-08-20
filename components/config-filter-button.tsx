@@ -10,8 +10,8 @@ import {
   University,
 } from "lucide-react"
 import React, { useId, useState } from "react"
+import { toast } from "sonner"
 
-import { useCalendarContext } from "@/components/calendar/calendar-context"
 import { useAcademicFilters } from "@/components/calendar/hooks/use-academic-filters"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -44,6 +44,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAuthContext } from "@/contexts/auth-context"
+import {
+  getUserProfile,
+  updateUserProfile,
+} from "@/lib/actions/profile.actions"
 
 import type { AcademicFilters } from "@/components/calendar/hooks/use-academic-filters"
 
@@ -80,18 +84,80 @@ export default function ConfigFilterButton({
     isComplete,
   } = useAcademicFilters(initialFilters)
 
-  // Try to connect with calendar context if available
-  const calendarContext = useCalendarContext()
-
-  // Enhanced setFilter function that also updates calendar context
-  const handleFilterChange = (key: keyof AcademicFilters, value: string) => {
+  // Enhanced setFilter function with profile saving
+  const handleFilterChange = async (
+    key: keyof AcademicFilters,
+    value: string,
+  ) => {
+    console.log("🔄 Cambiando filtro:", { key, value })
+    console.log("📊 Estado actual filters:", filters)
     setFilter(key, value)
+    console.log("✅ setFilter llamado")
 
-    // Also update calendar context if available
-    if (calendarContext) {
-      calendarContext.setAcademicFilter(key, value)
+    // Save to user profile if user is authenticated
+    if (user?.$id) {
+      try {
+        const profileData = {
+          user_id: user.$id,
+          sede_id: key === "sede" ? value : filters.sede || null,
+          faculty_id: key === "facultad" ? value : filters.facultad || null,
+          program_id: key === "programa" ? value : filters.programa || null,
+        }
+
+        console.log("💾 Guardando perfil:", profileData)
+        const result = await updateUserProfile(profileData)
+
+        if (result.success) {
+          toast.success("Configuración guardada")
+          console.log("✅ Perfil guardado exitosamente:", result.profile)
+        } else {
+          console.error("❌ Error guardando perfil:", result.error)
+          toast.error("Error guardando configuración")
+        }
+      } catch (error) {
+        console.error("❌ Error en handleFilterChange:", error)
+        toast.error("Error guardando configuración")
+      }
     }
   }
+
+  // Load user profile on mount
+  React.useEffect(() => {
+    if (user?.$id) {
+      const loadUserProfile = async () => {
+        try {
+          console.log("🔄 Cargando perfil del usuario:", user.$id)
+          const result = await getUserProfile(user.$id)
+
+          if (result.success && result.profile) {
+            console.log("✅ Perfil cargado:", result.profile)
+
+            // Update filters based on saved profile
+            if (result.profile.sede_id) {
+              setFilter("sede", result.profile.sede_id)
+            }
+            if (result.profile.faculty_id) {
+              setFilter("facultad", result.profile.faculty_id)
+            }
+            if (result.profile.program_id) {
+              setFilter("programa", result.profile.program_id)
+            }
+          } else {
+            console.log("ℹ️ No hay perfil guardado para este usuario")
+          }
+        } catch (error) {
+          console.error("❌ Error cargando perfil:", error)
+        }
+      }
+
+      void loadUserProfile()
+    }
+  }, [user?.$id, setFilter])
+
+  // Debug: mostrar cambios en filters
+  React.useEffect(() => {
+    console.log("📈 Filters cambió:", filters)
+  }, [filters])
 
   // Notify parent when filters change
   React.useEffect(() => {
@@ -108,27 +174,24 @@ export default function ConfigFilterButton({
 
     const parts = []
     if (filters.sede) {
-      const sede = academicData.sedes.find((s) => s.slug === filters.sede)
+      const sede = academicData.sedes.find((s) => s.$id === filters.sede)
       if (sede) parts.push(sede.name)
     }
     if (filters.facultad) {
       const facultad = availableFacultades.find(
-        (f) => f.slug === filters.facultad,
+        (f) => f.$id === filters.facultad,
       )
       if (facultad) parts.push(facultad.name)
     }
     if (filters.programa) {
       const programa = availableProgramas.find(
-        (p) => p.slug === filters.programa,
+        (p) => p.$id === filters.programa,
       )
       if (programa) parts.push(programa.name)
     }
 
     return parts.join(" • ")
   }
-
-  // Determinar si mostrar badges (solo en nav y no mobile)
-  const showBadges = variant === "nav"
 
   // Contenido del diálogo
   const renderDialogContent = () => (
@@ -184,8 +247,17 @@ export default function ConfigFilterButton({
                       Cargando sedes...
                     </div>
                   ) : filters.sede ? (
-                    academicData.sedes.find((s) => s.slug === filters.sede)
-                      ?.name
+                    (() => {
+                      const sedeEncontrada = academicData.sedes.find(
+                        (s) => s.$id === filters.sede,
+                      )
+                      console.log("🔍 Buscando sede:", {
+                        filtroSede: filters.sede,
+                        sedesDisponibles: academicData.sedes.map((s) => s.$id),
+                        sedeEncontrada,
+                      })
+                      return sedeEncontrada?.name || "Sede no encontrada"
+                    })()
                   ) : (
                     "Selecciona tu sede"
                   )}
@@ -203,13 +275,14 @@ export default function ConfigFilterButton({
                           key={sede.$id}
                           value={sede.name}
                           onSelect={() => {
-                            handleFilterChange("sede", sede.slug)
+                            console.log("🎯 Sede seleccionada:", sede.name)
+                            void handleFilterChange("sede", sede.$id) // Usar $id directamente
                             setSedeOpen(false)
                           }}
                         >
                           <Check
                             className={`mr-2 h-4 w-4 ${
-                              filters.sede === sede.slug
+                              filters.sede === sede.$id
                                 ? "opacity-100"
                                 : "opacity-0"
                             }`}
@@ -254,7 +327,7 @@ export default function ConfigFilterButton({
                       Cargando facultades...
                     </div>
                   ) : filters.facultad ? (
-                    availableFacultades.find((f) => f.slug === filters.facultad)
+                    availableFacultades.find((f) => f.$id === filters.facultad)
                       ?.name
                   ) : !filters.sede ? (
                     "Primero selecciona una sede"
@@ -277,13 +350,13 @@ export default function ConfigFilterButton({
                           key={facultad.$id}
                           value={facultad.name}
                           onSelect={() => {
-                            handleFilterChange("facultad", facultad.slug)
+                            void handleFilterChange("facultad", facultad.$id)
                             setFacultadOpen(false)
                           }}
                         >
                           <Check
                             className={`mr-2 h-4 w-4 ${
-                              filters.facultad === facultad.slug
+                              filters.facultad === facultad.$id
                                 ? "opacity-100"
                                 : "opacity-0"
                             }`}
@@ -328,7 +401,7 @@ export default function ConfigFilterButton({
                       Cargando programas...
                     </div>
                   ) : filters.programa ? (
-                    availableProgramas.find((p) => p.slug === filters.programa)
+                    availableProgramas.find((p) => p.$id === filters.programa)
                       ?.name
                   ) : !filters.facultad ? (
                     "Primero selecciona una facultad"
@@ -349,13 +422,13 @@ export default function ConfigFilterButton({
                           key={programa.$id}
                           value={programa.name}
                           onSelect={() => {
-                            handleFilterChange("programa", programa.slug)
+                            void handleFilterChange("programa", programa.$id)
                             setProgramaOpen(false)
                           }}
                         >
                           <Check
                             className={`mr-2 h-4 w-4 ${
-                              filters.programa === programa.slug
+                              filters.programa === programa.$id
                                 ? "opacity-100"
                                 : "opacity-0"
                             }`}
@@ -469,25 +542,6 @@ export default function ConfigFilterButton({
         </DialogTrigger>
         {renderDialogContent()}
       </Dialog>
-      {/* Active filters badges */}
-      {showBadges && filters.sede && (
-        <Badge variant="secondary" className="text-xs">
-          <School className="mr-1 size-3" />
-          {academicData.sedes.find((s) => s.slug === filters.sede)?.name}
-        </Badge>
-      )}
-      {showBadges && filters.facultad && (
-        <Badge variant="secondary" className="text-xs">
-          <University className="mr-1 size-3" />
-          {availableFacultades.find((f) => f.slug === filters.facultad)?.name}
-        </Badge>
-      )}
-      {showBadges && filters.programa && (
-        <Badge variant="secondary" className="text-xs">
-          <GraduationCap className="mr-1 size-3" />
-          {availableProgramas.find((p) => p.slug === filters.programa)?.name}
-        </Badge>
-      )}
     </div>
   )
 }

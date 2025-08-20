@@ -1,6 +1,6 @@
 /**
  * @fileoverview Calendar UI Context - State Management
- * @description Contexto para manejo de estado de UI del calendario (fechas, etiquetas visibles, filtros académicos)
+ * @description Contexto para manejo de estado de UI del calendario (fechas, etiquetas visibles, filtros académicos para filtrar eventos dentro de calendarios específicos)
  * @category UI Contexts
  */
 
@@ -20,6 +20,8 @@ import type { Etiquettes } from "@/types"
 // ===== TYPES =====
 
 // Tipos para filtros académicos
+// Estos filtros se aplican DENTRO de cada calendario académico para mostrar
+// solo los eventos que corresponden al perfil académico del usuario
 export interface AcademicFilters {
   sede: string
   facultad: string
@@ -27,12 +29,13 @@ export interface AcademicFilters {
 }
 
 // Tipo para identificar calendarios
+// Solo hay UN calendario por tipo académico que se filtra por usuario
 export type CalendarId =
   | "personal"
   | "national"
-  | "sede"
-  | "facultad"
-  | "programa"
+  | "sede" // Un solo calendario sede, filtrado por sede del usuario
+  | "facultad" // Un solo calendario facultad, filtrado por facultad del usuario
+  | "programa" // Un solo calendario programa, filtrado por programa del usuario
 
 interface CalendarContextType {
   // Date management
@@ -51,7 +54,10 @@ interface CalendarContextType {
     etiquettes: Etiquettes[],
   ) => void
 
-  // Academic filters (shared across calendars)
+  // Academic filters (for filtering events within academic calendars)
+  // - Calendario SEDE: muestra solo eventos de la sede del usuario
+  // - Calendario FACULTAD: muestra solo eventos de la facultad del usuario
+  // - Calendario PROGRAMA: muestra solo eventos del programa del usuario
   academicFilters: AcademicFilters
   setAcademicFilter: (filterType: keyof AcademicFilters, value: string) => void
   clearAcademicFilters: () => void
@@ -89,6 +95,12 @@ interface CalendarProviderProps {
 /**
  * Proveedor de contexto para UI del calendario
  * Maneja estado de fechas, visibilidad de etiquetas y filtros académicos
+ *
+ * Los filtros académicos se usan para:
+ * - Calendario SEDE: filtrar eventos por sede del usuario
+ * - Calendario FACULTAD: filtrar eventos por facultad del usuario
+ * - Calendario PROGRAMA: filtrar eventos por programa del usuario
+ *
  * @param children - Componentes hijos que tendrán acceso al contexto
  */
 export function CalendarProvider({ children }: CalendarProviderProps) {

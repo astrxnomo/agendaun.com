@@ -20,17 +20,6 @@ export enum CalendarViews {
   DAY = "day",
 }
 
-export type Sedes = Models.Document & {
-  name: string
-  slug: string
-}
-
-export type Faculties = Models.Document & {
-  name: string
-  slug: string
-  sede_id: Sedes["$id"]
-}
-
 export type Events = Models.Document & {
   title: string
   description: string | null
@@ -59,12 +48,24 @@ export type Calendars = Models.Document & {
   slug: string
 }
 
-export type Profiles = Models.Document & {}
+export type Profiles = Models.Document & {
+  sede_id: string | null
+  faculty_id: Faculties["$id"]
+  program_id: Programs["$id"]
+  user_id: User["$id"]
+}
+export type Sedes = Models.Document & {
+  name: string
+}
+
+export type Faculties = Models.Document & {
+  name: string
+  sede_id: Sedes["$id"]
+}
 
 export type Programs = Models.Document & {
   name: string
-  slug: string
-  faculties_id: Faculties["$id"]
+  faculty_id: Faculties["$id"]
 }
 
 export interface User {

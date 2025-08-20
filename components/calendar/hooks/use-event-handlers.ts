@@ -27,16 +27,6 @@ interface UseEventHandlersProps {
   onEventsUpdate: (updater: (prev: Events[]) => Events[]) => void
 }
 
-// ===== HOOK =====
-
-/**
- * Hook para manejar operaciones CRUD de eventos
- * @param props - Configuración del hook
- * @param props.calendar - Calendario al que pertenecen los eventos
- * @param props.permissions - Permisos del usuario para el calendario
- * @param props.onEventsUpdate - Callback para actualizar la lista de eventos
- * @returns Handlers para operaciones de eventos y estado de carga
- */
 export function useEventHandlers({
   calendar,
   permissions,
