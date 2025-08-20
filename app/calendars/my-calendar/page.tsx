@@ -1,4 +1,5 @@
-import PersonalCalendar from "@/components/calendars/personal-calendar"
+import { CalendarDataProvider } from "@/components/calendar/calendar-data-context"
+import UniversalCalendar from "@/components/calendar/universal-calendar"
 import { getPersonalCalendarData } from "@/lib/actions/personal-calendar.actions"
 
 export default async function MyCalendarPage() {
@@ -16,10 +17,12 @@ export default async function MyCalendarPage() {
   }
 
   return (
-    <PersonalCalendar
-      events={data.events}
-      etiquettes={data.etiquettes}
-      calendar={data.calendar}
-    />
+    <CalendarDataProvider calendar={data.calendar}>
+      <UniversalCalendar
+        calendar={data.calendar}
+        title="Mi Calendario"
+        showEditButton={true}
+      />
+    </CalendarDataProvider>
   )
 }

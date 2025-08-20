@@ -1,3 +1,9 @@
+/**
+ * @fileoverview UI Hooks - Current Time Indicator
+ * @description Hook para mostrar indicador de tiempo actual en vista de calendario
+ * @category UI Hooks
+ */
+
 "use client"
 
 import { endOfWeek, isSameDay, isWithinInterval, startOfWeek } from "date-fns"
@@ -5,10 +11,26 @@ import { useEffect, useState } from "react"
 
 import { EndHour, StartHour } from "@/components/calendar/constants"
 
+// ===== TYPES =====
+
+interface TimeIndicatorResult {
+  currentTimePosition: number
+  currentTimeVisible: boolean
+}
+
+// ===== HOOK =====
+
+/**
+ * Hook para calcular la posición y visibilidad del indicador de tiempo actual
+ * Actualiza automáticamente cada minuto para mantener la precisión
+ * @param currentDate - Fecha actual del calendario
+ * @param view - Vista del calendario (día o semana)
+ * @returns Posición y visibilidad del indicador de tiempo
+ */
 export function useCurrentTimeIndicator(
   currentDate: Date,
   view: "day" | "week",
-) {
+): TimeIndicatorResult {
   const [currentTimePosition, setCurrentTimePosition] = useState<number>(0)
   const [currentTimeVisible, setCurrentTimeVisible] = useState<boolean>(false)
 

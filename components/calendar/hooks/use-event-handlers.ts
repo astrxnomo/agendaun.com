@@ -1,6 +1,12 @@
+/**
+ * @fileoverview Event Hooks - Event Management
+ * @description Hook para manejar operaciones CRUD de eventos del calendario
+ * @category Event Hooks
+ */
+
 "use client"
 
-import { useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
@@ -13,12 +19,24 @@ import {
 import type { Calendars, Events } from "@/types"
 import type { CalendarPermissions } from "./use-calendar-permissions"
 
+// ===== TYPES =====
+
 interface UseEventHandlersProps {
   calendar: Calendars
   permissions: CalendarPermissions
   onEventsUpdate: (updater: (prev: Events[]) => Events[]) => void
 }
 
+// ===== HOOK =====
+
+/**
+ * Hook para manejar operaciones CRUD de eventos
+ * @param props - Configuración del hook
+ * @param props.calendar - Calendario al que pertenecen los eventos
+ * @param props.permissions - Permisos del usuario para el calendario
+ * @param props.onEventsUpdate - Callback para actualizar la lista de eventos
+ * @returns Handlers para operaciones de eventos y estado de carga
+ */
 export function useEventHandlers({
   calendar,
   permissions,
@@ -26,87 +44,102 @@ export function useEventHandlers({
 }: UseEventHandlersProps) {
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleEventAdd = async (event: Events) => {
-    if (!permissions.canCreate) {
-      toast.error("No tienes permisos para crear eventos")
-      return
-    }
+  // ===== EVENT HANDLERS =====
 
-    setIsLoading(true)
-    try {
-      const eventWithCalendar = { ...event, calendarId: calendar.$id }
-      const newEvent = await createEvent(eventWithCalendar)
+  const handleEventAdd = useCallback(
+    async (event: Events) => {
+      if (!permissions.canCreate) {
+        toast.error("No tienes permisos para crear eventos")
+        return
+      }
 
-      if (newEvent) {
-        onEventsUpdate((prev) => [...prev, newEvent])
-        toast.success("Evento creado exitosamente")
-      } else {
+      setIsLoading(true)
+      try {
+        const eventWithCalendar = { ...event, calendar_id: calendar.$id }
+        const newEvent = await createEvent(eventWithCalendar)
+
+        if (newEvent) {
+          onEventsUpdate((prev) => [...prev, newEvent])
+          toast.success("Evento creado exitosamente")
+        } else {
+          toast.error("Error al crear el evento")
+        }
+      } catch (error) {
+        console.error("Error creating event:", error)
         toast.error("Error al crear el evento")
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error) {
-      console.error("Error creating event:", error)
-      toast.error("Error al crear el evento")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    },
+    [calendar.$id, permissions.canCreate, onEventsUpdate],
+  )
 
-  const handleEventUpdate = async (updatedEvent: Events) => {
-    if (!updatedEvent.$id) {
-      toast.error("Error: Evento sin ID válido")
-      return
-    }
+  const handleEventUpdate = useCallback(
+    async (updatedEvent: Events) => {
+      if (!updatedEvent.$id) {
+        toast.error("Error: Evento sin ID válido")
+        return
+      }
 
-    if (!permissions.canUpdate) {
-      toast.error("No tienes permisos para actualizar eventos")
-      return
-    }
+      if (!permissions.canUpdate) {
+        toast.error("No tienes permisos para actualizar eventos")
+        return
+      }
 
-    setIsLoading(true)
-    try {
-      const result = await updateEvent(updatedEvent.$id, updatedEvent)
-      if (result) {
-        onEventsUpdate((prev) =>
-          prev.map((event) =>
-            event.$id === updatedEvent.$id ? result : event,
-          ),
-        )
-        toast.success("Evento actualizado exitosamente")
-      } else {
+      setIsLoading(true)
+      try {
+        const result = await updateEvent(updatedEvent.$id, updatedEvent)
+        if (result) {
+          onEventsUpdate((prev) =>
+            prev.map((event) =>
+              event.$id === updatedEvent.$id ? result : event,
+            ),
+          )
+          toast.success("Evento actualizado exitosamente")
+        } else {
+          toast.error("Error al actualizar el evento")
+        }
+      } catch (error) {
+        console.error("Error updating event:", error)
         toast.error("Error al actualizar el evento")
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error) {
-      console.error("Error updating event:", error)
-      toast.error("Error al actualizar el evento")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    },
+    [permissions.canUpdate, onEventsUpdate],
+  )
 
-  const handleEventDelete = async (eventId: string) => {
-    if (!permissions.canDelete) {
-      toast.error("No tienes permisos para eliminar eventos")
-      return
-    }
+  const handleEventDelete = useCallback(
+    async (eventId: string) => {
+      if (!permissions.canDelete) {
+        toast.error("No tienes permisos para eliminar eventos")
+        return
+      }
 
-    setIsLoading(true)
-    try {
-      const success = await deleteEvent(eventId)
-      if (success) {
-        onEventsUpdate((prev) => prev.filter((event) => event.$id !== eventId))
-        toast.success("Evento eliminado exitosamente")
-      } else {
+      setIsLoading(true)
+      try {
+        const success = await deleteEvent(eventId)
+        if (success) {
+          onEventsUpdate((prev) =>
+            prev.filter((event) => event.$id !== eventId),
+          )
+          toast.success("Evento eliminado exitosamente")
+        } else {
+          toast.error("Error al eliminar el evento")
+        }
+      } catch (error) {
+        console.error("Error deleting event:", error)
         toast.error("Error al eliminar el evento")
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error) {
-      console.error("Error deleting event:", error)
-      toast.error("Error al eliminar el evento")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    },
+    [permissions.canDelete, onEventsUpdate],
+  )
 
-  const refreshEtiquettes = async () => {
+  // ===== UTILITY HANDLERS =====
+
+  const refreshEtiquettes = useCallback(async () => {
     try {
       const updatedEtiquettes = await getEtiquettes(calendar.$id)
       return updatedEtiquettes
@@ -115,13 +148,24 @@ export function useEventHandlers({
       toast.error("Error al actualizar las etiquetas")
       return []
     }
-  }
+  }, [calendar.$id])
 
-  return {
-    isLoading,
-    handleEventAdd,
-    handleEventUpdate,
-    handleEventDelete,
-    refreshEtiquettes,
-  }
+  // ===== RETURN MEMOIZED HANDLERS =====
+
+  return useMemo(
+    () => ({
+      isLoading,
+      handleEventAdd,
+      handleEventUpdate,
+      handleEventDelete,
+      refreshEtiquettes,
+    }),
+    [
+      isLoading,
+      handleEventAdd,
+      handleEventUpdate,
+      handleEventDelete,
+      refreshEtiquettes,
+    ],
+  )
 }

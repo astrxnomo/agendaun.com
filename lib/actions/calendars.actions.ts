@@ -3,11 +3,11 @@
 import { Permission, Query, Role } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
-import { createSessionClient } from "@/lib/appwrite/config"
 import { db } from "@/lib/appwrite/db"
 import { CalendarViews, Colors, type Calendars } from "@/types"
 
 import { createEtiquette } from "./etiquettes.actions"
+import { userHasRole } from "./teams.actions"
 
 /**
  * Crea etiquetas por defecto para un calendario personal
@@ -214,95 +214,78 @@ export async function getNationalCalendar(): Promise<Calendars | null> {
 }
 
 /**
- * Crea el calendario nacional con permisos específicos para teams
+ * Obtiene un calendario por su slug de forma genérica
  */
-export async function createNationalCalendar(): Promise<Calendars | null> {
+export async function getCalendarBySlug(
+  slug: string,
+): Promise<Calendars | null> {
   try {
-    const user = await getUser()
-    if (!user) throw new Error("User not authenticated")
-
     const data = await db()
-
-    // Permisos para el calendario nacional:
-    // - Todos los usuarios pueden leer
-    // - Admins tienen acceso completo
-    // - Editores con rol "national-calendar" pueden escribir y actualizar
-    const permissions = [
-      Permission.read(Role.any()), // Todos pueden leer
-      Permission.write(Role.team("admins")),
-      Permission.write(Role.team("editors", "national-calendar")),
-      Permission.update(Role.team("admins")),
-      Permission.update(Role.team("editors", "national-calendar")),
-      Permission.delete(Role.team("admins")),
-    ]
-
-    const calendarData = {
-      name: "Calendario Nacional",
-      defaultView: CalendarViews.MONTH,
-      slug: "national-calendar",
-      owner_id: user.$id, // El creador inicial
-    }
-
-    const result = await data.calendars.create(calendarData, permissions)
-    return result as Calendars
+    const result = await data.calendars.list([Query.equal("slug", slug)])
+    return (result.documents[0] as Calendars) || null
   } catch (error) {
-    console.error("Error creating national calendar:", error)
+    console.error(`Error getting calendar with slug ${slug}:`, error)
     return null
   }
 }
 
 /**
- * Obtiene o crea el calendario nacional
+ * Obtiene el calendario único de sede
  */
-export async function getOrCreateNationalCalendar(): Promise<Calendars | null> {
-  try {
-    let nationalCalendar = await getNationalCalendar()
-
-    if (!nationalCalendar) {
-      nationalCalendar = await createNationalCalendar()
-
-      // Crear etiquetas por defecto para el calendario nacional
-      if (nationalCalendar) {
-        await createNationalCalendarEtiquettes(nationalCalendar.$id)
-      }
-    }
-
-    return nationalCalendar
-  } catch (error) {
-    console.error("Error getting or creating national calendar:", error)
-    return null
-  }
+export async function getSedeCalendar(): Promise<Calendars | null> {
+  return await getCalendarBySlug("sede-calendar")
 }
 
 /**
- * Crea etiquetas por defecto para el calendario nacional
+ * Obtiene el calendario único de facultad
  */
-async function createNationalCalendarEtiquettes(calendarId: string) {
-  const nationalEtiquettes = [
-    { name: "Festividad Nacional", color: Colors.RED },
-    { name: "Día Festivo", color: Colors.BLUE },
-    { name: "Fecha Conmemorativa", color: Colors.GREEN },
-    { name: "Evento Especial", color: Colors.YELLOW },
-  ]
-
-  for (const etiquette of nationalEtiquettes) {
-    try {
-      await createEtiquette({
-        name: etiquette.name,
-        color: etiquette.color,
-        isActive: true,
-        calendar_id: calendarId,
-      })
-    } catch (error) {
-      console.error(`Error creating etiquette ${etiquette.name}:`, error)
-    }
-  }
+export async function getFacultadCalendar(): Promise<Calendars | null> {
+  return await getCalendarBySlug("facultad-calendar")
 }
 
 /**
- * Obtiene permisos específicos para el calendario nacional basado en teams
+ * Obtiene el calendario único de programa
  */
-export async function getNationalCalendarPermissions(calendarId: string) {
+export async function getProgramaCalendar(): Promise<Calendars | null> {
+  return await getCalendarBySlug("programa-calendar")
+}
+
+/**
+ * Obtiene el calendario de sede específica (versión con slug)
+ */
+export async function getSedeCalendarBySlug(
+  sedeSlug: string,
+): Promise<Calendars | null> {
+  return await getCalendarBySlug(`sede-${sedeSlug}`)
+}
+
+/**
+ * Obtiene el calendario de facultad específica (versión con slug)
+ */
+export async function getFacultadCalendarBySlug(
+  facultadSlug: string,
+): Promise<Calendars | null> {
+  return await getCalendarBySlug(`facultad-${facultadSlug}`)
+}
+
+/**
+ * Obtiene el calendario de programa específico (versión con slug)
+ */
+export async function getProgramaCalendarBySlug(
+  programaSlug: string,
+): Promise<Calendars | null> {
+  return await getCalendarBySlug(`programa-${programaSlug}`)
+}
+
+/**
+ * Obtiene permisos dinámicos para calendarios específicos basado en teams
+ * @param calendarId - ID del calendario
+ * @param requiredRole - Rol requerido para editar (ej: "calendar-national", "calendar-sede")
+ */
+export async function getCalendarTeamPermissions(
+  calendarId: string,
+  requiredRole: string,
+) {
   try {
     const user = await getUser()
     if (!user) {
@@ -326,96 +309,24 @@ export async function getNationalCalendarPermissions(calendarId: string) {
       }
     }
 
-    // Para el calendario nacional, todos pueden leer
+    // Todos los usuarios autenticados pueden leer
     const canRead = true
 
-    // Verificar si el usuario pertenece a teams específicos usando la API real
-    const { getUserRolesInTeamByName } = await import("./teams.actions")
-
-    // Buscar team de admins
-    const adminRoles = await getUserRolesInTeamByName("Administradores")
-    const isAdmin = adminRoles.includes("admin")
-
-    // Buscar team de editores con permisos para calendario nacional
-    const editorRoles = await getUserRolesInTeamByName("Editores")
-    const canEditNational = editorRoles.includes("national-calendar")
+    const canEdit = await userHasRole(requiredRole)
 
     return {
       canRead,
-      canCreate: isAdmin || canEditNational,
-      canUpdate: isAdmin || canEditNational,
-      canDelete: isAdmin,
+      canCreate: canEdit,
+      canUpdate: canEdit,
+      canDelete: canEdit,
     }
   } catch (error) {
-    console.error("Error getting national calendar permissions:", error)
+    console.error("Error getting calendar team permissions:", error)
     return {
-      canRead: true, // Por defecto, todos pueden leer el calendario nacional
+      canRead: true, // Por defecto, todos pueden leer
       canCreate: false,
       canUpdate: false,
       canDelete: false,
     }
-  }
-}
-
-/**
- * Función temporal para gestionar roles de usuario
- * En producción, esto debería estar en un sistema de gestión de teams más robusto
- */
-export async function getUserTeams(_userId: string): Promise<string[]> {
-  try {
-    // Por ahora, usaremos las preferencias del usuario para almacenar los teams
-    // En producción, esto debería consultar una colección de teams o usar Appwrite Teams
-    const user = await getUser()
-    if (!user) return []
-
-    return (user.prefs?.teams as string[]) || []
-  } catch (error) {
-    console.error("Error getting user teams:", error)
-    return []
-  }
-}
-
-/**
- * Función para asignar un usuario a un team (solo para desarrollo/pruebas)
- * En producción, esto se haría a través de Appwrite Teams API
- */
-export async function addUserToTeam(
-  userId: string,
-  teamName: string,
-): Promise<boolean> {
-  try {
-    const { account } = await createSessionClient()
-    const user = await account.get()
-
-    if (user.$id !== userId) {
-      throw new Error("No tienes permisos para modificar este usuario")
-    }
-
-    const currentTeams = user.prefs?.teams || []
-    if (!currentTeams.includes(teamName)) {
-      const updatedTeams = [...currentTeams, teamName]
-      await account.updatePrefs({ ...user.prefs, teams: updatedTeams })
-    }
-
-    return true
-  } catch (error) {
-    console.error("Error adding user to team:", error)
-    return false
-  }
-}
-
-/**
- * Función para verificar si un usuario pertenece a un team específico
- */
-export async function isUserInTeam(
-  userId: string,
-  teamName: string,
-): Promise<boolean> {
-  try {
-    const userTeams = await getUserTeams(userId)
-    return userTeams.includes(teamName)
-  } catch (error) {
-    console.error("Error checking user team membership:", error)
-    return false
   }
 }

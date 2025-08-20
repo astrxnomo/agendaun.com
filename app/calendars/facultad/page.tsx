@@ -1,7 +1,27 @@
-import FacultadCalendar from "@/components/calendars/facultad-calendar"
-import { PageHeader } from "@/components/page-header"
+import { Suspense } from "react"
 
-export default function FacultadCalendarPage() {
+import { CalendarDataProvider } from "@/components/calendar/calendar-data-context"
+import UniversalCalendar from "@/components/calendar/universal-calendar"
+import { PageHeader } from "@/components/page-header"
+import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
+import { getFacultadCalendar } from "@/lib/actions/calendars.actions"
+
+export default async function FacultadCalendarPage() {
+  // Obtener el calendario único de facultad
+  const facultadCalendar = await getFacultadCalendar()
+
+  if (!facultadCalendar) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold text-red-600">Error</h1>
+        <p>No se encontró el calendario de facultad.</p>
+        <p className="text-muted-foreground mt-2 text-sm">
+          El calendario debe ser creado desde el panel de administración.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <>
       <PageHeader
@@ -14,10 +34,20 @@ export default function FacultadCalendarPage() {
       <div className="border-b p-6">
         <h1 className="text-3xl font-bold">Calendario de Facultad</h1>
         <p className="text-muted-foreground mt-2">
-          Festividades y días festivos oficiales de la facultad
+          Eventos y actividades específicas de facultad. Los eventos se filtran
+          según tu facultad configurada.
         </p>
       </div>
-      <FacultadCalendar editable={false} />
+
+      <Suspense fallback={<CalendarSkeleton />}>
+        <CalendarDataProvider calendar={facultadCalendar}>
+          <UniversalCalendar
+            calendar={facultadCalendar}
+            title="Calendario de Facultad"
+            showEditButton={true}
+          />
+        </CalendarDataProvider>
+      </Suspense>
     </>
   )
 }

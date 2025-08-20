@@ -3,7 +3,7 @@ import { useCallback, useMemo } from "react"
 
 import { useCalendarContext, type CalendarId } from "../calendar-context"
 
-import type { Etiquettes } from "@/types"
+import type { Etiquettes } from "../../../types"
 
 export function useCalendarManager(calendarId: CalendarId) {
   const context = useCalendarContext()

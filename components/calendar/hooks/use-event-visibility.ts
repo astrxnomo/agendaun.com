@@ -1,6 +1,14 @@
+/**
+ * @fileoverview UI Hooks - Event Visibility Management
+ * @description Hook para calcular la visibilidad de eventos basada en la altura del contenedor
+ * @category UI Hooks
+ */
+
 "use client"
 
 import { useLayoutEffect, useMemo, useRef, useState } from "react"
+
+// ===== TYPES =====
 
 interface EventVisibilityOptions {
   eventHeight: number
@@ -13,9 +21,15 @@ interface EventVisibilityResult {
   getVisibleEventCount: (totalEvents: number) => number
 }
 
+// ===== HOOK =====
+
 /**
- * Hook for calculating event visibility based on container height
- * Uses ResizeObserver for efficient updates
+ * Hook para calcular la visibilidad de eventos basada en la altura del contenedor
+ * Usa ResizeObserver para actualizaciones eficientes
+ * @param options - Configuración de altura y espaciado de eventos
+ * @param options.eventHeight - Altura de cada evento en píxeles
+ * @param options.eventGap - Espacio entre eventos en píxeles
+ * @returns Ref del contenedor, altura y función para calcular eventos visibles
  */
 export function useEventVisibility({
   eventHeight,

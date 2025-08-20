@@ -1,7 +1,27 @@
-import ProgramaCalendar from "@/components/calendars/programa-calendar"
-import { PageHeader } from "@/components/page-header"
+import { Suspense } from "react"
 
-export default function ProgramaCalendarPage() {
+import { CalendarDataProvider } from "@/components/calendar/calendar-data-context"
+import UniversalCalendar from "@/components/calendar/universal-calendar"
+import { PageHeader } from "@/components/page-header"
+import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
+import { getProgramaCalendar } from "@/lib/actions/calendars.actions"
+
+export default async function ProgramaCalendarPage() {
+  // Obtener el calendario único de programa
+  const programaCalendar = await getProgramaCalendar()
+
+  if (!programaCalendar) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold text-red-600">Error</h1>
+        <p>No se encontró el calendario de programa.</p>
+        <p className="text-muted-foreground mt-2 text-sm">
+          El calendario debe ser creado desde el panel de administración.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <>
       <PageHeader
@@ -14,10 +34,20 @@ export default function ProgramaCalendarPage() {
       <div className="border-b p-6">
         <h1 className="text-3xl font-bold">Calendario de Programa</h1>
         <p className="text-muted-foreground mt-2">
-          Eventos académicos específicos de tu programa de estudios
+          Eventos y actividades específicas de programa académico. Los eventos
+          se filtran según tu programa configurado.
         </p>
       </div>
-      <ProgramaCalendar userRole="user" />
+
+      <Suspense fallback={<CalendarSkeleton />}>
+        <CalendarDataProvider calendar={programaCalendar}>
+          <UniversalCalendar
+            calendar={programaCalendar}
+            title="Calendario de Programa"
+            showEditButton={true}
+          />
+        </CalendarDataProvider>
+      </Suspense>
     </>
   )
 }

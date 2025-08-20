@@ -11,7 +11,6 @@ import {
 } from "lucide-react"
 import React, { useId, useState } from "react"
 
-import { useCalendarContext } from "@/components/calendar/calendar-context"
 import { useAcademicFilters } from "@/components/calendar/hooks/use-academic-filters"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -78,20 +77,8 @@ export default function ConfigFilterButton({
     availableFacultades,
     availableProgramas,
     isComplete,
+    activeFiltersCount,
   } = useAcademicFilters(initialFilters)
-
-  // Try to connect with calendar context if available
-  const calendarContext = useCalendarContext()
-
-  // Enhanced setFilter function that also updates calendar context
-  const handleFilterChange = (key: keyof AcademicFilters, value: string) => {
-    setFilter(key, value)
-
-    // Also update calendar context if available
-    if (calendarContext) {
-      calendarContext.setAcademicFilter(key, value)
-    }
-  }
 
   // Notify parent when filters change
   React.useEffect(() => {
@@ -203,7 +190,7 @@ export default function ConfigFilterButton({
                           key={sede.$id}
                           value={sede.name}
                           onSelect={() => {
-                            handleFilterChange("sede", sede.slug)
+                            setFilter("sede", sede.slug)
                             setSedeOpen(false)
                           }}
                         >
@@ -277,7 +264,7 @@ export default function ConfigFilterButton({
                           key={facultad.$id}
                           value={facultad.name}
                           onSelect={() => {
-                            handleFilterChange("facultad", facultad.slug)
+                            setFilter("facultad", facultad.slug)
                             setFacultadOpen(false)
                           }}
                         >
@@ -349,7 +336,7 @@ export default function ConfigFilterButton({
                           key={programa.$id}
                           value={programa.name}
                           onSelect={() => {
-                            handleFilterChange("programa", programa.slug)
+                            setFilter("programa", programa.slug)
                             setProgramaOpen(false)
                           }}
                         >

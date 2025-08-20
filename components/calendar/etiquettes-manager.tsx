@@ -187,7 +187,7 @@ export function EtiquettesManager({
                   />
                   <Label
                     htmlFor={option.value}
-                    className={`block h-6 w-6 cursor-pointer rounded-full transition-all duration-200 ${option.class} ${
+                    className={`block h-5 w-5 cursor-pointer rounded-full transition-all duration-200 ${option.class} ${
                       form.color === option.value
                         ? "ring-foreground/20 ring-offset-background scale-125 shadow-lg ring-2 ring-offset-2"
                         : "hover:scale-110 hover:shadow-md"
@@ -228,7 +228,7 @@ export function EtiquettesManager({
           ) : (
             <>
               <Separator className="my-4" />
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <h3 className="text-sm font-medium">Etiquetas creadas</h3>
                 {etiquettes.map((etiquette) => (
                   <div

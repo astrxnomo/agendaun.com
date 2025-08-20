@@ -1,14 +1,23 @@
+/**
+ * @fileoverview Calendar UI Context - State Management
+ * @description Contexto para manejo de estado de UI del calendario (fechas, etiquetas visibles, filtros académicos)
+ * @category UI Contexts
+ */
+
 "use client"
 
 import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
   type ReactNode,
 } from "react"
 
 import type { Etiquettes } from "@/types"
+
+// ===== TYPES =====
 
 // Tipos para filtros académicos
 export interface AcademicFilters {
@@ -48,10 +57,19 @@ interface CalendarContextType {
   clearAcademicFilters: () => void
 }
 
+// ===== CONTEXT CREATION =====
+
 const CalendarContext = createContext<CalendarContextType | undefined>(
   undefined,
 )
 
+// ===== CONTEXT HOOK =====
+
+/**
+ * Hook para acceder al contexto de UI del calendario
+ * @throws Error si se usa fuera del CalendarProvider
+ * @returns Contexto de UI del calendario
+ */
 export function useCalendarContext() {
   const context = useContext(CalendarContext)
   if (context === undefined) {
@@ -60,11 +78,22 @@ export function useCalendarContext() {
   return context
 }
 
+// ===== PROVIDER PROPS =====
+
 interface CalendarProviderProps {
   children: ReactNode
 }
 
+// ===== PROVIDER COMPONENT =====
+
+/**
+ * Proveedor de contexto para UI del calendario
+ * Maneja estado de fechas, visibilidad de etiquetas y filtros académicos
+ * @param children - Componentes hijos que tendrán acceso al contexto
+ */
 export function CalendarProvider({ children }: CalendarProviderProps) {
+  // ===== STATE MANAGEMENT =====
+
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
 
   // Initialize visibleEtiquettes per calendar (empty by default)
@@ -84,6 +113,8 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     facultad: "",
     programa: "",
   })
+
+  // ===== ETIQUETTE ACTIONS =====
 
   // Set calendar etiquettes and initialize visibility based on isActive
   const setCalendarEtiquettes = useCallback(
@@ -132,6 +163,8 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     [visibleEtiquettes],
   )
 
+  // ===== ACADEMIC FILTER ACTIONS =====
+
   // Set individual academic filter
   const setAcademicFilter = useCallback(
     (filterType: keyof AcademicFilters, value: string) => {
@@ -152,17 +185,32 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     })
   }, [])
 
-  const value = {
-    currentDate,
-    setCurrentDate,
-    visibleEtiquettes,
-    toggleEtiquetteVisibility,
-    isEtiquetteVisible,
-    setCalendarEtiquettes,
-    academicFilters,
-    setAcademicFilter,
-    clearAcademicFilters,
-  }
+  // ===== CONTEXT VALUE =====
+
+  const value = useMemo(
+    () => ({
+      currentDate,
+      setCurrentDate,
+      visibleEtiquettes,
+      toggleEtiquetteVisibility,
+      isEtiquetteVisible,
+      setCalendarEtiquettes,
+      academicFilters,
+      setAcademicFilter,
+      clearAcademicFilters,
+    }),
+    [
+      currentDate,
+      setCurrentDate,
+      visibleEtiquettes,
+      toggleEtiquetteVisibility,
+      isEtiquetteVisible,
+      setCalendarEtiquettes,
+      academicFilters,
+      setAcademicFilter,
+      clearAcademicFilters,
+    ],
+  )
 
   return (
     <CalendarContext.Provider value={value}>
