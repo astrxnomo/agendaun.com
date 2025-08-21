@@ -220,25 +220,24 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         {isLoading ? (
-          <>
-            <Skeleton className="h-10 w-full" />
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton size="lg" disabled>
-                  <Skeleton className="flex aspect-square size-8 rounded-lg" />
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="mt-1 h-3 w-32" />
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" disabled>
+                <Skeleton className="flex aspect-square size-8 rounded-lg" />
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="mt-1 h-3 w-32" />
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
         ) : (
           <>
-            <ConfigFilterButton variant="sidebar" />
             {user ? (
-              <NavUser />
+              <>
+                <ConfigFilterButton variant="sidebar" />
+                <NavUser />
+              </>
             ) : (
               <SidebarMenu>
                 <SidebarMenuItem>

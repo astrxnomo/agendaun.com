@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthContextProvider } from "@/contexts/auth-context"
+import { ConfigProvider } from "@/contexts/config-context"
 
 import type { Metadata } from "next"
 import "./globals.css"
@@ -29,23 +30,25 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${outfit.variable} antialiased`}>
         <AuthContextProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <CalendarProvider>
-              <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset>
-                  <NavTop />
-                  {children}
-                </SidebarInset>
-              </SidebarProvider>
-            </CalendarProvider>
-            <Toaster position="bottom-right" richColors />
-          </ThemeProvider>
+          <ConfigProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <CalendarProvider>
+                <SidebarProvider>
+                  <AppSidebar />
+                  <SidebarInset>
+                    <NavTop />
+                    {children}
+                  </SidebarInset>
+                </SidebarProvider>
+              </CalendarProvider>
+              <Toaster position="bottom-right" richColors />
+            </ThemeProvider>
+          </ConfigProvider>
         </AuthContextProvider>
       </body>
     </html>

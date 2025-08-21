@@ -9,6 +9,7 @@ import {
   Settings2,
   University,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useEffect, useId, useState } from "react"
 import { toast } from "sonner"
 
@@ -42,6 +43,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useAuthContext } from "@/contexts/auth-context"
 import {
   getFacultiesBySede,
@@ -63,6 +65,7 @@ export default function ConfigFilterButton({
   variant = "nav",
 }: ConfigFilterButtonProps) {
   const { user } = useAuthContext()
+  const router = useRouter()
   const id = useId()
   const [open, setOpen] = useState(false)
   const [sedeOpen, setSedeOpen] = useState(false)
@@ -80,64 +83,72 @@ export default function ConfigFilterButton({
   const [programas, setProgramas] = useState<Programs[]>([])
 
   // Loading states
-  const [isLoadingSedes, setIsLoadingSedes] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [isLoadingFacultades, setIsLoadingFacultades] = useState(false)
   const [isLoadingProgramas, setIsLoadingProgramas] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
 
-  // Load initial data and user config
   useEffect(() => {
-    const loadInitialData = async () => {
+    const loadData = async () => {
       try {
-        setIsLoadingSedes(true)
+        setIsLoading(true)
+        setError(null)
 
-        // Load sedes
-        const sedesData = await getSedes()
+        const [sedesData, userProfileResult] = await Promise.all([
+          getSedes(),
+          user?.$id
+            ? getUserProfile(user.$id)
+            : Promise.resolve({ success: false, profile: null }),
+        ])
+
         setSedes(sedesData)
 
-        // Load user profile if logged in
-        if (user?.$id) {
-          const result = await getUserProfile(user.$id)
-          if (result.success && result.profile) {
-            const profile = result.profile
+        // Step 2: If user has profile, load additional data
+        if (userProfileResult.success && userProfileResult.profile) {
+          const profile = userProfileResult.profile
 
-            if (profile.sede_id) {
-              setSelectedSede(profile.sede_id)
+          // Set selections immediately
+          setSelectedSede(profile.sede_id || "")
+          setSelectedFacultad(profile.faculty_id || "")
+          setSelectedPrograma(profile.program_id || "")
 
-              // Load facultades for the user's sede
-              const facultadesData = await getFacultiesBySede(profile.sede_id)
-              setFacultades(facultadesData)
+          // Load facultades and programas in parallel if available
+          const loadPromises = []
 
-              if (profile.faculty_id) {
-                setSelectedFacultad(profile.faculty_id)
+          if (profile.sede_id) {
+            loadPromises.push(
+              getFacultiesBySede(profile.sede_id).then((data) =>
+                setFacultades(data),
+              ),
+            )
+          }
 
-                // Load programas for the user's faculty
-                const programasData = await getProgramsByFaculty(
-                  profile.faculty_id,
-                )
-                setProgramas(programasData)
+          if (profile.faculty_id) {
+            loadPromises.push(
+              getProgramsByFaculty(profile.faculty_id).then((data) =>
+                setProgramas(data),
+              ),
+            )
+          }
 
-                if (profile.program_id) {
-                  setSelectedPrograma(profile.program_id)
-                }
-              }
-            }
+          // Wait for all to complete
+          if (loadPromises.length > 0) {
+            await Promise.all(loadPromises)
           }
         }
       } catch (err) {
         console.error("Error loading initial data:", err)
         setError("Error cargando datos")
       } finally {
-        setIsLoadingSedes(false)
+        setIsLoading(false)
       }
     }
 
-    void loadInitialData()
+    void loadData()
   }, [user?.$id])
 
-  // Handle sede selection
   const handleSedeChange = async (sedeId: string) => {
     setSelectedSede(sedeId)
     setSelectedFacultad("")
@@ -159,7 +170,6 @@ export default function ConfigFilterButton({
     }
   }
 
-  // Handle facultad selection
   const handleFacultadChange = async (facultadId: string) => {
     setSelectedFacultad(facultadId)
     setSelectedPrograma("")
@@ -179,12 +189,10 @@ export default function ConfigFilterButton({
     }
   }
 
-  // Handle programa selection
   const handleProgramaChange = (programaId: string) => {
     setSelectedPrograma(programaId)
   }
 
-  // Save configuration
   const handleSave = async () => {
     if (!user?.$id) {
       toast.error("Debes estar logueado para guardar")
@@ -207,7 +215,9 @@ export default function ConfigFilterButton({
 
       if (result.success) {
         toast.success("Configuración guardada correctamente")
-        setOpen(false)
+        setOpen(false) // Cerrar el diálogo primero
+        // Forzar re-render de todos los componentes
+        router.refresh()
       } else {
         toast.error("Error guardando configuración")
       }
@@ -219,10 +229,8 @@ export default function ConfigFilterButton({
     }
   }
 
-  // Check if configuration is complete
   const isComplete = selectedSede && selectedFacultad && selectedPrograma
 
-  // Get display text for current selection
   const getDisplayText = () => {
     if (!selectedSede) return "Sin configurar"
 
@@ -262,7 +270,6 @@ export default function ConfigFilterButton({
       )}
 
       <div className="space-y-4">
-        {/* Sede */}
         <div className="space-y-2">
           <Label
             htmlFor={`${id}-sede`}
@@ -277,14 +284,14 @@ export default function ConfigFilterButton({
                 variant="outline"
                 role="combobox"
                 aria-expanded={sedeOpen}
-                disabled={isLoadingSedes}
+                disabled={isLoading}
                 className={`w-full justify-between py-6 ${
                   !selectedSede
                     ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
                     : ""
                 }`}
               >
-                {isLoadingSedes ? (
+                {isLoading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="size-4 animate-spin" />
                     Cargando sedes...
@@ -494,52 +501,64 @@ export default function ConfigFilterButton({
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <SidebarMenuButton
-                size="lg"
-                className={
-                  !isComplete
-                    ? "animate-pulse border border-dashed border-amber-300 dark:border-amber-500"
-                    : ""
-                }
-                tooltip={
-                  !isComplete
-                    ? "Configura tu ubicación académica"
-                    : "Configuración académica"
-                }
-              >
-                <div
-                  className={`relative flex aspect-square size-8 items-center justify-center rounded-lg ${
+          {isLoading ? (
+            <SidebarMenuButton size="lg" disabled>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                <Skeleton className="size-8 rounded-lg" />
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="mt-1 h-3 w-32" />
+              </div>
+            </SidebarMenuButton>
+          ) : (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className={
                     !isComplete
-                      ? "bg-amber-500 text-white dark:bg-amber-500"
-                      : "bg-primary text-primary-foreground"
-                  }`}
+                      ? "animate-pulse border border-dashed border-amber-300 dark:border-amber-500"
+                      : ""
+                  }
+                  tooltip={
+                    !isComplete
+                      ? "Configura tu ubicación académica"
+                      : "Configuración académica"
+                  }
                 >
-                  <School className="size-4" />
-                  {!isComplete && (
-                    <Badge
-                      variant="secondary"
-                      className="absolute -top-2 -right-2 min-w-4 animate-ping bg-amber-200 px-1 text-[8px] text-amber-600 dark:bg-amber-600 dark:text-amber-200"
-                    >
-                      !
-                    </Badge>
-                  )}
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {!isComplete ? "Establecer sede" : "Mi sede"}
-                  </span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {isComplete
-                      ? getDisplayText()
-                      : "Sede, facultad y programa"}
-                  </span>
-                </div>
-              </SidebarMenuButton>
-            </DialogTrigger>
-            {renderDialogContent()}
-          </Dialog>
+                  <div
+                    className={`relative flex aspect-square size-8 items-center justify-center rounded-lg ${
+                      !isComplete
+                        ? "bg-amber-500 text-white dark:bg-amber-500"
+                        : "bg-primary text-primary-foreground"
+                    }`}
+                  >
+                    <School className="size-4" />
+                    {!isComplete && (
+                      <Badge
+                        variant="secondary"
+                        className="absolute -top-2 -right-2 min-w-4 animate-ping bg-amber-200 px-1 text-[8px] text-amber-600 dark:bg-amber-600 dark:text-amber-200"
+                      >
+                        !
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">
+                      {!isComplete ? "Establecer sede" : "Mi sede"}
+                    </span>
+                    <span className="text-muted-foreground truncate text-xs">
+                      {isComplete
+                        ? getDisplayText()
+                        : "Sede, facultad y programa"}
+                    </span>
+                  </div>
+                </SidebarMenuButton>
+              </DialogTrigger>
+              {renderDialogContent()}
+            </Dialog>
+          )}
         </SidebarMenuItem>
       </SidebarMenu>
     )
@@ -547,30 +566,36 @@ export default function ConfigFilterButton({
 
   return (
     <div className="flex items-center gap-2">
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button
-            className={
-              !isComplete
-                ? "relative animate-pulse border border-dashed border-amber-300 bg-amber-500 text-white hover:bg-amber-500/90 dark:border-amber-500 dark:bg-amber-500 dark:hover:bg-amber-500/90"
-                : ""
-            }
-            aria-label="Configuración académica"
-          >
-            <School size={16} />
-            Mi sede
-            {!isComplete && (
-              <Badge
-                variant="secondary"
-                className="absolute -top-2 -right-2 min-w-4 animate-ping bg-amber-200 px-1 text-[8px] text-amber-600 dark:bg-amber-600 dark:text-amber-200"
-              >
-                !
-              </Badge>
-            )}
-          </Button>
-        </DialogTrigger>
-        {renderDialogContent()}
-      </Dialog>
+      {isLoading ? (
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-10 w-20" />
+        </div>
+      ) : (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className={
+                !isComplete
+                  ? "relative animate-pulse border border-dashed border-amber-300 bg-amber-500 text-white hover:bg-amber-500/90 dark:border-amber-500 dark:bg-amber-500 dark:hover:bg-amber-500/90"
+                  : ""
+              }
+              aria-label="Configuración académica"
+            >
+              <School size={16} />
+              Mi sede
+              {!isComplete && (
+                <Badge
+                  variant="secondary"
+                  className="absolute -top-2 -right-2 min-w-4 animate-ping bg-amber-200 px-1 text-[8px] text-amber-600 dark:bg-amber-600 dark:text-amber-200"
+                >
+                  !
+                </Badge>
+              )}
+            </Button>
+          </DialogTrigger>
+          {renderDialogContent()}
+        </Dialog>
+      )}
     </div>
   )
 }

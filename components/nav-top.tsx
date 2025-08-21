@@ -18,11 +18,7 @@ export default function NavTop() {
     <header className="border-b px-4">
       <nav className="flex h-14 items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-2">
-          {isLoading ? (
-            <Skeleton className="h-8 w-8" />
-          ) : (
-            <ConfigFilterButton />
-          )}
+          {user && <ConfigFilterButton />}
         </div>
 
         <div className="flex w-full max-w-sm flex-none justify-center">
