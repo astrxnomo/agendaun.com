@@ -96,8 +96,8 @@ export function useCalendar(): UseCalendarReturn {
     return calendarData.events.filter((event) => {
       // Aplicar filtros según el tipo de calendario y filtros activos
       const matchesSede = !sede || event.sede_id === sede
-      const matchesFacultad = !facultad || event.faculties_id === facultad
-      const matchesPrograma = !programa || event.programs_id === programa
+      const matchesFacultad = !facultad || event.faculty_id === facultad
+      const matchesPrograma = !programa || event.program_id === programa
 
       return matchesSede && matchesFacultad && matchesPrograma
     })

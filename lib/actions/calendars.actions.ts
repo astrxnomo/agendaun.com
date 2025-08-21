@@ -4,9 +4,16 @@ import { Permission, Query, Role } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
-import { CalendarViews, Colors, type Calendars } from "@/types"
+import {
+  CalendarViews,
+  Colors,
+  type Calendars,
+  type Etiquettes,
+  type Events,
+} from "@/types"
 
-import { createEtiquette } from "./etiquettes.actions"
+import { createEtiquette, getEtiquettes } from "./etiquettes.actions"
+import { getEvents } from "./events.actions"
 import { userHasRole } from "./teams.actions"
 
 /**
@@ -229,59 +236,6 @@ export async function getCalendarBySlug(
   }
 }
 
-/**
- * Obtiene el calendario único de sede
- */
-export async function getSedeCalendar(): Promise<Calendars | null> {
-  return await getCalendarBySlug("sede-calendar")
-}
-
-/**
- * Obtiene el calendario único de facultad
- */
-export async function getFacultadCalendar(): Promise<Calendars | null> {
-  return await getCalendarBySlug("facultad-calendar")
-}
-
-/**
- * Obtiene el calendario único de programa
- */
-export async function getProgramaCalendar(): Promise<Calendars | null> {
-  return await getCalendarBySlug("programa-calendar")
-}
-
-/**
- * Obtiene el calendario de sede específica (versión con slug)
- */
-export async function getSedeCalendarBySlug(
-  sedeSlug: string,
-): Promise<Calendars | null> {
-  return await getCalendarBySlug(`sede-${sedeSlug}`)
-}
-
-/**
- * Obtiene el calendario de facultad específica (versión con slug)
- */
-export async function getFacultadCalendarBySlug(
-  facultadSlug: string,
-): Promise<Calendars | null> {
-  return await getCalendarBySlug(`facultad-${facultadSlug}`)
-}
-
-/**
- * Obtiene el calendario de programa específico (versión con slug)
- */
-export async function getProgramaCalendarBySlug(
-  programaSlug: string,
-): Promise<Calendars | null> {
-  return await getCalendarBySlug(`programa-${programaSlug}`)
-}
-
-/**
- * Obtiene permisos dinámicos para calendarios específicos basado en teams
- * @param calendarId - ID del calendario
- * @param requiredRole - Rol requerido para editar (ej: "calendar-national", "calendar-sede")
- */
 export async function getCalendarTeamPermissions(
   calendarId: string,
   requiredRole: string,
@@ -328,5 +282,40 @@ export async function getCalendarTeamPermissions(
       canUpdate: false,
       canDelete: false,
     }
+  }
+}
+
+export interface PersonalCalendarData {
+  user: any
+  calendar: Calendars
+  events: Events[]
+  etiquettes: Etiquettes[]
+}
+
+export async function getPersonalCalendarData(): Promise<PersonalCalendarData | null> {
+  try {
+    // 1. Verificar autenticación
+    const user = await getUser()
+    if (!user) return null
+
+    // 2. Obtener o crear calendario personal
+    const calendar = await getOrCreatePersonalCalendar(user.$id)
+    if (!calendar) return null
+
+    // 3. Obtener eventos y etiquetas del calendario
+    const [events, etiquettes] = await Promise.all([
+      getEvents(calendar.$id),
+      getEtiquettes(calendar.$id),
+    ])
+
+    return {
+      user,
+      calendar,
+      events,
+      etiquettes,
+    }
+  } catch (error) {
+    console.error("Error getting personal calendar data:", error)
+    return null
   }
 }

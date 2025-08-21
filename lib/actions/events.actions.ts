@@ -18,8 +18,8 @@ function cleanEventData(event: Partial<Events>) {
     all_day: event.all_day,
     location: event.location,
     sede_id: event.sede_id,
-    faculties_id: event.faculties_id,
-    programs_id: event.programs_id,
+    faculties_id: event.faculty_id,
+    programs_id: event.program_id,
     calendar_id: event.calendar_id,
     etiquette_id: event.etiquette_id,
   }
@@ -73,7 +73,6 @@ export async function updateEvent(
   try {
     const data = await db()
 
-    // Limpiar el objeto event de propiedades de Appwrite
     const cleanEvent = cleanEventData(event)
 
     const result = await data.events.update(eventId, cleanEvent)

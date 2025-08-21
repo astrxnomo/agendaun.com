@@ -4,11 +4,8 @@ import { Permission, Query, Role } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
-import { Colors, type Etiquettes } from "@/types"
+import { type Etiquettes } from "@/types"
 
-/**
- * Limpia los datos de la etiqueta para envío a Appwrite
- */
 function cleanEtiquetteData(etiquette: Partial<Etiquettes>) {
   return {
     name: etiquette.name,
@@ -66,7 +63,6 @@ export async function updateEtiquette(
   try {
     const data = await db()
 
-    // Limpiar los datos
     const cleanEtiquette = cleanEtiquetteData(etiquette)
 
     const result = await data.etiquettes.update(etiquetteId, cleanEtiquette)
@@ -85,19 +81,5 @@ export async function deleteEtiquette(etiquetteId: string): Promise<boolean> {
   } catch (error) {
     console.error("Error deleting etiquette:", error)
     return false
-  }
-}
-
-export async function getColor(
-  calendarId: string,
-  etiquetteId: string,
-): Promise<Colors> {
-  try {
-    const etiquettes = await getEtiquettes(calendarId)
-    const etiquette = etiquettes.find((e) => e.$id === etiquetteId)
-    return etiquette?.color ?? Colors.GRAY
-  } catch (error) {
-    console.error("Error getting color:", error)
-    return Colors.GRAY
   }
 }

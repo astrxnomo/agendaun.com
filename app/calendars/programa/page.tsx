@@ -4,11 +4,10 @@ import { CalendarDataProvider } from "@/components/calendar/calendar-data-contex
 import UniversalCalendar from "@/components/calendar/universal-calendar"
 import { PageHeader } from "@/components/page-header"
 import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
-import { getProgramaCalendar } from "@/lib/actions/calendars.actions"
+import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 
 export default async function ProgramaCalendarPage() {
-  // Obtener el calendario único de programa
-  const programaCalendar = await getProgramaCalendar()
+  const programaCalendar = await getCalendarBySlug("programa-calendar")
 
   if (!programaCalendar) {
     return (

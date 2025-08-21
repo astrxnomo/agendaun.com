@@ -9,7 +9,7 @@ import {
   Settings2,
   University,
 } from "lucide-react"
-import React, { useId, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { toast } from "sonner"
 
 import { useAcademicFilters } from "@/components/calendar/hooks/use-academic-filters"
@@ -27,7 +27,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -71,30 +70,24 @@ export default function ConfigFilterButton({
 
   // Use academic filters hook with database integration
   const {
-    academicData,
-    filters,
-    isLoading,
-    isLoadingFacultades,
-    isLoadingProgramas,
-    error,
-    setFilter,
-    clearFilters,
+    sedes,
     availableFacultades,
     availableProgramas,
+    filters,
+    isLoading,
+    error,
+    setFilter,
+    setAllFilters,
     isComplete,
+    getDisplayText,
   } = useAcademicFilters(initialFilters)
 
-  // Enhanced setFilter function with profile saving
   const handleFilterChange = async (
     key: keyof AcademicFilters,
     value: string,
   ) => {
-    console.log("🔄 Cambiando filtro:", { key, value })
-    console.log("📊 Estado actual filters:", filters)
     setFilter(key, value)
-    console.log("✅ setFilter llamado")
 
-    // Save to user profile if user is authenticated
     if (user?.$id) {
       try {
         const profileData = {
@@ -104,96 +97,59 @@ export default function ConfigFilterButton({
           program_id: key === "programa" ? value : filters.programa || null,
         }
 
-        console.log("💾 Guardando perfil:", profileData)
         const result = await updateUserProfile(profileData)
 
         if (result.success) {
-          toast.success("Configuración guardada")
-          console.log("✅ Perfil guardado exitosamente:", result.profile)
+          toast.success("Configuración actualizada")
         } else {
-          console.error("❌ Error guardando perfil:", result.error)
-          toast.error("Error guardando configuración")
+          toast.error("Error actualizando configuración")
         }
-      } catch (error) {
-        console.error("❌ Error en handleFilterChange:", error)
-        toast.error("Error guardando configuración")
+      } catch {
+        toast.error("Error actualizando configuración")
       }
     }
   }
 
-  // Load user profile on mount
-  React.useEffect(() => {
+  useEffect(() => {
     if (user?.$id) {
       const loadUserProfile = async () => {
         try {
-          console.log("🔄 Cargando perfil del usuario:", user.$id)
           const result = await getUserProfile(user.$id)
 
           if (result.success && result.profile) {
-            console.log("✅ Perfil cargado:", result.profile)
+            const profileFilters: AcademicFilters = {
+              sede: result.profile.sede_id || "",
+              facultad: result.profile.faculty_id || "",
+              programa: result.profile.program_id || "",
+            }
 
-            // Update filters based on saved profile
-            if (result.profile.sede_id) {
-              setFilter("sede", result.profile.sede_id)
+            // Only update if there are actual values to prevent unnecessary re-renders
+
+            if (
+              profileFilters.sede ||
+              profileFilters.facultad ||
+              profileFilters.programa
+            ) {
+              setAllFilters(profileFilters)
             }
-            if (result.profile.faculty_id) {
-              setFilter("facultad", result.profile.faculty_id)
-            }
-            if (result.profile.program_id) {
-              setFilter("programa", result.profile.program_id)
-            }
-          } else {
-            console.log("ℹ️ No hay perfil guardado para este usuario")
           }
-        } catch (error) {
-          console.error("❌ Error cargando perfil:", error)
+        } catch {
+          // Silent fail for profile loading
         }
       }
 
       void loadUserProfile()
     }
-  }, [user?.$id, setFilter])
+  }, [user?.$id, setAllFilters])
 
-  // Debug: mostrar cambios en filters
-  React.useEffect(() => {
-    console.log("📈 Filters cambió:", filters)
-  }, [filters])
-
-  // Notify parent when filters change
-  React.useEffect(() => {
+  useEffect(() => {
     onFiltersChange?.(filters)
   }, [filters, onFiltersChange])
 
-  if (!user) {
-    return null
-  }
-
-  // Get current selection display text
   const getCurrentSelectionText = () => {
-    if (!filters.sede) return "Sin configurar"
-
-    const parts = []
-    if (filters.sede) {
-      const sede = academicData.sedes.find((s) => s.$id === filters.sede)
-      if (sede) parts.push(sede.name)
-    }
-    if (filters.facultad) {
-      const facultad = availableFacultades.find(
-        (f) => f.$id === filters.facultad,
-      )
-      if (facultad) parts.push(facultad.name)
-    }
-    if (filters.programa) {
-      const programa = availableProgramas.find(
-        (p) => p.$id === filters.programa,
-      )
-      if (programa) parts.push(programa.name)
-    }
-
-    return parts.join(" • ")
+    return getDisplayText()
   }
 
-  // Contenido del diálogo
   const renderDialogContent = () => (
     <DialogContent className="sm:max-w-md">
       <DialogHeader>
@@ -205,8 +161,7 @@ export default function ConfigFilterButton({
         </DialogTitle>
         <DialogDescription>
           Configura tu sede, facultad y programa para personalizar tu
-          experiencia. Esto te permitirá acceder a horarios y eventos relevantes
-          para ti.
+          experiencia. Los cambios se guardan automáticamente.
         </DialogDescription>
       </DialogHeader>
 
@@ -217,9 +172,7 @@ export default function ConfigFilterButton({
       )}
 
       <div className="space-y-6">
-        {/* Configuration Form */}
         <div className="grid gap-4">
-          {/* Sede */}
           <div className="space-y-2">
             <Label
               htmlFor={`${id}-sede`}
@@ -248,15 +201,8 @@ export default function ConfigFilterButton({
                     </div>
                   ) : filters.sede ? (
                     (() => {
-                      const sedeEncontrada = academicData.sedes.find(
-                        (s) => s.$id === filters.sede,
-                      )
-                      console.log("🔍 Buscando sede:", {
-                        filtroSede: filters.sede,
-                        sedesDisponibles: academicData.sedes.map((s) => s.$id),
-                        sedeEncontrada,
-                      })
-                      return sedeEncontrada?.name || "Sede no encontrada"
+                      const sede = sedes.find((s) => s.$id === filters.sede)
+                      return sede?.name || "Sede no encontrada"
                     })()
                   ) : (
                     "Selecciona tu sede"
@@ -270,13 +216,12 @@ export default function ConfigFilterButton({
                   <CommandList>
                     <CommandEmpty>No se encontró ninguna sede.</CommandEmpty>
                     <CommandGroup>
-                      {academicData.sedes.map((sede) => (
+                      {sedes.map((sede) => (
                         <CommandItem
                           key={sede.$id}
                           value={sede.name}
                           onSelect={() => {
-                            console.log("🎯 Sede seleccionada:", sede.name)
-                            void handleFilterChange("sede", sede.$id) // Usar $id directamente
+                            void handleFilterChange("sede", sede.$id)
                             setSedeOpen(false)
                           }}
                         >
@@ -314,21 +259,25 @@ export default function ConfigFilterButton({
                   variant="outline"
                   role="combobox"
                   aria-expanded={facultadOpen}
-                  disabled={!filters.sede || isLoadingFacultades}
+                  disabled={!filters.sede || isLoading}
                   className={`w-full justify-between py-6 ${
                     !filters.facultad && filters.sede
                       ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
                       : ""
                   }`}
                 >
-                  {isLoadingFacultades ? (
+                  {isLoading && !filters.sede ? (
                     <div className="flex items-center gap-2">
                       <Loader2 className="size-4 animate-spin" />
                       Cargando facultades...
                     </div>
                   ) : filters.facultad ? (
-                    availableFacultades.find((f) => f.$id === filters.facultad)
-                      ?.name
+                    (() => {
+                      const facultad = availableFacultades.find(
+                        (f) => f.$id === filters.facultad,
+                      )
+                      return facultad?.name || "Facultad no encontrada"
+                    })()
                   ) : !filters.sede ? (
                     "Primero selecciona una sede"
                   ) : (
@@ -388,21 +337,25 @@ export default function ConfigFilterButton({
                   variant="outline"
                   role="combobox"
                   aria-expanded={programaOpen}
-                  disabled={!filters.facultad || isLoadingProgramas}
+                  disabled={!filters.facultad || isLoading}
                   className={`w-full justify-between py-6 ${
                     !filters.programa && filters.facultad
                       ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
                       : ""
                   }`}
                 >
-                  {isLoadingProgramas ? (
+                  {isLoading && !filters.facultad ? (
                     <div className="flex items-center gap-2">
                       <Loader2 className="size-4 animate-spin" />
                       Cargando programas...
                     </div>
                   ) : filters.programa ? (
-                    availableProgramas.find((p) => p.$id === filters.programa)
-                      ?.name
+                    (() => {
+                      const programa = availableProgramas.find(
+                        (p) => p.$id === filters.programa,
+                      )
+                      return programa?.name || "Programa no encontrado"
+                    })()
                   ) : !filters.facultad ? (
                     "Primero selecciona una facultad"
                   ) : (
@@ -444,20 +397,6 @@ export default function ConfigFilterButton({
           </div>
         </div>
       </div>
-
-      <DialogFooter>
-        <Button
-          variant="outline"
-          onClick={() => {
-            clearFilters()
-          }}
-        >
-          Limpiar
-        </Button>
-        <Button onClick={() => setOpen(false)} disabled={!isComplete}>
-          {isComplete ? "Guardar" : "Completar configuración"}
-        </Button>
-      </DialogFooter>
     </DialogContent>
   )
 

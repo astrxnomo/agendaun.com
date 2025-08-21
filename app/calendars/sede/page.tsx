@@ -4,11 +4,10 @@ import { CalendarDataProvider } from "@/components/calendar/calendar-data-contex
 import UniversalCalendar from "@/components/calendar/universal-calendar"
 import { PageHeader } from "@/components/page-header"
 import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
-import { getSedeCalendar } from "@/lib/actions/calendars.actions"
+import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 
 export default async function SedeCalendarPage() {
-  // Obtener el calendario único de sede
-  const sedeCalendar = await getSedeCalendar()
+  const sedeCalendar = await getCalendarBySlug("sede-calendar")
 
   if (!sedeCalendar) {
     return (

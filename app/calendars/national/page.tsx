@@ -4,10 +4,10 @@ import { CalendarDataProvider } from "@/components/calendar/calendar-data-contex
 import UniversalCalendar from "@/components/calendar/universal-calendar"
 import { PageHeader } from "@/components/page-header"
 import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
-import { getNationalCalendar } from "@/lib/actions/calendars.actions"
+import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 
 export default async function NationalCalendarPage() {
-  const nationalCalendar = await getNationalCalendar()
+  const nationalCalendar = await getCalendarBySlug("national-calendar")
 
   if (!nationalCalendar) {
     return (

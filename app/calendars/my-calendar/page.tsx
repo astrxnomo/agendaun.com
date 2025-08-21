@@ -1,6 +1,7 @@
 import { CalendarDataProvider } from "@/components/calendar/calendar-data-context"
 import UniversalCalendar from "@/components/calendar/universal-calendar"
-import { getPersonalCalendarData } from "@/lib/actions/personal-calendar.actions"
+import { PageHeader } from "@/components/page-header"
+import { getPersonalCalendarData } from "@/lib/actions/calendars.actions"
 
 export default async function MyCalendarPage() {
   const data = await getPersonalCalendarData()
@@ -17,12 +18,20 @@ export default async function MyCalendarPage() {
   }
 
   return (
-    <CalendarDataProvider calendar={data.calendar}>
-      <UniversalCalendar
-        calendar={data.calendar}
-        title="Mi Calendario"
-        showEditButton={true}
+    <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Mi calendario", isCurrentPage: true },
+        ]}
       />
-    </CalendarDataProvider>
+      <CalendarDataProvider calendar={data.calendar}>
+        <UniversalCalendar
+          calendar={data.calendar}
+          title="Mi Calendario"
+          showEditButton={true}
+        />
+      </CalendarDataProvider>
+    </>
   )
 }

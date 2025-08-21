@@ -28,8 +28,8 @@ export type Events = Models.Document & {
   all_day: boolean
   location: string | null
   sede_id: Sedes["$id"]
-  faculties_id: Faculties["$id"]
-  programs_id: Programs["$id"]
+  faculty_id: Faculties["$id"]
+  program_id: Programs["$id"]
   calendar_id: Calendars["$id"]
   etiquette_id: Events["$id"]
 }

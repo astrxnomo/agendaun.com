@@ -1,50 +1,50 @@
 "use client"
 
 import {
-  addDays,
-  addMonths,
-  addWeeks,
-  endOfWeek,
-  format,
-  isSameMonth,
-  startOfWeek,
-  subMonths,
-  subWeeks,
+    addDays,
+    addMonths,
+    addWeeks,
+    endOfWeek,
+    format,
+    isSameMonth,
+    startOfWeek,
+    subMonths,
+    subWeeks,
 } from "date-fns"
 import { es } from "date-fns/locale"
 import {
-  CalendarCog,
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  Plus,
+    CalendarCog,
+    ChevronDownIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    Plus,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import {
-  addHoursToDate,
-  AgendaDaysToShow,
-  AgendaView,
-  CalendarDndProvider,
-  DayView,
-  EventDialog,
-  EventGap,
-  EventHeight,
-  EventViewDialog,
-  MonthView,
-  useCalendarContext,
-  WeekCellsHeight,
-  WeekView,
-  type CalendarPermissions,
+    addHoursToDate,
+    AgendaDaysToShow,
+    AgendaView,
+    CalendarDndProvider,
+    DayView,
+    EventDialog,
+    EventGap,
+    EventHeight,
+    EventViewDialog,
+    MonthView,
+    useCalendarContext,
+    WeekCellsHeight,
+    WeekView,
+    type CalendarPermissions,
 } from "@/components/calendar"
 import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuShortcut,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
@@ -185,8 +185,8 @@ export function SetupCalendar({
       location: "",
       etiquette_id: "",
       sede_id: "",
-      faculties_id: "",
-      programs_id: "",
+      faculty_id: "",
+      program_id: "",
       calendar_id: "",
       $collectionId: "",
       $databaseId: "",
