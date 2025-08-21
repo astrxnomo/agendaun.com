@@ -13,12 +13,10 @@ import {
 } from "@/types"
 
 import { createEtiquette, getEtiquettes } from "./etiquettes.actions"
-import { getEvents } from "./events.actions"
+import { getCalendarEvents } from "./events.actions"
+import { getCurrentUserProfile } from "./profile.actions"
 import { userHasRole } from "./teams.actions"
 
-/**
- * Crea etiquetas por defecto para un calendario personal
- */
 async function createDefaultEtiquettes(calendarId: string) {
   const defaultEtiquettes = [
     { name: "Personal", color: Colors.BLUE },
@@ -44,20 +42,6 @@ async function createDefaultEtiquettes(calendarId: string) {
   }
 }
 
-export async function getCalendar(slug: string): Promise<Calendars | null> {
-  try {
-    const data = await db()
-    const result = await data.calendars.list([Query.equal("slug", slug)])
-    return (result.documents[0] as Calendars) || null
-  } catch (error) {
-    console.error("Error getting calendar:", error)
-    return null
-  }
-}
-
-/**
- * Obtiene los permisos específicos que tiene el usuario actual sobre un calendario
- */
 export async function getCalendarPermissions(calendarId: string) {
   try {
     const user = await getUser()
@@ -204,25 +188,6 @@ export async function getOrCreatePersonalCalendar(
   }
 }
 
-/**
- * Obtiene el calendario nacional - es un calendario único y global
- */
-export async function getNationalCalendar(): Promise<Calendars | null> {
-  try {
-    const data = await db()
-    const result = await data.calendars.list([
-      Query.equal("slug", "national-calendar"),
-    ])
-    return (result.documents[0] as Calendars) || null
-  } catch (error) {
-    console.error("Error getting national calendar:", error)
-    return null
-  }
-}
-
-/**
- * Obtiene un calendario por su slug de forma genérica
- */
 export async function getCalendarBySlug(
   slug: string,
 ): Promise<Calendars | null> {
@@ -302,9 +267,12 @@ export async function getPersonalCalendarData(): Promise<PersonalCalendarData | 
     const calendar = await getOrCreatePersonalCalendar(user.$id)
     if (!calendar) return null
 
-    // 3. Obtener eventos y etiquetas del calendario
+    // 3. Obtener perfil del usuario
+    const profile = await getCurrentUserProfile()
+
+    // 4. Obtener eventos y etiquetas del calendario
     const [events, etiquettes] = await Promise.all([
-      getEvents(calendar.$id),
+      getCalendarEvents(calendar, profile),
       getEtiquettes(calendar.$id),
     ])
 

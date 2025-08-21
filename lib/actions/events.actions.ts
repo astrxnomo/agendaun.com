@@ -4,7 +4,7 @@ import { Permission, Query, Role } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
-import { type Events } from "@/types"
+import { type Calendars, type Events, type Profiles } from "@/types"
 
 /**
  * Limpia el objeto event de propiedades de Appwrite que no deben enviarse
@@ -25,17 +25,48 @@ function cleanEventData(event: Partial<Events>) {
   }
 }
 
-export async function getEvents(calendarId: string): Promise<Events[]> {
+export async function getCalendarEvents(
+  calendar: Calendars,
+  profile: Profiles | null,
+): Promise<Events[]> {
   try {
     const data = await db()
-    const result = await data.events.list([
-      Query.equal("calendar_id", calendarId),
-    ])
+    const queries = []
+
+    if (!calendar?.$id) {
+      return []
+    }
+
+    queries.push(Query.equal("calendar_id", calendar.$id))
+
+    if (calendar.slug === "national-calendar") {
+    } else if (calendar.slug === "sede-calendar") {
+      if (!profile?.sede_id) {
+        return []
+      }
+      queries.push(Query.equal("sede_id", profile.sede_id))
+    } else if (calendar.slug === "facultad-calendar") {
+      if (!profile?.faculty_id) {
+        return []
+      }
+      queries.push(Query.equal("faculty_id", profile.faculty_id))
+    } else if (calendar.slug === "programa-calendar") {
+      if (!profile?.program_id) {
+        return []
+      }
+      queries.push(Query.equal("program_id", profile.program_id))
+    } else {
+      if (!profile?.user_id) {
+        return []
+      }
+      queries.push(Query.equal("owner_id", profile.user_id))
+    }
+
+    const result = await data.events.list(queries)
 
     return result.documents as Events[]
   } catch (error) {
-    console.error("Error getting events:", error)
-    return []
+    throw error
   }
 }
 

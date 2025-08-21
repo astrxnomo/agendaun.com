@@ -1,6 +1,5 @@
 import { Suspense } from "react"
 
-import { CalendarDataProvider } from "@/components/calendar/calendar-data-context"
 import UniversalCalendar from "@/components/calendar/universal-calendar"
 import { PageHeader } from "@/components/page-header"
 import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
@@ -40,13 +39,11 @@ export default async function FacultadCalendarPage() {
       </div>
 
       <Suspense fallback={<CalendarSkeleton />}>
-        <CalendarDataProvider calendar={facultadCalendar}>
-          <UniversalCalendar
-            calendar={facultadCalendar}
-            title="Calendario de Facultad"
-            showEditButton={true}
-          />
-        </CalendarDataProvider>
+        <UniversalCalendar
+          calendar={facultadCalendar}
+          title="Calendario de Facultad"
+          showEditButton={true}
+        />
       </Suspense>
     </>
   )

@@ -7,8 +7,8 @@ import type { Etiquettes } from "@/types"
 
 interface EtiquettesHeaderProps {
   etiquettes: Etiquettes[]
-  isEtiquetteVisible: (color: string | undefined) => boolean
-  toggleEtiquetteVisibility: (color: string) => void
+  isEtiquetteVisible: (etiquetteId: string | undefined) => boolean
+  toggleEtiquetteVisibility: (etiquetteId: string) => void
   etiquettesManager: React.ReactNode
 }
 
@@ -30,15 +30,15 @@ export function EtiquettesHeader({
             <Badge
               key={etiquette.$id}
               variant={
-                isEtiquetteVisible(etiquette.color) ? "default" : "secondary"
+                isEtiquetteVisible(etiquette.$id) ? "default" : "secondary"
               }
               className={`cursor-pointer select-none hover:opacity-80 ${
-                isEtiquetteVisible(etiquette.color)
+                isEtiquetteVisible(etiquette.$id)
                   ? getEtiquetteColor(etiquette.color)
                   : "opacity-50"
               }`}
               onClick={() => {
-                toggleEtiquetteVisibility(etiquette.color)
+                toggleEtiquetteVisibility(etiquette.$id)
               }}
             >
               {etiquette.name}
