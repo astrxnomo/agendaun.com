@@ -27,21 +27,29 @@ interface UniversalCalendarProps {
   title?: string
 }
 
-export default function UniversalCalendar({
+export default function Calendar({
   calendar,
   showEditButton = true,
   title,
 }: UniversalCalendarProps) {
   const [editable, setEditable] = useState(false)
 
-  const cal = useCalendar(calendar)
-  const permissions = useCalendarPermissions(calendar.$id)
+  const {
+    events,
+    etiquettes,
+    isEtiquetteVisible,
+    toggleEtiquetteVisibility,
+    refetch,
+    isLoading,
+    error,
+  } = useCalendar(calendar)
+  const { permissions } = useCalendarPermissions(calendar.$id)
 
   const refreshEtiquettes = async () => {
     try {
       await getEtiquettes(calendar.$id)
 
-      cal.refetch()
+      refetch()
     } catch (error) {
       console.error("Error refreshing etiquettes:", error)
       toast.error("Error al actualizar las etiquetas")
@@ -49,7 +57,7 @@ export default function UniversalCalendar({
   }
 
   const toggleEditMode = () => {
-    if (!permissions.permissions.canUpdate) {
+    if (!permissions.canUpdate) {
       toast.error("No tienes permisos para editar este calendario")
       return
     }
@@ -57,41 +65,41 @@ export default function UniversalCalendar({
   }
 
   // Estados de carga y error
-  if (cal.isLoading) {
+  if (isLoading) {
     return <CalendarSkeleton />
   }
 
-  if (cal.error) {
-    return <CalendarError error={cal.error} retry={cal.refetch} />
+  if (error) {
+    return <CalendarError error={error} retry={refetch} />
   }
 
-  if (!cal.events && !cal.etiquettes) {
+  if (!events && !etiquettes) {
     return (
       <CalendarError
         error="No se pudieron cargar los datos del calendario"
-        retry={cal.refetch}
+        retry={refetch}
       />
     )
   }
 
-  const visibleEvents = cal.events.filter((event: any) =>
-    cal.isEtiquetteVisible(event.etiquette_id),
+  const visibleEvents = events.filter((event: any) =>
+    isEtiquetteVisible(event.etiquette_id),
   )
 
   return (
     <>
-      {(title || (showEditButton && permissions.permissions.canUpdate)) && (
+      {(title || (showEditButton && permissions.canUpdate)) && (
         <div className="flex items-center justify-between border-b p-6">
           <div>
             {title && <h2 className="text-xl font-semibold">{title}</h2>}
             <p className="text-muted-foreground text-sm">
-              {permissions.permissions.canUpdate
+              {permissions.canUpdate
                 ? "Tienes permisos para editar este calendario"
                 : "Solo puedes ver los eventos de este calendario"}
             </p>
           </div>
 
-          {showEditButton && permissions.permissions.canUpdate && (
+          {showEditButton && permissions.canUpdate && (
             <Button
               variant={editable ? "outline" : "default"}
               onClick={toggleEditMode}
@@ -119,14 +127,14 @@ export default function UniversalCalendar({
       )}
 
       <EtiquettesHeader
-        etiquettes={cal.etiquettes}
-        isEtiquetteVisible={cal.isEtiquetteVisible}
-        toggleEtiquetteVisibility={cal.toggleEtiquetteVisibility}
+        etiquettes={etiquettes}
+        isEtiquetteVisible={isEtiquetteVisible}
+        toggleEtiquetteVisibility={toggleEtiquetteVisibility}
         etiquettesManager={
           editable &&
-          permissions.permissions.canUpdate && (
+          permissions.canUpdate && (
             <EtiquettesManager
-              etiquettes={cal.etiquettes}
+              etiquettes={etiquettes}
               calendarId={calendar.$id}
               onUpdate={refreshEtiquettes}
             />
@@ -138,24 +146,24 @@ export default function UniversalCalendar({
         <SetupCalendar
           events={visibleEvents}
           onEventAdd={
-            editable && permissions.permissions.canCreate
+            editable && permissions.canCreate
               ? undefined // Será implementado posteriormente
               : undefined
           }
           onEventUpdate={
-            editable && permissions.permissions.canUpdate
+            editable && permissions.canUpdate
               ? undefined // Será implementado posteriormente
               : undefined
           }
           onEventDelete={
-            editable && permissions.permissions.canDelete
+            editable && permissions.canDelete
               ? undefined // Será implementado posteriormente
               : undefined
           }
           initialView={calendar.defaultView}
           editable={editable}
-          permissions={permissions.permissions}
-          etiquettes={cal.etiquettes}
+          permissions={permissions}
+          etiquettes={etiquettes}
         />
       </div>
     </>

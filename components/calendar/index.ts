@@ -17,7 +17,7 @@ export { WeekView } from "./week-view"
 // Enhanced Calendar System
 export { CalendarProvider, useCalendarContext } from "./calendar-context"
 
-export { default as UniversalCalendar } from "./universal-calendar"
+export { default as UniversalCalendar } from "./calendar"
 
 // Hook exports - Enhanced System
 export { useCalendar } from "./hooks/use-calendar"

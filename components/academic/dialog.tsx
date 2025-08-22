@@ -284,7 +284,7 @@ export function ConfigDialog() {
                 disabled={!selectedSede || isLoadingFaculties}
                 className={`w-full justify-between py-6 ${
                   !selectedFaculty && selectedSede
-                    ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
+                    ? "border-emerald-300 bg-emerald-50/50 dark:border-emerald-500 dark:bg-emerald-950/50"
                     : ""
                 }`}
               >
@@ -354,7 +354,7 @@ export function ConfigDialog() {
                 disabled={!selectedFaculty || isLoadingPrograms}
                 className={`w-full justify-between py-6 ${
                   !selectedProgram && selectedFaculty
-                    ? "border-amber-300 bg-amber-50/50 dark:border-amber-500 dark:bg-amber-950/50"
+                    ? "border-emerald-300 bg-emerald-50/50 dark:border-emerald-500 dark:bg-emerald-950/50"
                     : ""
                 }`}
               >

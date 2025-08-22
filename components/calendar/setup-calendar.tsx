@@ -454,7 +454,7 @@ export function SetupCalendar({
           }}
           onSave={handleEventSave}
           onDelete={handleEventDelete}
-          customEtiquettes={etiquettes}
+          etiquettes={etiquettes}
         />
 
         <EventViewDialog

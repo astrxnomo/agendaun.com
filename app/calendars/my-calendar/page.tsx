@@ -1,4 +1,4 @@
-import UniversalCalendar from "@/components/calendar/universal-calendar"
+import Calendar from "@/components/calendar/calendar"
 import { PageHeader } from "@/components/page-header"
 import { getPersonalCalendarData } from "@/lib/actions/calendars.actions"
 
@@ -24,7 +24,7 @@ export default async function MyCalendarPage() {
           { label: "Mi calendario", isCurrentPage: true },
         ]}
       />
-      <UniversalCalendar
+      <Calendar
         calendar={data.calendar}
         title="Mi Calendario"
         showEditButton={true}

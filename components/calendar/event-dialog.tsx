@@ -45,21 +45,20 @@ import type { Etiquettes, Events } from "@/types"
 
 interface EventDialogProps {
   event: Events | Partial<Events> | null
+  etiquettes?: Etiquettes[]
   isOpen: boolean
   onClose: () => void
   onSave: (event: Events) => void
   onDelete: (eventId: string) => void
-  customEtiquettes?: Etiquettes[] // ← Nueva prop para etiquetas disponibles
-  customLabels?: Etiquettes[]
 }
 
 export function EventDialog({
   event,
+  etiquettes = [],
   isOpen,
   onClose,
   onSave,
   onDelete,
-  customEtiquettes = [], // ← Recibir etiquetas con default vacío
 }: EventDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -69,7 +68,7 @@ export function EventDialog({
   const [endTime, setEndTime] = useState(`${DefaultEndHour}:00`)
   const [allDay, setAllDay] = useState(false)
   const [location, setLocation] = useState("")
-  const [etiquette, setEtiquette] = useState<string | null>(null) // Nueva state para etiqueta seleccionada
+  const [etiquette, setEtiquette] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   const [endDateOpen, setEndDateOpen] = useState(false)
@@ -89,15 +88,15 @@ export function EventDialog({
       setAllDay(event.all_day || false)
       setLocation(event.location || "")
       // Buscar la etiqueta que corresponde al evento por etiquette_id
-      const matchingEtiquette = customEtiquettes.find(
+      const matchingEtiquette = etiquettes.find(
         (etiq) => etiq.$id === event.etiquette_id,
       )
       setEtiquette(matchingEtiquette?.$id || null)
-      setError(null) // Reset error when opening dialog
+      setError(null)
     } else {
       resetForm()
     }
-  }, [event, customEtiquettes])
+  }, [event, etiquettes])
 
   const resetForm = () => {
     setTitle("")
@@ -175,7 +174,7 @@ export function EventDialog({
 
     // Determinar el color basado en la etiqueta seleccionada
     const selectedEtiquetteObj = etiquette
-      ? customEtiquettes.find((etiq) => etiq.$id === etiquette)
+      ? etiquettes.find((etiq) => etiq.$id === etiquette)
       : null
 
     onSave({
@@ -188,12 +187,6 @@ export function EventDialog({
       all_day: allDay,
       location,
       etiquette_id: selectedEtiquetteObj?.$id || "",
-      // Preserve other required fields from Events type
-      $collectionId: event?.$collectionId || "",
-      $databaseId: event?.$databaseId || "",
-      $createdAt: event?.$createdAt || "",
-      $updatedAt: event?.$updatedAt || "",
-      $permissions: event?.$permissions || [],
     } as Events)
   }
 
@@ -207,7 +200,7 @@ export function EventDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{event?.id ? "Editar" : "Crear"}</DialogTitle>
+          <DialogTitle>{event?.$id ? "Editar" : "Crear"}</DialogTitle>
           <DialogDescription className="sr-only">
             {event?.id
               ? "Edit the details of this event"
@@ -406,7 +399,7 @@ export function EventDialog({
               }
             >
               {/* Etiquetas disponibles */}
-              {customEtiquettes.map((etiq) => (
+              {etiquettes.map((etiq) => (
                 <label
                   key={etiq.$id}
                   className={cn(

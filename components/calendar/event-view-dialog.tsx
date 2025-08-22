@@ -28,9 +28,9 @@ interface EventViewDialogProps {
 
 export function EventViewDialog({
   event,
+  etiquettes = [],
   isOpen,
   onClose,
-  etiquettes = [], // Valor por defecto para evitar errores
 }: EventViewDialogProps) {
   if (!event) return null
 

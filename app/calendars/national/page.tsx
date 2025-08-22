@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 
-import UniversalCalendar from "@/components/calendar/universal-calendar"
+import Calendar from "@/components/calendar/calendar"
 import { PageHeader } from "@/components/page-header"
 import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
@@ -37,7 +37,7 @@ export default async function NationalCalendarPage() {
       </div>
 
       <Suspense fallback={<CalendarSkeleton />}>
-        <UniversalCalendar
+        <Calendar
           calendar={nationalCalendar}
           title="Calendario Nacional"
           showEditButton={true}
