@@ -6,8 +6,8 @@ import NavTop from "@/components/nav-top"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
+import { AcademicProvider } from "@/contexts/academic-context"
 import { AuthContextProvider } from "@/contexts/auth-context"
-import { ConfigProvider } from "@/contexts/config-context"
 
 import type { Metadata } from "next"
 import "./globals.css"
@@ -29,14 +29,14 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${outfit.variable} antialiased`}>
-        <AuthContextProvider>
-          <ConfigProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthContextProvider>
+            <AcademicProvider>
               <CalendarProvider>
                 <SidebarProvider>
                   <AppSidebar />
@@ -47,9 +47,9 @@ export default async function RootLayout({
                 </SidebarProvider>
               </CalendarProvider>
               <Toaster position="bottom-right" richColors />
-            </ThemeProvider>
-          </ConfigProvider>
-        </AuthContextProvider>
+            </AcademicProvider>
+          </AuthContextProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

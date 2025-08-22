@@ -20,8 +20,8 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+import { AcademicConfig } from "@/components/academic/sidebar-button"
 import { NavUser } from "@/components/auth/nav-user"
-import ConfigFilterButton from "@/components/config-filter-button"
 import {
   Collapsible,
   CollapsibleContent,
@@ -235,7 +235,7 @@ export function AppSidebar() {
           <>
             {user ? (
               <>
-                <ConfigFilterButton variant="sidebar" />
+                <AcademicConfig />
                 <NavUser />
               </>
             ) : (

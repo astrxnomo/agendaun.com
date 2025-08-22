@@ -20,19 +20,6 @@ export async function getSedes(): Promise<Sedes[]> {
   }
 }
 
-export async function getFaculties(): Promise<Faculties[]> {
-  try {
-    const data = await db()
-    const result = await data.faculties.list([
-      Query.orderAsc("name"),
-      Query.limit(200),
-    ])
-    return result.documents as Faculties[]
-  } catch (error) {
-    console.error("Error getting faculties:", error)
-    return []
-  }
-}
 export async function getFacultiesBySede(sedeId: string): Promise<Faculties[]> {
   try {
     const data = await db()
@@ -62,5 +49,42 @@ export async function getProgramsByFaculty(
   } catch (error) {
     console.error("Error getting programs by faculty:", error)
     return []
+  }
+}
+
+export async function getSedeById(sedeId: string): Promise<Sedes | null> {
+  try {
+    const data = await db()
+    const result = await data.sedes.get(sedeId)
+    return result as Sedes
+  } catch (error) {
+    console.error("Error getting sede by id:", error)
+    return null
+  }
+}
+
+export async function getFacultyById(
+  facultyId: string,
+): Promise<Faculties | null> {
+  try {
+    const data = await db()
+    const result = await data.faculties.get(facultyId)
+    return result as Faculties
+  } catch (error) {
+    console.error("Error getting faculty by id:", error)
+    return null
+  }
+}
+
+export async function getProgramById(
+  programId: string,
+): Promise<Programs | null> {
+  try {
+    const data = await db()
+    const result = await data.programs.get(programId)
+    return result as Programs
+  } catch (error) {
+    console.error("Error getting program by id:", error)
+    return null
   }
 }

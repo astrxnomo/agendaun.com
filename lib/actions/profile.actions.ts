@@ -71,14 +71,10 @@ export async function getUserProfile(user_id: string) {
       [Query.equal("user_id", user_id)],
     )
 
-    if (profile.documents.length > 0) {
-      return { success: true, profile: profile.documents[0] }
-    } else {
-      return { success: true, profile: null }
-    }
+    return profile.documents[0] as Profiles
   } catch (error) {
     console.error("Error getting user profile:", error)
-    return { success: false, error }
+    return null
   }
 }
 
