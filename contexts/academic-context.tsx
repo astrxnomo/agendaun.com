@@ -1,6 +1,12 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react"
 
 import { useAuthContext } from "@/contexts/auth-context"
 import {
@@ -39,7 +45,7 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
   })
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadConfig = async () => {
+  const loadConfig = useCallback(async () => {
     if (!user?.$id) {
       setConfig({
         selectedSede: null,
@@ -88,12 +94,11 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user])
 
   useEffect(() => {
     void loadConfig()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.$id])
+  }, [loadConfig])
 
   const isComplete = !!config.selectedSede
 
