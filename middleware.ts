@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
     const hasSession = await hasValidSession()
     if (!hasSession) {
       const response = NextResponse.redirect(
-        new URL("/auth/unauthorized", request.url),
+        new URL("/auth/unauthorized/require-auth", request.url),
       )
       response.cookies.delete("session")
       return response

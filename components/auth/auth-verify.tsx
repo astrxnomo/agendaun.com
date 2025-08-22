@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { useAcademicConfig } from "@/contexts/academic-context"
 import { useAuthContext } from "@/contexts/auth-context"
 import { createSession, getUser } from "@/lib/appwrite/auth"
 import { cn } from "@/lib/utils"
@@ -20,6 +21,7 @@ type Props = {
 
 export default function AuthVerify({ userId, secret }: Props) {
   const router = useRouter()
+  const { refreshConfig } = useAcademicConfig()
   const { setUser } = useAuthContext()
   const [error, setError] = useState(false)
 
@@ -30,6 +32,7 @@ export default function AuthVerify({ userId, secret }: Props) {
         if (!cancelled) {
           const userData = await getUser()
           setUser(userData)
+          await refreshConfig()
           toast.success("Sesión verificada correctamente")
           router.push("/calendars/my-calendar")
         }
@@ -40,7 +43,7 @@ export default function AuthVerify({ userId, secret }: Props) {
     return () => {
       cancelled = true
     }
-  }, [userId, secret, router, setUser])
+  }, [userId, secret, router, setUser, refreshConfig])
 
   return (
     <>
