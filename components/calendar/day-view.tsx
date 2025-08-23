@@ -29,7 +29,6 @@ import {
 import { cn } from "@/lib/utils"
 
 import type { Etiquettes, Events } from "@/types"
-import type { CalendarPermissions } from "./hooks/use-calendar-permissions"
 
 interface DayViewProps {
   currentDate: Date
@@ -38,7 +37,7 @@ interface DayViewProps {
   onEventSelect: (event: Events) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
-  permissions?: CalendarPermissions
+  canEdit?: boolean
 }
 
 interface PositionedEvent {
@@ -57,7 +56,7 @@ export function DayView({
   onEventSelect,
   onEventCreate,
   editable = false,
-  permissions,
+  canEdit = false,
 }: DayViewProps) {
   const hours = useMemo(() => {
     const dayStart = startOfDay(currentDate)
@@ -272,12 +271,7 @@ export function DayView({
                   onClick={(e) => handleEventClick(positionedEvent.event, e)}
                   showTime
                   height={positionedEvent.height}
-                  draggable={
-                    (permissions?.canUpdate ||
-                      permissions?.canCreate ||
-                      permissions?.canDelete) &&
-                    editable
-                  }
+                  draggable={editable && canEdit}
                 />
               </div>
             </div>

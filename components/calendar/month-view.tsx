@@ -37,7 +37,6 @@ import {
 } from "@/components/ui/popover"
 
 import type { Etiquettes, Events } from "@/types"
-import type { CalendarPermissions } from "./hooks/use-calendar-permissions"
 
 interface MonthViewProps {
   currentDate: Date
@@ -46,7 +45,7 @@ interface MonthViewProps {
   onEventSelect: (event: Events) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
-  permissions?: CalendarPermissions
+  canEdit?: boolean
 }
 
 export function MonthView({
@@ -56,7 +55,7 @@ export function MonthView({
   onEventSelect,
   onEventCreate,
   editable = false,
-  permissions,
+  canEdit = false,
 }: MonthViewProps) {
   const days = useMemo(() => {
     const monthStart = startOfMonth(currentDate)
@@ -219,12 +218,7 @@ export function MonthView({
                               onClick={(e) => handleEventClick(event, e)}
                               isFirstDay={isFirstDay}
                               isLastDay={isLastDay}
-                              draggable={
-                                (permissions?.canUpdate ||
-                                  permissions?.canCreate ||
-                                  permissions?.canDelete) &&
-                                editable
-                              }
+                              draggable={canEdit && editable}
                             />
                           </div>
                         )

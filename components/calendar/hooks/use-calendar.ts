@@ -2,30 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react"
 
+import { useCanEdit } from "@/components/calendar/hooks/use-can-edit"
 import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
-import { getCurrentUserProfile } from "@/lib/actions/profile.actions"
+import { getUserProfile } from "@/lib/actions/profiles.actions"
 
 import type { Calendars, Etiquettes, Events, Profiles } from "@/types"
 
-interface UseUnifiedCalendarResult {
-  events: Events[]
-  etiquettes: Etiquettes[]
-
-  isLoading: boolean
-  error: string | null
-
-  refetch: () => void
-
-  visibleEtiquettes: string[]
-  toggleEtiquetteVisibility: (etiquetteId: string) => void
-  isEtiquetteVisible: (etiquetteId: string | undefined) => boolean
-  calendar: string
-}
-
-export function useCalendar(
-  calendar: Calendars | null,
-): UseUnifiedCalendarResult {
+export function useCalendar(calendar: Calendars) {
   const [events, setEvents] = useState<Events[]>([])
   const [etiquettes, setEtiquettes] = useState<Etiquettes[]>([])
   const [visibleEtiquettes, setVisibleEtiquettes] = useState<string[]>([])
@@ -34,11 +18,17 @@ export function useCalendar(
   const [userProfile, setUserProfile] = useState<Profiles | null>(null)
   const [profileLoaded, setProfileLoaded] = useState(false)
 
+  const {
+    canEdit,
+    isLoading: permissionsLoading,
+    error: permissionsError,
+  } = useCanEdit(calendar?.slug || "")
+
   const loadUserProfile = useCallback(async () => {
     if (profileLoaded) return
 
     try {
-      const profile = await getCurrentUserProfile()
+      const profile = await getUserProfile()
       setUserProfile(profile)
     } catch (error) {
       console.error("Error loading user profile:", error)
@@ -99,6 +89,11 @@ export function useCalendar(
     },
     [visibleEtiquettes],
   )
+
+  const updateEvents = useCallback((updater: (prev: Events[]) => Events[]) => {
+    setEvents(updater)
+  }, [])
+
   useEffect(() => {
     void loadUserProfile()
   }, [loadUserProfile])
@@ -110,14 +105,16 @@ export function useCalendar(
   }, [fetchData, profileLoaded])
 
   return {
+    calendar,
     events,
     etiquettes,
-    isLoading,
-    error,
+    isLoading: isLoading || permissionsLoading,
+    error: error || permissionsError,
     refetch: fetchData,
     visibleEtiquettes,
     toggleEtiquetteVisibility,
     isEtiquetteVisible,
-    calendar: calendar?.slug || "unknown",
+    canEdit,
+    updateEvents,
   }
 }

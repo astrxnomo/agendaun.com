@@ -34,7 +34,6 @@ import {
 import { cn } from "@/lib/utils"
 
 import type { Etiquettes, Events } from "@/types"
-import type { CalendarPermissions } from "./hooks/use-calendar-permissions"
 
 interface WeekViewProps {
   currentDate: Date
@@ -43,7 +42,7 @@ interface WeekViewProps {
   onEventSelect: (event: Events) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
-  permissions?: CalendarPermissions
+  canEdit?: boolean
 }
 
 interface PositionedEvent {
@@ -62,7 +61,7 @@ export function WeekView({
   onEventSelect,
   onEventCreate,
   editable = false,
-  permissions,
+  canEdit = false,
 }: WeekViewProps) {
   const days = useMemo(() => {
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
@@ -358,12 +357,7 @@ export function WeekView({
                     onClick={(e) => handleEventClick(positionedEvent.event, e)}
                     showTime
                     height={positionedEvent.height}
-                    draggable={
-                      (permissions?.canUpdate ||
-                        permissions?.canCreate ||
-                        permissions?.canDelete) &&
-                      editable
-                    }
+                    draggable={canEdit && editable}
                   />
                 </div>
               </div>

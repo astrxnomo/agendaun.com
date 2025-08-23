@@ -42,7 +42,7 @@ import {
   getProgramsByFaculty,
   getSedes,
 } from "@/lib/actions/academic.actions"
-import { updateUserProfile } from "@/lib/actions/profile.actions"
+import { updateUserProfile } from "@/lib/actions/profiles.actions"
 
 import type { Faculties, Programs, Sedes } from "@/types"
 

@@ -24,11 +24,7 @@ export default async function MyCalendarPage() {
           { label: "Mi calendario", isCurrentPage: true },
         ]}
       />
-      <Calendar
-        calendar={data.calendar}
-        title="Mi Calendario"
-        showEditButton={true}
-      />
+      <Calendar calendar={data.calendar} />
     </>
   )
 }

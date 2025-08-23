@@ -1,43 +1,32 @@
 "use server"
 
-import { Query } from "node-appwrite"
-
 import { getUser } from "@/lib/appwrite/auth"
-import { createSessionClient } from "@/lib/appwrite/config"
+import { createAdminClient } from "@/lib/appwrite/config"
 
-interface Membership {
-  $id: string
-  userId: string
-  teamId: string
-  roles: string[]
-  invited: string
-  joined: string
-  confirm: boolean
-  mfa: boolean
-  $createdAt: string
-  $updatedAt: string
-}
-
-export async function userHasRole(role: string): Promise<boolean> {
+export async function getEditorRoles() {
   try {
     const user = await getUser()
     if (!user) return false
 
-    const { teams } = await createSessionClient()
+    const { users } = await createAdminClient()
 
-    const editorsTeamId = "68a4eb0c003d6a2551b4"
+    const memberships = await users.listMemberships(user.$id)
 
-    const memberships = await teams.listMemberships(editorsTeamId, [
-      Query.equal("userId", user.$id),
-    ])
+    const editorMembership = memberships.memberships.find(
+      (membership) =>
+        membership.teamId === process.env.NEXT_PUBLIC_TEAMS_EDITORS,
+    )
 
-    if (memberships.memberships.length === 0) return false
-
-    const userMembership = memberships.memberships[0] as Membership
-
-    return userMembership.roles.includes(role)
+    return editorMembership?.roles
   } catch (error) {
     console.error("Error checking user role:", error)
     return false
   }
+}
+
+export async function userCanEdit(calendarSlug: string) {
+  const roles = await getEditorRoles()
+  if (!roles) return false
+  if (roles.includes(calendarSlug)) return true
+  return false
 }

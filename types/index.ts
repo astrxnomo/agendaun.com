@@ -71,3 +71,7 @@ export type Programs = Models.Document & {
 export type Session = Models.Session
 
 export type User = Models.User<Models.Preferences>
+
+export type Team = Models.Team<Models.Preferences>
+
+export type Membership = Models.Membership

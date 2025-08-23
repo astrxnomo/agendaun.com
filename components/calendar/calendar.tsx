@@ -9,7 +9,6 @@ import {
   EtiquettesManager,
   SetupCalendar,
 } from "@/components/calendar"
-import { useCalendarPermissions } from "@/components/calendar/hooks/use-calendar-permissions"
 import {
   CalendarError,
   CalendarSkeleton,
@@ -18,38 +17,42 @@ import { Button } from "@/components/ui/button"
 import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 
 import { useCalendar } from "./hooks/use-calendar"
+import { useEventHandlers } from "./hooks/use-event-handlers"
 
 import type { Calendars } from "@/types"
 
-interface UniversalCalendarProps {
-  calendar: Calendars
-  showEditButton?: boolean
-  title?: string
-}
-
-export default function Calendar({
-  calendar,
-  showEditButton = true,
-  title,
-}: UniversalCalendarProps) {
-  const [editable, setEditable] = useState(false)
+export default function Calendar({ calendar }: { calendar: Calendars }) {
+  const [editMode, setEditMode] = useState(false)
 
   const {
     events,
     etiquettes,
+    isLoading,
+    refetch,
+    error,
     isEtiquetteVisible,
     toggleEtiquetteVisibility,
-    refetch,
-    isLoading,
-    error,
+    canEdit,
+    updateEvents,
   } = useCalendar(calendar)
-  const { permissions } = useCalendarPermissions(calendar.$id)
+
+  // Hook para manejar operaciones CRUD de eventos
+  const {
+    handleEventAdd,
+    handleEventUpdate,
+    handleEventDelete,
+    isLoading: eventLoading,
+  } = useEventHandlers({
+    calendar,
+    canEdit,
+    onEventsUpdate: updateEvents,
+  })
 
   const refreshEtiquettes = async () => {
     try {
       await getEtiquettes(calendar.$id)
 
-      refetch()
+      void refetch()
     } catch (error) {
       console.error("Error refreshing etiquettes:", error)
       toast.error("Error al actualizar las etiquetas")
@@ -57,15 +60,14 @@ export default function Calendar({
   }
 
   const toggleEditMode = () => {
-    if (!permissions.canUpdate) {
+    if (!canEdit) {
       toast.error("No tienes permisos para editar este calendario")
       return
     }
-    setEditable(!editable)
+    setEditMode(!editMode)
   }
 
-  // Estados de carga y error
-  if (isLoading) {
+  if (isLoading || eventLoading) {
     return <CalendarSkeleton />
   }
 
@@ -88,51 +90,12 @@ export default function Calendar({
 
   return (
     <>
-      {(title || (showEditButton && permissions.canUpdate)) && (
-        <div className="flex items-center justify-between border-b p-6">
-          <div>
-            {title && <h2 className="text-xl font-semibold">{title}</h2>}
-            <p className="text-muted-foreground text-sm">
-              {permissions.canUpdate
-                ? "Tienes permisos para editar este calendario"
-                : "Solo puedes ver los eventos de este calendario"}
-            </p>
-          </div>
-
-          {showEditButton && permissions.canUpdate && (
-            <Button
-              variant={editable ? "outline" : "default"}
-              onClick={toggleEditMode}
-              className="flex items-center gap-2"
-              title={
-                editable
-                  ? "Cambiar a modo solo lectura - No podrás editar eventos"
-                  : "Habilitar edición - Podrás crear, editar y eliminar eventos"
-              }
-            >
-              {editable ? (
-                <>
-                  <Eye />
-                  Lectura
-                </>
-              ) : (
-                <>
-                  <Edit />
-                  Editar
-                </>
-              )}
-            </Button>
-          )}
-        </div>
-      )}
-
       <EtiquettesHeader
         etiquettes={etiquettes}
         isEtiquetteVisible={isEtiquetteVisible}
         toggleEtiquetteVisibility={toggleEtiquetteVisibility}
         etiquettesManager={
-          editable &&
-          permissions.canUpdate && (
+          editMode && (
             <EtiquettesManager
               etiquettes={etiquettes}
               calendarId={calendar.$id}
@@ -140,29 +103,46 @@ export default function Calendar({
             />
           )
         }
+        editButton={
+          canEdit && (
+            <Button
+              variant={editMode ? "destructive" : "outline"}
+              size="sm"
+              onClick={toggleEditMode}
+              disabled={!canEdit}
+              title={
+                canEdit
+                  ? editMode
+                    ? "Salir del modo edición"
+                    : "Entrar en modo edición"
+                  : "No tienes permisos para editar este calendario"
+              }
+            >
+              {editMode ? (
+                <>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Ver
+                </>
+              ) : (
+                <>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar
+                </>
+              )}
+            </Button>
+          )
+        }
       />
 
       <div className="flex-1">
         <SetupCalendar
           events={visibleEvents}
-          onEventAdd={
-            editable && permissions.canCreate
-              ? undefined // Será implementado posteriormente
-              : undefined
-          }
-          onEventUpdate={
-            editable && permissions.canUpdate
-              ? undefined // Será implementado posteriormente
-              : undefined
-          }
-          onEventDelete={
-            editable && permissions.canDelete
-              ? undefined // Será implementado posteriormente
-              : undefined
-          }
+          onEventAdd={canEdit ? handleEventAdd : undefined}
+          onEventUpdate={canEdit ? handleEventUpdate : undefined}
+          onEventDelete={canEdit ? handleEventDelete : undefined}
           initialView={calendar.defaultView}
-          editable={editable}
-          permissions={permissions}
+          editable={editMode}
+          canEdit={canEdit}
           etiquettes={etiquettes}
         />
       </div>

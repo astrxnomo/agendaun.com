@@ -17,28 +17,25 @@ import {
 } from "@/lib/actions/events.actions"
 
 import type { Calendars, Events } from "@/types"
-import type { CalendarPermissions } from "./use-calendar-permissions"
 
 // ===== TYPES =====
 
 interface UseEventHandlersProps {
   calendar: Calendars
-  permissions: CalendarPermissions
+  canEdit: boolean
   onEventsUpdate: (updater: (prev: Events[]) => Events[]) => void
 }
 
 export function useEventHandlers({
   calendar,
-  permissions,
+  canEdit,
   onEventsUpdate,
 }: UseEventHandlersProps) {
   const [isLoading, setIsLoading] = useState(false)
 
-  // ===== EVENT HANDLERS =====
-
   const handleEventAdd = useCallback(
     async (event: Events) => {
-      if (!permissions.canCreate) {
+      if (!canEdit) {
         toast.error("No tienes permisos para crear eventos")
         return
       }
@@ -61,7 +58,7 @@ export function useEventHandlers({
         setIsLoading(false)
       }
     },
-    [calendar.$id, permissions.canCreate, onEventsUpdate],
+    [calendar.$id, canEdit, onEventsUpdate],
   )
 
   const handleEventUpdate = useCallback(
@@ -71,7 +68,7 @@ export function useEventHandlers({
         return
       }
 
-      if (!permissions.canUpdate) {
+      if (!canEdit) {
         toast.error("No tienes permisos para actualizar eventos")
         return
       }
@@ -96,12 +93,12 @@ export function useEventHandlers({
         setIsLoading(false)
       }
     },
-    [permissions.canUpdate, onEventsUpdate],
+    [canEdit, onEventsUpdate],
   )
 
   const handleEventDelete = useCallback(
     async (eventId: string) => {
-      if (!permissions.canDelete) {
+      if (!canEdit) {
         toast.error("No tienes permisos para eliminar eventos")
         return
       }
@@ -124,10 +121,8 @@ export function useEventHandlers({
         setIsLoading(false)
       }
     },
-    [permissions.canDelete, onEventsUpdate],
+    [canEdit, onEventsUpdate],
   )
-
-  // ===== UTILITY HANDLERS =====
 
   const refreshEtiquettes = useCallback(async () => {
     try {
@@ -139,8 +134,6 @@ export function useEventHandlers({
       return []
     }
   }, [calendar.$id])
-
-  // ===== RETURN MEMOIZED HANDLERS =====
 
   return useMemo(
     () => ({

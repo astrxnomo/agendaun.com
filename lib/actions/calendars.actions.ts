@@ -14,8 +14,7 @@ import {
 
 import { createEtiquette, getEtiquettes } from "./etiquettes.actions"
 import { getCalendarEvents } from "./events.actions"
-import { getCurrentUserProfile } from "./profile.actions"
-import { userHasRole } from "./teams.actions"
+import { getUserProfile } from "./profiles.actions"
 
 async function createDefaultEtiquettes(calendarId: string) {
   const defaultEtiquettes = [
@@ -38,77 +37,6 @@ async function createDefaultEtiquettes(calendarId: string) {
         `Error creating default etiquette ${etiquette.name}:`,
         error,
       )
-    }
-  }
-}
-
-export async function getCalendarPermissions(calendarId: string) {
-  try {
-    const user = await getUser()
-    if (!user) {
-      return {
-        canRead: false,
-        canCreate: false,
-        canUpdate: false,
-        canDelete: false,
-      }
-    }
-
-    const data = await db()
-    const calendar = await data.calendars.get(calendarId)
-
-    if (!calendar) {
-      return {
-        canRead: false,
-        canCreate: false,
-        canUpdate: false,
-        canDelete: false,
-      }
-    }
-
-    const permissions = (calendar.$permissions || []) as string[]
-    const userId = user.$id
-
-    const userReadPermission = `read("user:${userId}")`
-    const userWritePermission = `write("user:${userId}")`
-    const userUpdatePermission = `update("user:${userId}")`
-    const userDeletePermission = `delete("user:${userId}")`
-
-    // Verificar permisos específicos
-    const canRead =
-      permissions.includes(userReadPermission) ||
-      permissions.some((p: string) => p.includes(`read("user:${userId}")`))
-    const canWrite =
-      permissions.includes(userWritePermission) ||
-      permissions.some((p: string) => p.includes(`write("user:${userId}")`))
-    const canUpdate =
-      permissions.includes(userUpdatePermission) ||
-      permissions.some(
-        (p: string) =>
-          p.includes(`update("user:${userId}")`) ||
-          p.includes(`write("user:${userId}")`),
-      )
-    const canDelete =
-      permissions.includes(userDeletePermission) ||
-      permissions.some(
-        (p: string) =>
-          p.includes(`delete("user:${userId}")`) ||
-          p.includes(`write("user:${userId}")`),
-      )
-
-    return {
-      canRead,
-      canCreate: canWrite,
-      canUpdate,
-      canDelete,
-    }
-  } catch (error) {
-    console.error("Error getting calendar permissions:", error)
-    return {
-      canRead: false,
-      canCreate: false,
-      canUpdate: false,
-      canDelete: false,
     }
   }
 }
@@ -201,55 +129,6 @@ export async function getCalendarBySlug(
   }
 }
 
-export async function getCalendarTeamPermissions(
-  calendarId: string,
-  requiredRole: string,
-) {
-  try {
-    const user = await getUser()
-    if (!user) {
-      return {
-        canRead: false,
-        canCreate: false,
-        canUpdate: false,
-        canDelete: false,
-      }
-    }
-
-    const data = await db()
-    const calendar = await data.calendars.get(calendarId)
-
-    if (!calendar) {
-      return {
-        canRead: false,
-        canCreate: false,
-        canUpdate: false,
-        canDelete: false,
-      }
-    }
-
-    // Todos los usuarios autenticados pueden leer
-    const canRead = true
-
-    const canEdit = await userHasRole(requiredRole)
-
-    return {
-      canRead,
-      canCreate: canEdit,
-      canUpdate: canEdit,
-      canDelete: canEdit,
-    }
-  } catch (error) {
-    console.error("Error getting calendar team permissions:", error)
-    return {
-      canRead: true, // Por defecto, todos pueden leer
-      canCreate: false,
-      canUpdate: false,
-      canDelete: false,
-    }
-  }
-}
-
 export interface PersonalCalendarData {
   user: any
   calendar: Calendars
@@ -268,7 +147,7 @@ export async function getPersonalCalendarData(): Promise<PersonalCalendarData | 
     if (!calendar) return null
 
     // 3. Obtener perfil del usuario
-    const profile = await getCurrentUserProfile()
+    const profile = await getUserProfile()
 
     // 4. Obtener eventos y etiquetas del calendario
     const [events, etiquettes] = await Promise.all([

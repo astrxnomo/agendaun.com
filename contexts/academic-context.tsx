@@ -14,7 +14,7 @@ import {
   getProgramById,
   getSedeById,
 } from "@/lib/actions/academic.actions"
-import { getUserProfile } from "@/lib/actions/profile.actions"
+import { getUserProfile } from "@/lib/actions/profiles.actions"
 import { type Faculties, type Programs, type Sedes } from "@/types"
 
 interface ConfigData {
@@ -59,7 +59,7 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true)
 
-      const profile = await getUserProfile(user.$id)
+      const profile = await getUserProfile()
 
       if (profile) {
         const selectedSede = profile.sede_id

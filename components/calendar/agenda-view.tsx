@@ -26,7 +26,6 @@ export function AgendaView({
   etiquettes,
   onEventSelect,
 }: AgendaViewProps) {
-  // Show events for the next days based on constant
   const days = useMemo(() => {
     return Array.from({ length: AgendaDaysToShow }, (_, i) =>
       addDays(new Date(currentDate), i),

@@ -36,7 +36,6 @@ import {
   useCalendarContext,
   WeekCellsHeight,
   WeekView,
-  type CalendarPermissions,
 } from "@/components/calendar"
 import { Button } from "@/components/ui/button"
 import {
@@ -60,7 +59,7 @@ export interface EventCalendarProps {
   className?: string
   initialView?: CalendarView
   editable?: boolean
-  permissions?: CalendarPermissions
+  canEdit?: boolean
   etiquettes?: Etiquettes[] // ← Nueva prop para las etiquetas disponibles
 }
 
@@ -72,7 +71,7 @@ export function SetupCalendar({
   className,
   initialView = "month",
   editable = true,
-  permissions,
+  canEdit = false,
   etiquettes = [],
 }: EventCalendarProps) {
   const { currentDate, setCurrentDate } = useCalendarContext()
@@ -150,7 +149,7 @@ export function SetupCalendar({
   const handleEventSelect = (event: Events) => {
     setSelectedEvent(event)
 
-    if (permissions?.canUpdate && editable) {
+    if (canEdit && editable) {
       setIsEventDialogOpen(true)
     } else {
       setIsEventViewDialogOpen(true)
@@ -158,7 +157,7 @@ export function SetupCalendar({
   }
 
   const handleEventCreate = (startTime: Date) => {
-    if (!permissions?.canCreate) return // No permitir creación si no tiene permisos
+    if (!canEdit) return // No permitir creación si no tiene permisos
 
     // Snap to 15-minute intervals
     const minutes = startTime.getMinutes()
@@ -410,7 +409,7 @@ export function SetupCalendar({
               onEventSelect={handleEventSelect}
               onEventCreate={handleEventCreate}
               editable={editable}
-              permissions={permissions}
+              canEdit={canEdit}
             />
           )}
           {view === "week" && (
@@ -421,7 +420,7 @@ export function SetupCalendar({
               onEventSelect={handleEventSelect}
               onEventCreate={handleEventCreate}
               editable={editable}
-              permissions={permissions}
+              canEdit={canEdit}
             />
           )}
           {view === "day" && (
@@ -431,7 +430,7 @@ export function SetupCalendar({
               onEventSelect={handleEventSelect}
               onEventCreate={handleEventCreate}
               editable={editable}
-              permissions={permissions}
+              canEdit={canEdit}
               etiquettes={etiquettes}
             />
           )}
