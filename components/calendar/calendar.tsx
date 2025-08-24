@@ -1,10 +1,10 @@
 "use client"
 
-import { Edit, Eye } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
 import {
+  EditModeToggle,
   EtiquettesHeader,
   EtiquettesManager,
   SetupCalendar,
@@ -13,7 +13,6 @@ import {
   CalendarError,
   CalendarSkeleton,
 } from "@/components/skeletons/calendar-loading"
-import { Button } from "@/components/ui/button"
 import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 
 import { useCalendar } from "./hooks/use-calendar"
@@ -104,31 +103,11 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
         }
         editButton={
           canEdit && (
-            <Button
-              variant={editMode ? "destructive" : "outline"}
-              size="sm"
-              onClick={toggleEditMode}
+            <EditModeToggle
+              checked={editMode}
+              onCheckedChange={toggleEditMode}
               disabled={!canEdit}
-              title={
-                canEdit
-                  ? editMode
-                    ? "Salir del modo edición"
-                    : "Entrar en modo edición"
-                  : "No tienes permisos para editar este calendario"
-              }
-            >
-              {editMode ? (
-                <>
-                  <Eye className="mr-2 h-4 w-4" />
-                  Ver
-                </>
-              ) : (
-                <>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar
-                </>
-              )}
-            </Button>
+            />
           )
         }
       />
@@ -137,13 +116,13 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
         <SetupCalendar
           calendar={calendar}
           events={visibleEvents}
+          etiquettes={etiquettes}
+          editable={editMode}
+          canEdit={canEdit}
           onEventAdd={canEdit ? handleEventAdd : undefined}
           onEventUpdate={canEdit ? handleEventUpdate : undefined}
           onEventDelete={canEdit ? handleEventDelete : undefined}
           initialView={calendar.defaultView}
-          editable={editMode}
-          canEdit={canEdit}
-          etiquettes={etiquettes}
         />
       </div>
     </>

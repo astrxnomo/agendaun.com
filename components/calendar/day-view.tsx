@@ -201,11 +201,7 @@ export function DayView({
       {showAllDaySection && (
         <div className="border-border/70 bg-muted/50 border-t">
           <div className="grid grid-cols-[3rem_1fr] sm:grid-cols-[4rem_1fr]">
-            <div className="relative">
-              <span className="text-muted-foreground/70 absolute bottom-0 left-0 h-6 w-16 max-w-full text-right text-[10px]">
-                Todo el dia
-              </span>
-            </div>
+            <div className="relative"></div>
             <div className="border-border/70 relative border-r p-1 last:border-r-0">
               {allDayEvents.map((event) => {
                 const eventStart = new Date(event.start)
@@ -317,12 +313,14 @@ export function DayView({
                         quarter === 3 &&
                           "top-[calc(var(--week-cells-height)/4*3)]",
                       )}
-                      onClick={() => {
-                        const startTime = new Date(currentDate)
-                        startTime.setHours(hourValue)
-                        startTime.setMinutes(quarter * 15)
-                        onEventCreate(startTime)
-                      }}
+                      {...(editable && {
+                        onClick: () => {
+                          const startTime = new Date(currentDate)
+                          startTime.setHours(hourValue)
+                          startTime.setMinutes(quarter * 15)
+                          onEventCreate(startTime)
+                        },
+                      })}
                     />
                   )
                 })}

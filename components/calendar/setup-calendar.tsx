@@ -66,14 +66,14 @@ export interface EventCalendarProps {
 export function SetupCalendar({
   calendar,
   events = [],
+  etiquettes = [],
+  editable = true,
+  canEdit = false,
+  initialView = "month",
   onEventAdd,
   onEventUpdate,
   onEventDelete,
   className,
-  initialView = "month",
-  editable = true,
-  canEdit = false,
-  etiquettes = [],
 }: EventCalendarProps) {
   const { currentDate, setCurrentDate } = useCalendarContext()
   const [view, setView] = useState<CalendarView>(initialView)
@@ -160,7 +160,7 @@ export function SetupCalendar({
   }
 
   const handleEventCreate = (startTime: Date) => {
-    if (!canEdit) return // No permitir creación si no tiene permisos
+    if (!canEdit) return
 
     // Snap to 15-minute intervals
     const minutes = startTime.getMinutes()

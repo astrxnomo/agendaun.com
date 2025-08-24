@@ -91,13 +91,13 @@ export function EtiquettesManager({
         const result = await updateEtiquette(editingId, etiquetteData)
         success = !!result
         if (success) {
-          toast.success("Etiqueta actualizada exitosamente")
+          toast.success("Etiqueta actualizada")
         }
       } else {
         const result = await createEtiquette(etiquetteData)
         success = !!result
         if (success) {
-          toast.success("Etiqueta creada exitosamente")
+          toast.success("Etiqueta creada")
         }
       }
 
@@ -132,7 +132,7 @@ export function EtiquettesManager({
     try {
       const success = await deleteEtiquette(etiquetteId)
       if (success) {
-        toast.success("Etiqueta eliminada exitosamente")
+        toast.success("Etiqueta eliminada")
         onUpdate()
       } else {
         toast.error("Error al eliminar la etiqueta")
@@ -152,7 +152,7 @@ export function EtiquettesManager({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button className="ml-2" variant="ghost" size="sm">
           <Settings className="h-4 w-4" />
         </Button>
       </DialogTrigger>

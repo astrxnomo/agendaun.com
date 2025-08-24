@@ -22,6 +22,7 @@ export function useCalendar(calendar: Calendars) {
     canEdit,
     isLoading: permissionsLoading,
     error: permissionsError,
+    refetchPermissions,
   } = useCheckPermissions(calendar)
 
   const loadUserProfile = useCallback(async () => {
@@ -53,6 +54,8 @@ export function useCalendar(calendar: Calendars) {
       setIsLoading(true)
       setError(null)
 
+      refetchPermissions()
+
       const [eventsData, etiquettesData] = await Promise.all([
         getCalendarEvents(calendar, userProfile),
         getEtiquettes(calendar.$id),
@@ -70,7 +73,7 @@ export function useCalendar(calendar: Calendars) {
     } finally {
       setIsLoading(false)
     }
-  }, [calendar, userProfile, profileLoaded])
+  }, [calendar, userProfile, profileLoaded, refetchPermissions])
 
   const toggleEtiquetteVisibility = useCallback((etiquetteId: string) => {
     setVisibleEtiquettes((prev) => {

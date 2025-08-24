@@ -1,9 +1,3 @@
-/**
- * @fileoverview Event Hooks - Event Management
- * @description Hook para manejar operaciones CRUD de eventos del calendario
- * @category Event Hooks
- */
-
 "use client"
 
 import { useCallback, useMemo, useState } from "react"
@@ -16,8 +10,6 @@ import {
 } from "@/lib/actions/events.actions"
 
 import type { Calendars, Events } from "@/types"
-
-// ===== TYPES =====
 
 interface UseEventHandlersProps {
   calendar: Calendars
@@ -51,8 +43,8 @@ export function useEventHandlers({
 
       try {
         toast.promise(promise, {
-          loading: `Creando evento: "${event.title}"...`,
-          success: `Evento "${event.title}" creado exitosamente`,
+          loading: `Creando evento "${event.title}"...`,
+          success: `Evento "${event.title}" creado`,
           error: `Error al crear evento: "${event.title}"`,
         })
 
@@ -95,8 +87,8 @@ export function useEventHandlers({
 
       try {
         toast.promise(promise, {
-          loading: `Actualizando evento: "${updatedEvent.title}"...`,
-          success: `Evento "${updatedEvent.title}" actualizado exitosamente`,
+          loading: `Actualizando evento "${updatedEvent.title}"...`,
+          success: `Evento "${updatedEvent.title}" actualizado`,
           error: `Error al actualizar evento: "${updatedEvent.title}"`,
         })
 
@@ -131,7 +123,7 @@ export function useEventHandlers({
       try {
         toast.promise(promise, {
           loading: "Eliminando evento...",
-          success: "Evento eliminado exitosamente",
+          success: "Evento eliminado",
           error: "Error al eliminar evento",
         })
 

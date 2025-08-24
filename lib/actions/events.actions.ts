@@ -46,7 +46,6 @@ export async function getCalendarEvents(
 
     const result = await data.events.list(queries)
 
-    console.log("Events fetched:", result.documents)
     return result.documents as Events[]
   } catch (error) {
     throw error

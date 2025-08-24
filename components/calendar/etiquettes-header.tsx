@@ -1,5 +1,3 @@
-"use client"
-
 import { getEtiquetteColor } from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 
@@ -22,13 +20,10 @@ export function EtiquettesHeader({
 }: EtiquettesHeaderProps) {
   return (
     <div className="bg-background sticky top-12 z-30 border-b">
-      <div className="scrollbar-none flex h-12 shrink-0 items-center gap-2 overflow-x-auto px-4">
-        <span className="text-muted-foreground mr-2 shrink-0 text-sm font-medium">
-          Etiquetas
-        </span>
-
-        <div className="flex w-full justify-between">
-          <div className="flex shrink-0 items-center gap-1">
+      <div className="flex items-center justify-between">
+        <div className="scrollbar-none flex h-12 items-center overflow-x-auto">
+          {etiquettesManager}
+          <div className="ml-2 flex shrink-0 items-center gap-1">
             {etiquettes.map((etiquette) => (
               <Badge
                 key={etiquette.$id}
@@ -47,7 +42,6 @@ export function EtiquettesHeader({
                 {etiquette.name}
               </Badge>
             ))}
-            {etiquettesManager}
           </div>
         </div>
         {editButton}

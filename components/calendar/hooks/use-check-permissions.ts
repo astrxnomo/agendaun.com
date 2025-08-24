@@ -22,6 +22,7 @@ export function useCheckPermissions(calendar: Calendars) {
       setError(null)
 
       const hasPermission = await userCanEdit(calendar)
+      console.log("User edit permission:", hasPermission)
       setCanEdit(hasPermission)
     } catch (err) {
       console.error("Error checking edit permissions:", err)
