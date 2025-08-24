@@ -1,8 +1,5 @@
-import { Suspense } from "react"
-
 import Calendar from "@/components/calendar/calendar"
 import { PageHeader } from "@/components/page-header"
-import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 
 export default async function SedeCalendarPage() {
@@ -37,13 +34,7 @@ export default async function SedeCalendarPage() {
         </p>
       </div>
 
-      <Suspense fallback={<CalendarSkeleton />}>
-        <Calendar
-          calendar={sedeCalendar}
-          title="Calendario de Sede"
-          showEditButton={true}
-        />
-      </Suspense>
+      <Calendar calendar={sedeCalendar} />
     </>
   )
 }
