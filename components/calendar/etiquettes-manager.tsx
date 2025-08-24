@@ -20,14 +20,14 @@ import {
   deleteEtiquette,
   updateEtiquette,
 } from "@/lib/actions/etiquettes.actions"
-import { Colors, type Etiquettes } from "@/types"
+import { type Calendars, Colors, type Etiquettes } from "@/types"
 
 import { Separator } from "../ui/separator"
 import { getEtiquetteIndicatorColor } from "./utils"
 
 interface EtiquettesManagerProps {
   etiquettes: Etiquettes[]
-  calendarId: string
+  calendar: Calendars
   onUpdate: () => void
 }
 
@@ -43,7 +43,7 @@ const colorOptions = Object.values(Colors).map((color) => ({
 
 export function EtiquettesManager({
   etiquettes,
-  calendarId,
+  calendar,
   onUpdate,
 }: EtiquettesManagerProps) {
   const [open, setOpen] = useState(false)
@@ -83,7 +83,7 @@ export function EtiquettesManager({
         name: form.name.trim(),
         color: form.color,
         isActive: true,
-        calendar_id: calendarId,
+        calendar_id: calendar.$id,
       }
 
       let success = false

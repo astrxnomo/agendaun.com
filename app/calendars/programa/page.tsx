@@ -1,14 +1,11 @@
-import { Suspense } from "react"
-
 import Calendar from "@/components/calendar/calendar"
 import { PageHeader } from "@/components/page-header"
-import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 
 export default async function ProgramaCalendarPage() {
-  const programaCalendar = await getCalendarBySlug("programa-calendar")
+  const calendar = await getCalendarBySlug("programa-calendar")
 
-  if (!programaCalendar) {
+  if (!calendar) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
@@ -37,13 +34,7 @@ export default async function ProgramaCalendarPage() {
         </p>
       </div>
 
-      <Suspense fallback={<CalendarSkeleton />}>
-        <Calendar
-          calendar={programaCalendar}
-          title="Calendario de Programa"
-          showEditButton={true}
-        />
-      </Suspense>
+      <Calendar calendar={calendar} />
     </>
   )
 }

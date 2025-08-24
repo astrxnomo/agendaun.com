@@ -3,9 +3,9 @@ import { PageHeader } from "@/components/page-header"
 import { getPersonalCalendarData } from "@/lib/actions/calendars.actions"
 
 export default async function MyCalendarPage() {
-  const data = await getPersonalCalendarData()
+  const calendar = await getPersonalCalendarData()
 
-  if (!data) {
+  if (!calendar) {
     return (
       <div className="border-b p-6">
         <h1 className="text-3xl font-bold">Mi Calendario</h1>
@@ -24,7 +24,7 @@ export default async function MyCalendarPage() {
           { label: "Mi calendario", isCurrentPage: true },
         ]}
       />
-      <Calendar calendar={data.calendar} />
+      <Calendar calendar={calendar} />
     </>
   )
 }

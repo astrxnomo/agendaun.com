@@ -68,7 +68,7 @@ export function EventDialog({
   const [endTime, setEndTime] = useState(`${DefaultEndHour}:00`)
   const [allDay, setAllDay] = useState(false)
   const [location, setLocation] = useState("")
-  const [etiquette, setEtiquette] = useState<string | null>(null)
+  const [etiquette, setEtiquette] = useState<Etiquettes | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   const [endDateOpen, setEndDateOpen] = useState(false)
@@ -80,6 +80,9 @@ export function EventDialog({
 
       const start = event.start ? new Date(event.start) : new Date()
       const end = event.end ? new Date(event.end) : new Date()
+      const matchingEtiquette = etiquettes.find(
+        (etiq) => etiq.$id === event.etiquette_id,
+      )
 
       setStartDate(start)
       setEndDate(end)
@@ -87,11 +90,7 @@ export function EventDialog({
       setEndTime(formatTimeForInput(end))
       setAllDay(event.all_day || false)
       setLocation(event.location || "")
-      // Buscar la etiqueta que corresponde al evento por etiquette_id
-      const matchingEtiquette = etiquettes.find(
-        (etiq) => etiq.$id === event.etiquette_id,
-      )
-      setEtiquette(matchingEtiquette?.$id || null)
+      setEtiquette(matchingEtiquette || null)
       setError(null)
     } else {
       resetForm()
@@ -169,24 +168,17 @@ export function EventDialog({
       return
     }
 
-    // Use generic title if empty
     const eventTitle = title.trim() ? title : "(sin título)"
-
-    // Determinar el color basado en la etiqueta seleccionada
-    const selectedEtiquetteObj = etiquette
-      ? etiquettes.find((etiq) => etiq.$id === etiquette)
-      : null
 
     onSave({
       ...event,
-      $id: event?.$id || "",
       title: eventTitle,
       description,
       start,
       end,
       all_day: allDay,
       location,
-      etiquette_id: selectedEtiquetteObj?.$id || "",
+      etiquette_id: etiquette?.$id,
     } as Events)
   }
 
@@ -202,7 +194,7 @@ export function EventDialog({
         <DialogHeader>
           <DialogTitle>{event?.$id ? "Editar" : "Crear"}</DialogTitle>
           <DialogDescription className="sr-only">
-            {event?.id
+            {event?.$id
               ? "Edit the details of this event"
               : "Add a new event to your calendar"}
           </DialogDescription>
@@ -393,9 +385,13 @@ export function EventDialog({
             </legend>
             <RadioGroup
               className="grid grid-cols-2 gap-2"
-              value={etiquette || "none"}
+              value={etiquette?.$id || "none"}
               onValueChange={(value) =>
-                setEtiquette(value === "none" ? null : value)
+                setEtiquette(
+                  value === "none"
+                    ? null
+                    : etiquettes.find((etiq) => etiq.$id === value) || null,
+                )
               }
             >
               {/* Etiquetas disponibles */}
@@ -404,7 +400,7 @@ export function EventDialog({
                   key={etiq.$id}
                   className={cn(
                     "relative flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
-                    etiquette === etiq.$id
+                    etiquette?.$id === etiq.$id
                       ? "border-primary bg-primary/5"
                       : "border-input hover:bg-muted",
                   )}
@@ -423,7 +419,7 @@ export function EventDialog({
           </fieldset>
         </div>
         <DialogFooter className="flex-row sm:justify-between">
-          {event?.id && (
+          {event?.$id && (
             <Button
               variant="outline"
               className="text-destructive hover:text-destructive"

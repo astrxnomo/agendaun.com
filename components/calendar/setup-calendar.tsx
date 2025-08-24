@@ -20,7 +20,6 @@ import {
   Plus,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
 
 import {
   addHoursToDate,
@@ -47,12 +46,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
-import type { Etiquettes, Events } from "@/types"
+import type { Calendars, Etiquettes, Events } from "@/types"
 
 type CalendarView = "month" | "week" | "day" | "agenda"
 
 export interface EventCalendarProps {
+  calendar: Calendars
   events?: Events[]
+  etiquettes?: Etiquettes[]
   onEventAdd?: (event: Events) => void
   onEventUpdate?: (event: Events) => void
   onEventDelete?: (eventId: string) => void
@@ -60,10 +61,10 @@ export interface EventCalendarProps {
   initialView?: CalendarView
   editable?: boolean
   canEdit?: boolean
-  etiquettes?: Etiquettes[] // ← Nueva prop para las etiquetas disponibles
 }
 
 export function SetupCalendar({
+  calendar,
   events = [],
   onEventAdd,
   onEventUpdate,
@@ -78,7 +79,9 @@ export function SetupCalendar({
   const [view, setView] = useState<CalendarView>(initialView)
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [isEventViewDialogOpen, setIsEventViewDialogOpen] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<Events | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<Partial<Events> | null>(
+    null,
+  )
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -174,25 +177,11 @@ export function SetupCalendar({
       startTime.setMilliseconds(0)
     }
 
-    const newEvent: Events = {
-      $id: "",
-      title: "",
+    const newEvent = {
       start: startTime,
       end: addHoursToDate(startTime, 1),
       all_day: false,
-      description: "",
-      location: "",
-      etiquette_id: "",
-      sede_id: "",
-      faculty_id: "",
-      program_id: "",
-      calendar_id: "",
-      $collectionId: "",
-      $databaseId: "",
-      $createdAt: "",
-      $updatedAt: "",
-      $permissions: [],
-    }
+    } as Partial<Events>
     setSelectedEvent(newEvent)
     setIsEventDialogOpen(true)
   }
@@ -200,22 +189,10 @@ export function SetupCalendar({
   const handleEventSave = (event: Events) => {
     if (event.$id) {
       onEventUpdate?.(event)
-      // Show toast notification when an event is updated
-      toast(`Evento "${event.title}" actualizado`, {
-        description: format(new Date(event.start), "MMM d, yyyy", {
-          locale: es,
-        }),
-      })
     } else {
       onEventAdd?.({
         ...event,
-        id: Math.random().toString(36).substring(2, 11),
-      })
-      // Show toast notification when an event is added
-      toast(`Evento "${event.title}" agregado`, {
-        description: format(new Date(event.start), "MMM d, yyyy", {
-          locale: es,
-        }),
+        calendar_id: calendar.$id,
       })
     }
     setIsEventDialogOpen(false)
@@ -223,30 +200,13 @@ export function SetupCalendar({
   }
 
   const handleEventDelete = (eventId: string) => {
-    const deletedEvent = events.find((e) => e.id === eventId)
     onEventDelete?.(eventId)
     setIsEventDialogOpen(false)
     setSelectedEvent(null)
-
-    // Show toast notification when an event is deleted
-    if (deletedEvent) {
-      toast(`Evento "${deletedEvent.title}" eliminado`, {
-        description: format(new Date(deletedEvent.start), "MMM d, yyyy", {
-          locale: es,
-        }),
-      })
-    }
   }
 
   const handleEventUpdate = (updatedEvent: Events) => {
     onEventUpdate?.(updatedEvent)
-
-    // Show toast notification when an event is updated via drag and drop
-    toast(`Evento "${updatedEvent.title}" movido`, {
-      description: format(new Date(updatedEvent.start), "MMM d, yyyy", {
-        locale: es,
-      }),
-    })
   }
 
   const viewTitle = useMemo(() => {
@@ -446,6 +406,7 @@ export function SetupCalendar({
 
         <EventDialog
           event={selectedEvent}
+          etiquettes={etiquettes}
           isOpen={isEventDialogOpen}
           onClose={() => {
             setIsEventDialogOpen(false)
@@ -453,11 +414,10 @@ export function SetupCalendar({
           }}
           onSave={handleEventSave}
           onDelete={handleEventDelete}
-          etiquettes={etiquettes}
         />
 
         <EventViewDialog
-          event={selectedEvent}
+          event={selectedEvent as Events}
           isOpen={isEventViewDialogOpen}
           onClose={() => {
             setIsEventViewDialogOpen(false)

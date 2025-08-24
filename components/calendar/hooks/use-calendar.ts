@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 
-import { useCanEdit } from "@/components/calendar/hooks/use-can-edit"
+import { useCheckPermissions } from "@/components/calendar/hooks/use-check-permissions"
 import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
 import { getUserProfile } from "@/lib/actions/profiles.actions"
@@ -22,7 +22,7 @@ export function useCalendar(calendar: Calendars) {
     canEdit,
     isLoading: permissionsLoading,
     error: permissionsError,
-  } = useCanEdit(calendar?.slug || "")
+  } = useCheckPermissions(calendar)
 
   const loadUserProfile = useCallback(async () => {
     if (profileLoaded) return

@@ -36,7 +36,6 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
     updateEvents,
   } = useCalendar(calendar)
 
-  // Hook para manejar operaciones CRUD de eventos
   const {
     handleEventAdd,
     handleEventUpdate,
@@ -98,7 +97,7 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
           editMode && (
             <EtiquettesManager
               etiquettes={etiquettes}
-              calendarId={calendar.$id}
+              calendar={calendar}
               onUpdate={refreshEtiquettes}
             />
           )
@@ -136,6 +135,7 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
 
       <div className="flex-1">
         <SetupCalendar
+          calendar={calendar}
           events={visibleEvents}
           onEventAdd={canEdit ? handleEventAdd : undefined}
           onEventUpdate={canEdit ? handleEventUpdate : undefined}

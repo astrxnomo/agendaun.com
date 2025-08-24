@@ -12,9 +12,7 @@ import {
   type Events,
 } from "@/types"
 
-import { createEtiquette, getEtiquettes } from "./etiquettes.actions"
-import { getCalendarEvents } from "./events.actions"
-import { getUserProfile } from "./profiles.actions"
+import { createEtiquette } from "./etiquettes.actions"
 
 async function createDefaultEtiquettes(calendarId: string) {
   const defaultEtiquettes = [
@@ -136,31 +134,15 @@ export interface PersonalCalendarData {
   etiquettes: Etiquettes[]
 }
 
-export async function getPersonalCalendarData(): Promise<PersonalCalendarData | null> {
+export async function getPersonalCalendarData(): Promise<Calendars | null> {
   try {
-    // 1. Verificar autenticación
     const user = await getUser()
     if (!user) return null
 
-    // 2. Obtener o crear calendario personal
     const calendar = await getOrCreatePersonalCalendar(user.$id)
     if (!calendar) return null
 
-    // 3. Obtener perfil del usuario
-    const profile = await getUserProfile()
-
-    // 4. Obtener eventos y etiquetas del calendario
-    const [events, etiquettes] = await Promise.all([
-      getCalendarEvents(calendar, profile),
-      getEtiquettes(calendar.$id),
-    ])
-
-    return {
-      user,
-      calendar,
-      events,
-      etiquettes,
-    }
+    return calendar
   } catch (error) {
     console.error("Error getting personal calendar data:", error)
     return null

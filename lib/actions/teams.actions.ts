@@ -2,11 +2,16 @@
 
 import { getUser } from "@/lib/appwrite/auth"
 import { createAdminClient } from "@/lib/appwrite/config"
+import { type Calendars } from "@/types"
 
-export async function getEditorRoles() {
+export async function userCanEdit(calendar: Calendars) {
   try {
     const user = await getUser()
     if (!user) return false
+
+    if (calendar.owner_id === user.$id) return true
+
+    if (user.labels.includes("admin")) return true
 
     const { users } = await createAdminClient()
 
@@ -17,16 +22,15 @@ export async function getEditorRoles() {
         membership.teamId === process.env.NEXT_PUBLIC_TEAMS_EDITORS,
     )
 
-    return editorMembership?.roles
+    if (!editorMembership) return false
+
+    const editorRoles = editorMembership.roles
+    if (!editorRoles) return false
+    if (editorRoles.includes(calendar.slug)) return true
+
+    return false
   } catch (error) {
     console.error("Error checking user role:", error)
     return false
   }
-}
-
-export async function userCanEdit(calendarSlug: string) {
-  const roles = await getEditorRoles()
-  if (!roles) return false
-  if (roles.includes(calendarSlug)) return true
-  return false
 }

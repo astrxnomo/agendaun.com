@@ -3,14 +3,15 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { userCanEdit } from "@/lib/actions/teams.actions"
+import { type Calendars } from "@/types"
 
-export function useCanEdit(calendarSlug: string) {
+export function useCheckPermissions(calendar: Calendars) {
   const [canEdit, setCanEdit] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const checkPermissions = useCallback(async () => {
-    if (!calendarSlug) {
+    if (!calendar) {
       setCanEdit(false)
       setIsLoading(false)
       return
@@ -20,7 +21,7 @@ export function useCanEdit(calendarSlug: string) {
       setIsLoading(true)
       setError(null)
 
-      const hasPermission = await userCanEdit(calendarSlug)
+      const hasPermission = await userCanEdit(calendar)
       setCanEdit(hasPermission)
     } catch (err) {
       console.error("Error checking edit permissions:", err)
@@ -29,7 +30,7 @@ export function useCanEdit(calendarSlug: string) {
     } finally {
       setIsLoading(false)
     }
-  }, [calendarSlug])
+  }, [calendar])
 
   const refetchPermissions = useCallback(() => {
     void checkPermissions()

@@ -1,15 +1,11 @@
-import { Suspense } from "react"
-
 import Calendar from "@/components/calendar/calendar"
 import { PageHeader } from "@/components/page-header"
-import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 
 export default async function FacultadCalendarPage() {
-  // Obtener el calendario único de facultad
-  const facultadCalendar = await getCalendarBySlug("facultad-calendar")
+  const calendar = await getCalendarBySlug("facultad-calendar")
 
-  if (!facultadCalendar) {
+  if (!calendar) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
@@ -38,13 +34,7 @@ export default async function FacultadCalendarPage() {
         </p>
       </div>
 
-      <Suspense fallback={<CalendarSkeleton />}>
-        <Calendar
-          calendar={facultadCalendar}
-          title="Calendario de Facultad"
-          showEditButton={true}
-        />
-      </Suspense>
+      <Calendar calendar={calendar} />
     </>
   )
 }

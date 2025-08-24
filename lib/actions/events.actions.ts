@@ -1,33 +1,16 @@
 "use server"
 
-import { Permission, Query, Role } from "node-appwrite"
+import { Query } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
 import { type Calendars, type Events, type Profiles } from "@/types"
 
-/**
- * Limpia el objeto event de propiedades de Appwrite que no deben enviarse
- */
-function cleanEventData(event: Partial<Events>) {
-  return {
-    title: event.title,
-    description: event.description,
-    start: event.start,
-    end: event.end,
-    all_day: event.all_day,
-    location: event.location,
-    sede_id: event.sede_id,
-    faculties_id: event.faculty_id,
-    programs_id: event.program_id,
-    calendar_id: event.calendar_id,
-    etiquette_id: event.etiquette_id,
-  }
-}
+import { setPermissions } from "../utils/permissions"
 
 export async function getCalendarEvents(
   calendar: Calendars,
-  profile: Profiles | null,
+  profile?: Profiles | null,
 ): Promise<Events[]> {
   try {
     const data = await db()
@@ -59,11 +42,11 @@ export async function getCalendarEvents(
       if (!profile?.user_id) {
         return []
       }
-      queries.push(Query.equal("owner_id", profile.user_id))
     }
 
     const result = await data.events.list(queries)
 
+    console.log("Events fetched:", result.documents)
     return result.documents as Events[]
   } catch (error) {
     throw error
@@ -79,17 +62,12 @@ export async function createEvent(
 
     const data = await db()
 
-    // Limpiar el objeto event de propiedades de Appwrite
-    const cleanEvent = cleanEventData(event)
+    const calendar = await data.calendars.get(event.calendar_id)
+    if (!calendar) throw new Error("Calendar not found")
 
-    // Para eventos personales, solo el usuario creador tiene permisos completos
-    const permissions = [
-      Permission.read(Role.user(user.$id)),
-      Permission.update(Role.user(user.$id)),
-      Permission.delete(Role.user(user.$id)),
-    ]
+    const permissions = await setPermissions(calendar.slug, user.$id)
 
-    const result = await data.events.create(cleanEvent, permissions)
+    const result = await data.events.create(event, permissions)
     return result as Events
   } catch (error) {
     console.error("Error creating event:", error)
@@ -104,9 +82,15 @@ export async function updateEvent(
   try {
     const data = await db()
 
-    const cleanEvent = cleanEventData(event)
-
-    const result = await data.events.update(eventId, cleanEvent)
+    const result = await data.events.update(eventId, {
+      title: event.title,
+      description: event.description,
+      start: event.start,
+      end: event.end,
+      all_day: event.all_day,
+      location: event.location,
+      etiquette_id: event.etiquette_id,
+    })
     return result as Events
   } catch (error) {
     console.error("Error updating event:", error)

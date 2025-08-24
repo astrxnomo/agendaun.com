@@ -9,7 +9,6 @@
 import { useCallback, useMemo, useState } from "react"
 import { toast } from "sonner"
 
-import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 import {
   createEvent,
   deleteEvent,
@@ -27,7 +26,6 @@ interface UseEventHandlersProps {
 }
 
 export function useEventHandlers({
-  calendar,
   canEdit,
   onEventsUpdate,
 }: UseEventHandlersProps) {
@@ -41,24 +39,29 @@ export function useEventHandlers({
       }
 
       setIsLoading(true)
-      try {
-        const eventWithCalendar = { ...event, calendar_id: calendar.$id }
-        const newEvent = await createEvent(eventWithCalendar)
 
+      const promise = createEvent(event).then((newEvent) => {
         if (newEvent) {
           onEventsUpdate((prev) => [...prev, newEvent])
-          toast.success("Evento creado exitosamente")
+          return newEvent
         } else {
-          toast.error("Error al crear el evento")
+          throw new Error("Error al crear el evento")
         }
-      } catch (error) {
-        console.error("Error creating event:", error)
-        toast.error("Error al crear el evento")
+      })
+
+      try {
+        toast.promise(promise, {
+          loading: `Creando evento: "${event.title}"...`,
+          success: `Evento "${event.title}" creado exitosamente`,
+          error: `Error al crear evento: "${event.title}"`,
+        })
+
+        await promise
       } finally {
         setIsLoading(false)
       }
     },
-    [calendar.$id, canEdit, onEventsUpdate],
+    [canEdit, onEventsUpdate],
   )
 
   const handleEventUpdate = useCallback(
@@ -74,21 +77,30 @@ export function useEventHandlers({
       }
 
       setIsLoading(true)
+
+      const promise = updateEvent(updatedEvent.$id, updatedEvent).then(
+        (result) => {
+          if (result) {
+            onEventsUpdate((prev) =>
+              prev.map((event) =>
+                event.$id === updatedEvent.$id ? result : event,
+              ),
+            )
+            return result
+          } else {
+            throw new Error("Error al actualizar el evento")
+          }
+        },
+      )
+
       try {
-        const result = await updateEvent(updatedEvent.$id, updatedEvent)
-        if (result) {
-          onEventsUpdate((prev) =>
-            prev.map((event) =>
-              event.$id === updatedEvent.$id ? result : event,
-            ),
-          )
-          toast.success("Evento actualizado exitosamente")
-        } else {
-          toast.error("Error al actualizar el evento")
-        }
-      } catch (error) {
-        console.error("Error updating event:", error)
-        toast.error("Error al actualizar el evento")
+        toast.promise(promise, {
+          loading: `Actualizando evento: "${updatedEvent.title}"...`,
+          success: `Evento "${updatedEvent.title}" actualizado exitosamente`,
+          error: `Error al actualizar evento: "${updatedEvent.title}"`,
+        })
+
+        await promise
       } finally {
         setIsLoading(false)
       }
@@ -104,19 +116,26 @@ export function useEventHandlers({
       }
 
       setIsLoading(true)
-      try {
-        const success = await deleteEvent(eventId)
+
+      const promise = deleteEvent(eventId).then((success) => {
         if (success) {
           onEventsUpdate((prev) =>
             prev.filter((event) => event.$id !== eventId),
           )
-          toast.success("Evento eliminado exitosamente")
+          return success
         } else {
-          toast.error("Error al eliminar el evento")
+          throw new Error("Error al eliminar el evento")
         }
-      } catch (error) {
-        console.error("Error deleting event:", error)
-        toast.error("Error al eliminar el evento")
+      })
+
+      try {
+        toast.promise(promise, {
+          loading: "Eliminando evento...",
+          success: "Evento eliminado exitosamente",
+          error: "Error al eliminar evento",
+        })
+
+        await promise
       } finally {
         setIsLoading(false)
       }
@@ -124,31 +143,13 @@ export function useEventHandlers({
     [canEdit, onEventsUpdate],
   )
 
-  const refreshEtiquettes = useCallback(async () => {
-    try {
-      const updatedEtiquettes = await getEtiquettes(calendar.$id)
-      return updatedEtiquettes
-    } catch (error) {
-      console.error("Error refreshing etiquettes:", error)
-      toast.error("Error al actualizar las etiquetas")
-      return []
-    }
-  }, [calendar.$id])
-
   return useMemo(
     () => ({
       isLoading,
       handleEventAdd,
       handleEventUpdate,
       handleEventDelete,
-      refreshEtiquettes,
     }),
-    [
-      isLoading,
-      handleEventAdd,
-      handleEventUpdate,
-      handleEventDelete,
-      refreshEtiquettes,
-    ],
+    [isLoading, handleEventAdd, handleEventUpdate, handleEventDelete],
   )
 }

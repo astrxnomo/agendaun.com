@@ -1,14 +1,11 @@
-import { Suspense } from "react"
-
 import Calendar from "@/components/calendar/calendar"
 import { PageHeader } from "@/components/page-header"
-import { CalendarSkeleton } from "@/components/skeletons/calendar-loading"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 
 export default async function NationalCalendarPage() {
-  const nationalCalendar = await getCalendarBySlug("national-calendar")
+  const calendar = await getCalendarBySlug("national-calendar")
 
-  if (!nationalCalendar) {
+  if (!calendar) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
@@ -36,13 +33,7 @@ export default async function NationalCalendarPage() {
         </p>
       </div>
 
-      <Suspense fallback={<CalendarSkeleton />}>
-        <Calendar
-          calendar={nationalCalendar}
-          title="Calendario Nacional"
-          showEditButton={true}
-        />
-      </Suspense>
+      <Calendar calendar={calendar} />
     </>
   )
 }

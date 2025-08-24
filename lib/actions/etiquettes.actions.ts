@@ -1,19 +1,12 @@
 "use server"
 
-import { Permission, Query, Role } from "node-appwrite"
+import { Query } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
 import { type Etiquettes } from "@/types"
 
-function cleanEtiquetteData(etiquette: Partial<Etiquettes>) {
-  return {
-    name: etiquette.name,
-    color: etiquette.color,
-    isActive: etiquette.isActive ?? true,
-    calendar_id: etiquette.calendar_id,
-  }
-}
+import { setPermissions } from "../utils/permissions"
 
 export async function getEtiquettes(calendarId: string): Promise<Etiquettes[]> {
   try {
@@ -38,17 +31,12 @@ export async function createEtiquette(
 
     const data = await db()
 
-    // Limpiar los datos
-    const cleanEtiquette = cleanEtiquetteData(etiquette)
+    const calendar = await data.calendars.get(etiquette.calendar_id)
+    if (!calendar) throw new Error("Calendar not found")
 
-    // Permisos para el usuario creador
-    const permissions = [
-      Permission.read(Role.user(user.$id)),
-      Permission.update(Role.user(user.$id)),
-      Permission.delete(Role.user(user.$id)),
-    ]
+    const permissions = await setPermissions(calendar.slug, user.$id)
 
-    const result = await data.etiquettes.create(cleanEtiquette, permissions)
+    const result = await data.etiquettes.create(etiquette, permissions)
     return result as Etiquettes
   } catch (error) {
     console.error("Error creating etiquette:", error)
@@ -63,9 +51,7 @@ export async function updateEtiquette(
   try {
     const data = await db()
 
-    const cleanEtiquette = cleanEtiquetteData(etiquette)
-
-    const result = await data.etiquettes.update(etiquetteId, cleanEtiquette)
+    const result = await data.etiquettes.update(etiquetteId, etiquette)
     return result as Etiquettes
   } catch (error) {
     console.error("Error updating etiquette:", error)
