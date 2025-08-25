@@ -5,7 +5,7 @@ import { getPersonalCalendarData } from "@/lib/actions/calendars.actions"
 export default async function Page() {
   const calendar = await getPersonalCalendarData()
 
-  if (!calendar) {
+  if (!calendar || "type" in calendar) {
     return (
       <div className="border-b p-6">
         <h1 className="text-3xl font-bold">Mi Calendario</h1>

@@ -5,7 +5,7 @@ import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 export default async function Page() {
   const calendar = await getCalendarBySlug("faculty-calendar")
 
-  if (!calendar) {
+  if (!calendar || "type" in calendar) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>

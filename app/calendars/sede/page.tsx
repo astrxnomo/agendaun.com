@@ -3,9 +3,9 @@ import { PageHeader } from "@/components/page-header"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 
 export default async function Page() {
-  const sedeCalendar = await getCalendarBySlug("sede-calendar")
+  const calendar = await getCalendarBySlug("sede-calendar")
 
-  if (!sedeCalendar) {
+  if (!calendar || "type" in calendar) {
     return (
       <div className="p-6">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
@@ -34,7 +34,7 @@ export default async function Page() {
         </p>
       </div>
 
-      <Calendar calendar={sedeCalendar} />
+      <Calendar calendar={calendar} />
     </>
   )
 }
