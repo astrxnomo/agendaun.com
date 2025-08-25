@@ -4,9 +4,11 @@ import { Query } from "node-appwrite"
 
 import { db } from "@/lib/appwrite/db"
 
+import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+
 import type { Faculties, Programs, Sedes } from "@/types"
 
-export async function getSedes(): Promise<Sedes[]> {
+export async function getSedes(): Promise<Sedes[] | AppwriteError> {
   try {
     const data = await db()
     const result = await data.sedes.list([
@@ -16,11 +18,13 @@ export async function getSedes(): Promise<Sedes[]> {
     return result.documents as Sedes[]
   } catch (error) {
     console.error("Error getting sedes:", error)
-    return []
+    return handleAppwriteError(error)
   }
 }
 
-export async function getFacultiesBySede(sedeId: string): Promise<Faculties[]> {
+export async function getFacultiesBySede(
+  sedeId: string,
+): Promise<Faculties[] | AppwriteError> {
   try {
     const data = await db()
     const result = await data.faculties.list([
@@ -31,13 +35,13 @@ export async function getFacultiesBySede(sedeId: string): Promise<Faculties[]> {
     return result.documents as Faculties[]
   } catch (error) {
     console.error("Error getting faculties by sede:", error)
-    return []
+    return handleAppwriteError(error)
   }
 }
 
 export async function getProgramsByFaculty(
   facultyId: string,
-): Promise<Programs[]> {
+): Promise<Programs[] | AppwriteError> {
   try {
     const data = await db()
     const result = await data.programs.list([
@@ -48,43 +52,45 @@ export async function getProgramsByFaculty(
     return result.documents as Programs[]
   } catch (error) {
     console.error("Error getting programs by faculty:", error)
-    return []
+    return handleAppwriteError(error)
   }
 }
 
-export async function getSedeById(sedeId: string): Promise<Sedes | null> {
+export async function getSedeById(
+  sedeId: string,
+): Promise<Sedes | AppwriteError | null> {
   try {
     const data = await db()
     const result = await data.sedes.get(sedeId)
     return result as Sedes
   } catch (error) {
     console.error("Error getting sede by id:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
 export async function getFacultyById(
   facultyId: string,
-): Promise<Faculties | null> {
+): Promise<Faculties | AppwriteError | null> {
   try {
     const data = await db()
     const result = await data.faculties.get(facultyId)
     return result as Faculties
   } catch (error) {
     console.error("Error getting faculty by id:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
 export async function getProgramById(
   programId: string,
-): Promise<Programs | null> {
+): Promise<Programs | AppwriteError | null> {
   try {
     const data = await db()
     const result = await data.programs.get(programId)
     return result as Programs
   } catch (error) {
     console.error("Error getting program by id:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }

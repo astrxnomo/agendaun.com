@@ -8,6 +8,7 @@ import {
   deleteEvent,
   updateEvent,
 } from "@/lib/actions/events.actions"
+import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import type { Calendars, Events } from "@/types"
 
@@ -32,23 +33,18 @@ export function useEventHandlers({
 
       setIsLoading(true)
 
-      const promise = createEvent(event).then((newEvent) => {
-        if (newEvent) {
-          onEventsUpdate((prev) => [...prev, newEvent])
-          return newEvent
-        } else {
-          throw new Error("Error al crear el evento")
-        }
-      })
-
       try {
-        toast.promise(promise, {
-          loading: `Creando evento "${event.title}"...`,
-          success: `Evento "${event.title}" creado`,
-          error: `Error al crear evento: "${event.title}"`,
-        })
+        const result = await createEvent(event)
 
-        await promise
+        if (isAppwriteError(result)) {
+          toast.error("Error al crear evento", {
+            description: result.type,
+          })
+          return
+        }
+
+        onEventsUpdate((prev) => [...prev, result])
+        toast.success(`Evento "${result.title}" creado`)
       } finally {
         setIsLoading(false)
       }
@@ -70,29 +66,22 @@ export function useEventHandlers({
 
       setIsLoading(true)
 
-      const promise = updateEvent(updatedEvent.$id, updatedEvent).then(
-        (result) => {
-          if (result) {
-            onEventsUpdate((prev) =>
-              prev.map((event) =>
-                event.$id === updatedEvent.$id ? result : event,
-              ),
-            )
-            return result
-          } else {
-            throw new Error("Error al actualizar el evento")
-          }
-        },
-      )
-
       try {
-        toast.promise(promise, {
-          loading: `Actualizando evento "${updatedEvent.title}"...`,
-          success: `Evento "${updatedEvent.title}" actualizado`,
-          error: `Error al actualizar evento: "${updatedEvent.title}"`,
-        })
+        const result = await updateEvent(updatedEvent.$id, updatedEvent)
 
-        await promise
+        if (isAppwriteError(result)) {
+          toast.error("Error al actualizar evento", {
+            description: result.type,
+          })
+          return
+        }
+
+        onEventsUpdate((prev) =>
+          prev.map((event) =>
+            event.$id === updatedEvent.$id ? result : event,
+          ),
+        )
+        toast.success(`Evento "${result.title}" actualizado`)
       } finally {
         setIsLoading(false)
       }
@@ -109,25 +98,18 @@ export function useEventHandlers({
 
       setIsLoading(true)
 
-      const promise = deleteEvent(eventId).then((success) => {
-        if (success) {
-          onEventsUpdate((prev) =>
-            prev.filter((event) => event.$id !== eventId),
-          )
-          return success
-        } else {
-          throw new Error("Error al eliminar el evento")
-        }
-      })
-
       try {
-        toast.promise(promise, {
-          loading: "Eliminando evento...",
-          success: "Evento eliminado",
-          error: "Error al eliminar evento",
-        })
+        const result = await deleteEvent(eventId)
 
-        await promise
+        if (isAppwriteError(result)) {
+          toast.error("Error al eliminar evento", {
+            description: result.type,
+          })
+          return
+        }
+
+        onEventsUpdate((prev) => prev.filter((event) => event.$id !== eventId))
+        toast.success("Evento eliminado")
       } finally {
         setIsLoading(false)
       }

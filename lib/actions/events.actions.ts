@@ -6,6 +6,7 @@ import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
 import { type Calendars, type Events, type Profiles } from "@/types"
 
+import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
 import { setPermissions } from "../utils/permissions"
 
 export async function getCalendarEvents(
@@ -54,7 +55,7 @@ export async function getCalendarEvents(
 
 export async function createEvent(
   event: Partial<Events>,
-): Promise<Events | null> {
+): Promise<Events | AppwriteError> {
   try {
     const user = await getUser()
     if (!user) throw new Error("User not authenticated")
@@ -70,14 +71,14 @@ export async function createEvent(
     return result as Events
   } catch (error) {
     console.error("Error creating event:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
 export async function updateEvent(
   eventId: string,
   event: Partial<Events>,
-): Promise<Events | null> {
+): Promise<Events | AppwriteError> {
   try {
     const data = await db()
 
@@ -93,17 +94,19 @@ export async function updateEvent(
     return result as Events
   } catch (error) {
     console.error("Error updating event:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
-export async function deleteEvent(eventId: string): Promise<boolean> {
+export async function deleteEvent(
+  eventId: string,
+): Promise<boolean | AppwriteError> {
   try {
     const data = await db()
     await data.events.delete(eventId)
     return true
   } catch (error) {
     console.error("Error deleting event:", error)
-    return false
+    return handleAppwriteError(error)
   }
 }

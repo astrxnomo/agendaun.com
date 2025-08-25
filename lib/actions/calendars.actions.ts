@@ -13,6 +13,7 @@ import {
 } from "@/types"
 
 import { dbAdmin } from "../appwrite/db-admin"
+import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
 import { createEtiquette } from "./etiquettes.actions"
 
 async function createDefaultEtiquettes(calendarId: string) {
@@ -42,20 +43,20 @@ async function createDefaultEtiquettes(calendarId: string) {
 
 export async function getPersonalCalendar(
   userId: string,
-): Promise<Calendars | null> {
+): Promise<Calendars | AppwriteError | null> {
   try {
     const data = await db()
     const result = await data.calendars.list([Query.equal("owner_id", userId)])
     return (result.documents[0] as Calendars) || null
   } catch (error) {
     console.error("Error getting personal calendar:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
 export async function createPersonalCalendar(
   calendarData: Partial<Calendars>,
-): Promise<Calendars | null> {
+): Promise<Calendars | AppwriteError | null> {
   try {
     const user = await getUser()
     if (!user) throw new Error("User not authenticated")
@@ -81,16 +82,21 @@ export async function createPersonalCalendar(
     return result as Calendars
   } catch (error) {
     console.error("Error creating personal calendar:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
 export async function getOrCreatePersonalCalendar(
   userId: string,
-): Promise<Calendars | null> {
+): Promise<Calendars | AppwriteError | null> {
   try {
     // Primero intentamos obtener el calendario existente
     let personalCalendar = await getPersonalCalendar(userId)
+
+    // Check if it's an error
+    if (personalCalendar && "message" in personalCalendar) {
+      return personalCalendar as AppwriteError
+    }
 
     if (!personalCalendar) {
       // Si no existe, creamos uno nuevo
@@ -102,6 +108,11 @@ export async function getOrCreatePersonalCalendar(
 
       personalCalendar = await createPersonalCalendar(calendarData)
 
+      // Check if creation returned an error
+      if (personalCalendar && "message" in personalCalendar) {
+        return personalCalendar as AppwriteError
+      }
+
       // Crear etiquetas por defecto para el nuevo calendario
       if (personalCalendar) {
         await createDefaultEtiquettes(personalCalendar.$id)
@@ -111,20 +122,20 @@ export async function getOrCreatePersonalCalendar(
     return personalCalendar
   } catch (error) {
     console.error("Error getting or creating personal calendar:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
 export async function getCalendarBySlug(
   slug: string,
-): Promise<Calendars | null> {
+): Promise<Calendars | AppwriteError | null> {
   try {
     const data = await db()
     const result = await data.calendars.list([Query.equal("slug", slug)])
     return (result.documents[0] as Calendars) || null
   } catch (error) {
     console.error(`Error getting calendar with slug ${slug}:`, error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
@@ -135,7 +146,9 @@ export interface PersonalCalendarData {
   etiquettes: Etiquettes[]
 }
 
-export async function getPersonalCalendarData(): Promise<Calendars | null> {
+export async function getPersonalCalendarData(): Promise<
+  Calendars | AppwriteError | null
+> {
   try {
     const user = await getUser()
     if (!user) return null
@@ -143,9 +156,14 @@ export async function getPersonalCalendarData(): Promise<Calendars | null> {
     const calendar = await getOrCreatePersonalCalendar(user.$id)
     if (!calendar) return null
 
+    // Check if it's an error
+    if ("message" in calendar) {
+      return calendar as AppwriteError
+    }
+
     return calendar
   } catch (error) {
     console.error("Error getting personal calendar data:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }

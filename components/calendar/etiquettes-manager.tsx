@@ -67,7 +67,10 @@ export function EtiquettesManager({
       .filter((etiquette) => editingId !== etiquette.$id)
       .map((etiquette) => etiquette.color)
 
-    return colorOptions.filter((option) => !usedColors.includes(option.value))
+    return colorOptions.filter(
+      (option) =>
+        !usedColors.includes(option.value) && option.value !== Colors.GRAY,
+    )
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

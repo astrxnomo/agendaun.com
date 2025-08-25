@@ -6,9 +6,12 @@ import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
 import { type Etiquettes } from "@/types"
 
+import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
 import { setPermissions } from "../utils/permissions"
 
-export async function getEtiquettes(calendarId: string): Promise<Etiquettes[]> {
+export async function getEtiquettes(
+  calendarId: string,
+): Promise<Etiquettes[] | AppwriteError> {
   try {
     const data = await db()
     const result = await data.etiquettes.list([
@@ -18,13 +21,13 @@ export async function getEtiquettes(calendarId: string): Promise<Etiquettes[]> {
     return result.documents as Etiquettes[]
   } catch (error) {
     console.error("Error getting etiquettes:", error)
-    return []
+    return handleAppwriteError(error)
   }
 }
 
 export async function createEtiquette(
   etiquette: Partial<Etiquettes>,
-): Promise<Etiquettes | null> {
+): Promise<Etiquettes | AppwriteError> {
   try {
     const user = await getUser()
     if (!user) throw new Error("User not authenticated")
@@ -40,14 +43,14 @@ export async function createEtiquette(
     return result as Etiquettes
   } catch (error) {
     console.error("Error creating etiquette:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
 export async function updateEtiquette(
   etiquetteId: string,
   etiquette: Partial<Etiquettes>,
-): Promise<Etiquettes | null> {
+): Promise<Etiquettes | AppwriteError> {
   try {
     const data = await db()
 
@@ -55,17 +58,19 @@ export async function updateEtiquette(
     return result as Etiquettes
   } catch (error) {
     console.error("Error updating etiquette:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
 
-export async function deleteEtiquette(etiquetteId: string): Promise<boolean> {
+export async function deleteEtiquette(
+  etiquetteId: string,
+): Promise<boolean | AppwriteError> {
   try {
     const data = await db()
     await data.etiquettes.delete(etiquetteId)
     return true
   } catch (error) {
     console.error("Error deleting etiquette:", error)
-    return false
+    return handleAppwriteError(error)
   }
 }

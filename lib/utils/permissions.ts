@@ -34,6 +34,7 @@ export async function setPermissions(
 
     case "national":
       permissions.push(
+        Permission.read(Role.users("verified")),
         Permission.write(
           Role.team(
             process.env.NEXT_PUBLIC_TEAMS_EDITORS!,
@@ -45,6 +46,7 @@ export async function setPermissions(
 
     case "sede":
       permissions.push(
+        Permission.read(Role.users("verified")),
         Permission.write(
           Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "sede-calendar"),
         ),
@@ -53,6 +55,7 @@ export async function setPermissions(
 
     case "faculty":
       permissions.push(
+        Permission.read(Role.users("verified")),
         Permission.write(
           Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "faculty-calendar"),
         ),
@@ -61,6 +64,7 @@ export async function setPermissions(
 
     case "program":
       permissions.push(
+        Permission.read(Role.users("verified")),
         Permission.write(
           Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "program-calendar"),
         ),

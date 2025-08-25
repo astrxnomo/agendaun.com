@@ -2,18 +2,11 @@ import { isSameDay } from "date-fns"
 
 import { type Etiquettes, type Events, Colors } from "@/types"
 
-/**
- * Get the color for an event based on its etiquette
- */
 export function getEventColor(event: Events, etiquettes: Etiquettes[]): Colors {
   const etiquette = etiquettes.find((e) => e.$id === event.etiquette_id)
   return etiquette?.color || Colors.GRAY
 }
 
-/**
- * Get CSS classes for event colors using centralized color system
- * Returns complete class strings to ensure Tailwind includes them
- */
 export function getEtiquetteColor(color?: Colors): string {
   switch (color) {
     case Colors.BLUE:

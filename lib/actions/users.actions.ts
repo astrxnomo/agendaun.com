@@ -4,14 +4,16 @@ import { getUser } from "@/lib/appwrite/auth"
 import { createAdminClient } from "@/lib/appwrite/config"
 import { type Calendars } from "@/types"
 
-export async function userCanEdit(calendar: Calendars) {
+import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+
+export async function userCanEdit(
+  calendar: Calendars,
+): Promise<boolean | AppwriteError> {
   try {
     const user = await getUser()
     if (!user) return false
 
     if (calendar.owner_id === user.$id) return true
-
-    if (user.labels.includes("admin")) return true
 
     const { users } = await createAdminClient()
 
@@ -26,12 +28,11 @@ export async function userCanEdit(calendar: Calendars) {
 
     const editorRoles = editorMembership.roles
     if (!editorRoles) return false
-    if (editorRoles.includes("admin")) return true
     if (editorRoles.includes(calendar.slug)) return true
 
     return false
   } catch (error) {
     console.error("Error checking user role:", error)
-    return false
+    return handleAppwriteError(error)
   }
 }

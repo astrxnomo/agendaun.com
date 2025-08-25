@@ -4,6 +4,7 @@ import { Query } from "node-appwrite"
 
 import { getUser } from "../appwrite/auth"
 import { db } from "../appwrite/db"
+import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
 
 import type { Profiles } from "@/types"
 
@@ -17,7 +18,7 @@ export async function updateUserProfile({
   sede_id?: string | null
   faculty_id?: string | null
   program_id?: string | null
-}) {
+}): Promise<{ success: boolean; profile?: Profiles; error?: AppwriteError }> {
   try {
     const data = await db()
 
@@ -34,15 +35,20 @@ export async function updateUserProfile({
       })
       return { success: true, profile: result as Profiles }
     } else {
-      return { success: false, error: "Profile not found" }
+      return {
+        success: false,
+        error: handleAppwriteError(new Error("Profile not found")),
+      }
     }
   } catch (error) {
     console.error("Error updating user profile:", error)
-    return { success: false, error }
+    return { success: false, error: handleAppwriteError(error) }
   }
 }
 
-export async function getUserProfile() {
+export async function getUserProfile(): Promise<
+  Profiles | AppwriteError | null
+> {
   try {
     const user = await getUser()
     if (!user) return null
@@ -53,6 +59,6 @@ export async function getUserProfile() {
     return profile.documents[0] as Profiles
   } catch (error) {
     console.error("Error getting user profile:", error)
-    return null
+    return handleAppwriteError(error)
   }
 }
