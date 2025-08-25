@@ -26,6 +26,7 @@ export async function userCanEdit(calendar: Calendars) {
 
     const editorRoles = editorMembership.roles
     if (!editorRoles) return false
+    if (editorRoles.includes("admin")) return true
     if (editorRoles.includes(calendar.slug)) return true
 
     return false
