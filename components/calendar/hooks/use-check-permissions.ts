@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 
-import { userCanEdit } from "@/lib/actions/teams.actions"
+import { userCanEdit } from "@/lib/actions/users.actions"
 import { type Calendars } from "@/types"
 
 export function useCheckPermissions(calendar: Calendars) {

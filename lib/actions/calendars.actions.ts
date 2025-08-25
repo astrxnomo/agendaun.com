@@ -12,6 +12,7 @@ import {
   type Events,
 } from "@/types"
 
+import { dbAdmin } from "../appwrite/db-admin"
 import { createEtiquette } from "./etiquettes.actions"
 
 async function createDefaultEtiquettes(calendarId: string) {
@@ -59,7 +60,7 @@ export async function createPersonalCalendar(
     const user = await getUser()
     if (!user) throw new Error("User not authenticated")
 
-    const data = await db()
+    const data = await dbAdmin()
 
     // Para calendarios personales, solo el propietario tiene permisos completos
     const permissions = [

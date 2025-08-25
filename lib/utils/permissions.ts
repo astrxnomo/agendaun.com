@@ -28,13 +28,27 @@ export async function setPermissions(
     case "personal":
       permissions.push(
         Permission.read(Role.user(userId)),
-        Permission.write(Role.user(userId)),
+        Permission.create(Role.user(userId)),
+        Permission.update(Role.user(userId)),
+        Permission.delete(Role.user(userId)),
       )
       break
 
     case "national":
       permissions.push(
-        Permission.write(
+        Permission.create(
+          Role.team(
+            process.env.NEXT_PUBLIC_TEAMS_EDITORS!,
+            "national-calendar",
+          ),
+        ),
+        Permission.update(
+          Role.team(
+            process.env.NEXT_PUBLIC_TEAMS_EDITORS!,
+            "national-calendar",
+          ),
+        ),
+        Permission.delete(
           Role.team(
             process.env.NEXT_PUBLIC_TEAMS_EDITORS!,
             "national-calendar",
@@ -45,7 +59,13 @@ export async function setPermissions(
 
     case "sede":
       permissions.push(
-        Permission.write(
+        Permission.create(
+          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "sede-calendar"),
+        ),
+        Permission.update(
+          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "sede-calendar"),
+        ),
+        Permission.delete(
           Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "sede-calendar"),
         ),
       )
@@ -53,7 +73,13 @@ export async function setPermissions(
 
     case "faculty":
       permissions.push(
-        Permission.write(
+        Permission.create(
+          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "faculty-calendar"),
+        ),
+        Permission.update(
+          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "faculty-calendar"),
+        ),
+        Permission.delete(
           Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "faculty-calendar"),
         ),
       )
@@ -61,7 +87,13 @@ export async function setPermissions(
 
     case "program":
       permissions.push(
-        Permission.write(
+        Permission.create(
+          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "program-calendar"),
+        ),
+        Permission.update(
+          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "program-calendar"),
+        ),
+        Permission.delete(
           Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "program-calendar"),
         ),
       )

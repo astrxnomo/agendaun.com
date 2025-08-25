@@ -28,12 +28,12 @@ export async function getCalendarEvents(
         return []
       }
       queries.push(Query.equal("sede_id", profile.sede_id))
-    } else if (calendar.slug === "facultad-calendar") {
+    } else if (calendar.slug === "faculty-calendar") {
       if (!profile?.faculty_id) {
         return []
       }
       queries.push(Query.equal("faculty_id", profile.faculty_id))
-    } else if (calendar.slug === "programa-calendar") {
+    } else if (calendar.slug === "program-calendar") {
       if (!profile?.program_id) {
         return []
       }
