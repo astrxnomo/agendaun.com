@@ -129,7 +129,7 @@ export function AppSidebar() {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/calendars/facultad">
+                        <Link href="/calendars/faculty">
                           <University />
                           <span>Facultad</span>
                         </Link>
@@ -137,7 +137,7 @@ export function AppSidebar() {
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton asChild>
-                        <Link href="/calendars/programa">
+                        <Link href="/calendars/program">
                           <GraduationCap />
                           <span>Programa</span>
                         </Link>

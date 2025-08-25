@@ -2,7 +2,7 @@ import Calendar from "@/components/calendar/calendar"
 import { PageHeader } from "@/components/page-header"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 
-export default async function SedeCalendarPage() {
+export default async function Page() {
   const sedeCalendar = await getCalendarBySlug("sede-calendar")
 
   if (!sedeCalendar) {

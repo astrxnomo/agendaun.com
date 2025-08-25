@@ -2,7 +2,7 @@ import Calendar from "@/components/calendar/calendar"
 import { PageHeader } from "@/components/page-header"
 import { getPersonalCalendarData } from "@/lib/actions/calendars.actions"
 
-export default async function MyCalendarPage() {
+export default async function Page() {
   const calendar = await getPersonalCalendarData()
 
   if (!calendar) {

@@ -39,13 +39,13 @@ export default function DashboardIntro() {
     },
     {
       title: "Calendario Facultad",
-      href: "/calendars/facultad",
+      href: "/calendars/faculty",
       icon: University,
       description: "Fechas clave y eventos propios de tu facultad.",
     },
     {
       title: "Calendario Programa",
-      href: "/calendars/programa",
+      href: "/calendars/program",
       icon: GraduationCap,
       description:
         "Información y actividades específicas de tu programa académico.",

@@ -32,7 +32,7 @@ const calendarLinks = [
   },
   {
     title: "Facultad",
-    href: "/calendars/facultad",
+    href: "/calendars/faculty",
     icon: University,
     description: "Eventos académicos de tu facultad",
     details:
@@ -41,7 +41,7 @@ const calendarLinks = [
   },
   {
     title: "Programa",
-    href: "/calendars/programa",
+    href: "/calendars/program",
     icon: GraduationCap,
     description: "Eventos académicos de tu carrera",
     details:
