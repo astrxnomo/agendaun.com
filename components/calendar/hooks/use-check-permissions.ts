@@ -7,7 +7,7 @@ import { userCanEdit } from "@/lib/actions/users.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
 import { type Calendars } from "@/types"
 
-export function useCheckPermissions(calendar: Calendars) {
+export function useCheckPermissions(calendar: Calendars | null) {
   const [canEdit, setCanEdit] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

@@ -18,12 +18,11 @@ import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 import { useCalendar } from "./hooks/use-calendar"
 import { useEventHandlers } from "./hooks/use-event-handlers"
 
-import type { Calendars } from "@/types"
-
-export default function Calendar({ calendar }: { calendar: Calendars }) {
+export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
   const [editMode, setEditMode] = useState(false)
 
   const {
+    calendar,
     events,
     etiquettes,
     isLoading,
@@ -33,7 +32,7 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
     toggleEtiquetteVisibility,
     canEdit,
     updateEvents,
-  } = useCalendar(calendar)
+  } = useCalendar(calendarSlug)
 
   const {
     handleEventAdd,
@@ -41,12 +40,14 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
     handleEventDelete,
     isLoading: eventLoading,
   } = useEventHandlers({
-    calendar,
+    calendar: calendar!,
     canEdit,
     onEventsUpdate: updateEvents,
   })
 
   const refreshEtiquettes = async () => {
+    if (!calendar) return
+
     try {
       await getEtiquettes(calendar.$id)
 
@@ -73,6 +74,10 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
     return <CalendarError error={error} retry={refetch} />
   }
 
+  if (!calendar) {
+    return <CalendarError error="Calendario no encontrado" retry={refetch} />
+  }
+
   if (!events && !etiquettes) {
     return (
       <CalendarError
@@ -93,7 +98,8 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
         isEtiquetteVisible={isEtiquetteVisible}
         toggleEtiquetteVisibility={toggleEtiquetteVisibility}
         etiquettesManager={
-          editMode && (
+          editMode &&
+          calendar && (
             <EtiquettesManager
               etiquettes={etiquettes}
               calendar={calendar}
@@ -113,17 +119,19 @@ export default function Calendar({ calendar }: { calendar: Calendars }) {
       />
 
       <div className="flex-1">
-        <SetupCalendar
-          calendar={calendar}
-          events={visibleEvents}
-          etiquettes={etiquettes}
-          editable={editMode}
-          canEdit={canEdit}
-          onEventAdd={canEdit ? handleEventAdd : undefined}
-          onEventUpdate={canEdit ? handleEventUpdate : undefined}
-          onEventDelete={canEdit ? handleEventDelete : undefined}
-          initialView={calendar.defaultView}
-        />
+        {calendar && (
+          <SetupCalendar
+            calendar={calendar}
+            events={visibleEvents}
+            etiquettes={etiquettes}
+            editable={editMode}
+            canEdit={canEdit}
+            onEventAdd={canEdit ? handleEventAdd : undefined}
+            onEventUpdate={canEdit ? handleEventUpdate : undefined}
+            onEventDelete={canEdit ? handleEventDelete : undefined}
+            initialView={calendar.defaultView}
+          />
+        )}
       </div>
     </>
   )

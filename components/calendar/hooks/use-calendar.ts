@@ -1,15 +1,19 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
 
 import { useCheckPermissions } from "@/components/calendar/hooks/use-check-permissions"
+import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
 import { getUserProfile } from "@/lib/actions/profiles.actions"
+import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import type { Calendars, Etiquettes, Events, Profiles } from "@/types"
 
-export function useCalendar(calendar: Calendars) {
+export function useCalendar(calendarSlug: string) {
+  const [calendar, setCalendar] = useState<Calendars | null>(null)
   const [events, setEvents] = useState<Events[]>([])
   const [etiquettes, setEtiquettes] = useState<Etiquettes[]>([])
   const [visibleEtiquettes, setVisibleEtiquettes] = useState<string[]>([])
@@ -17,6 +21,7 @@ export function useCalendar(calendar: Calendars) {
   const [error, setError] = useState<string | null>(null)
   const [userProfile, setUserProfile] = useState<Profiles | null>(null)
   const [profileLoaded, setProfileLoaded] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
 
   const {
     canEdit,
@@ -29,51 +34,119 @@ export function useCalendar(calendar: Calendars) {
     if (profileLoaded) return
 
     try {
-      const profile = await getUserProfile()
-      setUserProfile(profile)
+      const result = await getUserProfile()
+
+      if (isAppwriteError(result)) {
+        toast.error("Error cargando perfil de usuario", {
+          description: result.type,
+        })
+        setUserProfile(null)
+        return
+      }
+
+      setUserProfile(result)
     } catch (error) {
       console.error("Error loading user profile:", error)
+      toast.error("Error cargando perfil de usuario")
       setUserProfile(null)
     } finally {
       setProfileLoaded(true)
     }
   }, [profileLoaded])
 
-  const fetchData = useCallback(async () => {
-    if (!calendar) {
-      setError("Calendario no encontrado")
-      setIsLoading(false)
-      return
+  const loadCalendar = useCallback(async () => {
+    if (!calendarSlug) {
+      setError("Slug de calendario no proporcionado")
+      return null
     }
 
-    if (!profileLoaded) {
+    try {
+      const result = await getCalendarBySlug(
+        calendarSlug === "personal"
+          ? `${calendarSlug}-${userProfile?.user_id}`
+          : calendarSlug,
+      )
+
+      if (isAppwriteError(result)) {
+        toast.error("Error cargando calendario", {
+          description: result.type,
+        })
+        setError("Error cargando calendario")
+        return null
+      }
+
+      if (!result) {
+        setError("Calendario no encontrado")
+        return null
+      }
+
+      setCalendar(result)
+      return result
+    } catch (error) {
+      console.error("Error loading calendar:", error)
+      toast.error("Error cargando calendario")
+      setError("Error cargando calendario")
+      return null
+    }
+  }, [calendarSlug, userProfile?.user_id])
+
+  const fetchData = useCallback(async () => {
+    if (!profileLoaded || dataLoaded) {
       return
     }
 
     try {
       setIsLoading(true)
       setError(null)
+      setDataLoaded(true)
 
-      refetchPermissions()
+      const calendarData = await loadCalendar()
+      if (!calendarData) {
+        setIsLoading(false)
+        return
+      }
 
-      const [eventsData, etiquettesData] = await Promise.all([
-        getCalendarEvents(calendar, userProfile),
-        getEtiquettes(calendar.$id),
+      if (refetchPermissions) {
+        refetchPermissions()
+      }
+
+      // Cargar datos del calendario
+      const [eventsResult, etiquettesResult] = await Promise.all([
+        getCalendarEvents(calendarData, userProfile),
+        getEtiquettes(calendarData.$id),
       ])
 
-      setEvents(eventsData)
-      setEtiquettes(etiquettesData)
+      if (isAppwriteError(eventsResult)) {
+        toast.error("Error cargando eventos", {
+          description: eventsResult.type,
+        })
+        setError("Error cargando eventos")
+        return
+      }
 
-      const activeEtiquetteIds = etiquettesData
+      if (isAppwriteError(etiquettesResult)) {
+        toast.error("Error cargando etiquetas", {
+          description: etiquettesResult.type,
+        })
+        setError("Error cargando etiquetas")
+        return
+      }
+
+      setEvents(eventsResult)
+      setEtiquettes(etiquettesResult)
+
+      const activeEtiquetteIds = etiquettesResult
         .filter((etiquette: Etiquettes) => etiquette.isActive)
         .map((etiquette: Etiquettes) => etiquette.$id)
       setVisibleEtiquettes(activeEtiquetteIds)
-    } catch {
+    } catch (error) {
+      console.error("Error fetching data:", error)
+      toast.error("Error al cargar los datos del calendario")
       setError("Error al cargar los datos del calendario")
     } finally {
       setIsLoading(false)
     }
-  }, [calendar, userProfile, profileLoaded, refetchPermissions])
+  }, [profileLoaded, dataLoaded, loadCalendar, userProfile, refetchPermissions])
 
   const toggleEtiquetteVisibility = useCallback((etiquetteId: string) => {
     setVisibleEtiquettes((prev) => {
@@ -93,19 +166,34 @@ export function useCalendar(calendar: Calendars) {
     [visibleEtiquettes],
   )
 
+  const manualRefetch = useCallback(async () => {
+    setDataLoaded(false)
+    await fetchData()
+  }, [fetchData])
+
   const updateEvents = useCallback((updater: (prev: Events[]) => Events[]) => {
     setEvents(updater)
   }, [])
 
   useEffect(() => {
-    void loadUserProfile()
-  }, [loadUserProfile])
+    if (!profileLoaded) {
+      void loadUserProfile()
+    }
+  }, [profileLoaded, loadUserProfile])
 
   useEffect(() => {
-    if (profileLoaded) {
+    setDataLoaded(false)
+    setCalendar(null)
+    setEvents([])
+    setEtiquettes([])
+    setError(null)
+  }, [calendarSlug])
+
+  useEffect(() => {
+    if (profileLoaded && !dataLoaded) {
       void fetchData()
     }
-  }, [fetchData, profileLoaded])
+  }, [profileLoaded, dataLoaded, fetchData])
 
   return {
     calendar,
@@ -113,7 +201,7 @@ export function useCalendar(calendar: Calendars) {
     etiquettes,
     isLoading: isLoading || permissionsLoading,
     error: error || permissionsError,
-    refetch: fetchData,
+    refetch: manualRefetch,
     visibleEtiquettes,
     toggleEtiquetteVisibility,
     isEtiquetteVisible,

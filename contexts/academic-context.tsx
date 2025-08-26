@@ -7,6 +7,7 @@ import {
   useEffect,
   useState,
 } from "react"
+import { toast } from "sonner"
 
 import { useAuthContext } from "@/contexts/auth-context"
 import {
@@ -15,6 +16,7 @@ import {
   getSedeById,
 } from "@/lib/actions/academic.actions"
 import { getUserProfile } from "@/lib/actions/profiles.actions"
+import { isAppwriteError } from "@/lib/utils/error-handler"
 import { type Faculties, type Programs, type Sedes } from "@/types"
 
 interface ConfigData {
@@ -59,18 +61,56 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true)
 
-      const profile = await getUserProfile()
+      const profileResult = await getUserProfile()
 
-      if (profile) {
-        const selectedSede = profile.sede_id
-          ? await getSedeById(profile.sede_id)
-          : null
-        const selectedFaculty = profile.faculty_id
-          ? await getFacultyById(profile.faculty_id)
-          : null
-        const selectedProgram = profile.program_id
-          ? await getProgramById(profile.program_id)
-          : null
+      if (isAppwriteError(profileResult)) {
+        toast.error("Error cargando perfil de usuario", {
+          description: profileResult.type,
+        })
+        setConfig({
+          selectedSede: null,
+          selectedFaculty: null,
+          selectedProgram: null,
+        })
+        return
+      }
+
+      if (profileResult) {
+        let selectedSede: Sedes | null = null
+        if (profileResult.sede_id) {
+          const sedeResult = await getSedeById(profileResult.sede_id)
+          if (isAppwriteError(sedeResult)) {
+            toast.error("Error cargando sede", {
+              description: sedeResult.type,
+            })
+          } else {
+            selectedSede = sedeResult
+          }
+        }
+
+        let selectedFaculty: Faculties | null = null
+        if (profileResult.faculty_id) {
+          const facultyResult = await getFacultyById(profileResult.faculty_id)
+          if (isAppwriteError(facultyResult)) {
+            toast.error("Error cargando facultad", {
+              description: facultyResult.type,
+            })
+          } else {
+            selectedFaculty = facultyResult
+          }
+        }
+
+        let selectedProgram: Programs | null = null
+        if (profileResult.program_id) {
+          const programResult = await getProgramById(profileResult.program_id)
+          if (isAppwriteError(programResult)) {
+            toast.error("Error cargando programa", {
+              description: programResult.type,
+            })
+          } else {
+            selectedProgram = programResult
+          }
+        }
 
         setConfig({
           selectedSede,
@@ -86,6 +126,7 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error("Error loading config:", error)
+      toast.error("Error cargando configuración académica")
       setConfig({
         selectedSede: null,
         selectedFaculty: null,

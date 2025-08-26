@@ -43,6 +43,7 @@ import {
   getSedes,
 } from "@/lib/actions/academic.actions"
 import { updateUserProfile } from "@/lib/actions/profiles.actions"
+import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import type { Faculties, Programs, Sedes } from "@/types"
 
@@ -89,11 +90,21 @@ export function ConfigDialog() {
 
     try {
       setError(null)
-      const sedes = await getSedes()
-      setSedes(sedes)
+      const result = await getSedes()
+
+      if (isAppwriteError(result)) {
+        toast.error("Error cargando sedes", {
+          description: result.type,
+        })
+        setError("Error cargando sedes")
+        return
+      }
+
+      setSedes(result)
       setIsSedesLoaded(true)
     } catch (err) {
       console.error("Error loading sedes:", err)
+      toast.error("Error cargando sedes")
       setError("Error cargando sedes")
     }
   }
@@ -108,10 +119,20 @@ export function ConfigDialog() {
     if (sedeId) {
       try {
         setIsLoadingFaculties(true)
-        const faculties = await getFacultiesBySede(sedeId)
-        setFaculties(faculties)
+        const result = await getFacultiesBySede(sedeId)
+
+        if (isAppwriteError(result)) {
+          toast.error("Error cargando facultades", {
+            description: result.type,
+          })
+          setError("Error cargando facultades")
+          return
+        }
+
+        setFaculties(result)
       } catch (err) {
         console.error("Error loading facultades:", err)
+        toast.error("Error cargando facultades")
         setError("Error cargando facultades")
       } finally {
         setIsLoadingFaculties(false)
@@ -127,10 +148,20 @@ export function ConfigDialog() {
     if (facultyId) {
       try {
         setIsLoadingPrograms(true)
-        const programs = await getProgramsByFaculty(facultyId)
-        setPrograms(programs)
+        const result = await getProgramsByFaculty(facultyId)
+
+        if (isAppwriteError(result)) {
+          toast.error("Error cargando programas", {
+            description: result.type,
+          })
+          setError("Error cargando programas")
+          return
+        }
+
+        setPrograms(result)
       } catch (err) {
         console.error("Error loading programas:", err)
+        toast.error("Error cargando programas")
         setError("Error cargando programas")
       } finally {
         setIsLoadingPrograms(false)
@@ -161,6 +192,13 @@ export function ConfigDialog() {
         faculty_id: selectedFaculty,
         program_id: selectedProgram,
       })
+
+      if (isAppwriteError(result)) {
+        toast.error("Error guardando configuración", {
+          description: result.type,
+        })
+        return
+      }
 
       if (result.success) {
         toast.success("Configuración guardada correctamente")
