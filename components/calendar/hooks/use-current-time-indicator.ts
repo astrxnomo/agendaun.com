@@ -18,15 +18,6 @@ interface TimeIndicatorResult {
   currentTimeVisible: boolean
 }
 
-// ===== HOOK =====
-
-/**
- * Hook para calcular la posición y visibilidad del indicador de tiempo actual
- * Actualiza automáticamente cada minuto para mantener la precisión
- * @param currentDate - Fecha actual del calendario
- * @param view - Vista del calendario (día o semana)
- * @returns Posición y visibilidad del indicador de tiempo
- */
 export function useCurrentTimeIndicator(
   currentDate: Date,
   view: "day" | "week",

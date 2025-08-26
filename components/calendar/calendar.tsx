@@ -34,16 +34,12 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
     updateEvents,
   } = useCalendar(calendarSlug)
 
-  const {
-    handleEventAdd,
-    handleEventUpdate,
-    handleEventDelete,
-    isLoading: eventLoading,
-  } = useEventHandlers({
-    calendar: calendar!,
-    canEdit,
-    onEventsUpdate: updateEvents,
-  })
+  const { handleEventAdd, handleEventUpdate, handleEventDelete } =
+    useEventHandlers({
+      calendar: calendar!,
+      canEdit,
+      onEventsUpdate: updateEvents,
+    })
 
   const refreshEtiquettes = async () => {
     if (!calendar) return
@@ -66,10 +62,9 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
     setEditMode(!editMode)
   }
 
-  if (isLoading || eventLoading) {
+  if (isLoading) {
     return <CalendarSkeleton />
   }
-
   if (error) {
     return <CalendarError error={error} retry={refetch} />
   }

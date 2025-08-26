@@ -173,6 +173,32 @@ export function ConfigDialog() {
     setSelectedProgram(programId)
   }
 
+  const saveUserProfile = async () => {
+    setIsSaving(true)
+    try {
+      const result = await updateUserProfile({
+        user_id: user!.$id,
+        sede_id: selectedSede,
+        faculty_id: selectedFaculty,
+        program_id: selectedProgram,
+      })
+
+      if (isAppwriteError(result)) {
+        throw new Error(result.type || "Error guardando configuración")
+      }
+
+      if (!result.success) {
+        throw new Error("Error guardando configuración")
+      }
+
+      await refreshConfig()
+      router.refresh()
+      return result
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const handleSave = async () => {
     if (!user?.$id) {
       toast.error("Debes estar logueado para guardar")
@@ -184,37 +210,12 @@ export function ConfigDialog() {
       return
     }
 
-    try {
-      setIsSaving(true)
-      const result = await updateUserProfile({
-        user_id: user.$id,
-        sede_id: selectedSede,
-        faculty_id: selectedFaculty,
-        program_id: selectedProgram,
-      })
-
-      if (isAppwriteError(result)) {
-        toast.error("Error guardando configuración", {
-          description: result.type,
-        })
-        return
-      }
-
-      if (result.success) {
-        toast.success("Configuración guardada correctamente")
-        await refreshConfig()
-        router.refresh()
-      } else {
-        toast.error("Error guardando configuración")
-      }
-    } catch (err) {
-      console.error("Error saving config:", err)
-      toast.error("Error guardando configuración")
-    } finally {
-      setIsSaving(false)
-    }
+    toast.promise(saveUserProfile(), {
+      loading: "Guardando configuración...",
+      success: "Configuración guardada correctamente",
+      error: (error: Error) => error.message,
+    })
   }
-
   return (
     <DialogContent className="sm:max-w-md">
       <DialogHeader>
