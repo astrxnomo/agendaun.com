@@ -16,7 +16,7 @@ export function EditModeToggle({
   disabled = false,
 }: EditModeToggleProps) {
   return (
-    <div className="flex shrink-0 items-center px-4">
+    <div className="flex shrink-0 items-center">
       <div className="relative inline-grid h-8 grid-cols-[1fr_1fr] items-center">
         <Switch
           checked={checked}

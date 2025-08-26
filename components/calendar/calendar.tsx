@@ -1,5 +1,6 @@
 "use client"
 
+import { CalendarSync } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -15,9 +16,10 @@ import {
 } from "@/components/skeletons/calendar-loading"
 import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 
+import { Button } from "../ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
 import { useCalendar } from "./hooks/use-calendar"
 import { useEventHandlers } from "./hooks/use-event-handlers"
-
 export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
   const [editMode, setEditMode] = useState(false)
 
@@ -110,6 +112,18 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
               disabled={!canEdit}
             />
           )
+        }
+        syncButton={
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" onClick={refetch}>
+                <CalendarSync />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Actualizar calendario</p>
+            </TooltipContent>
+          </Tooltip>
         }
       />
 

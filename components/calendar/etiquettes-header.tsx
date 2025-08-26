@@ -6,6 +6,7 @@ import type { Etiquettes } from "@/types"
 interface EtiquettesHeaderProps {
   etiquettes: Etiquettes[]
   editButton: React.ReactNode
+  syncButton: React.ReactNode
   etiquettesManager: React.ReactNode
   isEtiquetteVisible: (etiquetteId: string | undefined) => boolean
   toggleEtiquetteVisibility: (etiquetteId: string) => void
@@ -14,6 +15,7 @@ interface EtiquettesHeaderProps {
 export function EtiquettesHeader({
   etiquettes,
   editButton,
+  syncButton,
   etiquettesManager,
   isEtiquetteVisible,
   toggleEtiquetteVisibility,
@@ -44,7 +46,10 @@ export function EtiquettesHeader({
             ))}
           </div>
         </div>
-        {editButton}
+        <div className="flex gap-2 px-4">
+          {editButton}
+          {syncButton}
+        </div>
       </div>
     </div>
   )

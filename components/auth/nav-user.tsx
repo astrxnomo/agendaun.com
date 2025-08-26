@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronsUpDown, Cog, LogOut } from "lucide-react"
+import { Cog, Ellipsis, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -19,12 +19,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useAcademicConfig } from "@/contexts/academic-context"
 import { useAuthContext } from "@/contexts/auth-context"
 import { deleteSession } from "@/lib/appwrite/auth"
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { user, setUser } = useAuthContext()
+  const { selectedSede, selectedFaculty, selectedProgram } = useAcademicConfig()
   const router = useRouter()
 
   if (!user) {
@@ -67,13 +69,13 @@ export function NavUser() {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
-                  {user.name || user.email}
+                  {(user.name || user.email)?.replace(/@unal\.edu\.co$/, "")}
                 </span>
                 <span className="truncate text-[10px]">
-                  Universidad Nacional de Colombia
+                  {selectedSede?.name}
                 </span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <Ellipsis className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -93,8 +95,12 @@ export function NavUser() {
                   <span className="truncate font-medium">
                     {user.name || user.email}
                   </span>
+
                   <span className="truncate text-[10px]">
-                    Universidad Nacional de Colombia
+                    {selectedFaculty?.name}
+                  </span>
+                  <span className="truncate text-[10px]">
+                    {selectedProgram?.name}
                   </span>
                 </div>
               </div>
