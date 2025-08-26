@@ -192,7 +192,6 @@ export function SetupCalendar({
     } else {
       onEventAdd?.({
         ...event,
-        calendar_id: calendar.$id,
       })
     }
     setIsEventDialogOpen(false)
@@ -405,6 +404,7 @@ export function SetupCalendar({
         </div>
 
         <EventDialog
+          calendar={calendar}
           event={selectedEvent}
           etiquettes={etiquettes}
           isOpen={isEventDialogOpen}

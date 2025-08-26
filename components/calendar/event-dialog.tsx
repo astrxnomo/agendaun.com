@@ -39,11 +39,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { useAcademicConfig } from "@/contexts/academic-context"
 import { cn } from "@/lib/utils"
 
-import type { Etiquettes, Events } from "@/types"
+import type { Calendars, Etiquettes, Events } from "@/types"
 
 interface EventDialogProps {
+  calendar: Calendars
   event: Events | Partial<Events> | null
   etiquettes?: Etiquettes[]
   isOpen: boolean
@@ -53,6 +55,7 @@ interface EventDialogProps {
 }
 
 export function EventDialog({
+  calendar,
   event,
   etiquettes = [],
   isOpen,
@@ -72,6 +75,8 @@ export function EventDialog({
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   const [endDateOpen, setEndDateOpen] = useState(false)
+
+  const { selectedSede, selectedFaculty, selectedProgram } = useAcademicConfig()
 
   useEffect(() => {
     if (event) {
@@ -179,6 +184,12 @@ export function EventDialog({
       all_day: allDay,
       location,
       etiquette_id: etiquette?.$id,
+      sede_id: calendar.slug === "sede-calendar" ? selectedSede?.$id : null,
+      faculty_id:
+        calendar.slug === "faculty-calendar" ? selectedFaculty?.$id : null,
+      program_id:
+        calendar.slug === "program-calendar" ? selectedProgram?.$id : null,
+      calendar_id: calendar.$id,
     } as Events)
   }
 

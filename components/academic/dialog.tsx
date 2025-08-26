@@ -187,13 +187,11 @@ export function ConfigDialog() {
         throw new Error(result.type || "Error guardando configuración")
       }
 
-      if (!result.success) {
-        throw new Error("Error guardando configuración")
-      }
-
       await refreshConfig()
       router.refresh()
       return result
+    } catch (error) {
+      console.error("Error saving user profile:", error)
     } finally {
       setIsSaving(false)
     }

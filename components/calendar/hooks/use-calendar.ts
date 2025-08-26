@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { useCheckPermissions } from "@/components/calendar/hooks/use-check-permissions"
+import { useAcademicConfig } from "@/contexts/academic-context"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
@@ -13,6 +14,7 @@ import { isAppwriteError } from "@/lib/utils/error-handler"
 import type { Calendars, Etiquettes, Events, Profiles } from "@/types"
 
 export function useCalendar(calendarSlug: string) {
+  const academicConfig = useAcademicConfig()
   const [calendar, setCalendar] = useState<Calendars | null>(null)
   const [events, setEvents] = useState<Events[]>([])
   const [etiquettes, setEtiquettes] = useState<Etiquettes[]>([])
@@ -194,6 +196,18 @@ export function useCalendar(calendarSlug: string) {
       void fetchData()
     }
   }, [profileLoaded, dataLoaded, fetchData])
+
+  // Recargar datos cuando cambie la configuración académica
+  useEffect(() => {
+    if (profileLoaded) {
+      setDataLoaded(false)
+    }
+  }, [
+    academicConfig.selectedSede,
+    academicConfig.selectedFaculty,
+    academicConfig.selectedProgram,
+    profileLoaded,
+  ])
 
   return {
     calendar,
