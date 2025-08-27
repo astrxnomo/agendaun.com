@@ -71,7 +71,6 @@ export async function createPersonalCalendar(
     // Limpiar los datos del calendario
     const cleanCalendar = {
       name: calendarData.name,
-      team_id: calendarData.team_id,
       defaultView: calendarData.defaultView,
       slug: calendarData.slug,
       owner_id: user.$id,
@@ -94,7 +93,7 @@ export async function getOrCreatePersonalCalendar(
 
     // Check if it's an error
     if (personalCalendar && "message" in personalCalendar) {
-      return personalCalendar as AppwriteError
+      return personalCalendar
     }
 
     if (!personalCalendar) {
@@ -109,7 +108,7 @@ export async function getOrCreatePersonalCalendar(
 
       // Check if creation returned an error
       if (personalCalendar && "message" in personalCalendar) {
-        return personalCalendar as AppwriteError
+        return personalCalendar
       }
 
       // Crear etiquetas por defecto para el nuevo calendario
@@ -157,7 +156,7 @@ export async function getPersonalCalendarData(): Promise<
 
     // Check if it's an error
     if ("message" in calendar) {
-      return calendar as AppwriteError
+      return calendar
     }
 
     return calendar
