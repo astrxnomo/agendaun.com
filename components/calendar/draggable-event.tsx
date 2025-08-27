@@ -48,7 +48,7 @@ export function DraggableEvent({
   const eventStart = new Date(event.start)
   const eventEnd = new Date(event.end)
   const isMultiDayEvent =
-    isMultiDay || event.allDay || differenceInDays(eventEnd, eventStart) >= 1
+    isMultiDay || event.all_day || differenceInDays(eventEnd, eventStart) >= 1
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
