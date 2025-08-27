@@ -87,7 +87,7 @@ export function WeekView({
     return events
       .filter((event) => {
         // Include explicitly marked all-day events or multi-day events
-        return event.allDay || isMultiDayEvent(event)
+        return event.all_day || isMultiDayEvent(event)
       })
       .filter((event) => {
         const eventStart = new Date(event.start)
@@ -107,7 +107,7 @@ export function WeekView({
       // Get events for this day that are not all-day events or multi-day events
       const dayEvents = events.filter((event) => {
         // Skip all-day events and multi-day events
-        if (event.allDay || isMultiDayEvent(event)) return false
+        if (event.all_day || isMultiDayEvent(event)) return false
 
         const eventStart = new Date(event.start)
         const eventEnd = new Date(event.end)
