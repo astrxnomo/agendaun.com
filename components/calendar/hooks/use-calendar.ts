@@ -114,7 +114,7 @@ export function useCalendar(calendarSlug: string) {
 
       // Cargar datos del calendario
       const [eventsResult, etiquettesResult] = await Promise.all([
-        getCalendarEvents(calendarData, userProfile),
+        getCalendarEvents(calendarData),
         getEtiquettes(calendarData.$id),
       ])
 
@@ -148,7 +148,7 @@ export function useCalendar(calendarSlug: string) {
     } finally {
       setIsLoading(false)
     }
-  }, [profileLoaded, dataLoaded, loadCalendar, userProfile, refetchPermissions])
+  }, [profileLoaded, dataLoaded, loadCalendar, refetchPermissions])
 
   const toggleEtiquetteVisibility = useCallback((etiquetteId: string) => {
     setVisibleEtiquettes((prev) => {

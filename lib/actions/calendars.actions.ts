@@ -63,7 +63,6 @@ export async function createPersonalCalendar(
 
     const data = await dbAdmin()
 
-    // Para calendarios personales, solo el propietario tiene permisos completos
     const permissions = [
       Permission.read(Role.user(user.$id)),
       Permission.write(Role.user(user.$id)),

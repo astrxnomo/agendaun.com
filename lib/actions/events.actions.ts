@@ -4,15 +4,19 @@ import { Query } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
-import { type Calendars, type Events, type Profiles } from "@/types"
+import { type Calendars, type Events } from "@/types"
 
-import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+import {
+  handleAppwriteError,
+  isAppwriteError,
+  type AppwriteError,
+} from "../utils/error-handler"
 import { setPermissions } from "../utils/permissions"
+import { getUserProfile } from "./profiles.actions"
 
 export async function getCalendarEvents(
   calendar: Calendars,
-  profile?: Profiles | null,
-): Promise<Events[]> {
+): Promise<Events[] | AppwriteError> {
   try {
     const data = await db()
     const queries = []
@@ -20,6 +24,12 @@ export async function getCalendarEvents(
     if (!calendar?.$id) {
       return []
     }
+
+    const profileResult = await getUserProfile()
+    if (isAppwriteError(profileResult)) {
+      return profileResult
+    }
+    const profile = profileResult
 
     queries.push(Query.equal("calendar_id", calendar.$id))
 
@@ -49,7 +59,8 @@ export async function getCalendarEvents(
 
     return result.documents as Events[]
   } catch (error) {
-    throw error
+    console.error("Error getting calendar events:", error)
+    return handleAppwriteError(error)
   }
 }
 
