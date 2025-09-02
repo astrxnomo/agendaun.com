@@ -30,9 +30,9 @@ export async function updateUserProfile({
     if (existingProfile.documents.length > 0) {
       const profileId = existingProfile.documents[0].$id
       const result = await data.profiles.updateRow(profileId, {
-        sede_id: sede_id,
-        faculty_id: faculty_id,
-        program_id: program_id,
+        sede: sede_id,
+        faculty: faculty_id,
+        program: program_id,
       })
       return result as Profiles
     } else {
@@ -54,6 +54,12 @@ export async function getUserProfile(): Promise<
 
     const profile = await data.profiles.listRows([
       Query.equal("user_id", user.$id),
+      Query.select([
+        "*", // select all profile attributes
+        "sede.*", // select all sede relationship data
+        "faculty.*", // select all faculty relationship data
+        "program.*", // select all program relationship data
+      ]),
     ])
 
     return profile.documents[0] as Profiles

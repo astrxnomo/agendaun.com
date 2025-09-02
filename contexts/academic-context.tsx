@@ -10,20 +10,9 @@ import {
 import { toast } from "sonner"
 
 import { useAuthContext } from "@/contexts/auth-context"
-import {
-  getFacultyById,
-  getProgramById,
-  getSedeById,
-} from "@/lib/actions/academic.actions"
 import { getUserProfile } from "@/lib/actions/profiles.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
 import { type Faculties, type Programs, type Sedes } from "@/types"
-
-interface ConfigData {
-  selectedSede: Sedes | null
-  selectedFaculty: Faculties | null
-  selectedProgram: Programs | null
-}
 
 interface ConfigContextType {
   selectedSede: Sedes | null
@@ -40,20 +29,16 @@ const AcademicContext = createContext<ConfigContextType | undefined>(undefined)
 
 export function AcademicProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuthContext()
-  const [config, setConfig] = useState<ConfigData>({
-    selectedSede: null,
-    selectedFaculty: null,
-    selectedProgram: null,
-  })
+  const [selectedSede, setSelectedSede] = useState<Sedes | null>(null)
+  const [selectedFaculty, setSelectedFaculty] = useState<Faculties | null>(null)
+  const [selectedProgram, setSelectedProgram] = useState<Programs | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const loadConfig = useCallback(async () => {
     if (!user?.$id) {
-      setConfig({
-        selectedSede: null,
-        selectedFaculty: null,
-        selectedProgram: null,
-      })
+      setSelectedSede(null)
+      setSelectedFaculty(null)
+      setSelectedProgram(null)
       setIsLoading(false)
       return
     }
@@ -67,71 +52,27 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
         toast.error("Error cargando perfil de usuario", {
           description: profileResult.type,
         })
-        setConfig({
-          selectedSede: null,
-          selectedFaculty: null,
-          selectedProgram: null,
-        })
+        setSelectedSede(null)
+        setSelectedFaculty(null)
+        setSelectedProgram(null)
         return
       }
 
       if (profileResult) {
-        let selectedSede: Sedes | null = null
-        if (profileResult.sede_id) {
-          const sedeResult = await getSedeById(profileResult.sede_id)
-          if (isAppwriteError(sedeResult)) {
-            toast.error("Error cargando sede", {
-              description: sedeResult.type,
-            })
-          } else {
-            selectedSede = sedeResult
-          }
-        }
-
-        let selectedFaculty: Faculties | null = null
-        if (profileResult.faculty_id) {
-          const facultyResult = await getFacultyById(profileResult.faculty_id)
-          if (isAppwriteError(facultyResult)) {
-            toast.error("Error cargando facultad", {
-              description: facultyResult.type,
-            })
-          } else {
-            selectedFaculty = facultyResult
-          }
-        }
-
-        let selectedProgram: Programs | null = null
-        if (profileResult.program_id) {
-          const programResult = await getProgramById(profileResult.program_id)
-          if (isAppwriteError(programResult)) {
-            toast.error("Error cargando programa", {
-              description: programResult.type,
-            })
-          } else {
-            selectedProgram = programResult
-          }
-        }
-
-        setConfig({
-          selectedSede,
-          selectedFaculty,
-          selectedProgram,
-        })
+        setSelectedSede(profileResult.sede || null)
+        setSelectedFaculty(profileResult.faculty || null)
+        setSelectedProgram(profileResult.program || null)
       } else {
-        setConfig({
-          selectedSede: null,
-          selectedFaculty: null,
-          selectedProgram: null,
-        })
+        setSelectedSede(null)
+        setSelectedFaculty(null)
+        setSelectedProgram(null)
       }
     } catch (error) {
       console.error("Error loading config:", error)
       toast.error("Error cargando configuración académica")
-      setConfig({
-        selectedSede: null,
-        selectedFaculty: null,
-        selectedProgram: null,
-      })
+      setSelectedSede(null)
+      setSelectedFaculty(null)
+      setSelectedProgram(null)
     } finally {
       setIsLoading(false)
     }
@@ -141,16 +82,16 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
     void loadConfig()
   }, [loadConfig])
 
-  const isComplete = !!config.selectedSede
+  const isComplete = !!selectedSede
 
   return (
     <AcademicContext.Provider
       value={{
-        selectedSede: config.selectedSede,
-        selectedFaculty: config.selectedFaculty,
-        selectedProgram: config.selectedProgram,
+        selectedSede,
+        selectedFaculty,
+        selectedProgram,
 
-        isComplete: !!isComplete,
+        isComplete,
         isLoading,
 
         refreshConfig: loadConfig,

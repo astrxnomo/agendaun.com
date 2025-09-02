@@ -20,52 +20,62 @@ export enum CalendarViews {
   DAY = "day",
 }
 
+export enum DefaultView {
+  AGENDA = "agenda",
+  MONTH = "month",
+  WEEK = "week",
+  DAY = "day",
+}
+export type Sedes = Models.Document & {
+  name: string
+  faculties: Faculties[]
+}
+
+export type Faculties = Models.Document & {
+  name: string
+  programs: Programs[]
+  sede: Sedes
+}
+
+export type Programs = Models.Document & {
+  name: string
+  faculty: Faculties
+}
+
 export type Events = Models.Document & {
   title: string
   description: string | null
-  start: Date
-  end: Date
+  start: string
+  end: string | null
   all_day: boolean
   location: string | null
-  sede_id: Sedes["$id"]
-  faculty_id: Faculties["$id"] | null
-  program_id: Programs["$id"] | null
-  calendar_id: Calendars["$id"] | null
-  etiquette_id: Events["$id"] | null
+  calendar: Calendars
+  etiquette: Etiquettes
+  sede: Sedes
+  faculty: Faculties
+  program: Programs
 }
 
 export type Etiquettes = Models.Document & {
   name: string
   color: Colors
   isActive: boolean
-  calendar_id: Calendars["$id"]
+  calendar: Calendars
 }
 
 export type Calendars = Models.Document & {
   name: string | null
-  owner_id: User["$id"]
-  defaultView: CalendarViews
+  defaultView: DefaultView
   slug: string
+  profiles: Profiles
+  etiquettes: Etiquettes[]
 }
 
 export type Profiles = Models.Document & {
-  sede_id: string | null
-  faculty_id: Faculties["$id"]
-  program_id: Programs["$id"]
-  user_id: User["$id"]
-}
-export type Sedes = Models.Document & {
-  name: string
-}
-
-export type Faculties = Models.Document & {
-  name: string
-  sede_id: Sedes["$id"]
-}
-
-export type Programs = Models.Document & {
-  name: string
-  faculty_id: Faculties["$id"]
+  user_id: string
+  sede: Sedes
+  faculty: Faculties
+  program: Programs
 }
 
 export type Session = Models.Session

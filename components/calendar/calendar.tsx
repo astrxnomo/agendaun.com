@@ -85,7 +85,7 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
   }
 
   const visibleEvents = events.filter((event: any) =>
-    isEtiquetteVisible(event.etiquette_id),
+    isEtiquetteVisible(event.etiquette?.$id),
   )
 
   return (

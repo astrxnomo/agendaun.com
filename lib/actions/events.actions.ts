@@ -31,31 +31,38 @@ export async function getCalendarEvents(
     }
     const profile = profileResult
 
-    queries.push(Query.equal("calendar_id", calendar.$id))
+    queries.push(Query.equal("calendar", calendar.$id))
 
     if (calendar.slug === "national-calendar") {
     } else if (calendar.slug === "sede-calendar") {
-      if (!profile?.sede_id) {
+      if (!profile?.sede) {
         return []
       }
-      queries.push(Query.equal("sede_id", profile.sede_id))
+      queries.push(Query.equal("sede", profile.sede.$id))
     } else if (calendar.slug === "faculty-calendar") {
-      if (!profile?.faculty_id) {
+      if (!profile?.faculty) {
         return []
       }
-      queries.push(Query.equal("faculty_id", profile.faculty_id))
+      queries.push(Query.equal("faculty", profile.faculty.$id))
     } else if (calendar.slug === "program-calendar") {
-      if (!profile?.program_id) {
+      if (!profile?.program) {
         return []
       }
-      queries.push(Query.equal("program_id", profile.program_id))
+      queries.push(Query.equal("program", profile.program.$id))
     } else {
       if (!profile?.user_id) {
         return []
       }
     }
 
-    const result = await data.events.listRows(queries)
+    const result = await data.events.listRows([
+      ...queries,
+      Query.select([
+        "*", // select all event attributes
+        "etiquette.name", // We want basic etiquette info for performance
+        "etiquette.color",
+      ]),
+    ])
 
     return result.documents as Events[]
   } catch (error) {
@@ -65,7 +72,7 @@ export async function getCalendarEvents(
 }
 
 export async function createEvent(
-  event: Partial<Events>,
+  event: Partial<Events> & { calendarId: string },
 ): Promise<Events | AppwriteError> {
   try {
     const user = await getUser()
@@ -73,12 +80,27 @@ export async function createEvent(
 
     const data = await db()
 
-    const calendar = await data.calendars.getRow(event.calendar_id)
+    const calendar = await data.calendars.getRow(event.calendarId)
     if (!calendar) throw new Error("Calendar not found")
 
     const permissions = await setPermissions(calendar.slug, user.$id)
 
-    const result = await data.events.createRow(event, permissions)
+    // Create event with relationships
+    const eventData = {
+      title: event.title,
+      description: event.description,
+      start: event.start,
+      end: event.end,
+      all_day: event.all_day,
+      location: event.location,
+      calendar: event.calendarId,
+      etiquette: event.etiquette?.$id,
+      sede: event.sede?.$id,
+      faculty: event.faculty?.$id,
+      program: event.program?.$id,
+    }
+
+    const result = await data.events.createRow(eventData, permissions)
     return result as Events
   } catch (error) {
     console.error("Error creating event:", error)
@@ -100,7 +122,7 @@ export async function updateEvent(
       end: event.end,
       all_day: event.all_day,
       location: event.location,
-      etiquette_id: event.etiquette_id,
+      etiquette: event.etiquette?.$id,
     })
     return result as Events
   } catch (error) {

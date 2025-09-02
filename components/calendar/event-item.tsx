@@ -7,7 +7,6 @@ import { useMemo } from "react"
 import {
   getBorderRadiusClasses,
   getEtiquetteColor,
-  getEventColor,
 } from "@/components/calendar"
 import { cn } from "@/lib/utils"
 
@@ -58,8 +57,7 @@ function EventWrapper({
   onTouchStart,
 }: EventWrapperProps) {
   // Calculate color using etiquettes
-  const eventColor = getEventColor(event, etiquettes || [])
-  const colorClass = getEtiquetteColor(eventColor)
+  const colorClass = getEtiquetteColor(event.etiquette.color)
 
   // Always use the currentTime (if provided) to determine if the event is in the past
   const displayEnd = currentTime
@@ -127,8 +125,7 @@ export function EventItem({
   onMouseDown,
   onTouchStart,
 }: EventItemProps) {
-  const eventColor = getEventColor(event, etiquettes)
-  const colorClass = getEtiquetteColor(eventColor)
+  const colorClass = getEtiquetteColor(event.etiquette.color)
 
   // Use the provided currentTime (for dragging) or the event's actual time
   const displayStart = useMemo(() => {

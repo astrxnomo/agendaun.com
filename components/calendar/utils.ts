@@ -1,11 +1,6 @@
 import { isSameDay } from "date-fns"
 
-import { type Etiquettes, type Events, Colors } from "@/types"
-
-export function getEventColor(event: Events, etiquettes: Etiquettes[]): Colors {
-  const etiquette = etiquettes.find((e) => e.$id === event.etiquette_id)
-  return etiquette?.color || Colors.GRAY
-}
+import { type Events, Colors } from "@/types"
 
 export function getEtiquetteColor(color?: Colors): string {
   switch (color) {
@@ -81,7 +76,7 @@ export function getBorderRadiusClasses(
  */
 export function isMultiDayEvent(event: Events): boolean {
   const eventStart = new Date(event.start)
-  const eventEnd = new Date(event.end)
+  const eventEnd = new Date(event.end || event.start)
   return event.all_day || eventStart.getDate() !== eventEnd.getDate()
 }
 
@@ -120,7 +115,7 @@ export function getSpanningEventsForDay(events: Events[], day: Date): Events[] {
     if (!isMultiDayEvent(event)) return false
 
     const eventStart = new Date(event.start)
-    const eventEnd = new Date(event.end)
+    const eventEnd = new Date(event.end || event.start)
 
     // Only include if it's not the start day but is either the end day or a middle day
     return (
@@ -136,7 +131,7 @@ export function getSpanningEventsForDay(events: Events[], day: Date): Events[] {
 export function getAllEventsForDay(events: Events[], day: Date): Events[] {
   return events.filter((event) => {
     const eventStart = new Date(event.start)
-    const eventEnd = new Date(event.end)
+    const eventEnd = new Date(event.end || event.start)
     return (
       isSameDay(day, eventStart) ||
       isSameDay(day, eventEnd) ||
@@ -152,7 +147,7 @@ export function getAgendaEventsForDay(events: Events[], day: Date): Events[] {
   return events
     .filter((event) => {
       const eventStart = new Date(event.start)
-      const eventEnd = new Date(event.end)
+      const eventEnd = new Date(event.end || event.start)
       return (
         isSameDay(day, eventStart) ||
         isSameDay(day, eventEnd) ||

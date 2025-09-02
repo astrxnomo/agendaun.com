@@ -86,7 +86,7 @@ export function EventDialog({
       const start = event.start ? new Date(event.start) : new Date()
       const end = event.end ? new Date(event.end) : new Date()
       const matchingEtiquette = etiquettes.find(
-        (etiq) => etiq.$id === event.etiquette_id,
+        (etiq) => etiq.$id === event.etiquette?.$id,
       )
 
       setStartDate(start)
@@ -175,22 +175,31 @@ export function EventDialog({
 
     const eventTitle = title.trim() ? title : "(sin título)"
 
-    onSave({
+    const eventData = {
       ...event,
       title: eventTitle,
       description,
-      start,
-      end,
+      start: start.toISOString(),
+      end: end.toISOString(),
       all_day: allDay,
       location,
-      etiquette_id: etiquette?.$id,
-      sede_id: calendar.slug === "sede-calendar" ? selectedSede?.$id : null,
-      faculty_id:
-        calendar.slug === "faculty-calendar" ? selectedFaculty?.$id : null,
-      program_id:
-        calendar.slug === "program-calendar" ? selectedProgram?.$id : null,
-      calendar_id: calendar.$id,
-    } as Events)
+      etiquette: etiquette?.$id ? { $id: etiquette.$id } : undefined,
+      sede:
+        calendar.slug === "sede-calendar" && selectedSede?.$id
+          ? { $id: selectedSede.$id }
+          : undefined,
+      faculty:
+        calendar.slug === "faculty-calendar" && selectedFaculty?.$id
+          ? { $id: selectedFaculty.$id }
+          : undefined,
+      program:
+        calendar.slug === "program-calendar" && selectedProgram?.$id
+          ? { $id: selectedProgram.$id }
+          : undefined,
+      calendarId: calendar.$id,
+    }
+
+    onSave(eventData as any)
   }
 
   const handleDelete = () => {

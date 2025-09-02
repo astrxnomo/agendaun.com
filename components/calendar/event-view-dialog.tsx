@@ -4,7 +4,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar1, Clock, MapPin } from "lucide-react"
 
-import { getEtiquetteColor, getEventColor } from "@/components/calendar"
+import { getEtiquetteColor } from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -37,8 +37,7 @@ export function EventViewDialog({
   const startDate = new Date(event.start)
   const endDate = new Date(event.end)
 
-  const eventColor = getEventColor(event, etiquettes)
-  const etiquetteColor = getEtiquetteColor(eventColor)
+  const eventColor = getEtiquetteColor(event.etiquette.color)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -48,7 +47,7 @@ export function EventViewDialog({
             <div
               className={cn(
                 "flex size-10 items-center justify-center rounded-full border",
-                etiquetteColor,
+                eventColor,
               )}
             >
               <Calendar1 className="size-5" />
@@ -135,10 +134,10 @@ export function EventViewDialog({
               <Separator />
               <Badge
                 variant="secondary"
-                className={cn("border text-xs", etiquetteColor)}
+                className={cn("border text-xs", eventColor)}
               >
                 {etiquettes.find(
-                  (etiquette) => etiquette.$id === event.etiquette_id,
+                  (etiquette) => etiquette.$id === event.etiquette?.$id,
                 )?.name || "Sin etiqueta"}
               </Badge>
             </>
