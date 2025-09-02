@@ -55,7 +55,7 @@ export async function getCalendarEvents(
       }
     }
 
-    const result = await data.events.list(queries)
+    const result = await data.events.listRows(queries)
 
     return result.documents as Events[]
   } catch (error) {
@@ -73,12 +73,12 @@ export async function createEvent(
 
     const data = await db()
 
-    const calendar = await data.calendars.get(event.calendar_id)
+    const calendar = await data.calendars.getRow(event.calendar_id)
     if (!calendar) throw new Error("Calendar not found")
 
     const permissions = await setPermissions(calendar.slug, user.$id)
 
-    const result = await data.events.create(event, permissions)
+    const result = await data.events.createRow(event, permissions)
     return result as Events
   } catch (error) {
     console.error("Error creating event:", error)
@@ -93,7 +93,7 @@ export async function updateEvent(
   try {
     const data = await db()
 
-    const result = await data.events.update(eventId, {
+    const result = await data.events.updateRow(eventId, {
       title: event.title,
       description: event.description,
       start: event.start,
@@ -114,7 +114,7 @@ export async function deleteEvent(
 ): Promise<boolean | AppwriteError> {
   try {
     const data = await db()
-    await data.events.delete(eventId)
+    await data.events.deleteRow(eventId)
     return true
   } catch (error) {
     console.error("Error deleting event:", error)

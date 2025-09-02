@@ -4,7 +4,8 @@ import { createSessionClient } from "@/lib/appwrite/config"
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID!
 
-const collections = [
+// Using new terminology but keeping compatibility with current API
+const tables = [
   { name: "events", id: process.env.NEXT_PUBLIC_COLLECTION_EVENTS! },
   { name: "calendars", id: process.env.NEXT_PUBLIC_COLLECTION_CALENDARS! },
   { name: "etiquettes", id: process.env.NEXT_PUBLIC_COLLECTION_ETIQUETTES! },
@@ -18,8 +19,39 @@ export async function db() {
   const { database } = await createSessionClient()
   const api: Record<string, any> = {}
 
-  collections.forEach((collection) => {
-    api[collection.name] = {
+  tables.forEach((table) => {
+    api[table.name] = {
+      // New naming convention that maps to old methods for now
+      createRow: async (
+        data: any,
+        permissions: string[] = [],
+        rowId: string = ID.unique(),
+      ) =>
+        database.createDocument(
+          DATABASE_ID,
+          table.id,
+          rowId,
+          data,
+          permissions,
+        ),
+      updateRow: async (rowId: string, data: any, permissions?: string[]) =>
+        permissions
+          ? database.updateDocument(
+              DATABASE_ID,
+              table.id,
+              rowId,
+              data,
+              permissions,
+            )
+          : database.updateDocument(DATABASE_ID, table.id, rowId, data),
+      deleteRow: async (rowId: string) =>
+        database.deleteDocument(DATABASE_ID, table.id, rowId),
+      getRow: async (rowId: string) =>
+        database.getDocument(DATABASE_ID, table.id, rowId),
+      listRows: async (queries: any[] = []) =>
+        database.listDocuments(DATABASE_ID, table.id, queries),
+
+      // Keep old methods for backward compatibility
       create: async (
         payload: any,
         permissions: string[] = [],
@@ -27,7 +59,7 @@ export async function db() {
       ) =>
         database.createDocument(
           DATABASE_ID,
-          collection.id,
+          table.id,
           id,
           payload,
           permissions,
@@ -36,18 +68,18 @@ export async function db() {
         permissions
           ? database.updateDocument(
               DATABASE_ID,
-              collection.id,
+              table.id,
               id,
               payload,
               permissions,
             )
-          : database.updateDocument(DATABASE_ID, collection.id, id, payload),
+          : database.updateDocument(DATABASE_ID, table.id, id, payload),
       delete: async (id: string) =>
-        database.deleteDocument(DATABASE_ID, collection.id, id),
+        database.deleteDocument(DATABASE_ID, table.id, id),
       get: async (id: string) =>
-        database.getDocument(DATABASE_ID, collection.id, id),
+        database.getDocument(DATABASE_ID, table.id, id),
       list: async (queries: any[] = []) =>
-        database.listDocuments(DATABASE_ID, collection.id, queries),
+        database.listDocuments(DATABASE_ID, table.id, queries),
     }
   })
 

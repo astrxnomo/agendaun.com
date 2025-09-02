@@ -46,7 +46,9 @@ export async function getPersonalCalendar(
 ): Promise<Calendars | AppwriteError | null> {
   try {
     const data = await db()
-    const result = await data.calendars.list([Query.equal("owner_id", userId)])
+    const result = await data.calendars.listRows([
+      Query.equal("owner_id", userId),
+    ])
     return (result.documents[0] as Calendars) || null
   } catch (error) {
     console.error("Error getting personal calendar:", error)
@@ -68,7 +70,7 @@ export async function createPersonalCalendar(
       Permission.write(Role.user(user.$id)),
     ]
 
-    // Limpiar los datos del calendario
+    // Clean calendar data
     const cleanCalendar = {
       name: calendarData.name,
       defaultView: calendarData.defaultView,
@@ -76,7 +78,7 @@ export async function createPersonalCalendar(
       owner_id: user.$id,
     }
 
-    const result = await data.calendars.create(cleanCalendar, permissions)
+    const result = await data.calendars.createRow(cleanCalendar, permissions)
     return result as Calendars
   } catch (error) {
     console.error("Error creating personal calendar:", error)
@@ -129,7 +131,7 @@ export async function getCalendarBySlug(
 ): Promise<Calendars | AppwriteError | null> {
   try {
     const data = await db()
-    const result = await data.calendars.list([Query.equal("slug", slug)])
+    const result = await data.calendars.listRows([Query.equal("slug", slug)])
     return (result.documents[0] as Calendars) || null
   } catch (error) {
     console.error(`Error getting calendar with slug ${slug}:`, error)

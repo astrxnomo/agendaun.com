@@ -23,13 +23,13 @@ export async function updateUserProfile({
   try {
     const data = await dbAdmin()
 
-    const existingProfile = await data.profiles.list([
+    const existingProfile = await data.profiles.listRows([
       Query.equal("user_id", user_id),
     ])
 
     if (existingProfile.documents.length > 0) {
       const profileId = existingProfile.documents[0].$id
-      const result = await data.profiles.update(profileId, {
+      const result = await data.profiles.updateRow(profileId, {
         sede_id: sede_id,
         faculty_id: faculty_id,
         program_id: program_id,
@@ -52,7 +52,9 @@ export async function getUserProfile(): Promise<
     if (!user) return null
     const data = await db()
 
-    const profile = await data.profiles.list([Query.equal("user_id", user.$id)])
+    const profile = await data.profiles.listRows([
+      Query.equal("user_id", user.$id),
+    ])
 
     return profile.documents[0] as Profiles
   } catch (error) {

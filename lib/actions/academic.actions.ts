@@ -11,7 +11,7 @@ import type { Faculties, Programs, Sedes } from "@/types"
 export async function getSedes(): Promise<Sedes[] | AppwriteError> {
   try {
     const data = await db()
-    const result = await data.sedes.list([
+    const result = await data.sedes.listRows([
       Query.orderAsc("name"),
       Query.limit(100),
     ])
@@ -27,7 +27,7 @@ export async function getFacultiesBySede(
 ): Promise<Faculties[] | AppwriteError> {
   try {
     const data = await db()
-    const result = await data.faculties.list([
+    const result = await data.faculties.listRows([
       Query.equal("sede_id", sedeId),
       Query.orderAsc("name"),
       Query.limit(100),
@@ -44,7 +44,7 @@ export async function getProgramsByFaculty(
 ): Promise<Programs[] | AppwriteError> {
   try {
     const data = await db()
-    const result = await data.programs.list([
+    const result = await data.programs.listRows([
       Query.equal("faculty_id", facultyId),
       Query.orderAsc("name"),
       Query.limit(100),
@@ -61,7 +61,7 @@ export async function getSedeById(
 ): Promise<Sedes | AppwriteError | null> {
   try {
     const data = await db()
-    const result = await data.sedes.get(sedeId)
+    const result = await data.sedes.getRow(sedeId)
     return result as Sedes
   } catch (error) {
     console.error("Error getting sede by id:", error)
@@ -74,7 +74,7 @@ export async function getFacultyById(
 ): Promise<Faculties | AppwriteError | null> {
   try {
     const data = await db()
-    const result = await data.faculties.get(facultyId)
+    const result = await data.faculties.getRow(facultyId)
     return result as Faculties
   } catch (error) {
     console.error("Error getting faculty by id:", error)
@@ -87,7 +87,7 @@ export async function getProgramById(
 ): Promise<Programs | AppwriteError | null> {
   try {
     const data = await db()
-    const result = await data.programs.get(programId)
+    const result = await data.programs.getRow(programId)
     return result as Programs
   } catch (error) {
     console.error("Error getting program by id:", error)

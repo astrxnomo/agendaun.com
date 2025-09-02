@@ -14,7 +14,7 @@ export async function getEtiquettes(
 ): Promise<Etiquettes[] | AppwriteError> {
   try {
     const data = await db()
-    const result = await data.etiquettes.list([
+    const result = await data.etiquettes.listRows([
       Query.equal("calendar_id", calendarId),
     ])
 
@@ -34,12 +34,12 @@ export async function createEtiquette(
 
     const data = await db()
 
-    const calendar = await data.calendars.get(etiquette.calendar_id)
+    const calendar = await data.calendars.getRow(etiquette.calendar_id)
     if (!calendar) throw new Error("Calendar not found")
 
     const permissions = await setPermissions(calendar.slug, user.$id)
 
-    const result = await data.etiquettes.create(etiquette, permissions)
+    const result = await data.etiquettes.createRow(etiquette, permissions)
     return result as Etiquettes
   } catch (error) {
     console.error("Error creating etiquette:", error)
@@ -54,7 +54,7 @@ export async function updateEtiquette(
   try {
     const data = await db()
 
-    const result = await data.etiquettes.update(etiquetteId, etiquette)
+    const result = await data.etiquettes.updateRow(etiquetteId, etiquette)
     return result as Etiquettes
   } catch (error) {
     console.error("Error updating etiquette:", error)
@@ -67,7 +67,7 @@ export async function deleteEtiquette(
 ): Promise<boolean | AppwriteError> {
   try {
     const data = await db()
-    await data.etiquettes.delete(etiquetteId)
+    await data.etiquettes.deleteRow(etiquetteId)
     return true
   } catch (error) {
     console.error("Error deleting etiquette:", error)
