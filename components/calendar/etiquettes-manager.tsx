@@ -85,7 +85,7 @@ export function EtiquettesManager({
         name: form.name.trim(),
         color: form.color,
         isActive: true,
-        calendarId: calendar.$id,
+        calendar: calendar,
       }
 
       if (editingId) {
@@ -125,7 +125,7 @@ export function EtiquettesManager({
         })
       }
     },
-    [form, calendar.$id, editingId, onUpdate],
+    [form, calendar, editingId, onUpdate],
   )
 
   const handleEdit = useCallback((etiquette: Etiquettes) => {

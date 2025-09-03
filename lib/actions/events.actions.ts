@@ -2,7 +2,6 @@
 
 import { ID, Query } from "node-appwrite"
 
-import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
 import { type Calendars, type Events } from "@/types"
 
@@ -57,7 +56,7 @@ export async function getCalendarEvents(
 
     const result = await data.events.list([
       ...queries,
-      Query.select(["*", "etiquette.name", "etiquette.color"]),
+      Query.select(["*", "etiquette.name", "etiquette.color", "calendar.*"]),
     ])
 
     return result.rows as Events[]
@@ -68,35 +67,14 @@ export async function getCalendarEvents(
 }
 
 export async function createEvent(
-  event: Partial<Events> & { calendarId: string },
+  event: Partial<Events>,
 ): Promise<Events | AppwriteError> {
   try {
-    const user = await getUser()
-    if (!user) throw new Error("User not authenticated")
-
     const data = await db()
 
-    const calendar = await data.calendars.get(event.calendarId)
-    if (!calendar) throw new Error("Calendar not found")
+    const permissions = await setPermissions(event.calendar?.slug)
 
-    const permissions = await setPermissions(calendar.slug, user.$id)
-
-    // Create event with relationships
-    const eventData = {
-      title: event.title,
-      description: event.description,
-      start: event.start,
-      end: event.end,
-      all_day: event.all_day,
-      location: event.location,
-      calendar: event.calendarId,
-      etiquette: event.etiquette?.$id,
-      sede: event.sede?.$id,
-      faculty: event.faculty?.$id,
-      program: event.program?.$id,
-    }
-
-    const result = await data.events.upsert(ID.unique(), eventData, permissions)
+    const result = await data.events.upsert(ID.unique(), event, permissions)
     return result as Events
   } catch (error) {
     console.error("Error creating event:", error)

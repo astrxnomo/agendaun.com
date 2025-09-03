@@ -196,7 +196,7 @@ export function EventDialog({
         calendar.slug === "program-calendar" && selectedProgram?.$id
           ? { $id: selectedProgram.$id }
           : undefined,
-      calendarId: calendar.$id,
+      calendar: calendar,
     }
 
     onSave(eventData as any)

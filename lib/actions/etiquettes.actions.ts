@@ -10,7 +10,7 @@ import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
 import { setPermissions } from "../utils/permissions"
 
 export async function createEtiquette(
-  etiquette: Partial<Etiquettes> & { calendarId: string },
+  etiquette: Partial<Etiquettes>,
 ): Promise<Etiquettes | AppwriteError> {
   try {
     const user = await getUser()
@@ -18,16 +18,14 @@ export async function createEtiquette(
 
     const data = await db()
 
-    const calendar = await data.calendars.get(etiquette.calendarId)
-    if (!calendar) throw new Error("Calendar not found")
+    const permissions = await setPermissions(etiquette.calendar?.slug)
 
-    const permissions = await setPermissions(calendar.slug, user.$id)
-
+    // Create etiquette with relationship
     const etiquetteData = {
       name: etiquette.name,
       color: etiquette.color,
       isActive: etiquette.isActive,
-      calendar: etiquette.calendarId,
+      calendar: etiquette.calendar?.$id,
     }
 
     const result = await data.etiquettes.upsert(

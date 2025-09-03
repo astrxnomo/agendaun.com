@@ -1,5 +1,7 @@
 import { Permission, Role } from "node-appwrite"
 
+import { getUser } from "../appwrite/auth"
+
 export type CalendarType =
   | "personal"
   | "national"
@@ -17,9 +19,15 @@ export function getCalendarType(calendarSlug: string): CalendarType {
 }
 
 export async function setPermissions(
-  calendarSlug: string,
-  userId: string,
+  calendarSlug: string | undefined,
 ): Promise<string[]> {
+  if (!calendarSlug) {
+    throw new Error("Calendar slug is required to set permissions")
+  }
+
+  const user = await getUser()
+  if (!user) throw new Error("User not authenticated")
+
   const calendarType = getCalendarType(calendarSlug)
 
   const permissions: string[] = []
@@ -27,8 +35,8 @@ export async function setPermissions(
   switch (calendarType) {
     case "personal":
       permissions.push(
-        Permission.read(Role.user(userId)),
-        Permission.write(Role.user(userId)),
+        Permission.read(Role.user(user.$id)),
+        Permission.write(Role.user(user.$id)),
       )
       break
 
