@@ -13,11 +13,11 @@ export async function userCanEdit(
     const user = await getUser()
     if (!user) return false
 
-    if (calendar.owner_id === user.$id) return true
+    if (calendar.profile?.user_id === user.$id) return true
 
     const { users } = await createAdminClient()
 
-    const memberships = await users.listMemberships(user.$id)
+    const memberships = await users.listMemberships({ userId: user.$id })
 
     const editorMembership = memberships.memberships.find(
       (membership) =>
@@ -27,7 +27,9 @@ export async function userCanEdit(
     if (!editorMembership) return false
 
     const editorRoles = editorMembership.roles
+
     if (!editorRoles) return false
+
     if (editorRoles.includes(calendar.slug)) return true
 
     return false

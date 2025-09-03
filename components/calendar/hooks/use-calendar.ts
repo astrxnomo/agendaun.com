@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import { useCheckPermissions } from "@/components/calendar/hooks/use-check-permissions"
 import { useAcademicConfig } from "@/contexts/academic-context"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
-import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
 import { getUserProfile } from "@/lib/actions/profiles.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
@@ -112,11 +111,7 @@ export function useCalendar(calendarSlug: string) {
         refetchPermissions()
       }
 
-      // Cargar datos del calendario
-      const [eventsResult, etiquettesResult] = await Promise.all([
-        getCalendarEvents(calendarData),
-        getEtiquettes(calendarData.$id),
-      ])
+      const eventsResult = await getCalendarEvents(calendarData)
 
       if (isAppwriteError(eventsResult)) {
         toast.error("Error cargando eventos", {
@@ -126,18 +121,15 @@ export function useCalendar(calendarSlug: string) {
         return
       }
 
-      if (isAppwriteError(etiquettesResult)) {
-        toast.error("Error cargando etiquetas", {
-          description: etiquettesResult.type,
-        })
-        setError("Error cargando etiquetas")
-        return
-      }
-
       setEvents(eventsResult)
-      setEtiquettes(etiquettesResult)
 
-      const activeEtiquetteIds = etiquettesResult
+      const etiquettes = Array.isArray(calendarData.etiquettes)
+        ? calendarData.etiquettes
+        : []
+
+      setEtiquettes(etiquettes)
+
+      const activeEtiquetteIds = etiquettes
         .filter((etiquette: Etiquettes) => etiquette.isActive)
         .map((etiquette: Etiquettes) => etiquette.$id)
       setVisibleEtiquettes(activeEtiquetteIds)

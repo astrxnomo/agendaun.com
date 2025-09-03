@@ -43,7 +43,6 @@ interface EventWrapperProps {
 // Shared wrapper component for event styling
 function EventWrapper({
   event,
-  etiquettes,
   isFirstDay = true,
   isLastDay = true,
   isDragging,
@@ -57,7 +56,7 @@ function EventWrapper({
   onTouchStart,
 }: EventWrapperProps) {
   // Calculate color using etiquettes
-  const colorClass = getEtiquetteColor(event.etiquette.color)
+  const colorClass = getEtiquetteColor(event.etiquette?.color)
 
   // Always use the currentTime (if provided) to determine if the event is in the past
   const displayEnd = currentTime
@@ -125,7 +124,7 @@ export function EventItem({
   onMouseDown,
   onTouchStart,
 }: EventItemProps) {
-  const colorClass = getEtiquetteColor(event.etiquette.color)
+  const colorClass = getEtiquetteColor(event.etiquette?.color)
 
   // Use the provided currentTime (for dragging) or the event's actual time
   const displayStart = useMemo(() => {

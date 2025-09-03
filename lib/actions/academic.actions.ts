@@ -11,15 +11,12 @@ import type { Faculties, Programs, Sedes } from "@/types"
 export async function getSedes(): Promise<Sedes[] | AppwriteError> {
   try {
     const data = await db()
-    const result = await data.sedes.listRows([
+    const result = await data.sedes.list([
       Query.orderAsc("name"),
       Query.limit(100),
-      Query.select([
-        "*", // select all sede attributes
-        "faculties.*", // select all related faculties
-      ]),
+      Query.select(["*", "faculties.*"]),
     ])
-    return result.documents as Sedes[]
+    return result.rows as Sedes[]
   } catch (error) {
     console.error("Error getting sedes:", error)
     return handleAppwriteError(error)
@@ -31,17 +28,13 @@ export async function getFacultiesBySede(
 ): Promise<Faculties[] | AppwriteError> {
   try {
     const data = await db()
-    const result = await data.faculties.listRows([
-      Query.equal("sede", sedeId), // Query by relationship field directly
+    const result = await data.faculties.list([
+      Query.equal("sede", sedeId),
       Query.orderAsc("name"),
       Query.limit(100),
-      Query.select([
-        "*", // select all faculty attributes
-        "sede.*", // select related sede data
-        "programs.*", // select all related programs
-      ]),
+      Query.select(["*", "sede.*", "programs.*"]),
     ])
-    return result.documents as Faculties[]
+    return result.rows as Faculties[]
   } catch (error) {
     console.error("Error getting faculties by sede:", error)
     return handleAppwriteError(error)
@@ -53,16 +46,13 @@ export async function getProgramsByFaculty(
 ): Promise<Programs[] | AppwriteError> {
   try {
     const data = await db()
-    const result = await data.programs.listRows([
-      Query.equal("faculty", facultyId), // Query by relationship field directly
+    const result = await data.programs.list([
+      Query.equal("faculty", facultyId),
       Query.orderAsc("name"),
       Query.limit(100),
-      Query.select([
-        "*", // select all program attributes
-        "faculty.*", // select related faculty data
-      ]),
+      Query.select(["*", "faculty.*"]),
     ])
-    return result.documents as Programs[]
+    return result.rows as Programs[]
   } catch (error) {
     console.error("Error getting programs by faculty:", error)
     return handleAppwriteError(error)
@@ -74,14 +64,11 @@ export async function getSedeById(
 ): Promise<Sedes | AppwriteError | null> {
   try {
     const data = await db()
-    const result = await data.sedes.listRows([
+    const result = await data.sedes.list([
       Query.equal("$id", sedeId),
-      Query.select([
-        "*", // select all sede attributes
-        "faculties.*", // select all related faculties
-      ]),
+      Query.select(["*", "faculties.*"]),
     ])
-    return (result.documents[0] as Sedes) || null
+    return (result.rows[0] as Sedes) || null
   } catch (error) {
     console.error("Error getting sede by id:", error)
     return handleAppwriteError(error)
@@ -93,15 +80,11 @@ export async function getFacultyById(
 ): Promise<Faculties | AppwriteError | null> {
   try {
     const data = await db()
-    const result = await data.faculties.listRows([
+    const result = await data.faculties.list([
       Query.equal("$id", facultyId),
-      Query.select([
-        "*", // select all faculty attributes
-        "sede.*", // select related sede data
-        "programs.*", // select all related programs
-      ]),
+      Query.select(["*", "sede.*", "programs.*"]),
     ])
-    return (result.documents[0] as Faculties) || null
+    return (result.rows[0] as Faculties) || null
   } catch (error) {
     console.error("Error getting faculty by id:", error)
     return handleAppwriteError(error)
@@ -113,14 +96,11 @@ export async function getProgramById(
 ): Promise<Programs | AppwriteError | null> {
   try {
     const data = await db()
-    const result = await data.programs.listRows([
+    const result = await data.programs.list([
       Query.equal("$id", programId),
-      Query.select([
-        "*", // select all program attributes
-        "faculty.*", // select related faculty data
-      ]),
+      Query.select(["*", "faculty.*"]),
     ])
-    return (result.documents[0] as Programs) || null
+    return (result.rows[0] as Programs) || null
   } catch (error) {
     console.error("Error getting program by id:", error)
     return handleAppwriteError(error)

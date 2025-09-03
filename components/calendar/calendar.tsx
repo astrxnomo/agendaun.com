@@ -14,7 +14,6 @@ import {
   CalendarError,
   CalendarSkeleton,
 } from "@/components/skeletons/calendar-loading"
-import { getEtiquettes } from "@/lib/actions/etiquettes.actions"
 
 import { Button } from "../ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
@@ -42,19 +41,6 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
       canEdit,
       onEventsUpdate: updateEvents,
     })
-
-  const refreshEtiquettes = async () => {
-    if (!calendar) return
-
-    try {
-      await getEtiquettes(calendar.$id)
-
-      void refetch()
-    } catch (error) {
-      console.error("Error refreshing etiquettes:", error)
-      toast.error("Error al actualizar las etiquetas")
-    }
-  }
 
   const toggleEditMode = () => {
     if (!canEdit) {
@@ -84,23 +70,25 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
     )
   }
 
-  const visibleEvents = events.filter((event: any) =>
-    isEtiquetteVisible(event.etiquette?.$id),
-  )
+  const visibleEvents = Array.isArray(events)
+    ? events.filter((event: any) => isEtiquetteVisible(event.etiquette?.$id))
+    : []
+
+  const safeEtiquettes = Array.isArray(etiquettes) ? etiquettes : []
 
   return (
     <>
       <EtiquettesHeader
-        etiquettes={etiquettes}
+        etiquettes={safeEtiquettes}
         isEtiquetteVisible={isEtiquetteVisible}
         toggleEtiquetteVisibility={toggleEtiquetteVisibility}
         etiquettesManager={
           editMode &&
           calendar && (
             <EtiquettesManager
-              etiquettes={etiquettes}
+              etiquettes={safeEtiquettes}
               calendar={calendar}
-              onUpdate={refreshEtiquettes}
+              onUpdate={refetch}
             />
           )
         }

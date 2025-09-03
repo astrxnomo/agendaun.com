@@ -23,13 +23,13 @@ export async function updateUserProfile({
   try {
     const data = await dbAdmin()
 
-    const existingProfile = await data.profiles.listRows([
+    const existingProfile = await data.profiles.list([
       Query.equal("user_id", user_id),
     ])
 
-    if (existingProfile.documents.length > 0) {
-      const profileId = existingProfile.documents[0].$id
-      const result = await data.profiles.updateRow(profileId, {
+    if (existingProfile.rows.length > 0) {
+      const profileId = existingProfile.rows[0].$id
+      const result = await data.profiles.upsert(profileId, {
         sede: sede_id,
         faculty: faculty_id,
         program: program_id,
@@ -52,17 +52,12 @@ export async function getUserProfile(): Promise<
     if (!user) return null
     const data = await db()
 
-    const profile = await data.profiles.listRows([
+    const profile = await data.profiles.list([
       Query.equal("user_id", user.$id),
-      Query.select([
-        "*", // select all profile attributes
-        "sede.*", // select all sede relationship data
-        "faculty.*", // select all faculty relationship data
-        "program.*", // select all program relationship data
-      ]),
+      Query.select(["*", "sede.*", "faculty.*", "program.*"]),
     ])
 
-    return profile.documents[0] as Profiles
+    return profile.rows[0] as Profiles
   } catch (error) {
     console.error("Error getting user profile:", error)
     return handleAppwriteError(error)

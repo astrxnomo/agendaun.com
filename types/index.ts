@@ -45,8 +45,8 @@ export type Programs = Models.Document & {
 export type Events = Models.Document & {
   title: string
   description: string | null
-  start: string
-  end: string | null
+  start: Date
+  end: Date
   all_day: boolean
   location: string | null
   calendar: Calendars
@@ -67,7 +67,7 @@ export type Calendars = Models.Document & {
   name: string | null
   defaultView: DefaultView
   slug: string
-  profiles: Profiles
+  profile: Profiles
   etiquettes: Etiquettes[]
 }
 

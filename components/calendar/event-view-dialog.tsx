@@ -37,7 +37,7 @@ export function EventViewDialog({
   const startDate = new Date(event.start)
   const endDate = new Date(event.end)
 
-  const eventColor = getEtiquetteColor(event.etiquette.color)
+  const eventColor = getEtiquetteColor(event.etiquette?.color)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

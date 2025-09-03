@@ -1,6 +1,6 @@
 "use server"
 
-import { Query } from "node-appwrite"
+import { ID } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
@@ -8,26 +8,6 @@ import { type Etiquettes } from "@/types"
 
 import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
 import { setPermissions } from "../utils/permissions"
-
-export async function getEtiquettes(
-  calendarId: string,
-): Promise<Etiquettes[] | AppwriteError> {
-  try {
-    const data = await db()
-    const result = await data.etiquettes.listRows([
-      Query.equal("calendar", calendarId), // Query by relationship field directly
-      Query.select([
-        "*", // select all top-level attributes
-        "calendar.*", // select all calendar relationship attributes
-      ]),
-    ])
-
-    return result.documents as Etiquettes[]
-  } catch (error) {
-    console.error("Error getting etiquettes:", error)
-    return handleAppwriteError(error)
-  }
-}
 
 export async function createEtiquette(
   etiquette: Partial<Etiquettes> & { calendarId: string },
@@ -38,12 +18,11 @@ export async function createEtiquette(
 
     const data = await db()
 
-    const calendar = await data.calendars.getRow(etiquette.calendarId)
+    const calendar = await data.calendars.get(etiquette.calendarId)
     if (!calendar) throw new Error("Calendar not found")
 
     const permissions = await setPermissions(calendar.slug, user.$id)
 
-    // Create etiquette with relationship
     const etiquetteData = {
       name: etiquette.name,
       color: etiquette.color,
@@ -51,7 +30,11 @@ export async function createEtiquette(
       calendar: etiquette.calendarId,
     }
 
-    const result = await data.etiquettes.createRow(etiquetteData, permissions)
+    const result = await data.etiquettes.upsert(
+      ID.unique(),
+      etiquetteData,
+      permissions,
+    )
     return result as Etiquettes
   } catch (error) {
     console.error("Error creating etiquette:", error)
@@ -66,7 +49,7 @@ export async function updateEtiquette(
   try {
     const data = await db()
 
-    const result = await data.etiquettes.updateRow(etiquetteId, etiquette)
+    const result = await data.etiquettes.upsert(etiquetteId, etiquette)
     return result as Etiquettes
   } catch (error) {
     console.error("Error updating etiquette:", error)
@@ -79,7 +62,7 @@ export async function deleteEtiquette(
 ): Promise<boolean | AppwriteError> {
   try {
     const data = await db()
-    await data.etiquettes.deleteRow(etiquetteId)
+    await data.etiquettes.delete(etiquetteId)
     return true
   } catch (error) {
     console.error("Error deleting etiquette:", error)

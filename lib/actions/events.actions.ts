@@ -1,6 +1,6 @@
 "use server"
 
-import { Query } from "node-appwrite"
+import { ID, Query } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
@@ -55,16 +55,12 @@ export async function getCalendarEvents(
       }
     }
 
-    const result = await data.events.listRows([
+    const result = await data.events.list([
       ...queries,
-      Query.select([
-        "*", // select all event attributes
-        "etiquette.name", // We want basic etiquette info for performance
-        "etiquette.color",
-      ]),
+      Query.select(["*", "etiquette.name", "etiquette.color"]),
     ])
 
-    return result.documents as Events[]
+    return result.rows as Events[]
   } catch (error) {
     console.error("Error getting calendar events:", error)
     return handleAppwriteError(error)
@@ -80,7 +76,7 @@ export async function createEvent(
 
     const data = await db()
 
-    const calendar = await data.calendars.getRow(event.calendarId)
+    const calendar = await data.calendars.get(event.calendarId)
     if (!calendar) throw new Error("Calendar not found")
 
     const permissions = await setPermissions(calendar.slug, user.$id)
@@ -100,7 +96,7 @@ export async function createEvent(
       program: event.program?.$id,
     }
 
-    const result = await data.events.createRow(eventData, permissions)
+    const result = await data.events.upsert(ID.unique(), eventData, permissions)
     return result as Events
   } catch (error) {
     console.error("Error creating event:", error)
@@ -115,7 +111,7 @@ export async function updateEvent(
   try {
     const data = await db()
 
-    const result = await data.events.updateRow(eventId, {
+    const updateData = {
       title: event.title,
       description: event.description,
       start: event.start,
@@ -123,7 +119,9 @@ export async function updateEvent(
       all_day: event.all_day,
       location: event.location,
       etiquette: event.etiquette?.$id,
-    })
+    }
+
+    const result = await data.events.upsert(eventId, updateData)
     return result as Events
   } catch (error) {
     console.error("Error updating event:", error)
@@ -136,7 +134,7 @@ export async function deleteEvent(
 ): Promise<boolean | AppwriteError> {
   try {
     const data = await db()
-    await data.events.deleteRow(eventId)
+    await data.events.delete(eventId)
     return true
   } catch (error) {
     console.error("Error deleting event:", error)

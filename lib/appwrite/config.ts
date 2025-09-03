@@ -1,6 +1,6 @@
 "use server"
 
-import { Account, Client, Databases, Teams, Users } from "node-appwrite"
+import { Account, Client, TablesDB, Teams, Users } from "node-appwrite"
 
 import { verifySession } from "@/lib/appwrite/auth"
 
@@ -17,7 +17,7 @@ export const createAdminClient = async () => {
     },
 
     get database() {
-      return new Databases(client)
+      return new TablesDB(client)
     },
 
     get teams() {
@@ -44,7 +44,7 @@ export const createSessionClient = async () => {
     },
 
     get database() {
-      return new Databases(client)
+      return new TablesDB(client)
     },
 
     get teams() {

@@ -1,7 +1,7 @@
 "use client"
 
-import { Loader2, Settings, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { Settings, Trash2 } from "lucide-react"
+import { useCallback, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,7 @@ import {
   deleteEtiquette,
   updateEtiquette,
 } from "@/lib/actions/etiquettes.actions"
+import { isAppwriteError } from "@/lib/utils/error-handler"
 import { type Calendars, Colors, type Etiquettes } from "@/types"
 
 import { Separator } from "../ui/separator"
@@ -47,7 +48,6 @@ export function EtiquettesManager({
   onUpdate,
 }: EtiquettesManagerProps) {
   const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<EtiquetteForm>({
     name: "",
@@ -73,80 +73,91 @@ export function EtiquettesManager({
     )
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.name.trim()) {
-      toast.error("El nombre de la etiqueta es requerido")
-      return
-    }
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!form.name.trim()) {
+        toast.error("El nombre de la etiqueta es requerido")
+        return
+      }
 
-    setIsLoading(true)
-    try {
       const etiquetteData = {
         name: form.name.trim(),
         color: form.color,
         isActive: true,
-        calendar_id: calendar.$id,
+        calendarId: calendar.$id,
       }
 
-      let success = false
       if (editingId) {
-        const result = await updateEtiquette(editingId, etiquetteData)
-        success = !!result
-        if (success) {
-          toast.success("Etiqueta actualizada")
-        }
-      } else {
-        const result = await createEtiquette(etiquetteData)
-        success = !!result
-        if (success) {
-          toast.success("Etiqueta creada")
-        }
-      }
+        // Actualizar etiqueta existente
+        const promise = updateEtiquette(editingId, etiquetteData).then(
+          (result) => {
+            if (isAppwriteError(result)) {
+              throw new Error(result.message || "Error al actualizar etiqueta")
+            }
+            resetForm()
+            onUpdate()
+            return result
+          },
+        )
 
-      if (success) {
-        resetForm()
-        onUpdate()
+        toast.promise(promise, {
+          loading: "Actualizando etiqueta...",
+          success: (result) => `Etiqueta "${result.name}" actualizada`,
+          error: (err: Error) =>
+            err.message || "Error al actualizar la etiqueta",
+        })
       } else {
-        toast.error("Error al guardar la etiqueta")
-      }
-    } catch (error) {
-      console.error("Error saving etiquette:", error)
-      toast.error("Error al guardar la etiqueta")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+        // Crear nueva etiqueta
+        const promise = createEtiquette(etiquetteData).then((result) => {
+          if (isAppwriteError(result)) {
+            throw new Error(result.message || "Error al crear etiqueta")
+          }
+          resetForm()
+          onUpdate()
+          return result
+        })
 
-  const handleEdit = (etiquette: Etiquettes) => {
+        toast.promise(promise, {
+          loading: "Creando etiqueta...",
+          success: (result) => `Etiqueta "${result.name}" creada`,
+          error: (err: Error) => err.message || "Error al crear la etiqueta",
+        })
+      }
+    },
+    [form, calendar.$id, editingId, onUpdate],
+  )
+
+  const handleEdit = useCallback((etiquette: Etiquettes) => {
     setForm({
       name: etiquette.name,
       color: etiquette.color,
     })
     setEditingId(etiquette.$id)
-  }
+  }, [])
 
-  const handleDelete = async (etiquetteId: string) => {
-    if (!confirm("¿Estás seguro de que quieres eliminar esta etiqueta?")) {
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const success = await deleteEtiquette(etiquetteId)
-      if (success) {
-        toast.success("Etiqueta eliminada")
-        onUpdate()
-      } else {
-        toast.error("Error al eliminar la etiqueta")
+  const handleDelete = useCallback(
+    async (etiquetteId: string, etiquetteName: string) => {
+      if (!confirm("¿Estás seguro de que quieres eliminar esta etiqueta?")) {
+        return
       }
-    } catch (error) {
-      console.error("Error deleting etiquette:", error)
-      toast.error("Error al eliminar la etiqueta")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+
+      const promise = deleteEtiquette(etiquetteId).then((result) => {
+        if (isAppwriteError(result)) {
+          throw new Error(result.message || "Error al eliminar etiqueta")
+        }
+        onUpdate()
+        return result
+      })
+
+      toast.promise(promise, {
+        loading: "Eliminando etiqueta...",
+        success: () => `Etiqueta "${etiquetteName}" eliminada`,
+        error: (err: Error) => err.message || "Error al eliminar la etiqueta",
+      })
+    },
+    [onUpdate],
+  )
 
   const getColorClass = (color: Colors) => {
     return getEtiquetteIndicatorColor(color)
@@ -171,14 +182,12 @@ export function EtiquettesManager({
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Nombre de la etiqueta"
-              disabled={isLoading}
             />
             <RadioGroup
               value={form.color}
               onValueChange={(value) =>
                 setForm({ ...form, color: value as Colors })
               }
-              disabled={isLoading}
               className="bg-muted/30 flex flex-wrap justify-center gap-3 rounded-lg p-3"
             >
               {getAvailableColors().map((option) => (
@@ -201,21 +210,14 @@ export function EtiquettesManager({
             </RadioGroup>
 
             <div className="flex gap-2">
-              <Button type="submit" disabled={isLoading} size="sm">
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : editingId ? (
-                  "Actualizar"
-                ) : (
-                  "Crear"
-                )}
+              <Button type="submit" size="sm">
+                {editingId ? "Actualizar" : "Crear"}
               </Button>
               {editingId && (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={resetForm}
-                  disabled={isLoading}
                   size="sm"
                 >
                   Cancelar
@@ -251,7 +253,6 @@ export function EtiquettesManager({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(etiquette)}
-                        disabled={isLoading}
                         className="h-6 px-2 text-xs"
                       >
                         Editar
@@ -259,8 +260,9 @@ export function EtiquettesManager({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(etiquette.$id)}
-                        disabled={isLoading}
+                        onClick={() =>
+                          handleDelete(etiquette.$id, etiquette.name)
+                        }
                         className="text-destructive h-6 w-6 p-0"
                       >
                         <Trash2 className="h-3 w-3" />

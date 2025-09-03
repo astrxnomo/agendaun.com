@@ -12,11 +12,16 @@ export async function getCalendarBySlug(
 ): Promise<Calendars | AppwriteError | null> {
   try {
     const data = await db()
-    const result = await data.calendars.listRows([
+    const result = await data.calendars.list([
       Query.equal("slug", slug),
-      Query.select(["*"]), // Get calendar attributes
+      Query.select(["*", "profile.user_id", "etiquettes.*"]),
     ])
-    return (result.documents[0] as Calendars) || null
+
+    console.log(
+      `Calendar with slug ${slug} fetched:`,
+      result.rows[0].etiquettes,
+    )
+    return result.rows[0] as Calendars
   } catch (error) {
     console.error(`Error getting calendar with slug ${slug}:`, error)
     return handleAppwriteError(error)
