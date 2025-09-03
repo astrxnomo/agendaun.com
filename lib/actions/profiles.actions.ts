@@ -63,3 +63,24 @@ export async function getUserProfile(): Promise<
     return handleAppwriteError(error)
   }
 }
+
+// Optimized version for contexts that only need basic info
+export async function getUserProfileLight(): Promise<
+  Profiles | AppwriteError | null
+> {
+  try {
+    const user = await getUser()
+    if (!user) return null
+    const data = await db()
+
+    const profile = await data.profiles.list([
+      Query.equal("user_id", user.$id),
+      Query.select(["*", "sede.name", "faculty.name", "program.name"]),
+    ])
+
+    return profile.rows[0] as Profiles
+  } catch (error) {
+    console.error("Error getting user profile (light):", error)
+    return handleAppwriteError(error)
+  }
+}

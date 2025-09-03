@@ -37,7 +37,6 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
 
   const { handleEventAdd, handleEventUpdate, handleEventDelete } =
     useEventHandlers({
-      calendar: calendar!,
       canEdit,
       onEventsUpdate: updateEvents,
     })

@@ -23,6 +23,11 @@ interface ConfigContextType {
   isLoading: boolean
 
   refreshConfig: () => Promise<void>
+
+  // Helper functions for external components
+  updateSede: (sede: Sedes | null) => void
+  updateFaculty: (faculty: Faculties | null) => void
+  updateProgram: (program: Programs | null) => void
 }
 
 const AcademicContext = createContext<ConfigContextType | undefined>(undefined)
@@ -34,11 +39,16 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
   const [selectedProgram, setSelectedProgram] = useState<Programs | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // Helper function to clear all selections
+  const clearSelections = useCallback(() => {
+    setSelectedSede(null)
+    setSelectedFaculty(null)
+    setSelectedProgram(null)
+  }, [])
+
   const loadConfig = useCallback(async () => {
     if (!user?.$id) {
-      setSelectedSede(null)
-      setSelectedFaculty(null)
-      setSelectedProgram(null)
+      clearSelections()
       setIsLoading(false)
       return
     }
@@ -52,35 +62,53 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
         toast.error("Error cargando perfil de usuario", {
           description: profileResult.type,
         })
-        setSelectedSede(null)
-        setSelectedFaculty(null)
-        setSelectedProgram(null)
+        clearSelections()
         return
       }
 
+      // TablesDB relationships are already loaded, just assign them directly
       if (profileResult) {
+        // The relationships come fully populated from TablesDB
         setSelectedSede(profileResult.sede || null)
         setSelectedFaculty(profileResult.faculty || null)
         setSelectedProgram(profileResult.program || null)
       } else {
-        setSelectedSede(null)
-        setSelectedFaculty(null)
-        setSelectedProgram(null)
+        clearSelections()
       }
     } catch (error) {
       console.error("Error loading config:", error)
       toast.error("Error cargando configuración académica")
-      setSelectedSede(null)
-      setSelectedFaculty(null)
-      setSelectedProgram(null)
+      clearSelections()
     } finally {
       setIsLoading(false)
     }
-  }, [user])
+  }, [user, clearSelections])
 
   useEffect(() => {
     void loadConfig()
   }, [loadConfig])
+
+  // Helper functions for external updates
+  const updateSede = useCallback((sede: Sedes | null) => {
+    setSelectedSede(sede)
+    // Clear dependent selections when sede changes
+    if (sede?.faculties?.length === 0) {
+      setSelectedFaculty(null)
+      setSelectedProgram(null)
+    }
+  }, [])
+
+  const updateFaculty = useCallback((faculty: Faculties | null) => {
+    setSelectedFaculty(faculty)
+    // Clear dependent selections when faculty changes
+    if (faculty?.programs?.length === 0) {
+      setSelectedProgram(null)
+    }
+  }, [])
+
+  const updateProgram = useCallback((program: Programs | null) => {
+    setSelectedProgram(program)
+  }, [])
 
   const isComplete = !!selectedSede
 
@@ -95,6 +123,9 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
         isLoading,
 
         refreshConfig: loadConfig,
+        updateSede,
+        updateFaculty,
+        updateProgram,
       }}
     >
       {children}

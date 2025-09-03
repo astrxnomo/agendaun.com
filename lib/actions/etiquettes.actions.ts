@@ -20,17 +20,10 @@ export async function createEtiquette(
 
     const permissions = await setPermissions(etiquette.calendar?.slug)
 
-    // Create etiquette with relationship
-    const etiquetteData = {
-      name: etiquette.name,
-      color: etiquette.color,
-      isActive: etiquette.isActive,
-      calendar: etiquette.calendar?.$id,
-    }
-
+    // TablesDB can handle the relationship automatically
     const result = await data.etiquettes.upsert(
       ID.unique(),
-      etiquetteData,
+      etiquette,
       permissions,
     )
     return result as Etiquettes

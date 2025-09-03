@@ -56,7 +56,7 @@ export async function getCalendarEvents(
 
     const result = await data.events.list([
       ...queries,
-      Query.select(["*", "etiquette.name", "etiquette.color", "calendar.*"]),
+      Query.select(["*", "etiquette.name", "etiquette.color"]),
     ])
 
     return result.rows as Events[]
@@ -89,17 +89,7 @@ export async function updateEvent(
   try {
     const data = await db()
 
-    const updateData = {
-      title: event.title,
-      description: event.description,
-      start: event.start,
-      end: event.end,
-      all_day: event.all_day,
-      location: event.location,
-      etiquette: event.etiquette?.$id,
-    }
-
-    const result = await data.events.upsert(eventId, updateData)
+    const result = await data.events.upsert(eventId, event)
     return result as Events
   } catch (error) {
     console.error("Error updating event:", error)

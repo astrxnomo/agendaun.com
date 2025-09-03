@@ -10,10 +10,9 @@ import {
 } from "@/lib/actions/events.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
 
-import type { Calendars, Events } from "@/types"
+import type { Events } from "@/types"
 
 interface UseEventHandlersProps {
-  calendar: Calendars
   canEdit: boolean
   onEventsUpdate: (updater: (prev: Events[]) => Events[]) => void
 }
