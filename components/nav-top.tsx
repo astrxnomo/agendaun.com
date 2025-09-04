@@ -2,13 +2,13 @@
 import { LogIn } from "lucide-react"
 import Link from "next/link"
 
-import { AcademicConfig } from "@/components/academic/nav-button"
 import Search from "@/components/search-dialog"
 import { useAuthContext } from "@/contexts/auth-context"
 
 import Notifications from "./notifications-button"
 import ThemeToggle from "./theme-toggle"
 import { Button } from "./ui/button"
+import { SidebarTrigger } from "./ui/sidebar"
 import { Skeleton } from "./ui/skeleton"
 
 export default function NavTop() {
@@ -18,7 +18,7 @@ export default function NavTop() {
     <header className="border-b px-4">
       <nav className="flex h-14 items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-2">
-          {user && <AcademicConfig />}
+          <SidebarTrigger />
         </div>
 
         <div className="grow">

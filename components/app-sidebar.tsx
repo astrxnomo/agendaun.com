@@ -20,7 +20,6 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
-import { AcademicConfig } from "@/components/academic/sidebar-button"
 import { NavUser } from "@/components/auth/nav-user"
 import {
   Collapsible,
@@ -234,10 +233,7 @@ export function AppSidebar() {
         ) : (
           <>
             {user ? (
-              <>
-                <AcademicConfig />
-                <NavUser />
-              </>
+              <NavUser />
             ) : (
               <SidebarMenu>
                 <SidebarMenuItem>

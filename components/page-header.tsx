@@ -8,7 +8,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { SidebarTrigger } from "@/components/ui/sidebar"
 
 interface BreadcrumbItem {
   label: string
@@ -24,8 +23,6 @@ interface PageHeaderProps {
 export function PageHeader({ breadcrumbs, action }: PageHeaderProps) {
   return (
     <header className="bg-background sticky top-0 z-40 flex h-12 shrink-0 items-center gap-2 border-b px-4">
-      <SidebarTrigger />
-
       <Breadcrumb>
         <BreadcrumbList>
           {/* Desktop: breadcrumbs completos */}

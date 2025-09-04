@@ -28,6 +28,12 @@ interface ConfigContextType {
   updateSede: (sede: Sedes | null) => void
   updateFaculty: (faculty: Faculties | null) => void
   updateProgram: (program: Programs | null) => void
+
+  // Auto-setup functionality
+  isAcademicConfigComplete: boolean
+  isAcademicConfigIncomplete: boolean
+  showConfigDialog: boolean
+  setShowConfigDialog: (show: boolean) => void
 }
 
 const AcademicContext = createContext<ConfigContextType | undefined>(undefined)
@@ -38,6 +44,13 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
   const [selectedFaculty, setSelectedFaculty] = useState<Faculties | null>(null)
   const [selectedProgram, setSelectedProgram] = useState<Programs | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [showConfigDialog, setShowConfigDialog] = useState(false)
+
+  // Academic configuration status
+  const isAcademicConfigComplete = Boolean(
+    selectedSede && selectedFaculty && selectedProgram,
+  )
+  const isAcademicConfigIncomplete = Boolean(user && !isAcademicConfigComplete)
 
   // Helper function to clear all selections
   const clearSelections = useCallback(() => {
@@ -88,6 +101,24 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
     void loadConfig()
   }, [loadConfig])
 
+  // Auto-show config dialog when user is logged in but config is incomplete
+  useEffect(() => {
+    if (
+      user &&
+      !selectedSede &&
+      !selectedFaculty &&
+      !selectedProgram &&
+      !isLoading
+    ) {
+      // Small delay to let everything load
+      const timer = setTimeout(() => {
+        setShowConfigDialog(true)
+      }, 1500)
+
+      return () => clearTimeout(timer)
+    }
+  }, [user, selectedSede, selectedFaculty, selectedProgram, isLoading])
+
   // Helper functions for external updates
   const updateSede = useCallback((sede: Sedes | null) => {
     setSelectedSede(sede)
@@ -126,6 +157,12 @@ export function AcademicProvider({ children }: { children: React.ReactNode }) {
         updateSede,
         updateFaculty,
         updateProgram,
+
+        // Auto-setup functionality
+        isAcademicConfigComplete,
+        isAcademicConfigIncomplete,
+        showConfigDialog,
+        setShowConfigDialog,
       }}
     >
       {children}

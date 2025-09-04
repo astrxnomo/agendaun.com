@@ -3,6 +3,7 @@
 import { Cog, Ellipsis, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 
+import { UserConfigDialog } from "@/components/auth/user-config"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -71,9 +72,11 @@ export function NavUser() {
                 <span className="truncate font-medium">
                   {(user.name || user.email)?.replace(/@unal\.edu\.co$/, "")}
                 </span>
-                <span className="truncate text-[10px]">
-                  {selectedSede?.name}
-                </span>
+                {selectedSede && (
+                  <span className="truncate text-[10px]">
+                    {selectedSede?.name} - {selectedProgram?.name}
+                  </span>
+                )}
               </div>
               <Ellipsis className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -107,10 +110,12 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Cog />
-                Configuración
-              </DropdownMenuItem>
+              <UserConfigDialog>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <Cog />
+                  Configuración
+                </DropdownMenuItem>
+              </UserConfigDialog>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
 
