@@ -19,8 +19,6 @@ export { CalendarProvider, useCalendarContext } from "./calendar-context"
 
 export { default as UniversalCalendar } from "./calendar"
 
-export { useCalendar } from "./hooks/use-calendar"
-
 // Constants and utility exports
 export * from "./constants"
 export * from "./utils"

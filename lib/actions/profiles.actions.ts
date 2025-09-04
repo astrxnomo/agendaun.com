@@ -30,6 +30,7 @@ export async function updateUserProfile({
     if (existingProfile.rows.length > 0) {
       const profileId = existingProfile.rows[0].$id
       const result = await data.profiles.upsert(profileId, {
+        user_id,
         sede: sede_id,
         faculty: faculty_id,
         program: program_id,

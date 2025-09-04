@@ -67,7 +67,7 @@ export async function getCalendarEvents(
 }
 
 export async function createEvent(
-  event: Partial<Events>,
+  event: Events,
 ): Promise<Events | AppwriteError> {
   try {
     const data = await db()
@@ -83,13 +83,12 @@ export async function createEvent(
 }
 
 export async function updateEvent(
-  eventId: string,
-  event: Partial<Events>,
+  event: Events,
 ): Promise<Events | AppwriteError> {
   try {
     const data = await db()
 
-    const result = await data.events.upsert(eventId, event)
+    const result = await data.events.upsert(event.$id, event)
     return result as Events
   } catch (error) {
     console.error("Error updating event:", error)
@@ -102,8 +101,9 @@ export async function deleteEvent(
 ): Promise<boolean | AppwriteError> {
   try {
     const data = await db()
-    await data.events.delete(eventId)
-    return true
+    const result = await data.events.delete(eventId)
+
+    return result as boolean
   } catch (error) {
     console.error("Error deleting event:", error)
     return handleAppwriteError(error)
