@@ -23,7 +23,11 @@ export async function sendMagicLink(
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
     const verifyUrl = `${baseUrl}/auth/verify`
 
-    await account.createMagicURLToken(ID.unique(), email, verifyUrl)
+    await account.createMagicURLToken({
+      userId: ID.unique(),
+      email,
+      url: verifyUrl,
+    })
     return { success: true }
   } catch (error) {
     console.error("Error sending magic link:", error)
@@ -57,7 +61,10 @@ export const verifySession = cache(async () => {
 
 export async function createSession(userId: string, secret: string) {
   const { account } = await createAdminClient()
-  const session = await account.createSession(userId, secret)
+  const session = await account.createSession({
+    userId,
+    secret,
+  })
   const cookieStore = await cookies()
 
   cookieStore.set("session", session.secret, {
@@ -89,7 +96,7 @@ export async function deleteSession(): Promise<void> {
 
   try {
     const { account } = await createSessionClient()
-    await account.deleteSession("current")
+    await account.deleteSession({ sessionId: "current" })
   } catch (error) {
     console.error("Error deleting session:", error)
   }

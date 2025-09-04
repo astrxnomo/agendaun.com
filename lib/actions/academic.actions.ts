@@ -8,25 +8,21 @@ import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
 
 import type { Faculties, Programs, Sedes } from "@/types"
 
-// Optimized functions using relationships
-export async function getSedesWithFaculties(): Promise<
-  Sedes[] | AppwriteError
-> {
+export async function getSedes(): Promise<Sedes[] | AppwriteError> {
   try {
     const data = await db()
     const result = await data.sedes.list([
       Query.orderAsc("name"),
       Query.limit(100),
-      Query.select(["*", "faculties.name"]),
     ])
     return result.rows as Sedes[]
   } catch (error) {
-    console.error("Error getting sedes with faculties:", error)
+    console.error("Error getting sedes:", error)
     return handleAppwriteError(error)
   }
 }
 
-export async function getFacultiesWithPrograms(
+export async function getFacultiesBySede(
   sedeId: string,
 ): Promise<Faculties[] | AppwriteError> {
   try {
@@ -35,11 +31,10 @@ export async function getFacultiesWithPrograms(
       Query.equal("sede", sedeId),
       Query.orderAsc("name"),
       Query.limit(100),
-      Query.select(["*", "programs.name"]),
     ])
     return result.rows as Faculties[]
   } catch (error) {
-    console.error("Error getting faculties with programs:", error)
+    console.error("Error getting faculties by sede:", error)
     return handleAppwriteError(error)
   }
 }

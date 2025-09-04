@@ -10,7 +10,7 @@ import {
   University,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useId, useState } from "react"
+import { useId, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -38,9 +38,9 @@ import {
 import { useAcademicConfig } from "@/contexts/academic-context"
 import { useAuthContext } from "@/contexts/auth-context"
 import {
-  getFacultiesWithPrograms,
+  getFacultiesBySede,
   getProgramsByFaculty,
-  getSedesWithFaculties,
+  getSedes,
 } from "@/lib/actions/academic.actions"
 import { updateUserProfile } from "@/lib/actions/profiles.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
@@ -67,30 +67,17 @@ export function ConfigDialog() {
   const [programs, setPrograms] = useState<Programs[]>([])
 
   const [isSedesLoaded, setIsSedesLoaded] = useState(false)
-  const [isLoadingFallback, setIsLoadingFallback] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const [isLoadingFaculties, setIsLoadingFaculties] = useState(false)
+  const [isLoadingPrograms, setIsLoadingPrograms] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
-
-  const resetForm = () => {
-    setSelectedSede("")
-    setSelectedFaculty("")
-    setSelectedProgram("")
-    setFaculties([])
-    setPrograms([])
-    setError(null)
-  }
-
-  useEffect(() => {
-    resetForm()
-  }, [])
 
   const loadSedes = async () => {
     if (isSedesLoaded) return
 
     try {
       setError(null)
-      const result = await getSedesWithFaculties()
+      const result = await getSedes()
 
       if (isAppwriteError(result)) {
         toast.error("Error cargando sedes", {
@@ -116,32 +103,25 @@ export function ConfigDialog() {
     setPrograms([])
 
     if (sedeId) {
-      // Use the preloaded faculties from the sede relationship
-      const selectedSedeData = sedes.find((s) => s.$id === sedeId)
-      if (selectedSedeData?.faculties) {
-        setFaculties(selectedSedeData.faculties)
-      } else {
-        // Fallback: load faculties separately if not preloaded
-        try {
-          setIsLoadingFallback(true)
-          const result = await getFacultiesWithPrograms(sedeId)
+      try {
+        setIsLoadingFaculties(true)
+        const result = await getFacultiesBySede(sedeId)
 
-          if (isAppwriteError(result)) {
-            toast.error("Error cargando facultades", {
-              description: result.type,
-            })
-            setError("Error cargando facultades")
-            return
-          }
-
-          setFaculties(result)
-        } catch (err) {
-          console.error("Error loading facultades:", err)
-          toast.error("Error cargando facultades")
+        if (isAppwriteError(result)) {
+          toast.error("Error cargando facultades", {
+            description: result.type,
+          })
           setError("Error cargando facultades")
-        } finally {
-          setIsLoadingFallback(false)
+          return
         }
+
+        setFaculties(result)
+      } catch (err) {
+        console.error("Error loading facultades:", err)
+        toast.error("Error cargando facultades")
+        setError("Error cargando facultades")
+      } finally {
+        setIsLoadingFaculties(false)
       }
     } else {
       setFaculties([])
@@ -153,32 +133,25 @@ export function ConfigDialog() {
     setSelectedProgram("")
 
     if (facultyId) {
-      // Use the preloaded programs from the faculty relationship
-      const selectedFacultyData = faculties.find((f) => f.$id === facultyId)
-      if (selectedFacultyData?.programs) {
-        setPrograms(selectedFacultyData.programs)
-      } else {
-        // Fallback: load programs separately if not preloaded
-        try {
-          setIsLoadingFallback(true)
-          const result = await getProgramsByFaculty(facultyId)
+      try {
+        setIsLoadingPrograms(true)
+        const result = await getProgramsByFaculty(facultyId)
 
-          if (isAppwriteError(result)) {
-            toast.error("Error cargando programas", {
-              description: result.type,
-            })
-            setError("Error cargando programas")
-            return
-          }
-
-          setPrograms(result)
-        } catch (err) {
-          console.error("Error loading programas:", err)
-          toast.error("Error cargando programas")
+        if (isAppwriteError(result)) {
+          toast.error("Error cargando programas", {
+            description: result.type,
+          })
           setError("Error cargando programas")
-        } finally {
-          setIsLoadingFallback(false)
+          return
         }
+
+        setPrograms(result)
+      } catch (err) {
+        console.error("Error loading programas:", err)
+        toast.error("Error cargando programas")
+        setError("Error cargando programas")
+      } finally {
+        setIsLoadingPrograms(false)
       }
     } else {
       setPrograms([])
@@ -190,43 +163,32 @@ export function ConfigDialog() {
   }
 
   const saveUserProfile = async () => {
-    setIsSaving(true)
-    try {
-      const result = await updateUserProfile({
-        user_id: user!.$id,
-        sede_id: selectedSede,
-        faculty_id: selectedFaculty,
-        program_id: selectedProgram,
-      })
+    const result = await updateUserProfile({
+      user_id: user!.$id,
+      sede_id: selectedSede,
+      faculty_id: selectedFaculty,
+      program_id: selectedProgram,
+    })
 
-      if (isAppwriteError(result)) {
-        throw new Error(result.type || "Error guardando configuración")
-      }
-
-      // Update the academic context with the selected values
-      const selectedSedeData = sedes.find((s) => s.$id === selectedSede)
-      const selectedFacultyData = faculties.find(
-        (f) => f.$id === selectedFaculty,
-      )
-      const selectedProgramData = programs.find(
-        (p) => p.$id === selectedProgram,
-      )
-
-      updateSede(selectedSedeData || null)
-      updateFaculty(selectedFacultyData || null)
-      updateProgram(selectedProgramData || null)
-
-      await refreshConfig()
-      router.refresh()
-      return result
-    } catch (error) {
-      console.error("Error saving user profile:", error)
-    } finally {
-      setIsSaving(false)
+    if (isAppwriteError(result)) {
+      throw new Error(result.type || "Error guardando configuración")
     }
+
+    // Update the academic context with the selected values
+    const selectedSedeData = sedes.find((s) => s.$id === selectedSede)
+    const selectedFacultyData = faculties.find((f) => f.$id === selectedFaculty)
+    const selectedProgramData = programs.find((p) => p.$id === selectedProgram)
+
+    updateSede(selectedSedeData || null)
+    updateFaculty(selectedFacultyData || null)
+    updateProgram(selectedProgramData || null)
+
+    await refreshConfig()
+    router.refresh()
+    return result
   }
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!user?.$id) {
       toast.error("Debes estar logueado para guardar")
       return
@@ -347,14 +309,14 @@ export function ConfigDialog() {
                 variant="outline"
                 role="combobox"
                 aria-expanded={facultyOpen}
-                disabled={!selectedSede || isLoadingFallback}
+                disabled={!selectedSede || isLoadingFaculties}
                 className={`w-full justify-between py-6 ${
                   !selectedFaculty && selectedSede
                     ? "border-emerald-300 bg-emerald-50/50 dark:border-emerald-500 dark:bg-emerald-950/50"
                     : ""
                 }`}
               >
-                {isLoadingFallback ? (
+                {isLoadingFaculties ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="size-4 animate-spin" />
                     Cargando facultades...
@@ -417,14 +379,14 @@ export function ConfigDialog() {
                 variant="outline"
                 role="combobox"
                 aria-expanded={programOpen}
-                disabled={!selectedFaculty || isLoadingFallback}
+                disabled={!selectedFaculty || isLoadingPrograms}
                 className={`w-full justify-between py-6 ${
                   !selectedProgram && selectedFaculty
                     ? "border-emerald-300 bg-emerald-50/50 dark:border-emerald-500 dark:bg-emerald-950/50"
                     : ""
                 }`}
               >
-                {isLoadingFallback ? (
+                {isLoadingPrograms ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="size-4 animate-spin" />
                     Cargando programas...
@@ -476,15 +438,9 @@ export function ConfigDialog() {
       <DialogFooter>
         <Button
           onClick={handleSave}
-          disabled={
-            !selectedSede || !selectedFaculty || !selectedProgram || isSaving
-          }
+          disabled={!selectedSede || !selectedFaculty || !selectedProgram}
         >
-          {isSaving ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <>Guardar</>
-          )}
+          Guardar
         </Button>
       </DialogFooter>
     </DialogContent>

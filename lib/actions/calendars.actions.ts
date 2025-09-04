@@ -17,7 +17,7 @@ export async function getCalendarBySlug(
       Query.select(["*", "profile.user_id", "etiquettes.*"]),
     ])
 
-    return result.rows[0] as Calendars
+    return (result.rows[0] as Calendars) || null
   } catch (error) {
     console.error(`Error getting calendar with slug ${slug}:`, error)
     return handleAppwriteError(error)
