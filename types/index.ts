@@ -69,6 +69,7 @@ export type Calendars = Models.Document & {
   slug: string
   profile: Profiles
   etiquettes: Etiquettes[]
+  requireConfig: boolean
 }
 
 export type Profiles = Models.Document & {

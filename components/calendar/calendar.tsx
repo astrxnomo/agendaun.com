@@ -4,7 +4,6 @@ import { CalendarSync } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import { UserConfigDialog } from "@/components/auth/user-config"
 import {
   EditModeToggle,
   EtiquettesHeader,
@@ -21,19 +20,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useAcademicConfig } from "@/contexts/academic-context"
 import { useAuthContext } from "@/contexts/auth-context"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
 import { userCanEdit } from "@/lib/actions/users.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
 
+import { RequireConfig } from "../auth/require-config"
+
 import type { Calendars, Etiquettes, Events } from "@/types"
 
 export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
-  const academicConfig = useAcademicConfig()
-  const { user } = useAuthContext()
-  const { isAcademicConfigIncomplete } = academicConfig
+  const { user, profile } = useAuthContext()
+
   const [calendar, setCalendar] = useState<Calendars | null>(null)
   const [events, setEvents] = useState<Events[]>([])
   const [etiquettes, setEtiquettes] = useState<Etiquettes[]>([])
@@ -147,14 +146,7 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
     }
 
     void fetchData()
-  }, [
-    user,
-    calendarSlug,
-    academicConfig.selectedSede,
-    academicConfig.selectedFaculty,
-    academicConfig.selectedProgram,
-    refreshTrigger,
-  ])
+  }, [user, profile, calendarSlug, refreshTrigger])
 
   if (isLoading) return <CalendarSkeleton />
 
@@ -162,25 +154,8 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
     return <CalendarError error={error} retry={manualRefetch} />
   }
 
-  // Show academic setup prompt if configuration is incomplete
-  if (isAcademicConfigIncomplete) {
-    return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4 text-center">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Configuración Académica Requerida
-          </h2>
-          <p className="text-muted-foreground max-w-md">
-            Para ver el calendario, necesitas configurar tu sede, facultad y
-            programa académico.
-          </p>
-        </div>
-
-        <UserConfigDialog>
-          <Button>Configurar Información Académica</Button>
-        </UserConfigDialog>
-      </div>
-    )
+  if (calendar?.requireConfig && !profile?.sede) {
+    return <RequireConfig />
   }
 
   if (!calendar) {

@@ -39,7 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { useAcademicConfig } from "@/contexts/academic-context"
+import { useAuthContext } from "@/contexts/auth-context"
 import { cn } from "@/lib/utils"
 
 import type { Calendars, Etiquettes, Events } from "@/types"
@@ -63,6 +63,7 @@ export function EventDialog({
   onSave,
   onDelete,
 }: EventDialogProps) {
+  const { profile } = useAuthContext()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [startDate, setStartDate] = useState<Date>(new Date())
@@ -75,8 +76,6 @@ export function EventDialog({
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   const [endDateOpen, setEndDateOpen] = useState(false)
-
-  const { selectedSede, selectedFaculty, selectedProgram } = useAcademicConfig()
 
   useEffect(() => {
     if (event) {
@@ -185,16 +184,16 @@ export function EventDialog({
       location,
       etiquette: etiquette?.$id ? { $id: etiquette.$id } : undefined,
       sede:
-        calendar.slug === "sede-calendar" && selectedSede?.$id
-          ? { $id: selectedSede.$id }
+        calendar.slug === "sede-calendar" && profile?.sede?.$id
+          ? { $id: profile.sede.$id }
           : undefined,
       faculty:
-        calendar.slug === "faculty-calendar" && selectedFaculty?.$id
-          ? { $id: selectedFaculty.$id }
+        calendar.slug === "faculty-calendar" && profile?.faculty?.$id
+          ? { $id: profile.faculty.$id }
           : undefined,
       program:
-        calendar.slug === "program-calendar" && selectedProgram?.$id
-          ? { $id: selectedProgram.$id }
+        calendar.slug === "program-calendar" && profile?.program?.$id
+          ? { $id: profile.program.$id }
           : undefined,
       calendar: calendar,
     }

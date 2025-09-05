@@ -6,10 +6,10 @@ import NavTop from "@/components/nav-top"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
-import { AcademicProvider } from "@/contexts/academic-context"
 import { AuthContextProvider } from "@/contexts/auth-context"
 
 import type { Metadata } from "next"
+
 import "./globals.css"
 
 const outfit = Outfit({
@@ -36,18 +36,16 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <AuthContextProvider>
-            <AcademicProvider>
-              <CalendarProvider>
-                <SidebarProvider>
-                  <AppSidebar />
-                  <SidebarInset>
-                    <NavTop />
-                    {children}
-                  </SidebarInset>
-                </SidebarProvider>
-              </CalendarProvider>
-              <Toaster position="bottom-right" richColors />
-            </AcademicProvider>
+            <CalendarProvider>
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                  <NavTop />
+                  {children}
+                </SidebarInset>
+              </SidebarProvider>
+            </CalendarProvider>
+            <Toaster position="bottom-right" richColors />
           </AuthContextProvider>
         </ThemeProvider>
       </body>
