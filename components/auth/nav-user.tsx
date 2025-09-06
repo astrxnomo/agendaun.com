@@ -2,6 +2,8 @@
 
 import { Ellipsis, LogOut, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { toast } from "sonner"
 
 import { ConfigDialog } from "@/components/auth/config-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -23,33 +25,46 @@ import {
 import { useAuthContext } from "@/contexts/auth-context"
 import { deleteSession } from "@/lib/appwrite/auth"
 
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+const formatUserName = (name: string | undefined, email: string) => {
+  return (name || email)?.replace(/@unal\.edu\.co$/, "")
+}
+
 export function NavUser() {
   const { isMobile } = useSidebar()
-  const { user, setUser, profile, setProfile } = useAuthContext()
+  const { user, setUser, profile } = useAuthContext()
   const router = useRouter()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   if (!user) {
     return null
   }
 
   const handleLogout = async () => {
+    if (isLoggingOut) return
+
+    setIsLoggingOut(true)
     try {
       await deleteSession()
       setUser(null)
-      setProfile(null)
+      toast.success("Sesión cerrada exitosamente")
       router.push("/")
     } catch (error) {
       console.error("Error during logout:", error)
+      toast.error("Error", {
+        description: "No se pudo cerrar la sesión. Intenta de nuevo.",
+      })
+    } finally {
+      setIsLoggingOut(false)
     }
-  }
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
   }
 
   return (
@@ -68,11 +83,11 @@ export function NavUser() {
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
-                  {(user.name || user.email)?.replace(/@unal\.edu\.co$/, "")}
+                  {formatUserName(user.name, user.email)}
                 </span>
-                {profile?.sede && (
-                  <span className="truncate text-[10px]">
-                    {profile?.sede?.name} - {profile?.program?.name}
+                {profile?.sede && profile?.program && (
+                  <span className="text-muted-foreground truncate text-[10px]">
+                    {profile.sede.name} - {profile.program.name}
                   </span>
                 )}
               </div>
@@ -96,13 +111,21 @@ export function NavUser() {
                   <span className="truncate font-medium">
                     {user.name || user.email}
                   </span>
-
-                  <span className="truncate text-[10px]">
-                    {profile?.faculty?.name}
-                  </span>
-                  <span className="truncate text-[10px]">
-                    {profile?.program?.name}
-                  </span>
+                  {profile?.sede && (
+                    <span className="text-muted-foreground truncate text-[10px]">
+                      {profile.sede.name}
+                    </span>
+                  )}
+                  {profile?.faculty && (
+                    <span className="text-muted-foreground truncate text-[10px]">
+                      {profile.faculty.name}
+                    </span>
+                  )}
+                  {profile?.program && (
+                    <span className="text-muted-foreground truncate text-[10px]">
+                      {profile.program.name}
+                    </span>
+                  )}
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -116,9 +139,9 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
               <LogOut />
-              Cerrar sesión
+              {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

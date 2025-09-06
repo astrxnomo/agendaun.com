@@ -19,7 +19,7 @@ export default function Page() {
         </p>
       </div>
 
-      <Calendar calendarSlug="sede-calendar" />
+      <Calendar slug="sede-calendar" />
     </>
   )
 }

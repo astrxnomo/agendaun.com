@@ -46,39 +46,40 @@ import {
   getProgramsByFaculty,
   getSedes,
 } from "@/lib/actions/academic.actions"
-import { updateUserProfile } from "@/lib/actions/profiles.actions"
+import { updateProfile } from "@/lib/actions/profiles.actions"
+import { updateUserName } from "@/lib/actions/users.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import { Separator } from "../ui/separator"
 
-import type { Faculties, Programs, Sedes } from "@/types"
+import type { Faculties, Profiles, Programs, Sedes } from "@/types"
 
 interface UserConfigDialogProps {
   children: React.ReactNode
 }
 
 export function ConfigDialog({ children }: UserConfigDialogProps) {
-  const { user, profile, setProfile } = useAuthContext()
+  const { user, profile, setUser } = useAuthContext()
   const router = useRouter()
   const id = useId()
 
   const [open, setOpen] = useState(false)
 
-  // Form state
   const [name, setName] = useState(user?.name || "")
   const [email] = useState(user?.email || "")
 
-  // Academic selection state
   const [sedeOpen, setSedeOpen] = useState(false)
   const [facultyOpen, setFacultyOpen] = useState(false)
   const [programOpen, setProgramOpen] = useState(false)
 
-  const [selectedSedeId, setSelectedSedeId] = useState(profile?.sede?.$id || "")
-  const [selectedFacultyId, setSelectedFacultyId] = useState(
-    profile?.faculty?.$id || "",
+  const [selectedSede, setSelectedSede] = useState<Sedes | null>(
+    profile?.sede || null,
   )
-  const [selectedProgramId, setSelectedProgramId] = useState(
-    profile?.program?.$id || "",
+  const [selectedFaculty, setSelectedFaculty] = useState<Faculties | null>(
+    profile?.faculty || null,
+  )
+  const [selectedProgram, setSelectedProgram] = useState<Programs | null>(
+    profile?.program || null,
   )
 
   // Data state
@@ -99,9 +100,9 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
     setOpen(newOpen)
     if (newOpen) {
       setName(user?.name || "")
-      setSelectedSedeId(profile?.sede?.$id || "")
-      setSelectedFacultyId(profile?.faculty?.$id || "")
-      setSelectedProgramId(profile?.program?.$id || "")
+      setSelectedSede(profile?.sede || null)
+      setSelectedFaculty(profile?.faculty || null)
+      setSelectedProgram(profile?.program || null)
       setError(null)
 
       if (profile?.sede && profile?.faculty) {
@@ -122,7 +123,7 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
 
       if (isAppwriteError(result)) {
         toast.error("Error cargando sedes", {
-          description: result.message,
+          description: result.type,
         })
         setError("Error cargando sedes")
         return
@@ -137,20 +138,20 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
     }
   }
 
-  const handleSedeChange = async (sedeId: string) => {
-    setSelectedSedeId(sedeId)
-    setSelectedFacultyId("")
-    setSelectedProgramId("")
+  const handleSedeChange = async (sede: Sedes) => {
+    setSelectedSede(sede)
+    setSelectedFaculty(null)
+    setSelectedProgram(null)
     setPrograms([])
 
-    if (sedeId) {
+    if (sede) {
       try {
         setIsLoadingFaculties(true)
-        const result = await getFacultiesBySede(sedeId)
+        const result = await getFacultiesBySede(sede.$id)
 
         if (isAppwriteError(result)) {
           toast.error("Error cargando facultades", {
-            description: result.message,
+            description: result.type,
           })
           setError("Error cargando facultades")
           return
@@ -169,18 +170,18 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
     }
   }
 
-  const handleFacultyChange = async (facultyId: string) => {
-    setSelectedFacultyId(facultyId)
-    setSelectedProgramId("")
+  const handleFacultyChange = async (faculty: Faculties) => {
+    setSelectedFaculty(faculty)
+    setSelectedProgram(null)
 
-    if (facultyId) {
+    if (faculty) {
       try {
         setIsLoadingPrograms(true)
-        const result = await getProgramsByFaculty(facultyId)
+        const result = await getProgramsByFaculty(faculty.$id)
 
         if (isAppwriteError(result)) {
           toast.error("Error cargando programas", {
-            description: result.message,
+            description: result.type,
           })
           setError("Error cargando programas")
           return
@@ -199,8 +200,8 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
     }
   }
 
-  const handleProgramChange = (programId: string) => {
-    setSelectedProgramId(programId)
+  const handleProgramChange = (program: Programs) => {
+    setSelectedProgram(program)
   }
 
   const saveUserConfig = async () => {
@@ -208,29 +209,39 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
       throw new Error("Usuario no autenticado")
     }
 
+    if (!selectedSede || !selectedFaculty || !selectedProgram) {
+      throw new Error("Selecciona sede, facultad y programa")
+    }
+
+    if (!name.trim()) {
+      throw new Error("El nombre es requerido")
+    }
+
     setIsSaving(true)
     try {
-      // Update profile (academic configuration)
-      const profileResult = await updateUserProfile({
-        user_id: user.$id,
-        sede_id: selectedSedeId || null,
-        faculty_id: selectedFacultyId || null,
-        program_id: selectedProgramId || null,
-      })
+      if (name.trim() !== user.name) {
+        const result = await updateUserName(name.trim())
+
+        if (isAppwriteError(result)) {
+          throw new Error(result.type || "Error actualizando el nombre")
+        }
+
+        setUser({
+          ...user,
+          name: name.trim(),
+        })
+      }
+
+      const profileResult = await updateProfile({
+        ...profile,
+        sede: selectedSede,
+        faculty: selectedFaculty,
+        program: selectedProgram,
+      } as Profiles)
 
       if (isAppwriteError(profileResult)) {
-        throw new Error(
-          profileResult.message || "Error guardando configuración",
-        )
+        throw new Error(profileResult.type || "Error guardando configuración")
       }
-
-      // Update the profile in auth context to trigger calendar refresh
-      if (profileResult) {
-        setProfile(profileResult)
-      }
-
-      // TODO: Add user name update functionality here when available
-      // For now, we'll just update the academic configuration
 
       router.refresh()
       setOpen(false)
@@ -248,7 +259,12 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
       return
     }
 
-    if (!selectedSedeId || !selectedFacultyId || !selectedProgramId) {
+    if (!name.trim()) {
+      toast.error("El nombre es requerido")
+      return
+    }
+
+    if (!selectedSede || !selectedFaculty || !selectedProgram) {
       toast.error("Selecciona sede, facultad y programa")
       return
     }
@@ -345,10 +361,8 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                       aria-expanded={sedeOpen}
                       className="w-full justify-between"
                     >
-                      {selectedSedeId
-                        ? sedes.find((s) => s.$id === selectedSedeId)?.name ||
-                          profile?.sede?.name ||
-                          "Sede no encontrada"
+                      {selectedSede
+                        ? selectedSede.name || "Sede no encontrada"
                         : "Selecciona tu sede"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -368,13 +382,13 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                               key={sede.$id}
                               value={sede.name}
                               onSelect={() => {
-                                void handleSedeChange(sede.$id)
+                                void handleSedeChange(sede)
                                 setSedeOpen(false)
                               }}
                             >
                               <Check
                                 className={`h-4 w-4 ${
-                                  selectedSedeId === sede.$id
+                                  selectedSede?.$id === sede.$id
                                     ? "opacity-100"
                                     : "opacity-0"
                                 }`}
@@ -404,7 +418,7 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                       variant="outline"
                       role="combobox"
                       aria-expanded={facultyOpen}
-                      disabled={!selectedSedeId || isLoadingFaculties}
+                      disabled={!selectedSede || isLoadingFaculties}
                       className="w-full justify-between"
                     >
                       {isLoadingFaculties ? (
@@ -412,12 +426,9 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                           <Loader2 className="size-4 animate-spin" />
                           Cargando facultades...
                         </div>
-                      ) : selectedFacultyId ? (
-                        faculties.find((f) => f.$id === selectedFacultyId)
-                          ?.name ||
-                        profile?.faculty?.name ||
-                        "Facultad no encontrada"
-                      ) : !selectedSedeId ? (
+                      ) : selectedFaculty ? (
+                        selectedFaculty.name || "Facultad no encontrada"
+                      ) : !selectedSede ? (
                         "Primero selecciona una sede"
                       ) : (
                         "Selecciona tu facultad"
@@ -438,13 +449,13 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                               key={facultad.$id}
                               value={facultad.name}
                               onSelect={() => {
-                                void handleFacultyChange(facultad.$id)
+                                void handleFacultyChange(facultad)
                                 setFacultyOpen(false)
                               }}
                             >
                               <Check
                                 className={`h-4 w-4 ${
-                                  selectedFacultyId === facultad.$id
+                                  selectedFaculty?.$id === facultad.$id
                                     ? "opacity-100"
                                     : "opacity-0"
                                 }`}
@@ -476,7 +487,7 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                       variant="outline"
                       role="combobox"
                       aria-expanded={programOpen}
-                      disabled={!selectedFacultyId || isLoadingPrograms}
+                      disabled={!selectedFaculty || isLoadingPrograms}
                       className="w-full justify-between"
                     >
                       {isLoadingPrograms ? (
@@ -484,12 +495,9 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                           <Loader2 className="size-4 animate-spin" />
                           Cargando programas...
                         </div>
-                      ) : selectedProgramId ? (
-                        programs.find((p) => p.$id === selectedProgramId)
-                          ?.name ||
-                        profile?.program?.name ||
-                        "Programa no encontrado"
-                      ) : !selectedFacultyId ? (
+                      ) : selectedProgram ? (
+                        selectedProgram.name || "Programa no encontrado"
+                      ) : !selectedFaculty ? (
                         "Primero selecciona una facultad"
                       ) : (
                         "Selecciona tu programa"
@@ -510,13 +518,13 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                               key={programa.$id}
                               value={programa.name}
                               onSelect={() => {
-                                handleProgramChange(programa.$id)
+                                handleProgramChange(programa)
                                 setProgramOpen(false)
                               }}
                             >
                               <Check
                                 className={`h-4 w-4 ${
-                                  selectedProgramId === programa.$id
+                                  selectedProgram?.$id === programa.$id
                                     ? "opacity-100"
                                     : "opacity-0"
                                 }`}
@@ -544,9 +552,10 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
             type="button"
             onClick={handleSave}
             disabled={
-              !selectedSedeId ||
-              !selectedFacultyId ||
-              !selectedProgramId ||
+              !name.trim() ||
+              !selectedSede ||
+              !selectedFaculty ||
+              !selectedProgram ||
               isSaving
             }
           >

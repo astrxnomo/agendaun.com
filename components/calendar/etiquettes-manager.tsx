@@ -24,10 +24,9 @@ import { isAppwriteError } from "@/lib/utils/error-handler"
 import { type Calendars, Colors, type Etiquettes } from "@/types"
 
 import { Separator } from "../ui/separator"
-import { getEtiquetteIndicatorColor } from "./utils"
+import { getColorIndicator } from "./utils"
 
 interface EtiquettesManagerProps {
-  etiquettes: Etiquettes[]
   calendar: Calendars
   onUpdate: () => void
 }
@@ -39,7 +38,6 @@ interface EtiquetteForm {
 
 export function EtiquettesManager({
   calendar,
-  etiquettes,
   onUpdate,
 }: EtiquettesManagerProps) {
   const [open, setOpen] = useState(false)
@@ -61,7 +59,7 @@ export function EtiquettesManager({
   }
 
   const getAvailableColors = () => {
-    const usedColors = etiquettes
+    const usedColors = calendar.etiquettes
       .filter((etiquette) => editingEtiquette?.$id !== etiquette.$id)
       .map((etiquette) => etiquette.color)
 
@@ -69,7 +67,7 @@ export function EtiquettesManager({
       .filter((color) => !usedColors.includes(color) && color !== Colors.GRAY)
       .map((color) => ({
         value: color,
-        class: getEtiquetteIndicatorColor(color),
+        class: getColorIndicator(color),
       }))
   }
 
@@ -107,7 +105,7 @@ export function EtiquettesManager({
       loading: isEditing ? "Actualizando etiqueta..." : "Creando etiqueta...",
       success: (result) => {
         if (isAppwriteError(result)) {
-          throw new Error(result.message || "Error en la operación")
+          throw new Error(result.type || "Error en la operación")
         }
         resetForm()
         onUpdate()
@@ -129,7 +127,7 @@ export function EtiquettesManager({
     setIsLoading(true)
     const promise = deleteEtiquette(etiquette.$id).then((result) => {
       if (isAppwriteError(result)) {
-        throw new Error(result.message || "Error al eliminar etiqueta")
+        throw new Error(result.type || "Error al eliminar etiqueta")
       }
       onUpdate()
       return result
@@ -217,7 +215,7 @@ export function EtiquettesManager({
             </div>
           </form>
 
-          {etiquettes.length === 0 ? (
+          {calendar.etiquettes.length === 0 ? (
             <p className="text-muted-foreground py-4 text-center text-sm">
               No hay etiquetas
             </p>
@@ -226,14 +224,14 @@ export function EtiquettesManager({
               <Separator className="my-4" />
               <div className="space-y-1.5">
                 <h3 className="text-sm font-medium">Etiquetas creadas</h3>
-                {etiquettes.map((etiquette) => (
+                {calendar.etiquettes.map((etiquette) => (
                   <div
                     key={etiquette.$id}
                     className="flex items-center justify-between rounded border p-2"
                   >
                     <div className="flex items-center gap-2">
                       <div
-                        className={`h-3 w-3 rounded-full ${getEtiquetteIndicatorColor(
+                        className={`h-3 w-3 rounded-full ${getColorIndicator(
                           etiquette.color,
                         )}`}
                       />

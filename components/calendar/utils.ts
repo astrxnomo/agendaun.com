@@ -2,7 +2,7 @@ import { isSameDay } from "date-fns"
 
 import { type Events, Colors } from "@/types"
 
-export function getEtiquetteColor(color?: Colors): string {
+export function getColor(color?: Colors): string {
   switch (color) {
     case Colors.BLUE:
       return "bg-blue-200/50 hover:bg-blue-200/40 text-blue-900/90 shadow-blue-700/8 dark:bg-blue-400/25 dark:hover:bg-blue-400/20 dark:text-blue-200"
@@ -26,7 +26,7 @@ export function getEtiquetteColor(color?: Colors): string {
       return "bg-gray-200/50 hover:bg-gray-200/40 text-gray-900/90 shadow-gray-700/8 dark:bg-gray-400/25 dark:hover:bg-gray-400/20 dark:text-gray-200"
   }
 }
-export function getEtiquetteIndicatorColor(color?: Colors): string {
+export function getColorIndicator(color?: Colors): string {
   switch (color) {
     case Colors.GRAY:
       return "bg-gray-400 dark:bg-gray-500"

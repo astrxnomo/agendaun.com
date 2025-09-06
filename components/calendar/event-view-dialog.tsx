@@ -2,9 +2,9 @@
 
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { Calendar1, Clock, MapPin } from "lucide-react"
+import { Calendar, Clock, MapPin } from "lucide-react"
 
-import { getEtiquetteColor } from "@/components/calendar"
+import { getColor } from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -37,7 +37,7 @@ export function EventViewDialog({
   const startDate = new Date(event.start)
   const endDate = new Date(event.end)
 
-  const eventColor = getEtiquetteColor(event.etiquette?.color)
+  const eventColor = getColor(event.etiquette?.color)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -50,7 +50,7 @@ export function EventViewDialog({
                 eventColor,
               )}
             >
-              <Calendar1 className="size-5" />
+              <Calendar className="size-5" />
             </div>
             <DialogTitle className="text-left text-lg font-semibold">
               {event.title}

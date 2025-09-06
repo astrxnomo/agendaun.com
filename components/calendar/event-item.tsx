@@ -4,10 +4,7 @@ import { differenceInMinutes, format, getMinutes, isPast } from "date-fns"
 import { es } from "date-fns/locale"
 import { useMemo } from "react"
 
-import {
-  getBorderRadiusClasses,
-  getEtiquetteColor,
-} from "@/components/calendar"
+import { getBorderRadiusClasses, getColor } from "@/components/calendar"
 import { cn } from "@/lib/utils"
 
 import type { Etiquettes, Events } from "@/types"
@@ -56,7 +53,7 @@ function EventWrapper({
   onTouchStart,
 }: EventWrapperProps) {
   // Calculate color using etiquettes
-  const colorClass = getEtiquetteColor(event.etiquette?.color)
+  const colorClass = getColor(event.etiquette?.color)
 
   // Always use the currentTime (if provided) to determine if the event is in the past
   const displayEnd = currentTime
@@ -124,7 +121,7 @@ export function EventItem({
   onMouseDown,
   onTouchStart,
 }: EventItemProps) {
-  const colorClass = getEtiquetteColor(event.etiquette?.color)
+  const colorClass = getColor(event.etiquette?.color)
 
   // Use the provided currentTime (for dragging) or the event's actual time
   const displayStart = useMemo(() => {

@@ -10,7 +10,7 @@ export default async function Page() {
           { label: "Mi calendario", isCurrentPage: true },
         ]}
       />
-      <Calendar calendarSlug="personal" />
+      <Calendar slug="personal" />
     </>
   )
 }

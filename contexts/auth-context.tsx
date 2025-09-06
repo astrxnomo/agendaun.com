@@ -11,7 +11,6 @@ interface AuthContextType {
   user: User | null
   profile: Profiles | null
   setUser: (user: User | null) => void
-  setProfile: (profile: Profiles | null) => void
   isLoading: boolean
 }
 
@@ -27,25 +26,36 @@ export const AuthContextProvider = ({
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const handleGetLoggedInUser = async () => {
-      try {
-        const userData = await getUser()
-        setUser(userData)
+    const loadProfile = async () => {
+      if (!user) {
+        setProfile(null)
+        return
+      }
 
-        if (userData) {
-          const profileData = await getProfile(userData.$id)
-          if (!isAppwriteError(profileData)) {
-            setProfile(profileData)
-          } else {
-            setProfile(null)
-          }
+      try {
+        const profileData = await getProfile(user.$id)
+        if (!isAppwriteError(profileData)) {
+          setProfile(profileData)
         } else {
           setProfile(null)
         }
       } catch (error) {
+        console.log("Error loading profile:", error)
+        setProfile(null)
+      }
+    }
+
+    void loadProfile()
+  }, [user])
+
+  useEffect(() => {
+    const handleGetLoggedInUser = async () => {
+      try {
+        const userData = await getUser()
+        setUser(userData)
+      } catch (error) {
         console.log(error)
         setUser(null)
-        setProfile(null)
       } finally {
         setIsLoading(false)
       }
@@ -55,9 +65,7 @@ export const AuthContextProvider = ({
   }, [])
 
   return (
-    <AuthContext.Provider
-      value={{ user, profile, setUser, setProfile, isLoading }}
-    >
+    <AuthContext.Provider value={{ user, profile, setUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

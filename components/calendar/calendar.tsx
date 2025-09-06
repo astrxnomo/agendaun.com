@@ -1,25 +1,13 @@
 "use client"
 
-import { CalendarSync } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import {
-  EditModeToggle,
-  EtiquettesHeader,
-  EtiquettesManager,
-  SetupCalendar,
-} from "@/components/calendar"
+import { EtiquettesHeader, SetupCalendar } from "@/components/calendar"
 import {
   CalendarError,
   CalendarSkeleton,
 } from "@/components/skeletons/calendar-loading"
-import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { useAuthContext } from "@/contexts/auth-context"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
@@ -30,25 +18,20 @@ import { RequireConfig } from "../auth/require-config"
 
 import type { Calendars, Etiquettes, Events } from "@/types"
 
-export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
+export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   const { user, profile } = useAuthContext()
 
   const [calendar, setCalendar] = useState<Calendars | null>(null)
   const [events, setEvents] = useState<Events[]>([])
-  const [etiquettes, setEtiquettes] = useState<Etiquettes[]>([])
   const [visibleEtiquettes, setVisibleEtiquettes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editMode, setEditMode] = useState(false)
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [canEdit, setCanEdit] = useState(false)
+  const [refetchTrigger, setRefetchTrigger] = useState(0)
 
   const manualRefetch = () => {
-    setCalendar(null)
-    setEvents([])
-    setEtiquettes([])
-    setError(null)
-    setRefreshTrigger((prev) => prev + 1)
+    setRefetchTrigger((prev) => prev + 1)
   }
 
   const toggleEtiquetteVisibility = (etiquetteId: string) => {
@@ -77,12 +60,15 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
   useEffect(() => {
     setCalendar(null)
     setEvents([])
-    setEtiquettes([])
     setError(null)
   }, [calendarSlug])
 
   useEffect(() => {
+    // Don't run if still loading auth or if user is not available
     if (!user) return
+
+    // Don't run if we don't have a profile yet (could still be loading)
+    if (!profile) return
 
     const fetchData = async () => {
       try {
@@ -96,7 +82,7 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
 
         const calendarResult = await getCalendarBySlug(slug)
         if (isAppwriteError(calendarResult)) {
-          toast.error("Error cargando calendario", {
+          toast.error("Error cargando calendario...", {
             description: calendarResult.type,
           })
           return
@@ -111,15 +97,18 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
 
         const permissionsResult = await userCanEdit(calendarResult)
         if (isAppwriteError(permissionsResult)) {
-          console.warn("Error checking permissions:", permissionsResult.message)
+          toast.error("Error cargando permisos...", {
+            description: permissionsResult.type,
+          })
           setCanEdit(false)
         } else {
           setCanEdit(permissionsResult)
         }
 
-        const eventsResult = await getCalendarEvents(calendarResult)
+        // At this point we know profile exists
+        const eventsResult = await getCalendarEvents(calendarResult, profile)
         if (isAppwriteError(eventsResult)) {
-          toast.error("Error cargando eventos", {
+          toast.error("Error cargando eventos...", {
             description: eventsResult.type,
           })
           return
@@ -130,8 +119,6 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
         const etiquettes = Array.isArray(calendarResult.etiquettes)
           ? calendarResult.etiquettes
           : []
-
-        setEtiquettes(etiquettes)
 
         const activeEtiquetteIds: string[] = etiquettes
           .filter((etiquette: Etiquettes) => etiquette.isActive)
@@ -146,7 +133,7 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
     }
 
     void fetchData()
-  }, [user, profile, calendarSlug, refreshTrigger])
+  }, [user, profile, calendarSlug, refetchTrigger])
 
   if (isLoading) return <CalendarSkeleton />
 
@@ -171,52 +158,23 @@ export default function Calendar({ calendarSlug }: { calendarSlug: string }) {
   return (
     <>
       <EtiquettesHeader
-        etiquettes={etiquettes}
+        calendar={calendar}
         isEtiquetteVisible={isEtiquetteVisible}
         toggleEtiquetteVisibility={toggleEtiquetteVisibility}
-        etiquettesManager={
-          editMode && (
-            <EtiquettesManager
-              etiquettes={etiquettes}
-              calendar={calendar}
-              onUpdate={manualRefetch}
-            />
-          )
-        }
-        editButton={
-          canEdit && (
-            <EditModeToggle
-              checked={editMode}
-              onCheckedChange={toggleEditMode}
-              disabled={!canEdit}
-            />
-          )
-        }
-        syncButton={
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" onClick={manualRefetch}>
-                <CalendarSync />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Actualizar calendario</p>
-            </TooltipContent>
-          </Tooltip>
-        }
+        editMode={editMode}
+        canEdit={canEdit}
+        onToggleEditMode={toggleEditMode}
+        onManualRefetch={manualRefetch}
       />
-
-      <div className="flex-1">
-        <SetupCalendar
-          calendar={calendar}
-          events={visibleEvents}
-          etiquettes={etiquettes}
-          onEventsUpdate={setEvents}
-          editable={editMode}
-          canEdit={canEdit}
-          initialView={calendar.defaultView}
-        />
-      </div>
+      <SetupCalendar
+        initialView={calendar.defaultView}
+        calendar={calendar}
+        events={visibleEvents}
+        etiquettes={calendar.etiquettes}
+        onEventsUpdate={setEvents}
+        editable={editMode}
+        canEdit={canEdit}
+      />
     </>
   )
 }

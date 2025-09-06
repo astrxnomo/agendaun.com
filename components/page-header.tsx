@@ -22,10 +22,9 @@ interface PageHeaderProps {
 
 export function PageHeader({ breadcrumbs, action }: PageHeaderProps) {
   return (
-    <header className="bg-background sticky top-0 z-40 flex h-12 shrink-0 items-center gap-2 border-b px-4">
+    <header className="bg-background sticky top-0 z-40 flex h-12 shrink-0 items-center gap-2 border-b px-6">
       <Breadcrumb>
         <BreadcrumbList>
-          {/* Desktop: breadcrumbs completos */}
           {breadcrumbs.map((item, index) => (
             <Fragment key={index}>
               {index > 0 && <BreadcrumbSeparator />}

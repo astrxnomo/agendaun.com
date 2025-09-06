@@ -1,10 +1,33 @@
 "use server"
 
+import { type Models } from "appwrite"
+
 import { getUser } from "@/lib/appwrite/auth"
-import { createAdminClient } from "@/lib/appwrite/config"
-import { type Calendars } from "@/types"
+import { createAdminClient, createSessionClient } from "@/lib/appwrite/config"
+import { type Calendars, type User } from "@/types"
 
 import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+
+export async function updateUserName(
+  name: string,
+): Promise<Models.User<Models.Preferences> | AppwriteError> {
+  try {
+    if (!name.trim()) {
+      throw new Error("El nombre es requerido")
+    }
+
+    const { account } = await createSessionClient()
+
+    const result = await account.updateName({
+      name: name.trim(),
+    })
+
+    return result as User
+  } catch (error) {
+    console.error("Error updating user name:", error)
+    return handleAppwriteError(error)
+  }
+}
 
 export async function userCanEdit(
   calendar: Calendars,

@@ -194,7 +194,7 @@ export function SetupCalendar({
       // Actualizar evento existente
       const promise = updateEvent(event).then((result) => {
         if (isAppwriteError(result)) {
-          throw new Error(result.message || "Error al actualizar evento")
+          throw new Error(result.type || "Error al actualizar evento")
         }
         onEventsUpdate((prev) =>
           prev.map((e) => (e.$id === event.$id ? result : e)),
@@ -219,7 +219,7 @@ export function SetupCalendar({
       // Crear evento nuevo
       const promise = createEvent(event).then((result) => {
         if (isAppwriteError(result)) {
-          throw new Error(result.message || "Error al crear evento")
+          throw new Error(result.type || "Error al crear evento")
         }
         onEventsUpdate((prev) => [...prev, result])
         return result
@@ -244,7 +244,7 @@ export function SetupCalendar({
   const handleEventDelete = async (eventId: string) => {
     const promise = deleteEvent(eventId).then((result) => {
       if (isAppwriteError(result)) {
-        throw new Error(result.message || "Error al eliminar evento")
+        throw new Error(result.type || "Error al eliminar evento")
       }
       onEventsUpdate((prev) => prev.filter((event) => event.$id !== eventId))
       return result
@@ -284,7 +284,7 @@ export function SetupCalendar({
               : event,
           ),
         )
-        throw new Error(result.message || "No se pudo guardar el cambio")
+        throw new Error(result.type || "No se pudo guardar el cambio")
       }
 
       // Actualizar con los datos reales de la respuesta
@@ -296,7 +296,7 @@ export function SetupCalendar({
 
     toast.promise(promise, {
       loading: "Guardando...",
-      success: "Evento movido correctamente",
+      success: "Evento actualizado correctamente",
       error: (err: Error) => err.message || "Error al mover evento",
     })
   }

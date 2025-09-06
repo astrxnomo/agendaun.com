@@ -5,7 +5,7 @@ import { es } from "date-fns/locale"
 import { CalendarIcon, Trash } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
-import { getEtiquetteIndicatorColor } from "@/components/calendar"
+import { getColorIndicator } from "@/components/calendar"
 import {
   DefaultEndHour,
   DefaultStartHour,
@@ -428,7 +428,7 @@ export function EventDialog({
                   <div
                     className={cn(
                       "size-3 rounded-full border border-gray-400",
-                      getEtiquetteIndicatorColor(etiq.color),
+                      getColorIndicator(etiq.color),
                     )}
                   />
                   <span>{etiq.name}</span>

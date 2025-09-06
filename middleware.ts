@@ -7,7 +7,6 @@ import type { NextRequest } from "next/server"
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Redirect authenticated users away from auth pages
   if (pathname.startsWith("/auth")) {
     const hasSession = await hasValidSession()
     if (hasSession) {
