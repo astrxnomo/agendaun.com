@@ -1,7 +1,5 @@
 "use server"
 
-import { type Models } from "appwrite"
-
 import { getUser } from "@/lib/appwrite/auth"
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/config"
 import { type Calendars, type User } from "@/types"
@@ -10,7 +8,7 @@ import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
 
 export async function updateUserName(
   name: string,
-): Promise<Models.User<Models.Preferences> | AppwriteError> {
+): Promise<User | AppwriteError> {
   try {
     if (!name.trim()) {
       throw new Error("El nombre es requerido")
