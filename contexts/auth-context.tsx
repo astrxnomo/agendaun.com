@@ -31,27 +31,23 @@ export const AuthContextProvider = ({
   const [profile, setProfile] = useState<Profiles | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadUserAndProfile = async () => {
+  const loadUserAndProfile = useCallback(async () => {
     try {
       const userData = await getUser()
       setUser(userData)
 
       if (userData) {
         const profileData = await getProfile(userData.$id)
-        if (!isAppwriteError(profileData)) {
-          setProfile(profileData)
-        } else {
-          setProfile(null)
-        }
+        setProfile(!isAppwriteError(profileData) ? profileData : null)
       } else {
         setProfile(null)
       }
     } catch (error) {
-      console.log(error)
+      console.error("Error loading user and profile:", error)
       setUser(null)
       setProfile(null)
     }
-  }
+  }, [])
 
   const refreshAuth = useCallback(async () => {
     setIsLoading(true)
@@ -62,33 +58,8 @@ export const AuthContextProvider = ({
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [loadUserAndProfile])
 
-  // Load profile when user changes
-  useEffect(() => {
-    const loadProfile = async () => {
-      if (!user) {
-        setProfile(null)
-        return
-      }
-
-      try {
-        const profileData = await getProfile(user.$id)
-        if (!isAppwriteError(profileData)) {
-          setProfile(profileData)
-        } else {
-          setProfile(null)
-        }
-      } catch (error) {
-        console.log("Error loading profile:", error)
-        setProfile(null)
-      }
-    }
-
-    void loadProfile()
-  }, [user])
-
-  // Load user and profile on mount
   useEffect(() => {
     void refreshAuth()
   }, [refreshAuth])
