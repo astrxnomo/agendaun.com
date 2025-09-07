@@ -12,6 +12,7 @@ import { canEditCalendar } from "@/lib/actions/users.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import { RequireConfig } from "../auth/require-config"
+import { PageHeader } from "../page-header"
 import { CalendarError } from "./calendar-error"
 import { CalendarSkeleton } from "./calendar-skeleton"
 
@@ -176,6 +177,17 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
 
   return (
     <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Calendarios", href: "/calendars" },
+          {
+            label: calendar.name ?? "Calendario",
+            href: `/calendars/${calendar.slug}`,
+            isCurrentPage: true,
+          },
+        ]}
+      />
       <EtiquettesHeader
         calendar={calendar}
         isEtiquetteVisible={isEtiquetteVisible}
