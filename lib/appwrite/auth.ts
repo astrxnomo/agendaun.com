@@ -6,32 +6,24 @@ import { Account, Client, ID } from "node-appwrite"
 import { cache } from "react"
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/config"
+import { handleAppwriteError } from "@/lib/utils/error-handler"
 
-export async function sendMagicLink(
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const data = Object.fromEntries(formData)
-  const email = data.email as string
-
-  if (!email || typeof email !== "string") {
-    return { success: false, error: "invalid_email" }
-  }
-
-  const { account } = await createAdminClient()
-
+export async function sendMagicLink(email: string) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
-    const verifyUrl = `${baseUrl}/auth/verify`
+    if (!email || typeof email !== "string") {
+      throw new Error("Email es requerido")
+    }
+
+    const { account } = await createAdminClient()
 
     await account.createMagicURLToken({
       userId: ID.unique(),
       email,
-      url: verifyUrl,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/verify`,
     })
-    return { success: true }
   } catch (error) {
     console.error("Error sending magic link:", error)
-    return { success: false, error: "send_failed" }
+    return handleAppwriteError(error)
   }
 }
 

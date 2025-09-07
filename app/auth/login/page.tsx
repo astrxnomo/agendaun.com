@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { sendMagicLink } from "@/lib/appwrite/auth"
+import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import type React from "react"
 
@@ -16,6 +17,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+
+  const sendMagicLinkAction = async () => {
+    const result = await sendMagicLink(email)
+
+    if (isAppwriteError(result)) {
+      throw new Error(result.type || "Error al enviar el enlace de acceso")
+    }
+
+    setEmailSent(true)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,23 +41,14 @@ export default function LoginPage() {
 
     setIsLoading(true)
 
-    try {
-      const formData = new FormData()
-      formData.append("email", email)
+    toast.promise(sendMagicLinkAction(), {
+      loading: "Enviando enlace...",
+      success: "¡Enlace enviado! Revisa tu correo electrónico",
+      error: (error: Error) =>
+        error.message || "Error enviando el enlace de acceso",
+    })
 
-      const result = await sendMagicLink(formData)
-
-      if (result.success) {
-        setEmailSent(true)
-        toast.success("¡Enlace enviado! Revisa tu correo electrónico")
-      } else {
-        toast.error("No se pudo enviar el enlace. Intenta de nuevo.")
-      }
-    } catch {
-      toast.error("Error enviando el enlace de acceso")
-    } finally {
-      setIsLoading(false)
-    }
+    setIsLoading(false)
   }
 
   return (
@@ -98,16 +100,21 @@ export default function LoginPage() {
                 >
                   Correo institucional
                 </Label>
-                <Input
-                  id="email"
-                  placeholder="usuario@unal.edu.co"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  required
-                  className="bg-background/50 border-border/50 focus:border-primary/50 focus:ring-primary/20 placeholder:text-muted-foreground/60 h-12 rounded px-4 transition-all duration-200"
-                />
+                <div className="relative">
+                  <Input
+                    id="email"
+                    placeholder="usuario"
+                    type="text"
+                    value={email.replace("@unal.edu.co", "")}
+                    onChange={(e) => setEmail(e.target.value + "@unal.edu.co")}
+                    disabled={isLoading}
+                    required
+                    className="bg-background/50 border-border/50 focus:border-primary/50 focus:ring-primary/20 placeholder:text-muted-foreground/60 h-12 rounded px-4 pe-32 transition-all duration-200"
+                  />
+                  <span className="text-muted-foreground pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 text-sm peer-disabled:opacity-50">
+                    @unal.edu.co
+                  </span>
+                </div>
               </div>
 
               <Button

@@ -49,13 +49,7 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
     return visibleEtiquettes.includes(etiquetteId)
   }
 
-  const toggleEditMode = () => {
-    if (!canEdit) {
-      toast.error("No tienes permisos para editar este calendario")
-      return
-    }
-    setEditMode(!editMode)
-  }
+  const toggleEditMode = () => setEditMode(!editMode)
 
   useEffect(() => {
     setCalendar(null)
@@ -64,11 +58,7 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   }, [calendarSlug])
 
   useEffect(() => {
-    // Don't run if still loading auth or if user is not available
     if (!user) return
-
-    // Don't run if we don't have a profile yet (could still be loading)
-    if (!profile) return
 
     const fetchData = async () => {
       try {
@@ -105,16 +95,14 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
           setCanEdit(permissionsResult)
         }
 
-        // At this point we know profile exists
-        const eventsResult = await getCalendarEvents(calendarResult, profile)
+        const eventsResult = await getCalendarEvents(calendarResult, user)
         if (isAppwriteError(eventsResult)) {
           toast.error("Error cargando eventos...", {
             description: eventsResult.type,
           })
-          return
+        } else {
+          setEvents(eventsResult)
         }
-
-        setEvents(eventsResult)
 
         const etiquettes = Array.isArray(calendarResult.etiquettes)
           ? calendarResult.etiquettes

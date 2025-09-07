@@ -82,12 +82,10 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
     profile?.program || null,
   )
 
-  // Data state
   const [sedes, setSedes] = useState<Sedes[]>([])
   const [faculties, setFaculties] = useState<Faculties[]>([])
   const [programs, setPrograms] = useState<Programs[]>([])
 
-  // Loading state
   const [isSedesLoaded, setIsSedesLoaded] = useState(false)
   const [isLoadingFaculties, setIsLoadingFaculties] = useState(false)
   const [isLoadingPrograms, setIsLoadingPrograms] = useState(false)
@@ -95,7 +93,6 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
 
   const [error, setError] = useState<string | null>(null)
 
-  // Reset form when dialog opens
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen)
     if (newOpen) {
@@ -233,7 +230,8 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
       }
 
       const profileResult = await updateProfile({
-        ...profile,
+        $id: profile?.$id || "",
+        user_id: user.$id,
         sede: selectedSede,
         faculty: selectedFaculty,
         program: selectedProgram,
