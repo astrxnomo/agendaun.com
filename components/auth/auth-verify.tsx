@@ -8,7 +8,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { useAuthContext } from "@/contexts/auth-context"
-import { createSession, getUser } from "@/lib/appwrite/auth"
+import { createSession } from "@/lib/appwrite/auth"
 import { cn } from "@/lib/utils"
 
 import { PageHeader } from "../page-header"
@@ -20,27 +20,34 @@ type Props = {
 
 export default function AuthVerify({ userId, secret }: Props) {
   const router = useRouter()
-  const { setUser } = useAuthContext()
+  const { refreshAuth } = useAuthContext()
   const [error, setError] = useState(false)
 
   useEffect(() => {
     let cancelled = false
-    createSession(userId, secret)
-      .then(async () => {
+
+    const verifySession = async () => {
+      try {
+        await createSession(userId, secret)
+
         if (!cancelled) {
-          const userData = await getUser()
-          setUser(userData)
+          await refreshAuth()
           toast.success("Sesión verificada correctamente")
           router.push("/calendars/my-calendar")
         }
-      })
-      .catch(() => {
-        if (!cancelled) setError(true)
-      })
+      } catch {
+        if (!cancelled) {
+          setError(true)
+        }
+      }
+    }
+
+    void verifySession()
+
     return () => {
       cancelled = true
     }
-  }, [userId, secret, router, setUser])
+  }, [userId, secret, router, refreshAuth])
 
   return (
     <>

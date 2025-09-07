@@ -40,7 +40,7 @@ const formatUserName = (name: string | undefined, email: string) => {
 
 export function NavUser() {
   const { isMobile } = useSidebar()
-  const { user, setUser, profile } = useAuthContext()
+  const { user, refreshAuth, profile } = useAuthContext()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
@@ -54,7 +54,7 @@ export function NavUser() {
     setIsLoggingOut(true)
     try {
       await deleteSession()
-      setUser(null)
+      await refreshAuth() // This will clear both user and profile state
       toast.success("Sesión cerrada exitosamente")
       router.push("/")
     } catch (error) {

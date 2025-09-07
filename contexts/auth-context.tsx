@@ -1,6 +1,12 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react"
 
 import { getProfile } from "@/lib/actions/profiles.actions"
 import { getUser } from "@/lib/appwrite/auth"
@@ -10,7 +16,7 @@ import { type Profiles, type User } from "@/types"
 interface AuthContextType {
   user: User | null
   profile: Profiles | null
-  setUser: (user: User | null) => void
+  refreshAuth: () => Promise<void>
   isLoading: boolean
 }
 
@@ -25,6 +31,40 @@ export const AuthContextProvider = ({
   const [profile, setProfile] = useState<Profiles | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  const loadUserAndProfile = async () => {
+    try {
+      const userData = await getUser()
+      setUser(userData)
+
+      if (userData) {
+        const profileData = await getProfile(userData.$id)
+        if (!isAppwriteError(profileData)) {
+          setProfile(profileData)
+        } else {
+          setProfile(null)
+        }
+      } else {
+        setProfile(null)
+      }
+    } catch (error) {
+      console.log(error)
+      setUser(null)
+      setProfile(null)
+    }
+  }
+
+  const refreshAuth = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      await loadUserAndProfile()
+    } catch (error) {
+      console.error("Error in refreshAuth:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // Load profile when user changes
   useEffect(() => {
     const loadProfile = async () => {
       if (!user) {
@@ -48,24 +88,13 @@ export const AuthContextProvider = ({
     void loadProfile()
   }, [user])
 
+  // Load user and profile on mount
   useEffect(() => {
-    const handleGetLoggedInUser = async () => {
-      try {
-        const userData = await getUser()
-        setUser(userData)
-      } catch (error) {
-        console.log(error)
-        setUser(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    void handleGetLoggedInUser()
-  }, [])
+    void refreshAuth()
+  }, [refreshAuth])
 
   return (
-    <AuthContext.Provider value={{ user, profile, setUser, isLoading }}>
+    <AuthContext.Provider value={{ user, profile, refreshAuth, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

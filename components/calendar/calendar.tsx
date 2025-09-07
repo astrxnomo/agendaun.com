@@ -11,27 +11,51 @@ import {
 import { useAuthContext } from "@/contexts/auth-context"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
+import { getProfile } from "@/lib/actions/profiles.actions"
 import { userCanEdit } from "@/lib/actions/users.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import { RequireConfig } from "../auth/require-config"
 
-import type { Calendars, Etiquettes, Events } from "@/types"
+import type { Calendars, Etiquettes, Events, Profiles } from "@/types"
 
 export default function Calendar({ slug: calendarSlug }: { slug: string }) {
-  const { user, profile } = useAuthContext()
+  const { user } = useAuthContext()
 
   const [calendar, setCalendar] = useState<Calendars | null>(null)
   const [events, setEvents] = useState<Events[]>([])
   const [visibleEtiquettes, setVisibleEtiquettes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [editMode, setEditMode] = useState(false)
   const [canEdit, setCanEdit] = useState(false)
   const [refetchTrigger, setRefetchTrigger] = useState(0)
+  const [profile, setProfile] = useState<Profiles | null>(null)
 
   const manualRefetch = () => {
     setRefetchTrigger((prev) => prev + 1)
+  }
+
+  // Helper: Validar si el profile es suficiente para el tipo de calendario
+  const shouldFetchEvents = (calendar: Calendars, profile: Profiles | null) => {
+    if (!calendar.requireConfig) return true
+    if (!profile) return false
+
+    switch (calendar.slug) {
+      case "sede-calendar":
+        return !!profile.sede
+      case "faculty-calendar":
+        return !!profile.faculty
+      case "program-calendar":
+        return !!profile.program
+      default:
+        return true
+    }
+  }
+
+  const getActiveEtiquette = (etiquettes: Etiquettes[]): string[] => {
+    return etiquettes
+      .filter((etiquette) => etiquette.isActive)
+      .map((etiquette) => etiquette.$id)
   }
 
   const toggleEtiquetteVisibility = (etiquetteId: string) => {
@@ -54,7 +78,7 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   useEffect(() => {
     setCalendar(null)
     setEvents([])
-    setError(null)
+    setProfile(null)
   }, [calendarSlug])
 
   useEffect(() => {
@@ -63,7 +87,6 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
     const fetchData = async () => {
       try {
         setIsLoading(true)
-        setError(null)
 
         const slug =
           calendarSlug === "personal"
@@ -85,6 +108,19 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
 
         setCalendar(calendarResult)
 
+        let currentProfile: Profiles | null = null
+        if (calendarResult.requireConfig) {
+          const profileResult = await getProfile(user.$id)
+          if (isAppwriteError(profileResult)) {
+            toast.error("Error cargando perfil...", {
+              description: profileResult.type,
+            })
+            return
+          }
+          currentProfile = profileResult
+          setProfile(profileResult)
+        }
+
         const permissionsResult = await userCanEdit(calendarResult)
         if (isAppwriteError(permissionsResult)) {
           toast.error("Error cargando permisos...", {
@@ -95,23 +131,27 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
           setCanEdit(permissionsResult)
         }
 
-        const eventsResult = await getCalendarEvents(calendarResult, user)
-        if (isAppwriteError(eventsResult)) {
-          toast.error("Error cargando eventos...", {
-            description: eventsResult.type,
-          })
+        if (shouldFetchEvents(calendarResult, currentProfile)) {
+          const eventsResult = await getCalendarEvents(
+            calendarResult,
+            currentProfile ?? undefined,
+          )
+          if (isAppwriteError(eventsResult)) {
+            toast.error("Error cargando eventos...", {
+              description: eventsResult.type,
+            })
+          } else {
+            setEvents(eventsResult)
+          }
         } else {
-          setEvents(eventsResult)
+          setEvents([])
         }
 
         const etiquettes = Array.isArray(calendarResult.etiquettes)
           ? calendarResult.etiquettes
           : []
 
-        const activeEtiquetteIds: string[] = etiquettes
-          .filter((etiquette: Etiquettes) => etiquette.isActive)
-          .map((etiquette: Etiquettes) => etiquette.$id)
-        setVisibleEtiquettes(activeEtiquetteIds)
+        setVisibleEtiquettes(getActiveEtiquette(etiquettes))
       } catch (error) {
         console.error("Error fetching data:", error)
         toast.error("Error al cargar los datos del calendario")
@@ -121,22 +161,18 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
     }
 
     void fetchData()
-  }, [user, profile, calendarSlug, refetchTrigger])
+  }, [user, calendarSlug, refetchTrigger])
 
   if (isLoading) return <CalendarSkeleton />
-
-  if (error) {
-    return <CalendarError error={error} retry={manualRefetch} />
-  }
-
-  if (calendar?.requireConfig && !profile?.sede) {
-    return <RequireConfig />
-  }
 
   if (!calendar) {
     return (
       <CalendarError error="Calendario no encontrado" retry={manualRefetch} />
     )
+  }
+
+  if (calendar.requireConfig && !shouldFetchEvents(calendar, profile)) {
+    return <RequireConfig />
   }
 
   const visibleEvents = events.filter((event) =>

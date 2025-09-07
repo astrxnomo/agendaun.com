@@ -59,7 +59,7 @@ interface UserConfigDialogProps {
 }
 
 export function ConfigDialog({ children }: UserConfigDialogProps) {
-  const { user, profile, setUser } = useAuthContext()
+  const { user, profile, refreshAuth } = useAuthContext()
   const router = useRouter()
   const id = useId()
 
@@ -222,11 +222,6 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
         if (isAppwriteError(result)) {
           throw new Error(result.type || "Error actualizando el nombre")
         }
-
-        setUser({
-          ...user,
-          name: name.trim(),
-        })
       }
 
       const profileResult = await updateProfile({
@@ -241,6 +236,8 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
         throw new Error(profileResult.type || "Error guardando configuración")
       }
 
+      // Refresh both user and profile data from server
+      await refreshAuth()
       router.refresh()
       setOpen(false)
     } catch (error) {
@@ -252,11 +249,6 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
   }
 
   const handleSave = () => {
-    if (!user?.$id) {
-      toast.error("Debes estar logueado para guardar")
-      return
-    }
-
     if (!name.trim()) {
       toast.error("El nombre es requerido")
       return
