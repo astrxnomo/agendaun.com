@@ -1,0 +1,50 @@
+import { CalendarX, Home } from "lucide-react"
+import Link from "next/link"
+
+import { Button } from "@/components/ui/button"
+
+export function CalendarError() {
+  return (
+    <main className="flex min-h-[60vh] w-full items-center justify-center px-6 py-16">
+      <div className="w-full max-w-md space-y-10 text-center">
+        <div className="space-y-6">
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="bg-destructive/10 absolute inset-0 scale-150 rounded-full blur-xl"></div>
+              <div className="from-destructive/5 to-destructive/10 border-destructive/20 relative rounded-2xl border bg-gradient-to-br p-6 shadow-sm">
+                <CalendarX className="text-destructive size-8" />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h1 className="text-foreground text-2xl font-semibold tracking-tight">
+              Error al cargar calendario
+            </h1>
+            <p className="text-muted-foreground mx-auto text-sm leading-relaxed">
+              El calendario que buscas no existe o no esta disponible.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <Button variant="outline" asChild>
+            <Link href="/">
+              <Home />
+              Inicio
+            </Link>
+          </Button>
+
+          <div className="border-border/30 border-t pt-4 text-center">
+            <p className="text-muted-foreground/80 text-xs">
+              Si el problema persiste,{" "}
+              <span className="text-muted-foreground font-medium">
+                contacta al soporte
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}

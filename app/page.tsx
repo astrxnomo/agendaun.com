@@ -20,7 +20,7 @@ export default function DashboardIntro() {
   const quickLinks = [
     {
       title: "Mi calendario",
-      href: "/calendars/my-calendar",
+      href: "/calendars/personal",
       icon: Calendar,
       description:
         "Tu espacio personal para organizar tus clases, eventos y recordatorios.",
@@ -78,7 +78,7 @@ export default function DashboardIntro() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Button size="lg" asChild className="rounded shadow">
-                <Link href="/calendars/my-calendar">
+                <Link href="/calendars/personal">
                   Ir a mi calendario
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>

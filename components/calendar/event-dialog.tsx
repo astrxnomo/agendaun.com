@@ -184,15 +184,15 @@ export function EventDialog({
       location,
       etiquette: etiquette?.$id ? { $id: etiquette.$id } : undefined,
       sede:
-        calendar.slug === "sede-calendar" && profile?.sede?.$id
+        calendar.slug === "sede" && profile?.sede?.$id
           ? { $id: profile.sede.$id }
           : undefined,
       faculty:
-        calendar.slug === "faculty-calendar" && profile?.faculty?.$id
+        calendar.slug === "faculty" && profile?.faculty?.$id
           ? { $id: profile.faculty.$id }
           : undefined,
       program:
-        calendar.slug === "program-calendar" && profile?.program?.$id
+        calendar.slug === "program" && profile?.program?.$id
           ? { $id: profile.program.$id }
           : undefined,
       calendar: calendar,

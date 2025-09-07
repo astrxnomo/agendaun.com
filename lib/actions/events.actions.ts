@@ -20,11 +20,11 @@ export async function getCalendarEvents(
     queries.push(Query.equal("calendar", calendar.$id))
 
     if (profile) {
-      if (calendar.slug === "sede-calendar" && profile.sede) {
+      if (calendar.slug === "sede" && profile.sede) {
         queries.push(Query.equal("sede", profile.sede.$id))
-      } else if (calendar.slug === "faculty-calendar" && profile.faculty) {
+      } else if (calendar.slug === "faculty" && profile.faculty) {
         queries.push(Query.equal("faculty", profile.faculty.$id))
-      } else if (calendar.slug === "program-calendar" && profile.program) {
+      } else if (calendar.slug === "program" && profile.program) {
         queries.push(Query.equal("program", profile.program.$id))
       }
     }

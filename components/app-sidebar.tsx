@@ -19,6 +19,7 @@ import {
   University,
 } from "lucide-react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 import { NavUser } from "@/components/auth/nav-user"
 import {
@@ -46,6 +47,9 @@ import { useAuthContext } from "@/contexts/auth-context"
 
 export function AppSidebar() {
   const { user, isLoading } = useAuthContext()
+  const pathname = usePathname()
+
+  const isActive = (path: string) => pathname === path
 
   return (
     <Sidebar collapsible="icon">
@@ -68,14 +72,22 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
-            <SidebarMenuButton asChild tooltip="Inicio">
+            <SidebarMenuButton
+              asChild
+              tooltip="Inicio"
+              isActive={isActive("/") && pathname === "/"}
+            >
               <Link href="/">
                 <Home />
                 <span>Inicio</span>
               </Link>
             </SidebarMenuButton>
-            <SidebarMenuButton asChild tooltip="Mi calendario">
-              <Link href="/calendars/my-calendar">
+            <SidebarMenuButton
+              asChild
+              tooltip="Mi calendario"
+              isActive={isActive("/calendars/personal")}
+            >
+              <Link href="/calendars/personal">
                 <Calendar />
                 <span>Mi calendario</span>
               </Link>
@@ -86,7 +98,11 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Universidad</SidebarGroupLabel>
           <SidebarMenu>
-            <SidebarMenuButton asChild tooltip="Agenda">
+            <SidebarMenuButton
+              asChild
+              tooltip="Agenda"
+              isActive={isActive("/calendars")}
+            >
               <Link href="/calendars">
                 <BookMarked />
                 <span>Agenda</span>
@@ -96,7 +112,11 @@ export function AppSidebar() {
           <SidebarMenu>
             <Collapsible asChild defaultOpen={true}>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Calendarios">
+                <SidebarMenuButton
+                  asChild
+                  tooltip="Calendarios"
+                  isActive={isActive("/calendars")}
+                >
                   <Link href="/calendars">
                     <CalendarDays />
                     <span>Calendarios</span>
@@ -111,7 +131,10 @@ export function AppSidebar() {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/calendars/national")}
+                      >
                         <Link href="/calendars/national">
                           <Landmark className="size-4" />
                           <span>Nacional</span>
@@ -119,7 +142,10 @@ export function AppSidebar() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/calendars/sede")}
+                      >
                         <Link href="/calendars/sede">
                           <School />
                           <span>Sede</span>
@@ -127,7 +153,10 @@ export function AppSidebar() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/calendars/faculty")}
+                      >
                         <Link href="/calendars/faculty">
                           <University />
                           <span>Facultad</span>
@@ -135,7 +164,10 @@ export function AppSidebar() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/calendars/program")}
+                      >
                         <Link href="/calendars/program">
                           <GraduationCap />
                           <span>Programa</span>
@@ -148,7 +180,11 @@ export function AppSidebar() {
             </Collapsible>
             <Collapsible asChild defaultOpen={true}>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Horarios">
+                <SidebarMenuButton
+                  asChild
+                  tooltip="Horarios"
+                  isActive={isActive("/schedules")}
+                >
                   <Link href="/schedules">
                     <Clock />
                     <span>Horarios</span>
@@ -163,7 +199,10 @@ export function AppSidebar() {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/schedules/offices")}
+                      >
                         <Link href="/schedules/offices">
                           <Building2 className="size-4" />
                           <span>Oficinas</span>
@@ -171,7 +210,10 @@ export function AppSidebar() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/schedules/library")}
+                      >
                         <Link href="/schedules/library">
                           <BookMarked className="size-4" />
                           <span>Bibliotecas</span>
@@ -179,7 +221,10 @@ export function AppSidebar() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/schedules/professors")}
+                      >
                         <Link href="/schedules/professors">
                           <SquareUser className="size-4" />
                           <span>Profesores</span>
@@ -187,7 +232,10 @@ export function AppSidebar() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/schedules/tutoring")}
+                      >
                         <Link href="/schedules/tutoring">
                           <NotepadText className="size-4" />
                           <span>Monitorias</span>
@@ -195,7 +243,10 @@ export function AppSidebar() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/schedules/labs")}
+                      >
                         <Link href="/schedules/labs">
                           <FlaskConical className="size-4" />
                           <span>Laboratorios</span>
@@ -203,7 +254,10 @@ export function AppSidebar() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive("/schedules/transport")}
+                      >
                         <Link href="/schedules/transport">
                           <Bus className="size-4" />
                           <span>Transportes</span>

@@ -27,7 +27,7 @@ export async function updateUserName(
   }
 }
 
-export async function userCanEdit(
+export async function canEditCalendar(
   calendar: Calendars,
 ): Promise<boolean | AppwriteError> {
   try {
@@ -51,7 +51,7 @@ export async function userCanEdit(
 
     if (!editorRoles) return false
 
-    if (editorRoles.includes(calendar.slug)) return true
+    if (editorRoles.includes(`${calendar.slug}-calendar`)) return true
 
     return false
   } catch (error) {

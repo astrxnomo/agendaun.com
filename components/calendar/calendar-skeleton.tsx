@@ -29,28 +29,3 @@ export function CalendarSkeleton() {
     </div>
   )
 }
-
-export function CalendarError({
-  error,
-  retry,
-}: {
-  error: string
-  retry?: () => void
-}) {
-  return (
-    <div className="h-96 flex-col items-center justify-center p-6">
-      <div className="space-y-4 text-center">
-        <h2 className="text-destructive text-xl font-semibold">Error</h2>
-        <p className="text-muted-foreground">{error}</p>
-        {retry && (
-          <button
-            onClick={retry}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
-          >
-            Reintentar
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}

@@ -4,18 +4,16 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { EtiquettesHeader, SetupCalendar } from "@/components/calendar"
-import {
-  CalendarError,
-  CalendarSkeleton,
-} from "@/components/skeletons/calendar-loading"
 import { useAuthContext } from "@/contexts/auth-context"
 import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
 import { getProfile } from "@/lib/actions/profiles.actions"
-import { userCanEdit } from "@/lib/actions/users.actions"
+import { canEditCalendar } from "@/lib/actions/users.actions"
 import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import { RequireConfig } from "../auth/require-config"
+import { CalendarError } from "./calendar-error"
+import { CalendarSkeleton } from "./calendar-skeleton"
 
 import type { Calendars, Etiquettes, Events, Profiles } from "@/types"
 
@@ -35,17 +33,16 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
     setRefetchTrigger((prev) => prev + 1)
   }
 
-  // Helper: Validar si el profile es suficiente para el tipo de calendario
-  const shouldFetchEvents = (calendar: Calendars, profile: Profiles | null) => {
+  const canGetEvents = (calendar: Calendars, profile: Profiles | null) => {
     if (!calendar.requireConfig) return true
     if (!profile) return false
 
     switch (calendar.slug) {
-      case "sede-calendar":
+      case "sede":
         return !!profile.sede
-      case "faculty-calendar":
+      case "faculty":
         return !!profile.faculty
-      case "program-calendar":
+      case "program":
         return !!profile.program
       default:
         return true
@@ -121,17 +118,17 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
           setProfile(profileResult)
         }
 
-        const permissionsResult = await userCanEdit(calendarResult)
-        if (isAppwriteError(permissionsResult)) {
+        const canEditResult = await canEditCalendar(calendarResult)
+        if (isAppwriteError(canEditResult)) {
           toast.error("Error cargando permisos...", {
-            description: permissionsResult.type,
+            description: canEditResult.type,
           })
           setCanEdit(false)
         } else {
-          setCanEdit(permissionsResult)
+          setCanEdit(canEditResult)
         }
 
-        if (shouldFetchEvents(calendarResult, currentProfile)) {
+        if (canGetEvents(calendarResult, currentProfile)) {
           const eventsResult = await getCalendarEvents(
             calendarResult,
             currentProfile ?? undefined,
@@ -166,12 +163,10 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   if (isLoading) return <CalendarSkeleton />
 
   if (!calendar) {
-    return (
-      <CalendarError error="Calendario no encontrado" retry={manualRefetch} />
-    )
+    return <CalendarError />
   }
 
-  if (calendar.requireConfig && !shouldFetchEvents(calendar, profile)) {
+  if (calendar.requireConfig && !canGetEvents(calendar, profile)) {
     return <RequireConfig />
   }
 

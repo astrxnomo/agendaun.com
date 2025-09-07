@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
       const user = await getUser()
       if (user) {
         return NextResponse.redirect(
-          new URL("/calendars/my-calendar", request.url),
+          new URL("/calendars/personal", request.url),
         )
       }
     }

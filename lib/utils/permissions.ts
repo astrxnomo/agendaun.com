@@ -2,37 +2,15 @@ import { Permission, Role } from "node-appwrite"
 
 import { getUser } from "../appwrite/auth"
 
-export type CalendarType =
-  | "personal"
-  | "national"
-  | "sede"
-  | "faculty"
-  | "program"
-
-export function getCalendarType(calendarSlug: string): CalendarType {
-  if (calendarSlug.startsWith("personal-")) return "personal"
-  if (calendarSlug === "national-calendar") return "national"
-  if (calendarSlug === "sede-calendar") return "sede"
-  if (calendarSlug === "faculty-calendar") return "faculty"
-  if (calendarSlug === "program-calendar") return "program"
-  return "personal"
-}
-
 export async function setPermissions(
   calendarSlug: string | undefined,
 ): Promise<string[]> {
-  if (!calendarSlug) {
-    throw new Error("Calendar slug is required to set permissions")
-  }
-
   const user = await getUser()
   if (!user) throw new Error("User not authenticated")
 
-  const calendarType = getCalendarType(calendarSlug)
-
   const permissions: string[] = []
 
-  switch (calendarType) {
+  switch (calendarSlug) {
     case "personal":
       permissions.push(
         Permission.read(Role.user(user.$id)),

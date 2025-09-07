@@ -33,7 +33,7 @@ export default function AuthVerify({ userId, secret }: Props) {
         if (!cancelled) {
           await refreshAuth()
           toast.success("Sesión verificada correctamente")
-          router.push("/calendars/my-calendar")
+          router.push("/calendars/personal")
         }
       } catch {
         if (!cancelled) {

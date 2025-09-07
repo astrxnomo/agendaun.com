@@ -1,6 +1,6 @@
 "use client"
 
-import { Settings } from "lucide-react"
+import { CalendarCog, Settings } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
@@ -15,7 +15,7 @@ export function RequireConfig() {
             <div className="relative">
               <div className="absolute inset-0 scale-150 rounded-full bg-yellow-500/10 blur-xl dark:bg-yellow-400/10"></div>
               <div className="relative animate-pulse rounded-2xl border border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 p-6 shadow-sm dark:border-yellow-400/20 dark:from-yellow-400/5 dark:to-yellow-400/10">
-                <Settings className="size-8 text-yellow-600 dark:text-yellow-400" />
+                <CalendarCog className="size-8 text-yellow-600 dark:text-yellow-400" />
               </div>
             </div>
           </div>
