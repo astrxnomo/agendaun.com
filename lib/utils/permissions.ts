@@ -10,15 +10,15 @@ export async function setPermissions(
 
   const permissions: string[] = []
 
-  switch (calendarSlug) {
-    case "personal":
+  switch (true) {
+    case calendarSlug?.startsWith("personal"):
       permissions.push(
         Permission.read(Role.user(user.$id)),
         Permission.write(Role.user(user.$id)),
       )
       break
 
-    case "national":
+    case calendarSlug === "national":
       permissions.push(
         Permission.read(Role.users("verified")),
         Permission.write(
@@ -30,7 +30,7 @@ export async function setPermissions(
       )
       break
 
-    case "sede":
+    case calendarSlug === "sede":
       permissions.push(
         Permission.read(Role.users("verified")),
         Permission.write(
@@ -39,7 +39,7 @@ export async function setPermissions(
       )
       break
 
-    case "faculty":
+    case calendarSlug === "faculty":
       permissions.push(
         Permission.read(Role.users("verified")),
         Permission.write(
@@ -48,7 +48,7 @@ export async function setPermissions(
       )
       break
 
-    case "program":
+    case calendarSlug === "program":
       permissions.push(
         Permission.read(Role.users("verified")),
         Permission.write(
