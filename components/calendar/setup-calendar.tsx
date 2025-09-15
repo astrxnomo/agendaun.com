@@ -51,7 +51,6 @@ import {
   updateEvent,
 } from "@/lib/actions/events.actions"
 import { cn } from "@/lib/utils"
-import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import type { Calendars, Etiquettes, Events } from "@/types"
 
@@ -193,9 +192,6 @@ export function SetupCalendar({
     if (event.$id) {
       // Actualizar evento existente
       const promise = updateEvent(event).then((result) => {
-        if (isAppwriteError(result)) {
-          throw new Error(result.type || "Error al actualizar evento")
-        }
         onEventsUpdate((prev) =>
           prev.map((e) => (e.$id === event.$id ? result : e)),
         )
@@ -218,9 +214,6 @@ export function SetupCalendar({
     } else {
       // Crear evento nuevo
       const promise = createEvent(event).then((result) => {
-        if (isAppwriteError(result)) {
-          throw new Error(result.type || "Error al crear evento")
-        }
         onEventsUpdate((prev) => [...prev, result])
         return result
       })
@@ -242,12 +235,9 @@ export function SetupCalendar({
   }
 
   const handleEventDelete = async (eventId: string) => {
-    const promise = deleteEvent(eventId).then((result) => {
-      if (isAppwriteError(result)) {
-        throw new Error(result.type || "Error al eliminar evento")
-      }
+    const promise = deleteEvent(eventId).then(() => {
       onEventsUpdate((prev) => prev.filter((event) => event.$id !== eventId))
-      return result
+      return true
     })
 
     toast.promise(promise, {
@@ -274,8 +264,17 @@ export function SetupCalendar({
     )
 
     // Persistir cambios en la base de datos
-    const promise = updateEvent(updatedEvent).then((result) => {
-      if (isAppwriteError(result)) {
+    const promise = updateEvent(updatedEvent)
+      .then((result) => {
+        // Actualizar con los datos reales de la respuesta
+        onEventsUpdate((prev) =>
+          prev.map((event) =>
+            event.$id === updatedEvent.$id ? result : event,
+          ),
+        )
+        return result
+      })
+      .catch((error) => {
         // Si hay error, revertir el cambio en la UI
         onEventsUpdate((prev) =>
           prev.map((event) =>
@@ -284,15 +283,8 @@ export function SetupCalendar({
               : event,
           ),
         )
-        throw new Error(result.type || "No se pudo guardar el cambio")
-      }
-
-      // Actualizar con los datos reales de la respuesta
-      onEventsUpdate((prev) =>
-        prev.map((event) => (event.$id === updatedEvent.$id ? result : event)),
-      )
-      return result
-    })
+        throw error
+      })
 
     toast.promise(promise, {
       loading: "Guardando...",

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { sendMagicLink } from "@/lib/appwrite/auth"
-import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import type React from "react"
 
@@ -19,12 +18,7 @@ export default function LoginPage() {
   const [emailSent, setEmailSent] = useState(false)
 
   const sendMagicLinkAction = async () => {
-    const result = await sendMagicLink(email)
-
-    if (isAppwriteError(result)) {
-      throw new Error(result.type || "Error al enviar el enlace de acceso")
-    }
-
+    await sendMagicLink(email)
     setEmailSent(true)
   }
 

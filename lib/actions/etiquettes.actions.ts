@@ -5,12 +5,12 @@ import { ID } from "node-appwrite"
 import { db } from "@/lib/appwrite/db"
 import { type Etiquettes } from "@/types"
 
-import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+import { handleError } from "../utils/error-handler"
 import { setPermissions } from "../utils/permissions"
 
 export async function createEtiquette(
   etiquette: Etiquettes,
-): Promise<Etiquettes | AppwriteError> {
+): Promise<Etiquettes> {
   try {
     const data = await db()
     const permissions = await setPermissions(etiquette.calendar?.slug)
@@ -24,13 +24,13 @@ export async function createEtiquette(
     return result as Etiquettes
   } catch (error) {
     console.error("Error creating etiquette:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }
 
 export async function updateEtiquette(
   etiquette: Etiquettes,
-): Promise<Etiquettes | AppwriteError> {
+): Promise<Etiquettes> {
   try {
     const data = await db()
     const result = await data.etiquettes.upsert(etiquette.$id, etiquette)
@@ -38,13 +38,11 @@ export async function updateEtiquette(
     return result as Etiquettes
   } catch (error) {
     console.error("Error updating etiquette:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }
 
-export async function deleteEtiquette(
-  etiquetteId: string,
-): Promise<boolean | AppwriteError> {
+export async function deleteEtiquette(etiquetteId: string): Promise<boolean> {
   try {
     const data = await db()
     const result = await data.etiquettes.delete(etiquetteId)
@@ -52,6 +50,6 @@ export async function deleteEtiquette(
     return result as boolean
   } catch (error) {
     console.error("Error deleting etiquette:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }

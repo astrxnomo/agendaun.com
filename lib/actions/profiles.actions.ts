@@ -4,13 +4,11 @@ import { Query } from "node-appwrite"
 
 import { db } from "../appwrite/db"
 import { dbAdmin } from "../appwrite/db-admin"
-import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+import { handleError } from "../utils/error-handler"
 
 import type { Profiles } from "@/types"
 
-export async function updateProfile(
-  profile: Profiles,
-): Promise<Profiles | AppwriteError> {
+export async function updateProfile(profile: Profiles): Promise<Profiles> {
   try {
     const data = await dbAdmin()
 
@@ -18,13 +16,11 @@ export async function updateProfile(
     return result as Profiles
   } catch (error) {
     console.error("Error updating user profile:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }
 
-export async function getProfile(
-  profileId: string,
-): Promise<Profiles | AppwriteError | null> {
+export async function getProfile(profileId: string): Promise<Profiles | null> {
   try {
     const data = await db()
 
@@ -37,6 +33,6 @@ export async function getProfile(
     return (result.rows[0] as Profiles) || null
   } catch (error) {
     console.error("Error getting profile:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }

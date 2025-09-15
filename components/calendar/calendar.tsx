@@ -9,7 +9,6 @@ import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
 import { getCalendarEvents } from "@/lib/actions/events.actions"
 import { getProfile } from "@/lib/actions/profiles.actions"
 import { canEditCalendar } from "@/lib/actions/users.actions"
-import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import { RequireConfig } from "../auth/require-config"
 import { PageHeader } from "../page-header"
@@ -92,12 +91,6 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
             : calendarSlug
 
         const calendarResult = await getCalendarBySlug(slug)
-        if (isAppwriteError(calendarResult)) {
-          toast.error("Error cargando calendario...", {
-            description: calendarResult.type,
-          })
-          return
-        }
 
         if (!calendarResult) {
           toast.error("Calendario no encontrado")
@@ -108,38 +101,40 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
 
         let currentProfile: Profiles | null = null
         if (calendarResult.requireConfig) {
-          const profileResult = await getProfile(user.$id)
-          if (isAppwriteError(profileResult)) {
-            toast.error("Error cargando perfil...", {
-              description: profileResult.type,
-            })
+          try {
+            const profileResult = await getProfile(user.$id)
+            currentProfile = profileResult
+            setProfile(profileResult)
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : "Error cargando perfil"
+            toast.error(errorMessage)
             return
           }
-          currentProfile = profileResult
-          setProfile(profileResult)
         }
 
-        const canEditResult = await canEditCalendar(calendarResult)
-        if (isAppwriteError(canEditResult)) {
-          toast.error("Error cargando permisos...", {
-            description: canEditResult.type,
-          })
-          setCanEdit(false)
-        } else {
+        try {
+          const canEditResult = await canEditCalendar(calendarResult)
           setCanEdit(canEditResult)
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Error cargando permisos"
+          toast.error(errorMessage)
+          setCanEdit(false)
         }
 
         if (canGetEvents(calendarResult, currentProfile)) {
-          const eventsResult = await getCalendarEvents(
-            calendarResult,
-            currentProfile ?? undefined,
-          )
-          if (isAppwriteError(eventsResult)) {
-            toast.error("Error cargando eventos...", {
-              description: eventsResult.type,
-            })
-          } else {
+          try {
+            const eventsResult = await getCalendarEvents(
+              calendarResult,
+              currentProfile ?? undefined,
+            )
             setEvents(eventsResult)
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : "Error cargando eventos"
+            toast.error(errorMessage)
+            setEvents([])
           }
         } else {
           setEvents([])
@@ -151,8 +146,11 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
 
         setVisibleEtiquettes(getActiveEtiquette(etiquettes))
       } catch (error) {
-        console.error("Error fetching data:", error)
-        toast.error("Error al cargar los datos del calendario")
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Error al cargar los datos del calendario"
+        toast.error(errorMessage)
       } finally {
         setIsLoading(false)
       }

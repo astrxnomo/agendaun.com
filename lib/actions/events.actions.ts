@@ -5,16 +5,15 @@ import { ID, Query } from "node-appwrite"
 import { db } from "@/lib/appwrite/db"
 import { type Calendars, type Events, type Profiles } from "@/types"
 
-import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+import { handleError } from "../utils/error-handler"
 import { setPermissions } from "../utils/permissions"
 
 export async function getCalendarEvents(
   calendar: Calendars,
   profile?: Profiles,
-): Promise<Events[] | AppwriteError> {
+): Promise<Events[]> {
   try {
     const data = await db()
-
     const queries = []
 
     queries.push(Query.equal("calendar", calendar.$id))
@@ -36,51 +35,37 @@ export async function getCalendarEvents(
 
     return result.rows as Events[]
   } catch (error) {
-    console.error("Error getting calendar events:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }
 
-export async function createEvent(
-  event: Events,
-): Promise<Events | AppwriteError> {
+export async function createEvent(event: Events): Promise<Events> {
   try {
     const data = await db()
-
     const permissions = await setPermissions(event.calendar?.slug)
-
     const result = await data.events.upsert(ID.unique(), event, permissions)
     return result as Events
   } catch (error) {
-    console.error("Error creating event:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }
 
-export async function updateEvent(
-  event: Events,
-): Promise<Events | AppwriteError> {
+export async function updateEvent(event: Events): Promise<Events> {
   try {
     const data = await db()
-
     const result = await data.events.upsert(event.$id, event)
     return result as Events
   } catch (error) {
-    console.error("Error updating event:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }
 
-export async function deleteEvent(
-  eventId: string,
-): Promise<boolean | AppwriteError> {
+export async function deleteEvent(eventId: string): Promise<boolean> {
   try {
     const data = await db()
-    const result = await data.events.delete(eventId)
-
-    return result as boolean
+    await data.events.delete(eventId)
+    return true
   } catch (error) {
-    console.error("Error deleting event:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }

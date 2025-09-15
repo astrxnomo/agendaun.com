@@ -4,11 +4,11 @@ import { Query } from "node-appwrite"
 
 import { db } from "@/lib/appwrite/db"
 
-import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+import { handleError } from "../utils/error-handler"
 
 import type { Faculties, Programs, Sedes } from "@/types"
 
-export async function getSedes(): Promise<Sedes[] | AppwriteError> {
+export async function getSedes(): Promise<Sedes[]> {
   try {
     const data = await db()
     const result = await data.sedes.list([
@@ -17,14 +17,11 @@ export async function getSedes(): Promise<Sedes[] | AppwriteError> {
     ])
     return result.rows as Sedes[]
   } catch (error) {
-    console.error("Error getting sedes:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }
 
-export async function getFacultiesBySede(
-  sedeId: string,
-): Promise<Faculties[] | AppwriteError> {
+export async function getFacultiesBySede(sedeId: string): Promise<Faculties[]> {
   try {
     const data = await db()
     const result = await data.faculties.list([
@@ -34,14 +31,13 @@ export async function getFacultiesBySede(
     ])
     return result.rows as Faculties[]
   } catch (error) {
-    console.error("Error getting faculties by sede:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }
 
 export async function getProgramsByFaculty(
   facultyId: string,
-): Promise<Programs[] | AppwriteError> {
+): Promise<Programs[]> {
   try {
     const data = await db()
     const result = await data.programs.list([
@@ -51,7 +47,6 @@ export async function getProgramsByFaculty(
     ])
     return result.rows as Programs[]
   } catch (error) {
-    console.error("Error getting programs by faculty:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }

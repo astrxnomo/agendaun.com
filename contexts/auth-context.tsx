@@ -9,8 +9,7 @@ import {
 } from "react"
 
 import { getProfile } from "@/lib/actions/profiles.actions"
-import { getUser, hasValidSession } from "@/lib/appwrite/auth"
-import { isAppwriteError } from "@/lib/utils/error-handler"
+import { getUser } from "@/lib/appwrite/auth"
 import { type Profiles, type User } from "@/types"
 
 interface AuthContextType {
@@ -34,25 +33,25 @@ export const AuthContextProvider = ({
   const refreshAuth = useCallback(async () => {
     setIsLoading(true)
     try {
-      const sessionExists = await hasValidSession()
+      const userData = await getUser()
 
-      if (!sessionExists) {
+      if (!userData) {
         setUser(null)
         setProfile(null)
         return
       }
 
-      const userData = await getUser()
       setUser(userData)
 
-      if (userData) {
+      try {
         const profileData = await getProfile(userData.$id)
-        setProfile(!isAppwriteError(profileData) ? profileData : null)
-      } else {
+        setProfile(profileData)
+      } catch (profileError) {
+        console.warn("Could not load user profile:", profileError)
         setProfile(null)
       }
     } catch (error) {
-      console.error("Error loading user and profile:", error)
+      console.error("Authentication error:", error)
       setUser(null)
       setProfile(null)
     } finally {

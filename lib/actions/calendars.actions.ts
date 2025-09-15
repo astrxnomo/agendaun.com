@@ -5,11 +5,11 @@ import { Query } from "node-appwrite"
 import { db } from "@/lib/appwrite/db"
 import { type Calendars } from "@/types"
 
-import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+import { handleError } from "../utils/error-handler"
 
 export async function getCalendarBySlug(
   slug: string,
-): Promise<Calendars | AppwriteError | null> {
+): Promise<Calendars | null> {
   try {
     const data = await db()
     const result = await data.calendars.list([
@@ -20,6 +20,6 @@ export async function getCalendarBySlug(
     return (result.rows[0] as Calendars) || null
   } catch (error) {
     console.error(`Error getting calendar with slug ${slug}:`, error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }

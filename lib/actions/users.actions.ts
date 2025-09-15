@@ -4,11 +4,9 @@ import { getUser } from "@/lib/appwrite/auth"
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/config"
 import { type Calendars, type User } from "@/types"
 
-import { handleAppwriteError, type AppwriteError } from "../utils/error-handler"
+import { handleError } from "../utils/error-handler"
 
-export async function updateUserName(
-  name: string,
-): Promise<User | AppwriteError> {
+export async function updateUserName(name: string): Promise<User> {
   try {
     if (!name.trim()) {
       throw new Error("El nombre es requerido")
@@ -23,13 +21,11 @@ export async function updateUserName(
     return result as User
   } catch (error) {
     console.error("Error updating user name:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }
 
-export async function canEditCalendar(
-  calendar: Calendars,
-): Promise<boolean | AppwriteError> {
+export async function canEditCalendar(calendar: Calendars): Promise<boolean> {
   try {
     const user = await getUser()
     if (!user) return false
@@ -55,7 +51,6 @@ export async function canEditCalendar(
 
     return false
   } catch (error) {
-    console.error("Error checking user role:", error)
-    return handleAppwriteError(error)
+    handleError(error)
   }
 }

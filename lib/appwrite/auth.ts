@@ -6,7 +6,7 @@ import { Account, Client, ID } from "node-appwrite"
 import { cache } from "react"
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/config"
-import { handleAppwriteError } from "@/lib/utils/error-handler"
+import { handleError } from "@/lib/utils/error-handler"
 
 export async function sendMagicLink(email: string) {
   try {
@@ -23,7 +23,7 @@ export async function sendMagicLink(email: string) {
     })
   } catch (error) {
     console.error("Error sending magic link:", error)
-    return handleAppwriteError(error)
+    return handleError(error)
   }
 }
 

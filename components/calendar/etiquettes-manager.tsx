@@ -20,7 +20,6 @@ import {
   deleteEtiquette,
   updateEtiquette,
 } from "@/lib/actions/etiquettes.actions"
-import { isAppwriteError } from "@/lib/utils/error-handler"
 import { type Calendars, Colors, type Etiquettes } from "@/types"
 
 import { Separator } from "../ui/separator"
@@ -104,9 +103,6 @@ export function EtiquettesManager({
     toast.promise(promise, {
       loading: isEditing ? "Actualizando etiqueta..." : "Creando etiqueta...",
       success: (result) => {
-        if (isAppwriteError(result)) {
-          throw new Error(result.type || "Error en la operación")
-        }
         resetForm()
         onUpdate()
         setIsLoading(false)
@@ -125,12 +121,9 @@ export function EtiquettesManager({
     }
 
     setIsLoading(true)
-    const promise = deleteEtiquette(etiquette.$id).then((result) => {
-      if (isAppwriteError(result)) {
-        throw new Error(result.type || "Error al eliminar etiqueta")
-      }
+    const promise = deleteEtiquette(etiquette.$id).then(() => {
       onUpdate()
-      return result
+      return true
     })
 
     toast.promise(promise, {

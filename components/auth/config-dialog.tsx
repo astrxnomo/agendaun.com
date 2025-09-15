@@ -48,7 +48,6 @@ import {
 } from "@/lib/actions/academic.actions"
 import { updateProfile } from "@/lib/actions/profiles.actions"
 import { updateUserName } from "@/lib/actions/users.actions"
-import { isAppwriteError } from "@/lib/utils/error-handler"
 
 import { Separator } from "../ui/separator"
 
@@ -117,21 +116,13 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
     try {
       setError(null)
       const result = await getSedes()
-
-      if (isAppwriteError(result)) {
-        toast.error("Error cargando sedes", {
-          description: result.type,
-        })
-        setError("Error cargando sedes")
-        return
-      }
-
       setSedes(result)
       setIsSedesLoaded(true)
-    } catch (err) {
-      console.error("Error loading sedes:", err)
-      toast.error("Error cargando sedes")
-      setError("Error cargando sedes")
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Error cargando sedes"
+      toast.error(errorMessage)
+      setError(errorMessage)
     }
   }
 
@@ -145,20 +136,12 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
       try {
         setIsLoadingFaculties(true)
         const result = await getFacultiesBySede(sede.$id)
-
-        if (isAppwriteError(result)) {
-          toast.error("Error cargando facultades", {
-            description: result.type,
-          })
-          setError("Error cargando facultades")
-          return
-        }
-
         setFaculties(result)
-      } catch (err) {
-        console.error("Error loading facultades:", err)
-        toast.error("Error cargando facultades")
-        setError("Error cargando facultades")
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Error cargando facultades"
+        toast.error(errorMessage)
+        setError(errorMessage)
       } finally {
         setIsLoadingFaculties(false)
       }
@@ -175,20 +158,12 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
       try {
         setIsLoadingPrograms(true)
         const result = await getProgramsByFaculty(faculty.$id)
-
-        if (isAppwriteError(result)) {
-          toast.error("Error cargando programas", {
-            description: result.type,
-          })
-          setError("Error cargando programas")
-          return
-        }
-
         setPrograms(result)
-      } catch (err) {
-        console.error("Error loading programas:", err)
-        toast.error("Error cargando programas")
-        setError("Error cargando programas")
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Error cargando programas"
+        toast.error(errorMessage)
+        setError(errorMessage)
       } finally {
         setIsLoadingPrograms(false)
       }
@@ -217,24 +192,16 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
     setIsSaving(true)
     try {
       if (name.trim() !== user.name) {
-        const result = await updateUserName(name.trim())
-
-        if (isAppwriteError(result)) {
-          throw new Error(result.type || "Error actualizando el nombre")
-        }
+        await updateUserName(name.trim())
       }
 
-      const profileResult = await updateProfile({
+      await updateProfile({
         $id: profile?.$id || "",
         user_id: user.$id,
         sede: selectedSede,
         faculty: selectedFaculty,
         program: selectedProgram,
       } as Profiles)
-
-      if (isAppwriteError(profileResult)) {
-        throw new Error(profileResult.type || "Error guardando configuración")
-      }
 
       // Refresh both user and profile data from server
       await refreshAuth()
