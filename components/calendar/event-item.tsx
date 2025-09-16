@@ -2,9 +2,15 @@
 
 import { differenceInMinutes, format, getMinutes, isPast } from "date-fns"
 import { es } from "date-fns/locale"
+import { CalendarIcon, ClockIcon, MapPinIcon } from "lucide-react"
 import { useMemo } from "react"
 
 import { getBorderRadiusClasses, getColor } from "@/components/calendar"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 import type { Etiquettes, Events } from "@/types"
@@ -19,6 +25,68 @@ const formatTimeWithOptionalMinutes = (date: Date) => {
   return format(date, getMinutes(date) === 0 ? "ha" : "h:mma", {
     locale: es,
   }).toLowerCase()
+}
+
+function EventTooltipContent({ event }: { event: Events }) {
+  const displayStart = new Date(event.start)
+  const displayEnd = new Date(event.end)
+
+  const formatEventTime = () => {
+    if (event.all_day) return "Todo el día"
+
+    return `${formatTimeWithOptionalMinutes(displayStart)} - ${formatTimeWithOptionalMinutes(displayEnd)}`
+  }
+
+  const formatEventDate = () => {
+    return format(displayStart, "EEEE, d 'de' MMMM", { locale: es })
+  }
+
+  return (
+    <div className="w-72 space-y-3 p-1">
+      <div className="text-sm leading-tight font-semibold">{event.title}</div>
+
+      <div className="space-y-2">
+        <div className="text-muted-foreground flex items-center gap-2 text-xs">
+          <CalendarIcon className="h-3.5 w-3.5 shrink-0" />
+          <span className="capitalize">{formatEventDate()}</span>
+        </div>
+
+        <div className="text-muted-foreground flex items-center gap-2 text-xs">
+          <ClockIcon className="h-3.5 w-3.5 shrink-0" />
+          <span>{formatEventTime()}</span>
+        </div>
+
+        {event.location && (
+          <div className="text-muted-foreground flex items-center gap-2 text-xs">
+            <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{event.location}</span>
+          </div>
+        )}
+
+        {event.etiquette && (
+          <div className="flex items-center gap-2 text-xs">
+            <div
+              className={cn(
+                "h-3.5 w-3.5 shrink-0 rounded-full",
+                getColor(event.etiquette.color),
+              )}
+            />
+            <span className="text-muted-foreground truncate">
+              {event.etiquette.name}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {event.description && (
+        <div className="border-t pt-3">
+          <p className="text-muted-foreground line-clamp-3 text-xs leading-relaxed">
+            {event.description}
+          </p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 interface EventWrapperProps {
@@ -66,23 +134,35 @@ function EventWrapper({
   const isEventInPast = isPast(displayEnd)
 
   return (
-    <button
-      className={cn(
-        "focus-visible:border-ring focus-visible:ring-ring/50 flex h-full w-full overflow-hidden px-1 text-left font-medium backdrop-blur-md transition outline-none select-none focus-visible:ring-[3px] data-dragging:cursor-grabbing data-dragging:shadow-lg data-past-event:line-through sm:px-2",
-        colorClass,
-        getBorderRadiusClasses(isFirstDay, isLastDay),
-        className,
-      )}
-      data-dragging={isDragging || undefined}
-      data-past-event={isEventInPast || undefined}
-      onClick={onClick}
-      onMouseDown={onMouseDown}
-      onTouchStart={onTouchStart}
-      {...dndListeners}
-      {...dndAttributes}
-    >
-      {children}
-    </button>
+    <Tooltip delayDuration={300}>
+      <TooltipTrigger asChild>
+        <button
+          className={cn(
+            "focus-visible:border-ring focus-visible:ring-ring/50 flex h-full w-full overflow-hidden px-1 text-left font-medium backdrop-blur-md transition-all duration-150 outline-none select-none hover:brightness-110 focus-visible:ring-[3px] data-dragging:cursor-grabbing data-dragging:shadow-lg data-past-event:line-through sm:px-2",
+            colorClass,
+            getBorderRadiusClasses(isFirstDay, isLastDay),
+            className,
+          )}
+          data-dragging={isDragging || undefined}
+          data-past-event={isEventInPast || undefined}
+          onClick={onClick}
+          onMouseDown={onMouseDown}
+          onTouchStart={onTouchStart}
+          {...dndListeners}
+          {...dndAttributes}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        align="start"
+        sideOffset={8}
+        className="border-border/20 z-50"
+      >
+        <EventTooltipContent event={event} />
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -233,39 +313,51 @@ export function EventItem({
 
   // Agenda view - kept separate since it's significantly different
   return (
-    <button
-      className={cn(
-        "focus-visible:border-ring focus-visible:ring-ring/50 flex w-full flex-col gap-1 rounded p-2 text-left transition outline-none focus-visible:ring-[3px] data-past-event:line-through data-past-event:opacity-90",
-        colorClass,
-        className,
-      )}
-      data-past-event={isPast(new Date(event.end)) || undefined}
-      onClick={onClick}
-      onMouseDown={onMouseDown}
-      onTouchStart={onTouchStart}
-      {...dndListeners}
-      {...dndAttributes}
-    >
-      <div className="text-sm font-medium">{event.title}</div>
-      <div className="text-xs opacity-70">
-        {event.all_day ? (
-          <span>Todo el dia</span>
-        ) : (
-          <span className="uppercase">
-            {formatTimeWithOptionalMinutes(displayStart)} -{" "}
-            {formatTimeWithOptionalMinutes(displayEnd)}
-          </span>
-        )}
-        {event.location && (
-          <>
-            <span className="px-1 opacity-35"> · </span>
-            <span>{event.location}</span>
-          </>
-        )}
-      </div>
-      {event.description && (
-        <div className="my-1 text-xs opacity-90">{event.description}</div>
-      )}
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          className={cn(
+            "focus-visible:border-ring focus-visible:ring-ring/50 flex w-full flex-col gap-1 rounded p-2 text-left transition-all duration-150 outline-none focus-visible:ring-[3px] data-past-event:line-through data-past-event:opacity-90",
+            colorClass,
+            className,
+          )}
+          data-past-event={isPast(new Date(event.end)) || undefined}
+          onClick={onClick}
+          onMouseDown={onMouseDown}
+          onTouchStart={onTouchStart}
+          {...dndListeners}
+          {...dndAttributes}
+        >
+          <div className="text-sm font-medium">{event.title}</div>
+          <div className="text-xs opacity-70">
+            {event.all_day ? (
+              <span>Todo el dia</span>
+            ) : (
+              <span className="uppercase">
+                {formatTimeWithOptionalMinutes(displayStart)} -{" "}
+                {formatTimeWithOptionalMinutes(displayEnd)}
+              </span>
+            )}
+            {event.location && (
+              <>
+                <span className="px-1 opacity-35"> · </span>
+                <span>{event.location}</span>
+              </>
+            )}
+          </div>
+          {event.description && (
+            <div className="my-1 text-xs opacity-90">{event.description}</div>
+          )}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        align="start"
+        sideOffset={8}
+        className="border-border/20 z-50 border shadow-lg"
+      >
+        <EventTooltipContent event={event} />
+      </TooltipContent>
+    </Tooltip>
   )
 }
