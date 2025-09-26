@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Separator } from "@/components/ui/separator"
 import {
   createEtiquette,
   deleteEtiquette,
@@ -22,7 +23,6 @@ import {
 } from "@/lib/actions/etiquettes.actions"
 import { type Calendars, Colors, type Etiquettes } from "@/types"
 
-import { Separator } from "../ui/separator"
 import { getColorIndicator } from "./utils"
 
 interface EtiquettesManagerProps {

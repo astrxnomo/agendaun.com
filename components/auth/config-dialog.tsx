@@ -40,6 +40,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Separator } from "@/components/ui/separator"
 import { useAuthContext } from "@/contexts/auth-context"
 import {
   getFacultiesBySede,
@@ -48,8 +49,6 @@ import {
 } from "@/lib/actions/academic.actions"
 import { updateProfile } from "@/lib/actions/profiles.actions"
 import { updateUserName } from "@/lib/actions/users.actions"
-
-import { Separator } from "../ui/separator"
 
 import type { Faculties, Profiles, Programs, Sedes } from "@/types"
 
