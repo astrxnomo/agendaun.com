@@ -1,6 +1,6 @@
 "use client"
 
-import { Ellipsis, LogOut, Settings } from "lucide-react"
+import { Ellipsis, LogOut, SquareUser } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -129,13 +129,12 @@ export function NavUser() {
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
               <ConfigDialog>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <Settings />
-                  Configuración
+                  <SquareUser />
+                  Mi cuenta
                 </DropdownMenuItem>
               </ConfigDialog>
             </DropdownMenuGroup>
