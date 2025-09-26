@@ -12,9 +12,11 @@ import {
   GraduationCap,
   Home,
   Landmark,
+  LifeBuoy,
   LogIn,
   NotepadText,
   School,
+  Send,
   SquareUser,
   University,
 } from "lucide-react"
@@ -45,6 +47,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuthContext } from "@/contexts/auth-context"
 
+import { Badge } from "./ui/badge"
+
 export function AppSidebar() {
   const { user, isLoading } = useAuthContext()
   const pathname = usePathname()
@@ -62,13 +66,17 @@ export function AppSidebar() {
                   <BookMarked size={18} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">AgendaUN</span>
+                  <span className="flex items-center gap-2 truncate font-medium">
+                    AgendaUN
+                    <Badge className="h-5">Beta</Badge>
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu>
@@ -270,7 +278,30 @@ export function AppSidebar() {
             </Collapsible>
           </SidebarMenu>
         </SidebarGroup>
+
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupLabel>Ayuda</SidebarGroupLabel>
+
+          <SidebarMenu>
+            <SidebarMenuButton asChild tooltip="Soporte">
+              <Link href="">
+                <LifeBuoy />
+                <span>Soporte</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenu>
+
+          <SidebarMenu>
+            <SidebarMenuButton asChild tooltip="Feedback">
+              <Link href="">
+                <Send />
+                <span>Feedback</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         {isLoading ? (
           <SidebarMenu>

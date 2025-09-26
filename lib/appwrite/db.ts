@@ -2,7 +2,6 @@ import { createSessionClient } from "@/lib/appwrite/config"
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID!
 
-// Using TablesDB API
 const tables = [
   { name: "events", id: process.env.NEXT_PUBLIC_COLLECTION_EVENTS! },
   { name: "calendars", id: process.env.NEXT_PUBLIC_COLLECTION_CALENDARS! },

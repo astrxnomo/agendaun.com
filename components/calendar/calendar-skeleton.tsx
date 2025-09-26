@@ -1,6 +1,32 @@
 import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
+
+// Generate random event positions for skeleton
+const generateRandomEventPositions = () => {
+  const positions = []
+
+  // Generate 8-15 random event positions across the 42 cells
+  const eventCount = Math.floor(Math.random() * 8) + 8
+
+  for (let i = 0; i < eventCount; i++) {
+    const cellIndex = Math.floor(Math.random() * 42)
+    const width = ["w-full", "w-4/5", "w-3/4", "w-5/6"][
+      Math.floor(Math.random() * 4)
+    ]
+    const hasMultiple = Math.random() > 0.8 // 20% chance of having multiple events
+
+    positions.push({
+      cellIndex,
+      width,
+      hasMultiple,
+    })
+  }
+
+  return positions
+}
 
 export function CalendarSkeleton() {
+  const randomPositions = generateRandomEventPositions()
   return (
     <div className="flex h-full flex-col">
       <header className="flex h-12 items-center border-b px-6">
@@ -55,6 +81,9 @@ export function CalendarSkeleton() {
             >
               {Array.from({ length: 7 }).map((_, dayIndex) => {
                 const cellIndex = weekIndex * 7 + dayIndex
+                const cellPositions = randomPositions.filter(
+                  (pos) => pos.cellIndex === cellIndex,
+                )
 
                 return (
                   <div
@@ -63,20 +92,20 @@ export function CalendarSkeleton() {
                   >
                     <div className="p-2">
                       <div className="min-h-[calc((var(--event-height)+var(--event-gap))*2)] sm:min-h-[calc((var(--event-height)+var(--event-gap))*3)] lg:min-h-[calc((var(--event-height)+var(--event-gap))*4)]">
-                        {cellIndex % 7 === 2 && (
+                        {cellPositions.length > 0 && (
                           <div className="mt-1 space-y-1">
-                            <Skeleton className="h-4 w-full rounded" />
-                            <Skeleton className="h-4 w-3/4 rounded" />
-                          </div>
-                        )}
-                        {cellIndex % 11 === 0 && (
-                          <div className="mt-1">
-                            <Skeleton className="h-4 w-4/5 rounded" />
-                          </div>
-                        )}
-                        {cellIndex % 13 === 0 && (
-                          <div className="mt-1 space-y-1">
-                            <Skeleton className="h-4 w-full rounded" />
+                            {cellPositions
+                              .slice(0, 2)
+                              .map((position, posIndex) => (
+                                <Skeleton
+                                  key={`skeleton-${cellIndex}-${posIndex}`}
+                                  className={cn("h-4 rounded", position.width)}
+                                />
+                              ))}
+                            {cellPositions.some((pos) => pos.hasMultiple) &&
+                              cellPositions.length === 1 && (
+                                <Skeleton className="h-4 w-3/4 rounded" />
+                              )}
                           </div>
                         )}
                       </div>
