@@ -1,32 +1,35 @@
+import { useMemo } from "react"
+
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
-// Generate random event positions for skeleton
+// Generate random event positions for skeleton - memoized to prevent re-renders
 const generateRandomEventPositions = () => {
   const positions = []
-
+  
   // Generate 8-15 random event positions across the 42 cells
   const eventCount = Math.floor(Math.random() * 8) + 8
-
+  
   for (let i = 0; i < eventCount; i++) {
     const cellIndex = Math.floor(Math.random() * 42)
     const width = ["w-full", "w-4/5", "w-3/4", "w-5/6"][
       Math.floor(Math.random() * 4)
     ]
     const hasMultiple = Math.random() > 0.8 // 20% chance of having multiple events
-
+    
     positions.push({
       cellIndex,
       width,
       hasMultiple,
     })
   }
-
+  
   return positions
 }
 
 export function CalendarSkeleton() {
-  const randomPositions = generateRandomEventPositions()
+  // Use useMemo to generate positions only once per component mount
+  const randomPositions = useMemo(() => generateRandomEventPositions(), [])
   return (
     <div className="flex h-full flex-col">
       <header className="flex h-12 items-center border-b px-6">
