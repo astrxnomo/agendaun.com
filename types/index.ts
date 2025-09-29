@@ -42,7 +42,7 @@ export type Programs = Models.Document & {
   faculty: Faculties
 }
 
-export type Events = Models.Document & {
+export type CalendarEvents = Models.Document & {
   title: string
   description: string | null
   start: Date
@@ -50,13 +50,23 @@ export type Events = Models.Document & {
   all_day: boolean
   location: string | null
   calendar: Calendars
-  etiquette: Etiquettes
+  etiquette: CalendarEtiquettes
   sede: Sedes
   faculty: Faculties
   program: Programs
 }
 
-export type Etiquettes = Models.Document & {
+export type ScheduleEvents = Models.Document & {
+  title: string
+  description: string | null
+  start_time: string
+  end_time: string
+  location: string | null
+  schedule: Schedules
+  color: Colors
+}
+
+export type CalendarEtiquettes = Models.Document & {
   name: string
   color: Colors
   isActive: boolean
@@ -68,8 +78,23 @@ export type Calendars = Models.Document & {
   defaultView: DefaultView
   slug: string
   profile: Profiles
-  etiquettes: Etiquettes[]
+  etiquettes: CalendarEtiquettes[]
   requireConfig: boolean
+}
+
+export type Schedules = Models.Document & {
+  name: string | null
+  slug: string
+  sede: Sedes
+  program: Programs
+  faculty: Faculties
+  category: ScheduleCategories
+}
+
+export type ScheduleCategories = Models.Document & {
+  name: string
+  slug: string
+  icon: string | null
 }
 
 export type Profiles = Models.Document & {
@@ -79,10 +104,4 @@ export type Profiles = Models.Document & {
   program: Programs
 }
 
-export type Session = Models.Session
-
 export type User = Models.User<Models.Preferences>
-
-export type Team = Models.Team<Models.Preferences>
-
-export type Membership = Models.Membership

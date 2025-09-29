@@ -50,18 +50,20 @@ import {
   createEvent,
   deleteEvent,
   updateEvent,
-} from "@/lib/actions/events.actions"
+} from "@/lib/actions/calendar/events.actions"
 import { cn } from "@/lib/utils"
 
-import type { Calendars, Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents, Calendars } from "@/types"
 
 type CalendarView = "month" | "week" | "day" | "agenda"
 
 export interface EventCalendarProps {
   calendar: Calendars
-  events?: Events[]
-  etiquettes?: Etiquettes[]
-  onEventsUpdate: (updater: (prev: Events[]) => Events[]) => void
+  events?: CalendarEvents[]
+  etiquettes?: CalendarEtiquettes[]
+  onEventsUpdate: (
+    updater: (prev: CalendarEvents[]) => CalendarEvents[],
+  ) => void
   className?: string
   initialView?: CalendarView
   editable?: boolean
@@ -82,9 +84,8 @@ export function SetupCalendar({
   const [view, setView] = useState<CalendarView>(initialView)
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [isEventViewDialogOpen, setIsEventViewDialogOpen] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<Partial<Events> | null>(
-    null,
-  )
+  const [selectedEvent, setSelectedEvent] =
+    useState<Partial<CalendarEvents> | null>(null)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -152,7 +153,7 @@ export function SetupCalendar({
     setCurrentDate(new Date())
   }
 
-  const handleEventSelect = (event: Events) => {
+  const handleEventSelect = (event: CalendarEvents) => {
     setSelectedEvent(event)
 
     if (canEdit && editable) {
@@ -184,12 +185,12 @@ export function SetupCalendar({
       start: startTime,
       end: addHoursToDate(startTime, 1),
       all_day: false,
-    } as Partial<Events>
+    } as Partial<CalendarEvents>
     setSelectedEvent(newEvent)
     setIsEventDialogOpen(true)
   }
 
-  const handleEventSave = async (event: Events) => {
+  const handleEventSave = async (event: CalendarEvents) => {
     if (event.$id) {
       // Actualizar evento existente
       const promise = updateEvent(event).then((result) => {
@@ -256,7 +257,7 @@ export function SetupCalendar({
     }
   }
 
-  const handleEventUpdate = async (updatedEvent: Events) => {
+  const handleEventUpdate = async (updatedEvent: CalendarEvents) => {
     // Actualizar inmediatamente en la UI para drag & drop fluido
     onEventsUpdate((prev) =>
       prev.map((event) =>
@@ -504,7 +505,7 @@ export function SetupCalendar({
           />
 
           <EventViewDialog
-            event={selectedEvent as Events}
+            event={selectedEvent as CalendarEvents}
             etiquettes={etiquettes}
             isOpen={isEventViewDialogOpen}
             onClose={() => {

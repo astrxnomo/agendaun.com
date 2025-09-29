@@ -7,15 +7,15 @@ import { useEffect, useMemo, useRef } from "react"
 
 import { EventItem } from "@/components/calendar/event-item"
 
-import type { Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/types"
 
 interface EventsPopupProps {
   date: Date
-  events: Events[]
-  etiquettes: Etiquettes[]
+  events: CalendarEvents[]
+  etiquettes: CalendarEtiquettes[]
   position: { top: number; left: number }
   onClose: () => void
-  onEventSelect: (event: Events) => void
+  onEventSelect: (event: CalendarEvents) => void
 }
 
 export function EventsPopup({
@@ -59,7 +59,7 @@ export function EventsPopup({
     }
   }, [onClose])
 
-  const handleEventClick = (event: Events) => {
+  const handleEventClick = (event: CalendarEvents) => {
     onEventSelect(event)
     onClose()
   }

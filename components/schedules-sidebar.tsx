@@ -1,0 +1,139 @@
+"use client"
+
+import {
+  BookMarked,
+  Building2,
+  Bus,
+  ChevronRight,
+  Clock,
+  FlaskConical,
+  NotepadText,
+  SquareUser,
+} from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import {
+  SidebarMenuAction,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar"
+import { Skeleton } from "@/components/ui/skeleton"
+import { getAllScheduleCategories } from "@/lib/actions/schedule/schedules.actions"
+
+import type { ScheduleCategories } from "@/types"
+
+// Icon mapping for categories
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  offices: Building2,
+  oficinas: Building2,
+  library: BookMarked,
+  bibliotecas: BookMarked,
+  professors: SquareUser,
+  profesores: SquareUser,
+  tutoring: NotepadText,
+  monitorias: NotepadText,
+  labs: FlaskConical,
+  laboratorios: FlaskConical,
+  transport: Bus,
+  transporte: Bus,
+  default: Clock,
+}
+
+function getIconForCategory(categorySlug: string, iconName?: string | null) {
+  if (iconName && iconMap[iconName]) {
+    return iconMap[iconName]
+  }
+
+  const slug = categorySlug.toLowerCase()
+  return iconMap[slug] || iconMap.default
+}
+
+export function SchedulesSidebar() {
+  const [categories, setCategories] = useState<ScheduleCategories[]>([])
+  const [loading, setLoading] = useState(true)
+  const pathname = usePathname()
+
+  const isActive = (path: string) => {
+    if (path === "/schedules") {
+      return pathname === "/schedules"
+    }
+    return pathname.startsWith(path)
+  }
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const data = await getAllScheduleCategories()
+        setCategories(data)
+      } catch (error) {
+        console.error("Error fetching schedule categories:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void fetchCategories()
+  }, [])
+
+  return (
+    <Collapsible asChild defaultOpen className="group/collapsible">
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          tooltip="Horarios"
+          isActive={isActive("/schedules")}
+        >
+          <Link href="/schedules">
+            <Clock />
+            <span>Horarios</span>
+          </Link>
+        </SidebarMenuButton>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuAction className="data-[state=open]:rotate-90">
+            <ChevronRight />
+            <span className="sr-only">Expandir Horarios</span>
+          </SidebarMenuAction>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {loading
+              ? Array.from({ length: 4 }).map((_, index) => (
+                  <SidebarMenuSubItem key={index}>
+                    <div className="flex items-center gap-2 px-2 py-1">
+                      <Skeleton className="h-4 w-4" />
+                      <Skeleton className="h-4 flex-1" />
+                    </div>
+                  </SidebarMenuSubItem>
+                ))
+              : categories.map((category) => {
+                  const Icon = getIconForCategory(category.slug, category.icon)
+                  return (
+                    <SidebarMenuSubItem key={category.$id}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={isActive(`/schedules/${category.slug}`)}
+                      >
+                        <Link href={`/schedules/${category.slug}`}>
+                          <Icon className="size-4" />
+                          <span>{category.name}</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  )
+                })}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  )
+}

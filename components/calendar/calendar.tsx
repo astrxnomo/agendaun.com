@@ -5,8 +5,8 @@ import { toast } from "sonner"
 
 import { EtiquettesHeader, SetupCalendar } from "@/components/calendar"
 import { useAuthContext } from "@/contexts/auth-context"
-import { getCalendarBySlug } from "@/lib/actions/calendars.actions"
-import { getCalendarEvents } from "@/lib/actions/events.actions"
+import { getCalendarBySlug } from "@/lib/actions/calendar/calendars.actions"
+import { getCalendarEvents } from "@/lib/actions/calendar/events.actions"
 import { getProfile } from "@/lib/actions/profiles.actions"
 import { canEditCalendar } from "@/lib/actions/users.actions"
 
@@ -15,13 +15,18 @@ import { PageHeader } from "../page-header"
 import { CalendarError } from "./calendar-error"
 import { CalendarSkeleton } from "./calendar-skeleton"
 
-import type { Calendars, Etiquettes, Events, Profiles } from "@/types"
+import type {
+  CalendarEtiquettes,
+  CalendarEvents,
+  Calendars,
+  Profiles,
+} from "@/types"
 
 export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   const { user } = useAuthContext()
 
   const [calendar, setCalendar] = useState<Calendars | null>(null)
-  const [events, setEvents] = useState<Events[]>([])
+  const [events, setEvents] = useState<CalendarEvents[]>([])
   const [visibleEtiquettes, setVisibleEtiquettes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [editMode, setEditMode] = useState(false)
@@ -49,7 +54,7 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
     }
   }
 
-  const getActiveEtiquette = (etiquettes: Etiquettes[]): string[] => {
+  const getActiveEtiquette = (etiquettes: CalendarEtiquettes[]): string[] => {
     return etiquettes
       .filter((etiquette) => etiquette.isActive)
       .map((etiquette) => etiquette.$id)

@@ -24,6 +24,7 @@ import {
   DroppableCell,
   EventItem,
   isMultiDayEvent,
+  sortEvents,
   useCurrentTimeIndicator,
 } from "@/components/calendar"
 import {
@@ -33,20 +34,20 @@ import {
 } from "@/components/calendar/constants"
 import { cn } from "@/lib/utils"
 
-import type { Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/types"
 
 interface WeekViewProps {
   currentDate: Date
-  events: Events[]
-  etiquettes: Etiquettes[]
-  onEventSelect: (event: Events) => void
+  events: CalendarEvents[]
+  etiquettes: CalendarEtiquettes[]
+  onEventSelect: (event: CalendarEvents) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
   canEdit?: boolean
 }
 
 interface PositionedEvent {
-  event: Events
+  event: CalendarEvents
   top: number
   height: number
   left: number
@@ -142,7 +143,7 @@ export function WeekView({
       const dayStart = startOfDay(day)
 
       // Track columns for overlapping events
-      const columns: { event: Events; end: Date }[][] = []
+      const columns: { event: CalendarEvents; end: Date }[][] = []
 
       sortedEvents.forEach((event) => {
         const eventStart = new Date(event.start)
@@ -215,7 +216,7 @@ export function WeekView({
     return result
   }, [days, events])
 
-  const handleEventClick = (event: Events, e: React.MouseEvent) => {
+  const handleEventClick = (event: CalendarEvents, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }
@@ -256,15 +257,17 @@ export function WeekView({
           <div className="grid grid-cols-8">
             <div className="border-border/70 relative border-r"></div>
             {days.map((day, dayIndex) => {
-              const dayAllDayEvents = allDayEvents.filter((event) => {
-                const eventStart = new Date(event.start)
-                const eventEnd = new Date(event.end)
-                return (
-                  isSameDay(day, eventStart) ||
-                  (day > eventStart && day < eventEnd) ||
-                  isSameDay(day, eventEnd)
-                )
-              })
+              const dayAllDayEvents = sortEvents(
+                allDayEvents.filter((event) => {
+                  const eventStart = new Date(event.start)
+                  const eventEnd = new Date(event.end)
+                  return (
+                    isSameDay(day, eventStart) ||
+                    (day > eventStart && day < eventEnd) ||
+                    isSameDay(day, eventEnd)
+                  )
+                }),
+              )
 
               return (
                 <div

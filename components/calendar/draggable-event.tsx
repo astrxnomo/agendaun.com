@@ -6,11 +6,11 @@ import { differenceInDays } from "date-fns"
 import { useRef, useState } from "react"
 
 import { EventItem, useCalendarDnd } from "@/components/calendar"
-import { type Etiquettes, type Events } from "@/types"
+import { type CalendarEtiquettes, type CalendarEvents } from "@/types"
 
 interface DraggableEventProps {
-  event: Events
-  etiquettes?: Etiquettes[]
+  event: CalendarEvents
+  etiquettes?: CalendarEtiquettes[]
   view: "month" | "week" | "day"
   showTime?: boolean
   onClick?: (e: React.MouseEvent) => void

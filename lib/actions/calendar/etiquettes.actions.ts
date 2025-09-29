@@ -3,14 +3,13 @@
 import { ID } from "node-appwrite"
 
 import { db } from "@/lib/appwrite/db"
-import { type Etiquettes } from "@/types"
-
-import { handleError } from "../utils/error-handler"
-import { setPermissions } from "../utils/permissions"
+import { handleError } from "@/lib/utils/error-handler"
+import { setPermissions } from "@/lib/utils/permissions"
+import { type CalendarEtiquettes } from "@/types"
 
 export async function createEtiquette(
-  etiquette: Etiquettes,
-): Promise<Etiquettes> {
+  etiquette: CalendarEtiquettes,
+): Promise<CalendarEtiquettes> {
   try {
     const data = await db()
     const permissions = await setPermissions(etiquette.calendar?.slug)
@@ -21,7 +20,7 @@ export async function createEtiquette(
       permissions,
     )
 
-    return result as Etiquettes
+    return result as CalendarEtiquettes
   } catch (error) {
     console.error("Error creating etiquette:", error)
     handleError(error)
@@ -29,13 +28,13 @@ export async function createEtiquette(
 }
 
 export async function updateEtiquette(
-  etiquette: Etiquettes,
-): Promise<Etiquettes> {
+  etiquette: CalendarEtiquettes,
+): Promise<CalendarEtiquettes> {
   try {
     const data = await db()
     const result = await data.etiquettes.upsert(etiquette.$id, etiquette)
 
-    return result as Etiquettes
+    return result as CalendarEtiquettes
   } catch (error) {
     console.error("Error updating etiquette:", error)
     handleError(error)

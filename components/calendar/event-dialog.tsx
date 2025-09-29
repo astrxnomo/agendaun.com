@@ -42,15 +42,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { useAuthContext } from "@/contexts/auth-context"
 import { cn } from "@/lib/utils"
 
-import type { Calendars, Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents, Calendars } from "@/types"
 
 interface EventDialogProps {
   calendar: Calendars
-  event: Events | Partial<Events> | null
-  etiquettes?: Etiquettes[]
+  event: CalendarEvents | Partial<CalendarEvents> | null
+  etiquettes?: CalendarEtiquettes[]
   isOpen: boolean
   onClose: () => void
-  onSave: (event: Events) => void
+  onSave: (event: CalendarEvents) => void
   onDelete: (eventId: string) => void
 }
 
@@ -72,7 +72,7 @@ export function EventDialog({
   const [endTime, setEndTime] = useState(`${DefaultEndHour}:00`)
   const [allDay, setAllDay] = useState(false)
   const [location, setLocation] = useState("")
-  const [etiquette, setEtiquette] = useState<Etiquettes | null>(null)
+  const [etiquette, setEtiquette] = useState<CalendarEtiquettes | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   const [endDateOpen, setEndDateOpen] = useState(false)

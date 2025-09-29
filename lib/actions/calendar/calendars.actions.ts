@@ -5,7 +5,7 @@ import { Query } from "node-appwrite"
 import { db } from "@/lib/appwrite/db"
 import { type Calendars } from "@/types"
 
-import { handleError } from "../utils/error-handler"
+import { handleError } from "../../utils/error-handler"
 
 export async function getCalendarBySlug(
   slug: string,

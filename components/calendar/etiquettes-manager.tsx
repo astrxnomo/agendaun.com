@@ -20,8 +20,8 @@ import {
   createEtiquette,
   deleteEtiquette,
   updateEtiquette,
-} from "@/lib/actions/etiquettes.actions"
-import { type Calendars, Colors, type Etiquettes } from "@/types"
+} from "@/lib/actions/calendar/etiquettes.actions"
+import { Colors, type CalendarEtiquettes, type Calendars } from "@/types"
 
 import { getColorIndicator } from "./utils"
 
@@ -41,9 +41,8 @@ export function EtiquettesManager({
 }: EtiquettesManagerProps) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [editingEtiquette, setEditingEtiquette] = useState<Etiquettes | null>(
-    null,
-  )
+  const [editingEtiquette, setEditingEtiquette] =
+    useState<CalendarEtiquettes | null>(null)
   const [form, setForm] = useState<EtiquetteForm>({
     name: "",
     color: "" as Colors,
@@ -70,7 +69,7 @@ export function EtiquettesManager({
       }))
   }
 
-  const handleEdit = (etiquette: Etiquettes) => {
+  const handleEdit = (etiquette: CalendarEtiquettes) => {
     setForm({
       name: etiquette.name,
       color: etiquette.color,
@@ -98,7 +97,7 @@ export function EtiquettesManager({
           name: form.name.trim(),
           color: form.color,
           calendar: calendar,
-        } as Etiquettes)
+        } as CalendarEtiquettes)
 
     toast.promise(promise, {
       loading: isEditing ? "Actualizando etiqueta..." : "Creando etiqueta...",
@@ -115,7 +114,7 @@ export function EtiquettesManager({
     })
   }
 
-  const handleDelete = (etiquette: Etiquettes) => {
+  const handleDelete = (etiquette: CalendarEtiquettes) => {
     if (!confirm("¿Estás seguro de que quieres eliminar esta etiqueta?")) {
       return
     }

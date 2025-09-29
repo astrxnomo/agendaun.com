@@ -19,6 +19,7 @@ import {
   DroppableCell,
   EventItem,
   isMultiDayEvent,
+  sortEvents,
   useCurrentTimeIndicator,
 } from "@/components/calendar"
 import {
@@ -28,20 +29,20 @@ import {
 } from "@/components/calendar/constants"
 import { cn } from "@/lib/utils"
 
-import type { Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/types"
 
 interface DayViewProps {
   currentDate: Date
-  events: Events[]
-  etiquettes: Etiquettes[]
-  onEventSelect: (event: Events) => void
+  events: CalendarEvents[]
+  etiquettes: CalendarEtiquettes[]
+  onEventSelect: (event: CalendarEvents) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
   canEdit?: boolean
 }
 
 interface PositionedEvent {
-  event: Events
+  event: CalendarEvents
   top: number
   height: number
   left: number
@@ -82,10 +83,11 @@ export function DayView({
 
   // Filter all-day events
   const allDayEvents = useMemo(() => {
-    return dayEvents.filter((event) => {
+    const filtered = dayEvents.filter((event) => {
       // Include explicitly marked all-day events or multi-day events
       return event.all_day || isMultiDayEvent(event)
     })
+    return sortEvents(filtered)
   }, [dayEvents])
 
   // Get only single-day time-based events
@@ -119,7 +121,7 @@ export function DayView({
     })
 
     // Track columns for overlapping events
-    const columns: { event: Events; end: Date }[][] = []
+    const columns: { event: CalendarEvents; end: Date }[][] = []
 
     sortedEvents.forEach((event) => {
       const eventStart = new Date(event.start)
@@ -185,7 +187,7 @@ export function DayView({
     return result
   }, [currentDate, timeEvents])
 
-  const handleEventClick = (event: Events, e: React.MouseEvent) => {
+  const handleEventClick = (event: CalendarEvents, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }

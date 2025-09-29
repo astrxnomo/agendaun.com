@@ -1,6 +1,6 @@
 import { isSameDay } from "date-fns"
 
-import { type Events, Colors } from "@/types"
+import { type CalendarEvents, Colors } from "@/types"
 
 export function getColor(color?: Colors): string {
   switch (color) {
@@ -74,16 +74,26 @@ export function getBorderRadiusClasses(
 /**
  * Check if an event is a multi-day event
  */
-export function isMultiDayEvent(event: Events): boolean {
+export function isMultiDayEvent(event: CalendarEvents): boolean {
   const eventStart = new Date(event.start)
   const eventEnd = new Date(event.end || event.start)
   return event.all_day || eventStart.getDate() !== eventEnd.getDate()
 }
 
 /**
+ * Get the duration of an event in milliseconds
+ */
+export function getEventDuration(event: CalendarEvents): number {
+  return new Date(event.end).getTime() - new Date(event.start).getTime()
+}
+
+/**
  * Filter events for a specific day
  */
-export function getEventsForDay(events: Events[], day: Date): Events[] {
+export function getEventsForDay(
+  events: CalendarEvents[],
+  day: Date,
+): CalendarEvents[] {
   return events
     .filter((event) => {
       const eventStart = new Date(event.start)
@@ -93,16 +103,32 @@ export function getEventsForDay(events: Events[], day: Date): Events[] {
 }
 
 /**
- * Sort events with multi-day events first, then by start time
+ * Sort events with multi-day events first (longest first), then by start time
  */
-export function sortEvents(events: Events[]): Events[] {
+export function sortEvents(events: CalendarEvents[]): CalendarEvents[] {
   return [...events].sort((a, b) => {
     const aIsMultiDay = isMultiDayEvent(a)
     const bIsMultiDay = isMultiDayEvent(b)
 
+    // Both are multi-day: sort by duration (longest first), then by start time
+    if (aIsMultiDay && bIsMultiDay) {
+      const aDuration = getEventDuration(a)
+      const bDuration = getEventDuration(b)
+
+      // If durations are different, longest first
+      if (aDuration !== bDuration) {
+        return bDuration - aDuration
+      }
+
+      // If same duration, sort by start time
+      return new Date(a.start).getTime() - new Date(b.start).getTime()
+    }
+
+    // Multi-day events come before single-day events
     if (aIsMultiDay && !bIsMultiDay) return -1
     if (!aIsMultiDay && bIsMultiDay) return 1
 
+    // Both are single-day: sort by start time
     return new Date(a.start).getTime() - new Date(b.start).getTime()
   })
 }
@@ -110,7 +136,10 @@ export function sortEvents(events: Events[]): Events[] {
 /**
  * Get multi-day events that span across a specific day (but don't start on that day)
  */
-export function getSpanningEventsForDay(events: Events[], day: Date): Events[] {
+export function getSpanningEventsForDay(
+  events: CalendarEvents[],
+  day: Date,
+): CalendarEvents[] {
   return events.filter((event) => {
     if (!isMultiDayEvent(event)) return false
 
@@ -128,7 +157,10 @@ export function getSpanningEventsForDay(events: Events[], day: Date): Events[] {
 /**
  * Get all events visible on a specific day (starting, ending, or spanning)
  */
-export function getAllEventsForDay(events: Events[], day: Date): Events[] {
+export function getAllEventsForDay(
+  events: CalendarEvents[],
+  day: Date,
+): CalendarEvents[] {
   return events.filter((event) => {
     const eventStart = new Date(event.start)
     const eventEnd = new Date(event.end || event.start)
@@ -143,7 +175,10 @@ export function getAllEventsForDay(events: Events[], day: Date): Events[] {
 /**
  * Get all events for a day (for agenda view)
  */
-export function getAgendaEventsForDay(events: Events[], day: Date): Events[] {
+export function getAgendaEventsForDay(
+  events: CalendarEvents[],
+  day: Date,
+): CalendarEvents[] {
   return events
     .filter((event) => {
       const eventStart = new Date(event.start)

@@ -3,13 +3,22 @@ import { createAdminClient } from "@/lib/appwrite/config"
 const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID!
 
 const tables = [
-  { name: "events", id: process.env.NEXT_PUBLIC_COLLECTION_EVENTS! },
+  { name: "calendarEvents", id: process.env.NEXT_PUBLIC_COLLECTION_EVENTS! },
   { name: "calendars", id: process.env.NEXT_PUBLIC_COLLECTION_CALENDARS! },
   { name: "etiquettes", id: process.env.NEXT_PUBLIC_COLLECTION_ETIQUETTES! },
   { name: "sedes", id: process.env.NEXT_PUBLIC_COLLECTION_SEDES! },
   { name: "faculties", id: process.env.NEXT_PUBLIC_COLLECTION_FACULTIES! },
   { name: "programs", id: process.env.NEXT_PUBLIC_COLLECTION_PROGRAMS! },
   { name: "profiles", id: process.env.NEXT_PUBLIC_COLLECTION_PROFILES! },
+  { name: "schedules", id: process.env.NEXT_PUBLIC_COLLECTION_SCHEDULES! },
+  {
+    name: "scheduleEvents",
+    id: process.env.NEXT_PUBLIC_COLLECTION_SCHEDULE_EVENTS!,
+  },
+  {
+    name: "scheduleCategories",
+    id: process.env.NEXT_PUBLIC_COLLECTION_SCHEDULES_CATEGORIES!,
+  },
 ]
 
 export async function dbAdmin() {

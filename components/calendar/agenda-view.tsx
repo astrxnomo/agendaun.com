@@ -11,13 +11,13 @@ import {
   getAgendaEventsForDay,
 } from "@/components/calendar"
 
-import type { Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/types"
 
 interface AgendaViewProps {
   currentDate: Date
-  events: Events[]
-  etiquettes: Etiquettes[]
-  onEventSelect: (event: Events) => void
+  events: CalendarEvents[]
+  etiquettes: CalendarEtiquettes[]
+  onEventSelect: (event: CalendarEvents) => void
 }
 
 export function AgendaView({
@@ -32,7 +32,7 @@ export function AgendaView({
     )
   }, [currentDate])
 
-  const handleEventClick = (event: Events, e: React.MouseEvent) => {
+  const handleEventClick = (event: CalendarEvents, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }

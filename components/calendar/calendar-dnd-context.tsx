@@ -25,11 +25,11 @@ import {
 
 import { EventItem } from "@/components/calendar"
 
-import type { Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/types"
 
 // Define the context type
 type CalendarDndContextType = {
-  activeEvent: Events | null
+  activeEvent: CalendarEvents | null
   activeId: UniqueIdentifier | null
   activeView: "month" | "week" | "day" | null
   currentTime: Date | null
@@ -64,8 +64,8 @@ export const useCalendarDnd = () => useContext(CalendarDndContext)
 // Props for the provider
 interface CalendarDndProviderProps {
   children: ReactNode
-  etiquettes: Etiquettes[]
-  onEventUpdate: (event: Events) => void
+  etiquettes: CalendarEtiquettes[]
+  onEventUpdate: (event: CalendarEvents) => void
 }
 
 export function CalendarDndProvider({
@@ -73,7 +73,7 @@ export function CalendarDndProvider({
   etiquettes,
   onEventUpdate,
 }: CalendarDndProviderProps) {
-  const [activeEvent, setActiveEvent] = useState<Events | null>(null)
+  const [activeEvent, setActiveEvent] = useState<CalendarEvents | null>(null)
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
   const [activeView, setActiveView] = useState<"month" | "week" | "day" | null>(
     null,
@@ -137,7 +137,7 @@ export function CalendarDndProvider({
       multiDayWidth: eventMultiDayWidth,
       dragHandlePosition: eventDragHandlePosition,
     } = active.data.current as {
-      event: Events
+      event: CalendarEvents
       view: "month" | "week" | "day"
       height?: number
       isMultiDay?: boolean
@@ -250,7 +250,7 @@ export function CalendarDndProvider({
       }
 
       const activeData = active.data.current as {
-        event?: Events
+        event?: CalendarEvents
         view?: string
       }
       const overData = over.data.current as { date?: Date; time?: number }

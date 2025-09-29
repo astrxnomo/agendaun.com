@@ -2,22 +2,16 @@
 
 import {
   BookMarked,
-  Building2,
-  Bus,
   Calendar,
   CalendarDays,
   ChevronRight,
-  Clock,
-  FlaskConical,
   GraduationCap,
   Home,
   Landmark,
   LifeBuoy,
   LogIn,
-  NotepadText,
   School,
   Send,
-  SquareUser,
   University,
 } from "lucide-react"
 import Link from "next/link"
@@ -47,6 +41,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuthContext } from "@/contexts/auth-context"
 
+import { SchedulesSidebar } from "./schedules-sidebar"
 import { Badge } from "./ui/badge"
 
 export function AppSidebar() {
@@ -186,96 +181,7 @@ export function AppSidebar() {
                 </CollapsibleContent>
               </SidebarMenuItem>
             </Collapsible>
-            <Collapsible asChild defaultOpen={true}>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Horarios"
-                  isActive={isActive("/schedules")}
-                >
-                  <Link href="/schedules">
-                    <Clock />
-                    <span>Horarios</span>
-                  </Link>
-                </SidebarMenuButton>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuAction className="data-[state=open]:rotate-90">
-                    <ChevronRight />
-                    <span className="sr-only">Expandir Horarios</span>
-                  </SidebarMenuAction>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/schedules/offices")}
-                      >
-                        <Link href="/schedules/offices">
-                          <Building2 className="size-4" />
-                          <span>Oficinas</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/schedules/library")}
-                      >
-                        <Link href="/schedules/library">
-                          <BookMarked className="size-4" />
-                          <span>Bibliotecas</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/schedules/professors")}
-                      >
-                        <Link href="/schedules/professors">
-                          <SquareUser className="size-4" />
-                          <span>Profesores</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/schedules/tutoring")}
-                      >
-                        <Link href="/schedules/tutoring">
-                          <NotepadText className="size-4" />
-                          <span>Monitorias</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/schedules/labs")}
-                      >
-                        <Link href="/schedules/labs">
-                          <FlaskConical className="size-4" />
-                          <span>Laboratorios</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/schedules/transport")}
-                      >
-                        <Link href="/schedules/transport">
-                          <Bus className="size-4" />
-                          <span>Transportes</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
+            <SchedulesSidebar />
           </SidebarMenu>
         </SidebarGroup>
 

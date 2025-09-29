@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-import type { Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/types"
 import type { DraggableAttributes } from "@dnd-kit/core"
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities"
 
@@ -27,7 +27,7 @@ const formatTimeWithOptionalMinutes = (date: Date) => {
   }).toLowerCase()
 }
 
-function EventTooltipContent({ event }: { event: Events }) {
+function EventTooltipContent({ event }: { event: CalendarEvents }) {
   const displayStart = new Date(event.start)
   const displayEnd = new Date(event.end)
 
@@ -90,8 +90,8 @@ function EventTooltipContent({ event }: { event: Events }) {
 }
 
 interface EventWrapperProps {
-  event: Events
-  etiquettes?: Etiquettes[]
+  event: CalendarEvents
+  etiquettes?: CalendarEtiquettes[]
   isFirstDay?: boolean
   isLastDay?: boolean
   isDragging?: boolean
@@ -167,8 +167,8 @@ function EventWrapper({
 }
 
 interface EventItemProps {
-  event: Events
-  etiquettes?: Etiquettes[]
+  event: CalendarEvents
+  etiquettes?: CalendarEtiquettes[]
   view: "month" | "week" | "day" | "agenda"
   isDragging?: boolean
   onClick?: (e: React.MouseEvent) => void

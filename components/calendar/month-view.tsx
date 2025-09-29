@@ -36,13 +36,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-import type { Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/types"
 
 interface MonthViewProps {
   currentDate: Date
-  events: Events[]
-  etiquettes: Etiquettes[]
-  onEventSelect: (event: Events) => void
+  events: CalendarEvents[]
+  etiquettes: CalendarEtiquettes[]
+  onEventSelect: (event: CalendarEvents) => void
   onEventCreate: (startTime: Date) => void
   editable?: boolean
   canEdit?: boolean
@@ -88,7 +88,7 @@ export function MonthView({
     return result
   }, [days])
 
-  const handleEventClick = (event: Events, e: React.MouseEvent) => {
+  const handleEventClick = (event: CalendarEvents, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect(event)
   }
@@ -128,7 +128,10 @@ export function MonthView({
               const spanningEvents = getSpanningEventsForDay(events, day)
               const isCurrentMonth = isSameMonth(day, currentDate)
               const cellId = `month-cell-${day.toISOString()}`
-              const allDayEvents: Events[] = [...spanningEvents, ...dayEvents]
+              const allDayEvents: CalendarEvents[] = [
+                ...spanningEvents,
+                ...dayEvents,
+              ]
               const allEvents = getAllEventsForDay(events, day)
 
               const isReferenceCell = weekIndex === 0 && dayIndex === 0
@@ -235,7 +238,7 @@ export function MonthView({
                             >
                               <span>
                                 + {remainingCount}{" "}
-                                <span className="max-sm:sr-only">more</span>
+                                <span className="max-sm:sr-only">más</span>
                               </span>
                             </button>
                           </PopoverTrigger>

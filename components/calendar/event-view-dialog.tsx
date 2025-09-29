@@ -17,13 +17,13 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
-import type { Etiquettes, Events } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/types"
 
 interface EventViewDialogProps {
-  event: Events | null
+  event: CalendarEvents | null
   isOpen: boolean
   onClose: () => void
-  etiquettes?: Etiquettes[] // ← Nueva prop para etiquetas disponibles
+  etiquettes?: CalendarEtiquettes[] // ← Nueva prop para etiquetas disponibles
 }
 
 export function EventViewDialog({
