@@ -1,22 +1,20 @@
 "use server"
 
-import { Query } from "node-appwrite"
+import { ID, Query } from "node-appwrite"
 
-import { dbAdmin } from "@/lib/appwrite/db-admin"
+import { db } from "@/lib/appwrite/db"
 import { handleError } from "@/lib/utils/error-handler"
 
-import type { Colors, ScheduleEvents } from "@/types"
+import type { ScheduleEvents, Schedules } from "@/types"
 
-/**
- * Get all events for a specific schedule
- */
 export async function getScheduleEvents(
-  scheduleId: string,
+  schedule: Schedules,
 ): Promise<ScheduleEvents[]> {
   try {
-    const data = await dbAdmin()
+    const data = await db()
+
     const result = await data.scheduleEvents.list([
-      Query.equal("schedule", scheduleId),
+      Query.equal("schedule", schedule.$id),
       Query.select(["*", "schedule.*"]),
       Query.orderAsc("start_time"),
     ])
@@ -28,21 +26,13 @@ export async function getScheduleEvents(
   }
 }
 
-/**
- * Create a new schedule event
- */
-export async function createScheduleEvent(data: {
-  title: string
-  description?: string
-  start_time: string
-  end_time: string
-  location?: string
-  schedule: string
-  color: Colors
-}): Promise<ScheduleEvents | null> {
+export async function createScheduleEvent(
+  event: ScheduleEvents,
+): Promise<ScheduleEvents> {
   try {
-    const db = await dbAdmin()
-    const result = await db.scheduleEvents.create(data)
+    const data = await db()
+
+    const result = await data.scheduleEvents.upsert(ID.unique(), event)
 
     return result as ScheduleEvents
   } catch (error) {
@@ -51,23 +41,13 @@ export async function createScheduleEvent(data: {
   }
 }
 
-/**
- * Update a schedule event
- */
 export async function updateScheduleEvent(
-  eventId: string,
-  data: Partial<{
-    title: string
-    description: string
-    start_time: string
-    end_time: string
-    location: string
-    color: Colors
-  }>,
-): Promise<ScheduleEvents | null> {
+  event: ScheduleEvents,
+): Promise<ScheduleEvents> {
   try {
-    const db = await dbAdmin()
-    const result = await db.scheduleEvents.update(eventId, data)
+    const data = await db()
+
+    const result = await data.scheduleEvents.upsert(event.$id, event)
 
     return result as ScheduleEvents
   } catch (error) {
@@ -76,13 +56,11 @@ export async function updateScheduleEvent(
   }
 }
 
-/**
- * Delete a schedule event
- */
 export async function deleteScheduleEvent(eventId: string): Promise<boolean> {
   try {
-    const db = await dbAdmin()
-    await db.scheduleEvents.delete(eventId)
+    const data = await db()
+
+    await data.scheduleEvents.delete(eventId)
 
     return true
   } catch (error) {

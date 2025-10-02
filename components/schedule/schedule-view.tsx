@@ -19,28 +19,20 @@ import {
 } from "@/components/calendar/constants"
 import { cn } from "@/lib/utils"
 
-// Simplified event type for schedule view
-export type ScheduleEvent = {
-  $id: string
-  title: string
-  description?: string
-  start: Date
-  end: Date
-  location?: string
-}
+import type { ScheduleEvents } from "@/types"
 
 interface ScheduleViewProps {
-  events: ScheduleEvent[]
-  onEventSelect?: (event: ScheduleEvent) => void
+  events: ScheduleEvents[]
+  onEventSelect?: (event: ScheduleEvents) => void
   onEventCreate?: (startTime: Date) => void
-  onEventUpdate?: (event: ScheduleEvent) => void
+  onEventUpdate?: (event: ScheduleEvents) => void
   onEventDelete?: (eventId: string) => void
   editable?: boolean
   canEdit?: boolean
 }
 
 interface PositionedEvent {
-  event: ScheduleEvent
+  event: ScheduleEvents
   top: number
   height: number
   left: number
@@ -82,17 +74,17 @@ export function ScheduleView({
     const result = Array.from({ length: 7 }, (_, dayIndex) => {
       // Filter events for this day of the week
       const dayEvents = events.filter((event) => {
-        const eventStart = new Date(event.start)
+        const eventStart = new Date(event.start_time)
         const eventDayOfWeek = (eventStart.getDay() + 6) % 7 // Convert Sunday=0 to Monday=0
         return eventDayOfWeek === dayIndex
       })
 
       // Sort events by start time and duration
       const sortedEvents = [...dayEvents].sort((a, b) => {
-        const aStart = new Date(a.start)
-        const bStart = new Date(b.start)
-        const aEnd = new Date(a.end)
-        const bEnd = new Date(b.end)
+        const aStart = new Date(a.start_time)
+        const bStart = new Date(b.start_time)
+        const aEnd = new Date(a.end_time)
+        const bEnd = new Date(b.end_time)
 
         // First sort by start time
         if (aStart < bStart) return -1
@@ -108,11 +100,11 @@ export function ScheduleView({
       const positionedEvents: PositionedEvent[] = []
 
       // Track columns for overlapping events
-      const columns: { event: ScheduleEvent; endHour: number }[][] = []
+      const columns: { event: ScheduleEvents; endHour: number }[][] = []
 
       sortedEvents.forEach((event) => {
-        const eventStart = new Date(event.start)
-        const eventEnd = new Date(event.end)
+        const eventStart = new Date(event.start_time)
+        const eventEnd = new Date(event.end_time)
 
         // Calculate top position and height
         const startHour = getHours(eventStart) + getMinutes(eventStart) / 60
@@ -141,8 +133,8 @@ export function ScheduleView({
             const overlaps = col.some((c) => {
               // Check if events overlap
               const cStartHour =
-                getHours(new Date(c.event.start)) +
-                getMinutes(new Date(c.event.start)) / 60
+                getHours(new Date(c.event.start_time)) +
+                getMinutes(new Date(c.event.start_time)) / 60
               return clampedStartHour < c.endHour && clampedEndHour > cStartHour
             })
             if (!overlaps) {
@@ -179,7 +171,7 @@ export function ScheduleView({
     return result
   }, [events])
 
-  const handleEventClick = (event: ScheduleEvent, e: React.MouseEvent) => {
+  const handleEventClick = (event: ScheduleEvents, e: React.MouseEvent) => {
     e.stopPropagation()
     onEventSelect?.(event)
   }
@@ -243,7 +235,7 @@ export function ScheduleView({
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="h-full w-full">
-                  <ScheduleEvent
+                  <ScheduleEvents
                     event={positionedEvent.event}
                     onClick={(e) => handleEventClick(positionedEvent.event, e)}
                     height={positionedEvent.height}
@@ -308,15 +300,15 @@ export function ScheduleView({
 }
 
 // Simple event component for schedule view
-interface ScheduleEventProps {
-  event: ScheduleEvent
+interface ScheduleEventsProps {
+  event: ScheduleEvents
   onClick: (e: React.MouseEvent) => void
   height: number
 }
 
-function ScheduleEvent({ event, onClick, height }: ScheduleEventProps) {
-  const startTime = new Date(event.start)
-  const endTime = new Date(event.end)
+function ScheduleEvents({ event, onClick, height }: ScheduleEventsProps) {
+  const startTime = new Date(event.start_time)
+  const endTime = new Date(event.end_time)
   const showTime = height >= 40 // Only show time if event is tall enough
 
   return (

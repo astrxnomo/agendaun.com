@@ -1,12 +1,8 @@
-import { ArrowRight, Clock } from "lucide-react"
+import { ArrowRight, CalendarClock, Clock } from "lucide-react"
 import Link from "next/link"
-import { notFound } from "next/navigation"
 
 import { PageHeader } from "@/components/page-header"
-import {
-  getCategoryBySlug,
-  getSchedulesByCategory,
-} from "@/lib/actions/schedule/schedules.actions"
+import { getSchedulesByCategory } from "@/lib/actions/schedule/schedules.actions"
 
 type Props = {
   params: Promise<{ category: string }>
@@ -15,13 +11,19 @@ type Props = {
 export default async function ScheduleCategoryPage({ params }: Props) {
   const { category: categorySlug } = await params
 
-  const category = await getCategoryBySlug(categorySlug)
+  const { schedules, category } = await getSchedulesByCategory(categorySlug)
 
   if (!category) {
-    notFound()
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-12 text-center">
+        <Clock className="text-muted-foreground mb-4 h-12 w-12" />
+        <h3 className="text-lg font-semibold">Categoría no encontrada</h3>
+        <p className="text-muted-foreground text-sm">
+          No se encontró la categoría solicitada.
+        </p>
+      </div>
+    )
   }
-
-  const schedules = await getSchedulesByCategory(category.$id)
 
   return (
     <>
@@ -42,12 +44,12 @@ export default async function ScheduleCategoryPage({ params }: Props) {
       <div className="p-6 md:p-10 lg:p-20">
         {schedules.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-            <Clock className="text-muted-foreground mb-4 h-12 w-12" />
+            <CalendarClock className="text-muted-foreground mb-4 h-12 w-12" />
             <h3 className="text-lg font-semibold">
               No hay horarios disponibles
             </h3>
             <p className="text-muted-foreground text-sm">
-              No se encontraron horarios para esta categoría.
+              No se encontraron horarios para esta categoría en tu sede.
             </p>
           </div>
         ) : (
@@ -58,20 +60,14 @@ export default async function ScheduleCategoryPage({ params }: Props) {
                 href={`/schedules/${categorySlug}/${schedule.$id}`}
                 className="group bg-muted/40 hover:border-primary/30 hover:bg-muted/60 relative overflow-hidden rounded-xl border border-transparent p-6 transition-all duration-200 hover:shadow-xl"
               >
-                <div className="relative flex items-start gap-4">
+                <div className="relative flex items-center gap-4">
                   <span className="bg-primary/10 text-primary rounded-lg p-3">
-                    <Clock className="h-6 w-6" />
+                    <CalendarClock className="h-6 w-6" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <h3 className="group-hover:text-primary text-lg font-semibold transition-colors">
                       {schedule.name}
                     </h3>
-                    <p className="text-muted-foreground text-sm">
-                      {schedule.program?.name} - {schedule.faculty?.name}
-                    </p>
-                    <p className="text-muted-foreground mt-2 text-xs">
-                      Sede: {schedule.sede?.name}
-                    </p>
                   </span>
                   <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100" />
                 </div>

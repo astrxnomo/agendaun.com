@@ -1,14 +1,19 @@
 "use client"
 
 import {
-  BookMarked,
+  BookOpen,
   Building2,
   Bus,
   ChevronRight,
   Clock,
   FlaskConical,
-  NotepadText,
-  SquareUser,
+  GraduationCap,
+  MapPin,
+  Stethoscope,
+  Users,
+  Utensils,
+  Wifi,
+  type LucideIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -32,30 +37,21 @@ import { getAllScheduleCategories } from "@/lib/actions/schedule/schedules.actio
 
 import type { ScheduleCategories } from "@/types"
 
-// Icon mapping for categories
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  offices: Building2,
-  oficinas: Building2,
-  library: BookMarked,
-  bibliotecas: BookMarked,
-  professors: SquareUser,
-  profesores: SquareUser,
-  tutoring: NotepadText,
-  monitorias: NotepadText,
-  labs: FlaskConical,
-  laboratorios: FlaskConical,
-  transport: Bus,
-  transporte: Bus,
-  default: Clock,
-}
-
-function getIconForCategory(categorySlug: string, iconName?: string | null) {
-  if (iconName && iconMap[iconName]) {
-    return iconMap[iconName]
+const getIconComponent = (iconName: string | null): LucideIcon => {
+  const iconMap: Record<string, LucideIcon> = {
+    GraduationCap,
+    Users,
+    Building2,
+    FlaskConical,
+    BookOpen,
+    Bus,
+    Utensils,
+    Stethoscope,
+    Wifi,
+    MapPin,
   }
 
-  const slug = categorySlug.toLowerCase()
-  return iconMap[slug] || iconMap.default
+  return iconName && iconMap[iconName] ? iconMap[iconName] : Clock
 }
 
 export function SchedulesSidebar() {
@@ -116,7 +112,7 @@ export function SchedulesSidebar() {
                   </SidebarMenuSubItem>
                 ))
               : categories.map((category) => {
-                  const Icon = getIconForCategory(category.slug, category.icon)
+                  const IconComponent = getIconComponent(category.icon)
                   return (
                     <SidebarMenuSubItem key={category.$id}>
                       <SidebarMenuSubButton
@@ -124,7 +120,7 @@ export function SchedulesSidebar() {
                         isActive={isActive(`/schedules/${category.slug}`)}
                       >
                         <Link href={`/schedules/${category.slug}`}>
-                          <Icon className="size-4" />
+                          <IconComponent className="size-4" />
                           <span>{category.name}</span>
                         </Link>
                       </SidebarMenuSubButton>

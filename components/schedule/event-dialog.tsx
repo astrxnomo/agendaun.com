@@ -23,13 +23,13 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 
-import type { ScheduleEvent } from "./schedule-view"
+import type { ScheduleEvents } from "@/types"
 
 interface ScheduleEventDialogProps {
-  event: ScheduleEvent | Partial<ScheduleEvent> | null
+  event: ScheduleEvents | Partial<ScheduleEvents> | null
   isOpen: boolean
   onClose: () => void
-  onSave: (event: ScheduleEvent) => void
+  onSave: (event: ScheduleEvents) => void
   onDelete?: (eventId: string) => void
 }
 
@@ -54,8 +54,8 @@ export function ScheduleEventDialog({
       setDescription(event.description || "")
       setLocation(event.location || "")
 
-      if (event.start) {
-        const startDateTime = new Date(event.start)
+      if (event.start_time) {
+        const startDateTime = new Date(event.start_time)
         // Convert JavaScript day (0 = Sunday) to Monday-first (1 = Monday)
         const jsDay = startDateTime.getDay()
         const mondayFirstDay = jsDay === 0 ? 7 : jsDay
@@ -63,8 +63,8 @@ export function ScheduleEventDialog({
         setStartTime(formatTimeForInput(startDateTime))
       }
 
-      if (event.end) {
-        const endDateTime = new Date(event.end)
+      if (event.end_time) {
+        const endDateTime = new Date(event.end_time)
         setEndTime(formatTimeForInput(endDateTime))
       }
     } else {
@@ -146,16 +146,16 @@ export function ScheduleEventDialog({
       return
     }
 
-    const savedEvent: ScheduleEvent = {
+    const savedEvent: Partial<ScheduleEvents> = {
       $id: event?.$id || `temp-${Date.now()}-${Math.random()}`,
       title,
-      description: description || undefined,
-      start: startDateTime,
-      end: endDateTime,
-      location: location || undefined,
+      description: description || null,
+      start_time: startDateTime.toISOString(),
+      end_time: endDateTime.toISOString(),
+      location: location || null,
     }
 
-    onSave(savedEvent)
+    onSave(savedEvent as ScheduleEvents)
     onClose()
     resetForm()
   }
@@ -193,7 +193,7 @@ export function ScheduleEventDialog({
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ej: Dr. García - Matemáticas"
+              placeholder="Ej: Matemáticas I - Grupo 01"
             />
           </div>
 
@@ -204,7 +204,7 @@ export function ScheduleEventDialog({
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descripción del horario de atención..."
+              placeholder="Información adicional sobre el horario..."
               rows={3}
             />
           </div>
@@ -216,7 +216,7 @@ export function ScheduleEventDialog({
               id="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Ej: Oficina 201, Laboratorio 305"
+              placeholder="Ej: Edificio 401, Salón 201"
             />
           </div>
 

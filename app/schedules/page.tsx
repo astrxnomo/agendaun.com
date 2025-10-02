@@ -20,7 +20,6 @@ import { getAllScheduleCategories } from "@/lib/actions/schedule/schedules.actio
 export default async function SchedulesPage() {
   const categories = await getAllScheduleCategories()
 
-  // Enhanced icon mapping for categories using database icons
   const getIconForCategory = (iconName: string | null) => {
     if (!iconName) return Clock
 

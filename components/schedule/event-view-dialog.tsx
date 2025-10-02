@@ -13,10 +13,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-import type { ScheduleEvent } from "./schedule-view"
+import type { ScheduleEvents } from "@/types"
 
 interface ScheduleEventViewDialogProps {
-  event: ScheduleEvent | null
+  event: ScheduleEvents | null
   isOpen: boolean
   onClose: () => void
 }
@@ -28,8 +28,8 @@ export function ScheduleEventViewDialog({
 }: ScheduleEventViewDialogProps) {
   if (!event) return null
 
-  const startDate = new Date(event.start)
-  const endDate = new Date(event.end)
+  const startDate = new Date(event.start_time)
+  const endDate = new Date(event.end_time)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
