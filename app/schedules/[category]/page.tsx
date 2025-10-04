@@ -4,6 +4,8 @@ import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { getSchedulesByCategory } from "@/lib/actions/schedule/schedules.actions"
 
+export const dynamic = "force-dynamic"
+
 type Props = {
   params: Promise<{ category: string }>
 }

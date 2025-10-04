@@ -21,11 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 
-import type { ScheduleEvents } from "@/types"
+import type { ScheduleEvents, Schedules } from "@/types"
 
 interface ScheduleEventDialogProps {
+  schedule: Schedules
   event: ScheduleEvents | Partial<ScheduleEvents> | null
   isOpen: boolean
   onClose: () => void
@@ -34,6 +36,7 @@ interface ScheduleEventDialogProps {
 }
 
 export function ScheduleEventDialog({
+  schedule,
   event,
   isOpen,
   onClose,
@@ -146,16 +149,18 @@ export function ScheduleEventDialog({
       return
     }
 
-    const savedEvent: Partial<ScheduleEvents> = {
-      $id: event?.$id || `temp-${Date.now()}-${Math.random()}`,
-      title,
-      description: description || null,
+    const savedEvent: ScheduleEvents = {
+      ...event,
+      $id: event?.$id || "",
+      title: title.trim(),
+      description: description.trim() || null,
       start_time: startDateTime.toISOString(),
       end_time: endDateTime.toISOString(),
-      location: location || null,
-    }
+      location: location.trim() || null,
+      schedule: event?.schedule || schedule,
+    } as ScheduleEvents
 
-    onSave(savedEvent as ScheduleEvents)
+    onSave(savedEvent)
     onClose()
     resetForm()
   }
@@ -220,6 +225,8 @@ export function ScheduleEventDialog({
             />
           </div>
 
+          <Separator />
+
           {/* Day of Week */}
           <div className="space-y-2">
             <Label htmlFor="dayOfWeek">Día de la semana</Label>
@@ -278,22 +285,24 @@ export function ScheduleEventDialog({
           </div>
         </div>
 
-        <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={onClose} className="flex-1">
-            Cancelar
-          </Button>
+        <DialogFooter className="flex-col gap-2 sm:flex-row">
           {isEditing && onDelete && (
             <Button
               variant="destructive"
               onClick={handleDelete}
-              className="flex-1"
+              className="w-full sm:flex-1"
             >
               Eliminar
             </Button>
           )}
-          <Button onClick={handleSave} className="flex-1">
-            {isEditing ? "Actualizar" : "Crear"}
-          </Button>
+          <div className="flex w-full gap-2 sm:flex-1">
+            <Button variant="outline" onClick={onClose} className="flex-1">
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} className="flex-1">
+              {isEditing ? "Guardar" : "Crear"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

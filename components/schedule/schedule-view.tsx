@@ -12,12 +12,16 @@ import {
 import { es } from "date-fns/locale"
 import React, { useMemo } from "react"
 
+import { cn } from "@/lib/utils"
+
 import {
+  DaysOfWeek,
   EndHour,
+  MinEventHeight,
+  QuarterHourIntervals,
   StartHour,
   WeekCellsHeight,
-} from "@/components/calendar/constants"
-import { cn } from "@/lib/utils"
+} from "./constants"
 
 import type { ScheduleEvents } from "@/types"
 
@@ -25,8 +29,6 @@ interface ScheduleViewProps {
   events: ScheduleEvents[]
   onEventSelect?: (event: ScheduleEvents) => void
   onEventCreate?: (startTime: Date) => void
-  onEventUpdate?: (event: ScheduleEvents) => void
-  onEventDelete?: (eventId: string) => void
   editable?: boolean
   canEdit?: boolean
 }
@@ -40,23 +42,10 @@ interface PositionedEvent {
   zIndex: number
 }
 
-// Days of the week in Spanish
-const daysOfWeek = [
-  "Lunes",
-  "Martes",
-  "Miércoles",
-  "Jueves",
-  "Viernes",
-  "Sábado",
-  "Domingo",
-]
-
 export function ScheduleView({
   events,
   onEventSelect,
   onEventCreate,
-  onEventUpdate: _onEventUpdate,
-  onEventDelete: _onEventDelete,
   editable = false,
   canEdit = false,
 }: ScheduleViewProps) {
@@ -171,19 +160,25 @@ export function ScheduleView({
     return result
   }, [events])
 
-  const handleEventClick = (event: ScheduleEvents, e: React.MouseEvent) => {
-    e.stopPropagation()
-    onEventSelect?.(event)
-  }
+  const handleEventClick = React.useCallback(
+    (event: ScheduleEvents, e: React.MouseEvent) => {
+      e.stopPropagation()
+      onEventSelect?.(event)
+    },
+    [onEventSelect],
+  )
 
   return (
-    <div data-slot="schedule-view" className="flex h-full flex-col">
+    <div
+      data-slot="schedule-view"
+      className="flex h-full flex-col overflow-y-auto"
+    >
       {/* Header with days of the week */}
-      <div className="bg-background/80 border-border/70 sticky z-20 grid grid-cols-8 border-y uppercase backdrop-blur-md">
+      <div className="bg-background border-border/70 sticky top-0 z-20 grid grid-cols-8 border-y uppercase">
         <div className="text-muted-foreground/70 py-2 text-center text-xs">
           Hora
         </div>
-        {daysOfWeek.map((day) => (
+        {DaysOfWeek.map((day) => (
           <div
             key={day}
             className="text-muted-foreground/70 py-2 text-center text-xs"
@@ -197,7 +192,7 @@ export function ScheduleView({
       </div>
 
       {/* Schedule grid */}
-      <div className="grid flex-1 grid-cols-8 overflow-hidden">
+      <div className="grid grid-cols-8">
         {/* Hours column */}
         <div className="border-border/70 grid auto-cols-fr border-r">
           {hours.map((hour, index) => (
@@ -215,7 +210,7 @@ export function ScheduleView({
         </div>
 
         {/* Days columns */}
-        {daysOfWeek.map((_, dayIndex) => (
+        {DaysOfWeek.map((_, dayIndex) => (
           <div
             key={dayIndex}
             className="border-border/70 relative grid auto-cols-fr border-r last:border-r-0"
@@ -255,14 +250,14 @@ export function ScheduleView({
                   {/* Quarter-hour intervals for creating events */}
                   {editable &&
                     canEdit &&
-                    [0, 1, 2, 3].map((quarter) => {
+                    QuarterHourIntervals.map((quarter) => {
                       const dayOfWeek = dayIndex // 0 = Monday, 6 = Sunday
 
                       return (
                         <div
                           key={`${hour.toString()}-${quarter}`}
                           className={cn(
-                            "absolute h-[calc(var(--week-cells-height)/4)] w-full cursor-pointer transition-colors hover:bg-green-50 dark:hover:bg-green-950/20",
+                            "hover:bg-foreground/10 absolute h-[calc(var(--week-cells-height)/4)] w-full cursor-pointer transition-colors",
                             quarter === 0 && "top-0",
                             quarter === 1 &&
                               "top-[calc(var(--week-cells-height)/4)]",
@@ -271,6 +266,7 @@ export function ScheduleView({
                             quarter === 3 &&
                               "top-[calc(var(--week-cells-height)/4*3)]",
                           )}
+                          title="Crear evento"
                           onClick={() => {
                             if (onEventCreate) {
                               // Create a date for this day of week and time
@@ -306,10 +302,14 @@ interface ScheduleEventsProps {
   height: number
 }
 
-function ScheduleEvents({ event, onClick, height }: ScheduleEventsProps) {
+const ScheduleEvents = React.memo(function ScheduleEvents({
+  event,
+  onClick,
+  height,
+}: ScheduleEventsProps) {
   const startTime = new Date(event.start_time)
   const endTime = new Date(event.end_time)
-  const showTime = height >= 40 // Only show time if event is tall enough
+  const showTime = height >= MinEventHeight
 
   return (
     <div
@@ -331,4 +331,4 @@ function ScheduleEvents({ event, onClick, height }: ScheduleEventsProps) {
       </div>
     </div>
   )
-}
+})

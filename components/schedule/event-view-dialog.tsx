@@ -2,7 +2,7 @@
 
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { Calendar, Clock, MapPin, X } from "lucide-react"
+import { Calendar, Clock, MapPin } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -39,14 +39,6 @@ export function ScheduleEventViewDialog({
             <DialogTitle className="text-lg font-semibold">
               {event.title}
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-6 w-6 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
 
