@@ -17,6 +17,8 @@ import Link from "next/link"
 import { PageHeader } from "@/components/page-header"
 import { getAllScheduleCategories } from "@/lib/actions/schedule/schedules.actions"
 
+export const dynamic = "force-dynamic"
+
 export default async function SchedulesPage() {
   const categories = await getAllScheduleCategories()
 
