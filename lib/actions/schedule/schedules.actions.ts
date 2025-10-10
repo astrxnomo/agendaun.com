@@ -4,6 +4,7 @@ import { Query } from "node-appwrite"
 
 import { getUser } from "@/lib/appwrite/auth"
 import { db } from "@/lib/appwrite/db"
+import { dbAdmin } from "@/lib/appwrite/db-admin"
 import { handleError } from "@/lib/utils/error-handler"
 
 import { getProfile } from "../profiles.actions"
@@ -14,7 +15,7 @@ export async function getAllScheduleCategories(): Promise<
   ScheduleCategories[]
 > {
   try {
-    const data = await db()
+    const data = await dbAdmin()
     const result = await data.scheduleCategories.list([Query.orderAsc("name")])
 
     return result.rows as ScheduleCategories[]
@@ -36,7 +37,6 @@ export async function getSchedulesByCategory(
 
     const data = await db()
 
-    // First, get the category by slug to get its ID
     const categoryResult = await data.scheduleCategories.list([
       Query.equal("slug", categorySlugOrId),
       Query.limit(1),
@@ -84,6 +84,102 @@ export async function getScheduleById(
     return (result.rows[0] as Schedules) || null
   } catch (error) {
     console.error("Error fetching schedule by ID:", error)
+    handleError(error)
+  }
+}
+
+export async function createSchedule(input: {
+  name: string
+  categoryId: string
+  facultyId: string
+  programId: string
+}): Promise<Schedules> {
+  try {
+    const user = await getUser()
+    if (!user) throw new Error("No autenticado")
+
+    const profile = await getProfile(user.$id)
+    if (!profile?.sede) {
+      throw new Error("El usuario no tiene una sede asignada")
+    }
+
+    const data = await db()
+
+    const slug = input.name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+
+    const result = await data.schedules.upsert(
+      "unique()",
+      {
+        name: input.name,
+        slug,
+        category: input.categoryId,
+        sede: profile.sede.$id,
+        faculty: input.facultyId,
+        program: input.programId,
+      },
+      [],
+    )
+
+    return result as Schedules
+  } catch (error) {
+    console.error("Error creating schedule:", error)
+    handleError(error)
+  }
+}
+
+export async function updateSchedule(
+  scheduleId: string,
+  input: {
+    name: string
+    facultyId: string
+    programId: string
+  },
+): Promise<Schedules> {
+  try {
+    const user = await getUser()
+    if (!user) throw new Error("No autenticado")
+
+    const data = await db()
+
+    const slug = input.name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+
+    const result = await data.schedules.upsert(
+      scheduleId,
+      {
+        name: input.name,
+        slug,
+        faculty: input.facultyId,
+        program: input.programId,
+      },
+      [],
+    )
+
+    return result as Schedules
+  } catch (error) {
+    console.error("Error updating schedule:", error)
+    handleError(error)
+  }
+}
+
+export async function deleteSchedule(scheduleId: string): Promise<void> {
+  try {
+    const user = await getUser()
+    if (!user) throw new Error("No autenticado")
+
+    const data = await db()
+    await data.schedules.delete(scheduleId)
+  } catch (error) {
+    console.error("Error deleting schedule:", error)
     handleError(error)
   }
 }

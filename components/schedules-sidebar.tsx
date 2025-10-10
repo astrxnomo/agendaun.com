@@ -1,20 +1,6 @@
 "use client"
 
-import {
-  BookOpen,
-  Building2,
-  Bus,
-  ChevronRight,
-  Clock,
-  FlaskConical,
-  GraduationCap,
-  MapPin,
-  Stethoscope,
-  Users,
-  Utensils,
-  Wifi,
-  type LucideIcon,
-} from "lucide-react"
+import { ChevronRight, Clock } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -34,25 +20,9 @@ import {
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getAllScheduleCategories } from "@/lib/actions/schedule/schedules.actions"
+import { getIcon } from "@/lib/utils"
 
 import type { ScheduleCategories } from "@/types"
-
-const getIconComponent = (iconName: string | null): LucideIcon => {
-  const iconMap: Record<string, LucideIcon> = {
-    GraduationCap,
-    Users,
-    Building2,
-    FlaskConical,
-    BookOpen,
-    Bus,
-    Utensils,
-    Stethoscope,
-    Wifi,
-    MapPin,
-  }
-
-  return iconName && iconMap[iconName] ? iconMap[iconName] : Clock
-}
 
 export function SchedulesSidebar() {
   const [categories, setCategories] = useState<ScheduleCategories[]>([])
@@ -112,7 +82,7 @@ export function SchedulesSidebar() {
                   </SidebarMenuSubItem>
                 ))
               : categories.map((category) => {
-                  const IconComponent = getIconComponent(category.icon)
+                  const IconComponent = getIcon(category.icon, Clock)
                   return (
                     <SidebarMenuSubItem key={category.$id}>
                       <SidebarMenuSubButton

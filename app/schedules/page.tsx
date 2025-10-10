@@ -1,55 +1,12 @@
-import {
-  ArrowRight,
-  BookOpen,
-  Building2,
-  Bus,
-  Clock,
-  FlaskConical,
-  GraduationCap,
-  MapPin,
-  Stethoscope,
-  Users,
-  Utensils,
-  Wifi,
-} from "lucide-react"
+import { ArrowRight, Clock } from "lucide-react"
 import Link from "next/link"
 
 import { PageHeader } from "@/components/page-header"
 import { getAllScheduleCategories } from "@/lib/actions/schedule/schedules.actions"
-
-export const dynamic = "force-dynamic"
+import { getIcon } from "@/lib/utils"
 
 export default async function SchedulesPage() {
   const categories = await getAllScheduleCategories()
-
-  const getIconForCategory = (iconName: string | null) => {
-    if (!iconName) return Clock
-
-    switch (iconName) {
-      case "GraduationCap":
-        return GraduationCap
-      case "Users":
-        return Users
-      case "Building2":
-        return Building2
-      case "FlaskConical":
-        return FlaskConical
-      case "BookOpen":
-        return BookOpen
-      case "Bus":
-        return Bus
-      case "Utensils":
-        return Utensils
-      case "Stethoscope":
-        return Stethoscope
-      case "Wifi":
-        return Wifi
-      case "MapPin":
-        return MapPin
-      default:
-        return Clock
-    }
-  }
 
   return (
     <>
@@ -80,7 +37,7 @@ export default async function SchedulesPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => {
-              const Icon = getIconForCategory(category.icon)
+              const Icon = getIcon(category.icon, Clock)
               return (
                 <Link
                   key={category.$id}

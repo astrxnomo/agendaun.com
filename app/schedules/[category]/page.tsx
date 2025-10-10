@@ -2,9 +2,11 @@ import { ArrowRight, CalendarClock, Clock } from "lucide-react"
 import Link from "next/link"
 
 import { PageHeader } from "@/components/page-header"
+import { ScheduleDialog } from "@/components/schedule/schedule-dialog"
+import { getProfile } from "@/lib/actions/profiles.actions"
 import { getSchedulesByCategory } from "@/lib/actions/schedule/schedules.actions"
-
-export const dynamic = "force-dynamic"
+import { canEditScheduleCategory } from "@/lib/actions/users.actions"
+import { getUser } from "@/lib/appwrite/auth"
 
 type Props = {
   params: Promise<{ category: string }>
@@ -14,6 +16,9 @@ export default async function ScheduleCategoryPage({ params }: Props) {
   const { category: categorySlug } = await params
 
   const { schedules, category } = await getSchedulesByCategory(categorySlug)
+
+  const user = await getUser()
+  const profile = user ? await getProfile(user.$id) : null
 
   if (!category) {
     return (
@@ -27,6 +32,8 @@ export default async function ScheduleCategoryPage({ params }: Props) {
     )
   }
 
+  const canEdit = await canEditScheduleCategory(categorySlug)
+
   return (
     <>
       <PageHeader
@@ -37,15 +44,26 @@ export default async function ScheduleCategoryPage({ params }: Props) {
         ]}
       />
       <div className="border-b p-6">
-        <h1 className="text-3xl font-bold">{category.name}</h1>
-        <p className="text-muted-foreground mt-2">
-          Todos los horarios de {category.name.toLowerCase()}
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">{category.name}</h1>
+            <p className="text-muted-foreground mt-2">
+              Todos los horarios de {category.name.toLowerCase()}
+            </p>
+          </div>
+          {canEdit && profile?.sede && (
+            <ScheduleDialog
+              categoryId={category.$id}
+              categoryName={category.name}
+              userSedeId={profile.sede.$id}
+            />
+          )}
+        </div>
       </div>
 
       <div className="p-6 md:p-10 lg:p-20">
         {schedules.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
+          <div className="flex flex-col items-center justify-center rounded-lg p-12 text-center">
             <CalendarClock className="text-muted-foreground mb-4 h-12 w-12" />
             <h3 className="text-lg font-semibold">
               No hay horarios disponibles

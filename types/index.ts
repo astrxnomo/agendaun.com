@@ -77,9 +77,10 @@ export type Calendars = Models.Document & {
   name: string | null
   defaultView: DefaultView
   slug: string
-  profile: Profiles
+  profile: Profiles | null
   etiquettes: CalendarEtiquettes[]
   requireConfig: boolean
+  icon: string | null
 }
 
 export type Schedules = Models.Document & {

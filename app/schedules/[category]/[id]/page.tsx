@@ -1,7 +1,5 @@
 import { Schedule } from "@/components/schedule/schedule"
 
-export const dynamic = "force-dynamic"
-
 type Props = {
   params: Promise<{ category: string; id: string }>
 }

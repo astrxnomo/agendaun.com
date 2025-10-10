@@ -25,12 +25,10 @@ export async function updateUserName(name: string): Promise<User> {
   }
 }
 
-export async function canEditCalendar(calendar: Calendars): Promise<boolean> {
+async function getUserEditorRoles(): Promise<string[]> {
   try {
     const user = await getUser()
-    if (!user) return false
-
-    if (calendar.profile?.user_id === user.$id) return true
+    if (!user) return []
 
     const { users } = await createAdminClient()
 
@@ -41,17 +39,35 @@ export async function canEditCalendar(calendar: Calendars): Promise<boolean> {
         membership.teamId === process.env.NEXT_PUBLIC_TEAMS_EDITORS,
     )
 
-    if (!editorMembership) return false
+    if (!editorMembership) return []
 
-    const editorRoles = editorMembership.roles
-
-    if (!editorRoles) return false
-
-    if (editorRoles.includes(`${calendar.slug}-calendar`)) return true
-
-    return false
+    return editorMembership.roles || []
   } catch (error) {
     handleError(error)
+  }
+}
+
+async function checkPermissions(
+  roles: string[],
+  checks: string[],
+): Promise<boolean> {
+  return checks.some((check) => roles.includes(check))
+}
+
+export async function canEditCalendar(calendar: Calendars): Promise<boolean> {
+  try {
+    const user = await getUser()
+    if (!user) return false
+
+    // Owner check
+    if (calendar.profile?.user_id === user.$id) return true
+
+    // Role-based permissions
+    const roles = await getUserEditorRoles()
+    return checkPermissions(roles, [`${calendar.slug}-calendar`])
+  } catch (error) {
+    handleError(error)
+    return false
   }
 }
 
@@ -60,26 +76,48 @@ export async function canEditSchedule(schedule: Schedules): Promise<boolean> {
     const user = await getUser()
     if (!user) return false
 
-    const { users } = await createAdminClient()
-
-    const memberships = await users.listMemberships({ userId: user.$id })
-
-    const editorMembership = memberships.memberships.find(
-      (membership) =>
-        membership.teamId === process.env.NEXT_PUBLIC_TEAMS_EDITORS,
-    )
-
-    if (!editorMembership) return false
-
-    const editorRoles = editorMembership.roles
-
-    if (!editorRoles) return false
-
-    if (editorRoles.includes(`${schedule.category.slug}-schedule`)) return true
-
-    return false
+    const roles = await getUserEditorRoles()
+    return checkPermissions(roles, [
+      "schedules-admin",
+      `${schedule.$id}-schedule`,
+      `${schedule.category.slug}-schedule`,
+    ])
   } catch (error) {
     handleError(error)
     return false
+  }
+}
+
+export async function canEditScheduleCategory(
+  categorySlug: string,
+): Promise<boolean> {
+  try {
+    const user = await getUser()
+    if (!user) return false
+
+    const roles = await getUserEditorRoles()
+    return checkPermissions(roles, [
+      "schedules-admin",
+      `${categorySlug}-schedule`,
+    ])
+  } catch (error) {
+    handleError(error)
+    return false
+  }
+}
+
+export async function getUserRoles(filterPattern?: string): Promise<string[]> {
+  try {
+    const roles = await getUserEditorRoles()
+
+    if (!filterPattern) return roles
+
+    return roles.filter((role) => {
+      if (role === filterPattern) return true
+      return role.includes(filterPattern)
+    })
+  } catch (error) {
+    handleError(error)
+    return []
   }
 }
