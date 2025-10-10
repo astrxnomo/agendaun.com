@@ -13,11 +13,12 @@ import { sendMagicLink } from "@/lib/appwrite/auth"
 import type React from "react"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
 
   const sendMagicLinkAction = async () => {
+    const email = `${username}@unal.edu.co`
     await sendMagicLink(email)
     setEmailSent(true)
   }
@@ -25,12 +26,8 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!email.trim()) {
-      return toast.error("Por favor ingresa tu correo electrónico")
-    }
-
-    if (!email.endsWith("@unal.edu.co")) {
-      return toast.error("Debes usar tu correo institucional (@unal.edu.co)")
+    if (!username.trim()) {
+      return toast.error("Por favor ingresa tu usuario")
     }
 
     setIsLoading(true)
@@ -99,8 +96,8 @@ export default function LoginPage() {
                     id="email"
                     placeholder="usuario"
                     type="text"
-                    value={email.replace("@unal.edu.co", "")}
-                    onChange={(e) => setEmail(e.target.value + "@unal.edu.co")}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     disabled={isLoading}
                     required
                     className="bg-background/50 border-border/50 focus:border-primary/50 focus:ring-primary/20 placeholder:text-muted-foreground/60 h-12 rounded px-4 pe-32 transition-all duration-200"
@@ -134,7 +131,9 @@ export default function LoginPage() {
               <div className="bg-primary/5 border-primary/20 rounded border p-5 backdrop-blur-sm">
                 <div className="space-y-2 text-center">
                   <p className="text-sm">Enlace enviado a</p>
-                  <p className="text-primary text-sm font-semibold">{email}</p>
+                  <p className="text-primary text-sm font-semibold">
+                    {username}@unal.edu.co
+                  </p>
                 </div>
               </div>
 
@@ -148,7 +147,7 @@ export default function LoginPage() {
                   variant="outline"
                   onClick={() => {
                     setEmailSent(false)
-                    setEmail("")
+                    setUsername("")
                   }}
                   className="border-border/50 hover:bg-muted/50 h-11 w-full rounded transition-all duration-200"
                 >
