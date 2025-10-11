@@ -3,10 +3,12 @@ import Link from "next/link"
 
 import { PageHeader } from "@/components/page-header"
 import { ScheduleDialog } from "@/components/schedule/schedule-dialog"
-import { getProfile } from "@/lib/actions/profiles.actions"
+import { ScheduleItemActions } from "@/components/schedule/schedule-item-actions"
 import { getSchedulesByCategory } from "@/lib/actions/schedule/schedules.actions"
-import { canEditScheduleCategory } from "@/lib/actions/users.actions"
-import { getUser } from "@/lib/appwrite/auth"
+import {
+  canEditSchedule,
+  canEditScheduleCategory,
+} from "@/lib/actions/users.actions"
 
 type Props = {
   params: Promise<{ category: string }>
@@ -17,8 +19,13 @@ export default async function ScheduleCategoryPage({ params }: Props) {
 
   const { schedules, category } = await getSchedulesByCategory(categorySlug)
 
-  const user = await getUser()
-  const profile = user ? await getProfile(user.$id) : null
+  // Verificar permisos para cada horario
+  const schedulesWithPermissions = await Promise.all(
+    schedules.map(async (schedule) => ({
+      schedule,
+      canEdit: await canEditSchedule(schedule),
+    })),
+  )
 
   if (!category) {
     return (
@@ -51,11 +58,10 @@ export default async function ScheduleCategoryPage({ params }: Props) {
               Todos los horarios de {category.name.toLowerCase()}
             </p>
           </div>
-          {canEdit && profile?.sede && (
+          {canEdit && (
             <ScheduleDialog
               categoryId={category.$id}
               categoryName={category.name}
-              userSedeId={profile.sede.$id}
             />
           )}
         </div>
@@ -74,24 +80,28 @@ export default async function ScheduleCategoryPage({ params }: Props) {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {schedules.map((schedule) => (
-              <Link
-                key={schedule.$id}
-                href={`/schedules/${categorySlug}/${schedule.$id}`}
-                className="group bg-muted/40 hover:border-primary/30 hover:bg-muted/60 relative overflow-hidden rounded-xl border border-transparent p-6 transition-all duration-200 hover:shadow-xl"
-              >
-                <div className="relative flex items-center gap-4">
-                  <span className="bg-primary/10 text-primary rounded-lg p-3">
-                    <CalendarClock className="h-6 w-6" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <h3 className="group-hover:text-primary text-lg font-semibold transition-colors">
-                      {schedule.name}
-                    </h3>
-                  </span>
-                  <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100" />
-                </div>
-              </Link>
+            {schedulesWithPermissions.map(({ schedule, canEdit }) => (
+              <div key={schedule.$id} className="relative">
+                <Link
+                  href={`/schedules/${categorySlug}/${schedule.$id}`}
+                  className="group bg-muted/40 hover:border-primary/30 hover:bg-muted/60 relative block overflow-hidden rounded-xl border border-transparent p-6 transition-all duration-200 hover:shadow-xl"
+                >
+                  <div className="relative flex items-center gap-4">
+                    <span className="bg-primary/10 text-primary rounded-lg p-3">
+                      <CalendarClock className="h-6 w-6" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <h3 className="group-hover:text-primary text-lg font-semibold transition-colors">
+                        {schedule.name}
+                      </h3>
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {canEdit && <ScheduleItemActions schedule={schedule} />}
+                      <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100" />
+                    </div>
+                  </div>
+                </Link>
+              </div>
             ))}
           </div>
         )}

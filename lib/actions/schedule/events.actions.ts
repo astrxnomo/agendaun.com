@@ -2,10 +2,10 @@
 
 import { ID, Query } from "node-appwrite"
 
-import { db } from "@/lib/appwrite/db"
-import { handleError } from "@/lib/utils/error-handler"
+import { type ScheduleEvents, type Schedules } from "@/types"
 
-import type { ScheduleEvents, Schedules } from "@/types"
+import { db } from "../../appwrite/db"
+import { handleError } from "../../utils/error-handler"
 
 export async function getScheduleEvents(
   schedule: Schedules,
@@ -15,7 +15,7 @@ export async function getScheduleEvents(
 
     const result = await data.scheduleEvents.list([
       Query.equal("schedule", schedule.$id),
-      Query.select(["*", "schedule.*"]),
+      Query.select(["*", "schedule.*", "schedule.category.*"]),
       Query.orderAsc("start_time"),
     ])
 
@@ -31,7 +31,6 @@ export async function createScheduleEvent(
 ): Promise<ScheduleEvents> {
   try {
     const data = await db()
-
     const result = await data.scheduleEvents.upsert(ID.unique(), event)
 
     return result as ScheduleEvents
@@ -46,7 +45,6 @@ export async function updateScheduleEvent(
 ): Promise<ScheduleEvents> {
   try {
     const data = await db()
-
     const result = await data.scheduleEvents.upsert(event.$id, event)
 
     return result as ScheduleEvents

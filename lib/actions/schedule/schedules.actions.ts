@@ -1,16 +1,23 @@
 "use server"
 
-import { Query } from "node-appwrite"
+import { ID, Query } from "node-appwrite"
 
-import { getUser } from "@/lib/appwrite/auth"
-import { db } from "@/lib/appwrite/db"
-import { dbAdmin } from "@/lib/appwrite/db-admin"
-import { handleError } from "@/lib/utils/error-handler"
+import { type ScheduleCategories, type Schedules } from "@/types"
 
+import { getUser } from "../../appwrite/auth"
+import { db } from "../../appwrite/db"
+import { dbAdmin } from "../../appwrite/db-admin"
+import { handleError } from "../../utils/error-handler"
 import { getProfile } from "../profiles.actions"
 
-import type { ScheduleCategories, Schedules } from "@/types"
+// ============================================================================
+// GET OPERATIONS
+// ============================================================================
 
+/**
+ * Get all schedule categories
+ * @returns Array of all schedule categories ordered by name
+ */
 export async function getAllScheduleCategories(): Promise<
   ScheduleCategories[]
 > {
@@ -25,20 +32,23 @@ export async function getAllScheduleCategories(): Promise<
   }
 }
 
-export async function getSchedulesByCategory(
-  categorySlugOrId: string,
-): Promise<{
+/**
+ * Get all schedules for a specific category filtered by user's sede
+ * @param categorySlug - The slug of the schedule category
+ * @returns Object containing schedules array and category information
+ */
+export async function getSchedulesByCategory(categorySlug: string): Promise<{
   schedules: Schedules[]
   category: ScheduleCategories | null
 }> {
   try {
     const user = await getUser()
     const profile = user ? await getProfile(user.$id) : null
-
     const data = await db()
 
+    // Get category
     const categoryResult = await data.scheduleCategories.list([
-      Query.equal("slug", categorySlugOrId),
+      Query.equal("slug", categorySlug),
       Query.limit(1),
     ])
 
@@ -47,15 +57,16 @@ export async function getSchedulesByCategory(
       return { schedules: [], category: null }
     }
 
+    // Build queries
     const queries = [Query.equal("category", category.$id)]
-
     if (profile?.sede) {
       queries.push(Query.equal("sede", profile.sede.$id))
     }
 
+    // Get schedules
     const result = await data.schedules.list([
       ...queries,
-      Query.select(["*", "sede.*", "faculty.*", "program.*", "category.*"]),
+      Query.select(["*", "sede.*", "category.*"]),
       Query.orderAsc("name"),
     ])
 
@@ -64,36 +75,44 @@ export async function getSchedulesByCategory(
       category,
     }
   } catch (error) {
-    console.error("Error fetching schedules by category:", error)
+    console.error(
+      `Error getting schedules for category ${categorySlug}:`,
+      error,
+    )
     handleError(error)
   }
 }
 
+/**
+ * Get a single schedule by ID with related data
+ * @param scheduleId - The ID of the schedule to retrieve
+ * @returns Schedule object or null if not found
+ */
 export async function getScheduleById(
   scheduleId: string,
 ): Promise<Schedules | null> {
   try {
     const data = await db()
-
     const result = await data.schedules.list([
       Query.equal("$id", scheduleId),
-      Query.select(["*", "sede.*", "faculty.*", "program.*", "category.*"]),
+      Query.select(["*", "sede.*", "category.*"]),
       Query.limit(1),
     ])
 
     return (result.rows[0] as Schedules) || null
   } catch (error) {
-    console.error("Error fetching schedule by ID:", error)
+    console.error(`Error getting schedule with id ${scheduleId}:`, error)
     handleError(error)
   }
 }
 
-export async function createSchedule(input: {
-  name: string
-  categoryId: string
-  facultyId: string
-  programId: string
-}): Promise<Schedules> {
+// ============================================================================
+// CREATE OPERATIONS
+// ============================================================================
+
+export async function createSchedule(
+  schedule: Partial<Schedules>,
+): Promise<Schedules> {
   try {
     const user = await getUser()
     if (!user) throw new Error("No autenticado")
@@ -104,23 +123,11 @@ export async function createSchedule(input: {
     }
 
     const data = await db()
-
-    const slug = input.name
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-
     const result = await data.schedules.upsert(
-      "unique()",
+      ID.unique(),
       {
-        name: input.name,
-        slug,
-        category: input.categoryId,
+        ...schedule,
         sede: profile.sede.$id,
-        faculty: input.facultyId,
-        program: input.programId,
       },
       [],
     )
@@ -132,37 +139,14 @@ export async function createSchedule(input: {
   }
 }
 
-export async function updateSchedule(
-  scheduleId: string,
-  input: {
-    name: string
-    facultyId: string
-    programId: string
-  },
-): Promise<Schedules> {
+// ============================================================================
+// UPDATE OPERATIONS
+// ============================================================================
+
+export async function updateSchedule(schedule: Schedules): Promise<Schedules> {
   try {
-    const user = await getUser()
-    if (!user) throw new Error("No autenticado")
-
     const data = await db()
-
-    const slug = input.name
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-
-    const result = await data.schedules.upsert(
-      scheduleId,
-      {
-        name: input.name,
-        slug,
-        faculty: input.facultyId,
-        program: input.programId,
-      },
-      [],
-    )
+    const result = await data.schedules.upsert(schedule.$id, schedule, [])
 
     return result as Schedules
   } catch (error) {
@@ -171,13 +155,16 @@ export async function updateSchedule(
   }
 }
 
-export async function deleteSchedule(scheduleId: string): Promise<void> {
-  try {
-    const user = await getUser()
-    if (!user) throw new Error("No autenticado")
+// ============================================================================
+// DELETE OPERATIONS
+// ============================================================================
 
+export async function deleteSchedule(scheduleId: string): Promise<boolean> {
+  try {
     const data = await db()
     await data.schedules.delete(scheduleId)
+
+    return true
   } catch (error) {
     console.error("Error deleting schedule:", error)
     handleError(error)

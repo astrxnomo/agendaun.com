@@ -85,10 +85,10 @@ export type Calendars = Models.Document & {
 
 export type Schedules = Models.Document & {
   name: string | null
-  slug: string
+  description: string | null
   sede: Sedes
-  program: Programs
-  faculty: Faculties
+  faculty: Faculties | null
+  program: Programs | null
   category: ScheduleCategories
 }
 

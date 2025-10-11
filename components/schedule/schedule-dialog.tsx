@@ -1,7 +1,7 @@
 "use client"
 
-import { Loader2, Plus, Save } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Loader2, Pencil, Plus, Save } from "lucide-react"
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -15,28 +15,17 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  getFacultiesBySede,
-  getProgramsByFaculty,
-} from "@/lib/actions/academic.actions"
+import { Textarea } from "@/components/ui/textarea"
 import {
   createSchedule,
   updateSchedule,
 } from "@/lib/actions/schedule/schedules.actions"
 
-import type { Faculties, Programs, Schedules } from "@/types"
+import type { Schedules } from "@/types"
 
 type ScheduleDialogProps = {
   categoryId: string
   categoryName: string
-  userSedeId: string
   schedule?: Schedules
   onSuccess?: () => void
 }
@@ -44,46 +33,13 @@ type ScheduleDialogProps = {
 export function ScheduleDialog({
   categoryId,
   categoryName,
-  userSedeId,
   schedule,
   onSuccess,
 }: ScheduleDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [name, setName] = useState(schedule?.name || "")
-
-  const [faculties, setFaculties] = useState<Faculties[]>([])
-  const [programs, setPrograms] = useState<Programs[]>([])
-
-  const [selectedFaculty, setSelectedFaculty] = useState<string>(
-    schedule?.faculty?.$id || "",
-  )
-  const [selectedProgram, setSelectedProgram] = useState<string>(
-    schedule?.program?.$id || "",
-  )
-
-  useEffect(() => {
-    const loadFaculties = async () => {
-      const data = await getFacultiesBySede(userSedeId)
-      setFaculties(data)
-    }
-    void loadFaculties()
-  }, [userSedeId])
-
-  useEffect(() => {
-    if (selectedFaculty) {
-      const loadPrograms = async () => {
-        const data = await getProgramsByFaculty(selectedFaculty)
-        setPrograms(data)
-        if (!data.find((p) => p.$id === selectedProgram)) {
-          setSelectedProgram("")
-        }
-      }
-      void loadPrograms()
-    } else {
-      setPrograms([])
-    }
-  }, [selectedFaculty, selectedProgram])
+  const [description, setDescription] = useState(schedule?.description || "")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,47 +49,39 @@ export function ScheduleDialog({
       return
     }
 
-    if (!selectedFaculty || !selectedProgram) {
-      toast.error("Debes seleccionar facultad y programa")
-      return
-    }
-
     setLoading(true)
 
     try {
       if (schedule) {
-        toast.promise(
-          updateSchedule(schedule.$id, {
-            name: name.trim(),
-            facultyId: selectedFaculty,
-            programId: selectedProgram,
-          }),
-          {
-            loading: "Actualizando horario...",
-            success: "Horario actualizado correctamente",
-            error: "Error al actualizar el horario",
-          },
-        )
+        const updatedSchedule = {
+          ...schedule,
+          name: name.trim(),
+          description: description.trim() || null,
+        }
+        const promise = updateSchedule(updatedSchedule)
+        toast.promise(promise, {
+          loading: "Actualizando horario...",
+          success: "Horario actualizado correctamente",
+          error: "Error al actualizar el horario",
+        })
+        await promise
       } else {
-        toast.promise(
-          createSchedule({
-            name: name.trim(),
-            categoryId,
-            facultyId: selectedFaculty,
-            programId: selectedProgram,
-          }),
-          {
-            loading: "Creando horario...",
-            success: "Horario creado correctamente",
-            error: "Error al crear el horario",
-          },
-        )
+        const promise = createSchedule({
+          name: name.trim(),
+          description: description.trim() || null,
+          category: categoryId as any,
+        } as any)
+        toast.promise(promise, {
+          loading: "Creando horario...",
+          success: "Horario creado correctamente",
+          error: "Error al crear el horario",
+        })
+        await promise
       }
 
       setOpen(false)
       setName("")
-      setSelectedFaculty("")
-      setSelectedProgram("")
+      setDescription("")
       onSuccess?.()
     } catch (error) {
       console.error("Error in schedule dialog:", error)
@@ -146,8 +94,13 @@ export function ScheduleDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {schedule ? (
-          <Button variant="outline" size="sm">
-            Editar
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:text-primary h-8 w-8"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="sr-only">Editar horario</span>
           </Button>
         ) : (
           <Button>
@@ -181,43 +134,15 @@ export function ScheduleDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="faculty">Facultad</Label>
-            <Select
-              value={selectedFaculty}
-              onValueChange={setSelectedFaculty}
-              disabled={loading || faculties.length === 0}
-            >
-              <SelectTrigger id="faculty">
-                <SelectValue placeholder="Selecciona una facultad" />
-              </SelectTrigger>
-              <SelectContent>
-                {faculties.map((faculty) => (
-                  <SelectItem key={faculty.$id} value={faculty.$id}>
-                    {faculty.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="program">Programa</Label>
-            <Select
-              value={selectedProgram}
-              onValueChange={setSelectedProgram}
-              disabled={loading || !selectedFaculty || programs.length === 0}
-            >
-              <SelectTrigger id="program">
-                <SelectValue placeholder="Selecciona un programa" />
-              </SelectTrigger>
-              <SelectContent>
-                {programs.map((program) => (
-                  <SelectItem key={program.$id} value={program.$id}>
-                    {program.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="description">Descripción (opcional)</Label>
+            <Textarea
+              id="description"
+              placeholder="Describe brevemente este horario..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={loading}
+              rows={3}
+            />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
