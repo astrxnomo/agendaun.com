@@ -1,5 +1,6 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { ID, Query } from "node-appwrite"
 
 import { type ScheduleCategories, type Schedules } from "@/types"
@@ -10,14 +11,6 @@ import { dbAdmin } from "../../appwrite/db-admin"
 import { handleError } from "../../utils/error-handler"
 import { getProfile } from "../profiles.actions"
 
-// ============================================================================
-// GET OPERATIONS
-// ============================================================================
-
-/**
- * Get all schedule categories
- * @returns Array of all schedule categories ordered by name
- */
 export async function getAllScheduleCategories(): Promise<
   ScheduleCategories[]
 > {
@@ -32,11 +25,6 @@ export async function getAllScheduleCategories(): Promise<
   }
 }
 
-/**
- * Get all schedules for a specific category filtered by user's sede
- * @param categorySlug - The slug of the schedule category
- * @returns Object containing schedules array and category information
- */
 export async function getSchedulesByCategory(categorySlug: string): Promise<{
   schedules: Schedules[]
   category: ScheduleCategories | null
@@ -83,11 +71,6 @@ export async function getSchedulesByCategory(categorySlug: string): Promise<{
   }
 }
 
-/**
- * Get a single schedule by ID with related data
- * @param scheduleId - The ID of the schedule to retrieve
- * @returns Schedule object or null if not found
- */
 export async function getScheduleById(
   scheduleId: string,
 ): Promise<Schedules | null> {
@@ -105,10 +88,6 @@ export async function getScheduleById(
     handleError(error)
   }
 }
-
-// ============================================================================
-// CREATE OPERATIONS
-// ============================================================================
 
 export async function createSchedule(
   schedule: Partial<Schedules>,
@@ -132,6 +111,7 @@ export async function createSchedule(
       [],
     )
 
+    revalidatePath("/schedules")
     return result as Schedules
   } catch (error) {
     console.error("Error creating schedule:", error)
@@ -139,15 +119,12 @@ export async function createSchedule(
   }
 }
 
-// ============================================================================
-// UPDATE OPERATIONS
-// ============================================================================
-
 export async function updateSchedule(schedule: Schedules): Promise<Schedules> {
   try {
     const data = await db()
     const result = await data.schedules.upsert(schedule.$id, schedule, [])
 
+    revalidatePath("/schedules")
     return result as Schedules
   } catch (error) {
     console.error("Error updating schedule:", error)
@@ -155,15 +132,12 @@ export async function updateSchedule(schedule: Schedules): Promise<Schedules> {
   }
 }
 
-// ============================================================================
-// DELETE OPERATIONS
-// ============================================================================
-
 export async function deleteSchedule(scheduleId: string): Promise<boolean> {
   try {
     const data = await db()
     await data.schedules.delete(scheduleId)
 
+    revalidatePath("/schedules")
     return true
   } catch (error) {
     console.error("Error deleting schedule:", error)

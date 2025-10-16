@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/page-header"
 import { getAllScheduleCategories } from "@/lib/actions/schedule/schedules.actions"
 import { getIcon } from "@/lib/utils"
 
-export default async function SchedulesPage() {
+export default async function SchedulesCategoriesPage() {
   const categories = await getAllScheduleCategories()
 
   return (

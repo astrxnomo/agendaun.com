@@ -1,7 +1,6 @@
 "use client"
 
 import { Loader2, Trash2 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -28,7 +27,6 @@ type ScheduleItemActionsProps = {
 }
 
 export function ScheduleItemActions({ schedule }: ScheduleItemActionsProps) {
-  const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -43,7 +41,6 @@ export function ScheduleItemActions({ schedule }: ScheduleItemActionsProps) {
       })
 
       setOpen(false)
-      router.refresh()
     } catch (error) {
       console.error("Error deleting schedule:", error)
     } finally {
@@ -54,14 +51,9 @@ export function ScheduleItemActions({ schedule }: ScheduleItemActionsProps) {
   return (
     <div
       className="flex items-center gap-1"
-      onClick={(e) => e.preventDefault()}
+      onClick={(e) => e.stopPropagation()}
     >
-      <ScheduleDialog
-        categoryId={schedule.category.$id}
-        categoryName={schedule.category.name}
-        schedule={schedule}
-      />
-
+      <ScheduleDialog category={schedule.category} schedule={schedule} />
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
           <Button
@@ -95,8 +87,7 @@ export function ScheduleItemActions({ schedule }: ScheduleItemActionsProps) {
             >
               {isDeleting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Eliminando...
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 </>
               ) : (
                 "Eliminar"

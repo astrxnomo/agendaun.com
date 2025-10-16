@@ -59,15 +59,12 @@ export async function canEditCalendar(calendar: Calendars): Promise<boolean> {
     const user = await getUser()
     if (!user) return false
 
-    // Owner check
     if (calendar.profile?.user_id === user.$id) return true
 
-    // Role-based permissions
     const roles = await getUserEditorRoles()
     return checkPermissions(roles, [`${calendar.slug}-calendar`])
   } catch (error) {
     handleError(error)
-    return false
   }
 }
 
@@ -79,12 +76,11 @@ export async function canEditSchedule(schedule: Schedules): Promise<boolean> {
     const roles = await getUserEditorRoles()
     return checkPermissions(roles, [
       "schedules-admin",
-      `${schedule.$id}-schedule`,
       `${schedule.category.slug}-schedule`,
+      `${schedule.$id}-schedule`,
     ])
   } catch (error) {
     handleError(error)
-    return false
   }
 }
 
@@ -102,7 +98,6 @@ export async function canEditScheduleCategory(
     ])
   } catch (error) {
     handleError(error)
-    return false
   }
 }
 
@@ -118,6 +113,5 @@ export async function getUserRoles(filterPattern?: string): Promise<string[]> {
     })
   } catch (error) {
     handleError(error)
-    return []
   }
 }

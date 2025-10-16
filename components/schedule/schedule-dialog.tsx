@@ -1,7 +1,7 @@
 "use client"
 
-import { Loader2, Pencil, Plus, Save } from "lucide-react"
-import { useState } from "react"
+import { Loader2, Pencil, Plus } from "lucide-react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -21,25 +21,28 @@ import {
   updateSchedule,
 } from "@/lib/actions/schedule/schedules.actions"
 
-import type { Schedules } from "@/types"
+import type { ScheduleCategories, Schedules } from "@/types"
 
 type ScheduleDialogProps = {
-  categoryId: string
-  categoryName: string
+  category: ScheduleCategories
   schedule?: Schedules
-  onSuccess?: () => void
 }
 
-export function ScheduleDialog({
-  categoryId,
-  categoryName,
-  schedule,
-  onSuccess,
-}: ScheduleDialogProps) {
+export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [name, setName] = useState(schedule?.name || "")
   const [description, setDescription] = useState(schedule?.description || "")
+
+  useEffect(() => {
+    if (open && schedule) {
+      setName(schedule.name || "")
+      setDescription(schedule.description || "")
+    } else if (open && !schedule) {
+      setName("")
+      setDescription("")
+    }
+  }, [open, schedule])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,38 +54,31 @@ export function ScheduleDialog({
 
     setLoading(true)
 
-    try {
-      if (schedule) {
-        const updatedSchedule = {
+    const promise = schedule
+      ? updateSchedule({
           ...schedule,
           name: name.trim(),
           description: description.trim() || null,
-        }
-        const promise = updateSchedule(updatedSchedule)
-        toast.promise(promise, {
-          loading: "Actualizando horario...",
-          success: "Horario actualizado correctamente",
-          error: "Error al actualizar el horario",
         })
-        await promise
-      } else {
-        const promise = createSchedule({
+      : createSchedule({
           name: name.trim(),
           description: description.trim() || null,
-          category: categoryId as any,
+          category: category.$id as any,
         } as any)
-        toast.promise(promise, {
-          loading: "Creando horario...",
-          success: "Horario creado correctamente",
-          error: "Error al crear el horario",
-        })
-        await promise
-      }
 
+    toast.promise(promise, {
+      loading: schedule ? "Actualizando horario..." : "Creando horario...",
+      success: schedule
+        ? "Horario actualizado correctamente"
+        : "Horario creado correctamente",
+      error: "Error al guardar el horario",
+    })
+
+    try {
+      await promise
       setOpen(false)
       setName("")
       setDescription("")
-      onSuccess?.()
     } catch (error) {
       console.error("Error in schedule dialog:", error)
     } finally {
@@ -117,7 +113,7 @@ export function ScheduleDialog({
           <DialogDescription>
             {schedule
               ? "Actualiza los datos del horario"
-              : `Crea un nuevo horario para ${categoryName}`}
+              : `Crea un nuevo horario para ${category.name}`}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -157,14 +153,10 @@ export function ScheduleDialog({
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Guardando...
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 </>
               ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {schedule ? "Actualizar" : "Crear"}
-                </>
+                <>{schedule ? "Actualizar" : "Crear"}</>
               )}
             </Button>
           </div>

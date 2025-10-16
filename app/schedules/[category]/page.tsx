@@ -52,18 +52,9 @@ export default async function ScheduleCategoryPage({ params }: Props) {
       />
       <div className="border-b p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">{category.name}</h1>
-            <p className="text-muted-foreground mt-2">
-              Todos los horarios de {category.name.toLowerCase()}
-            </p>
-          </div>
-          {canEdit && (
-            <ScheduleDialog
-              categoryId={category.$id}
-              categoryName={category.name}
-            />
-          )}
+          <h1 className="text-3xl font-bold">{category.name}</h1>
+
+          {canEdit && <ScheduleDialog category={category} />}
         </div>
       </div>
 
@@ -81,23 +72,32 @@ export default async function ScheduleCategoryPage({ params }: Props) {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {schedulesWithPermissions.map(({ schedule, canEdit }) => (
-              <div key={schedule.$id} className="relative">
+              <div key={schedule.$id} className="relative h-full">
                 <Link
                   href={`/schedules/${categorySlug}/${schedule.$id}`}
-                  className="group bg-muted/40 hover:border-primary/30 hover:bg-muted/60 relative block overflow-hidden rounded-xl border border-transparent p-6 transition-all duration-200 hover:shadow-xl"
+                  className="group bg-muted/40 hover:border-primary/30 hover:bg-muted/60 relative flex h-full flex-col overflow-hidden rounded-xl border border-transparent p-6 transition-all duration-200 hover:shadow-xl"
                 >
-                  <div className="relative flex items-center gap-4">
-                    <span className="bg-primary/10 text-primary rounded-lg p-3">
+                  <div className="flex items-start gap-4">
+                    <span className="bg-primary/10 text-primary flex-shrink-0 rounded-lg p-3">
                       <CalendarClock className="h-6 w-6" />
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <h3 className="group-hover:text-primary text-lg font-semibold transition-colors">
-                        {schedule.name}
-                      </h3>
-                    </span>
-                    <div className="flex items-center gap-2">
-                      {canEdit && <ScheduleItemActions schedule={schedule} />}
-                      <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="group-hover:text-primary line-clamp-2 text-lg font-semibold transition-colors">
+                          {schedule.name}
+                        </h3>
+                        <div className="flex flex-shrink-0 items-center gap-2">
+                          {canEdit && (
+                            <ScheduleItemActions schedule={schedule} />
+                          )}
+                          <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100" />
+                        </div>
+                      </div>
+                      {schedule.description && (
+                        <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
+                          {schedule.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </Link>

@@ -1,30 +1,3 @@
-/**
- * @fileoverview export function Schedule({ scheduleId }: ScheduleProps) {
-  const [schedule, setSchedule] = useState<Schedules | null>(null)
-  const [events, setEvents] = useState<ScheduleEvents[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [canEdit, setCanEdit] = useState(false)
-  const [editMode, setEditMode] = useState(false)
-
-  const toggleEditMode = () => setEditMode(!editMode)ule Component - Main Schedule Container
- * @descri        ]}
-      />
-      <ScheduleHeader
-        schedule={schedule}
-        editMode={editMode}
-        canEdit={canEdit}
-        onToggleEditMode={toggleEditMode}
-      />
-      <SetupSchedule
-        schedule={schedule}
-        events={events}
-        onEventsUpdate={setEvents}
-        editable={editMode}
-        canEdit={canEdit}
-      />mponente principal que obtiene datos y orquesta el horario
- * @category UI Components - Schedule
- */
-
 "use client"
 
 import { useEffect, useState } from "react"
