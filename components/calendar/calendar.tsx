@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -24,6 +25,7 @@ import type {
 
 export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   const { user } = useAuthContext()
+  const router = useRouter()
 
   const [calendar, setCalendar] = useState<Calendars | null>(null)
   const [events, setEvents] = useState<CalendarEvents[]>([])
@@ -76,6 +78,12 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   }
 
   const toggleEditMode = () => setEditMode(!editMode)
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/auth/unauthorized/require-auth")
+    }
+  }, [user, router])
 
   useEffect(() => {
     setCalendar(null)

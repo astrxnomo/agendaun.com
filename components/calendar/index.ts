@@ -19,6 +19,10 @@ export { CalendarProvider, useCalendarContext } from "./calendar-context"
 
 export { default as UniversalCalendar } from "./calendar"
 
+// Skeleton components
+export { CalendarSkeletonBackground } from "../auth/skeleton-background"
+export { CalendarSkeleton } from "./calendar-skeleton"
+
 // Constants and utility exports
 export * from "./constants"
 export * from "./utils"

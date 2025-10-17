@@ -1,7 +1,7 @@
 "use server"
 
-import { getUser } from "@/lib/appwrite/auth"
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/config"
+import { getUser, verifySession } from "@/lib/appwrite/dal"
 import { type Calendars, type Schedules, type User } from "@/types"
 
 import { handleError } from "../utils/error-handler"
@@ -12,7 +12,8 @@ export async function updateUserName(name: string): Promise<User> {
       throw new Error("El nombre es requerido")
     }
 
-    const { account } = await createSessionClient()
+    const session = await verifySession()
+    const { account } = await createSessionClient(session)
 
     const result = await account.updateName({
       name: name.trim(),

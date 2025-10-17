@@ -9,7 +9,7 @@ import {
 } from "react"
 
 import { getProfile } from "@/lib/actions/profiles.actions"
-import { getUser } from "@/lib/appwrite/auth"
+import { getUserForContext } from "@/lib/appwrite/auth"
 import { type Profiles, type User } from "@/types"
 
 interface AuthContextType {
@@ -33,7 +33,7 @@ export const AuthContextProvider = ({
   const refreshAuth = useCallback(async () => {
     setIsLoading(true)
     try {
-      const userData = await getUser()
+      const userData = await getUserForContext()
 
       if (!userData) {
         setUser(null)

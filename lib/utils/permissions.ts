@@ -1,6 +1,6 @@
 import { Permission, Role } from "node-appwrite"
 
-import { getUser } from "../appwrite/auth"
+import { getUser } from "../appwrite/dal"
 
 export async function setPermissions(
   calendarSlug: string | undefined,

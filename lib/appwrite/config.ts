@@ -2,8 +2,6 @@
 
 import { Account, Client, TablesDB, Users } from "node-appwrite"
 
-import { verifySession } from "@/lib/appwrite/auth"
-
 export const createAdminClient = async () => {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
@@ -26,9 +24,7 @@ export const createAdminClient = async () => {
   }
 }
 
-export const createSessionClient = async () => {
-  const sessionValue = await verifySession()
-
+export const createSessionClient = async (sessionValue: string) => {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)

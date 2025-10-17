@@ -1,4 +1,5 @@
 import { createSessionClient } from "@/lib/appwrite/config"
+import { verifySession } from "@/lib/appwrite/dal"
 
 const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID!
 
@@ -22,7 +23,8 @@ const tables = [
 ]
 
 export async function db() {
-  const { database } = await createSessionClient()
+  const session = await verifySession()
+  const { database } = await createSessionClient(session)
   const api: Record<string, any> = {}
 
   tables.forEach((table) => {

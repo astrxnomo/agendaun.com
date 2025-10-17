@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache"
 import { ID, Query } from "node-appwrite"
 
-import { type ScheduleCategories, type Schedules } from "@/types"
+import { getUser } from "@/lib/appwrite/dal"
+import { type Profiles, type ScheduleCategories, type Schedules } from "@/types"
 
-import { getUser } from "../../appwrite/auth"
 import { db } from "../../appwrite/db"
 import { dbAdmin } from "../../appwrite/db-admin"
 import { handleError } from "../../utils/error-handler"
@@ -25,33 +25,32 @@ export async function getAllScheduleCategories(): Promise<
   }
 }
 
-export async function getSchedulesByCategory(categorySlug: string): Promise<{
+export async function getSchedulesByCategory(
+  categorySlug: string,
+  profile: Profiles,
+): Promise<{
   schedules: Schedules[]
   category: ScheduleCategories | null
 }> {
-  try {
-    const user = await getUser()
-    const profile = user ? await getProfile(user.$id) : null
-    const data = await db()
+  const data = await db()
 
-    // Get category
+  try {
     const categoryResult = await data.scheduleCategories.list([
       Query.equal("slug", categorySlug),
       Query.limit(1),
     ])
 
     const category = categoryResult.rows[0] as ScheduleCategories
+
     if (!category) {
       return { schedules: [], category: null }
     }
 
-    // Build queries
     const queries = [Query.equal("category", category.$id)]
     if (profile?.sede) {
       queries.push(Query.equal("sede", profile.sede.$id))
     }
 
-    // Get schedules
     const result = await data.schedules.list([
       ...queries,
       Query.select(["*", "sede.*", "category.*"]),

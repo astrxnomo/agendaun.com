@@ -1,9 +1,11 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/page-header"
+import { useAuthContext } from "@/contexts/auth-context"
 import { getScheduleEvents } from "@/lib/actions/schedule/events.actions"
 import { getScheduleById } from "@/lib/actions/schedule/schedules.actions"
 import { canEditSchedule } from "@/lib/actions/users.actions"
@@ -16,15 +18,23 @@ import { SetupSchedule } from "./setup-schedule"
 import type { ScheduleEvents, Schedules } from "@/types"
 
 export function Schedule({ scheduleId }: { scheduleId: string }) {
+  const { user } = useAuthContext()
   const [schedule, setSchedule] = useState<Schedules | null>(null)
   const [events, setEvents] = useState<ScheduleEvents[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [canEdit, setCanEdit] = useState(false)
   const [editMode, setEditMode] = useState(false)
 
+  const router = useRouter()
+
   const toggleEditMode = () => setEditMode(!editMode)
 
   useEffect(() => {
+    if (!user) {
+      router.push("/auth/unauthorized/require-auth")
+      return
+    }
+
     const fetchData = async () => {
       try {
         setIsLoading(true)
@@ -57,7 +67,7 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
     }
 
     void fetchData()
-  }, [scheduleId])
+  }, [user, scheduleId, router])
 
   if (isLoading) return <ScheduleSkeleton />
 

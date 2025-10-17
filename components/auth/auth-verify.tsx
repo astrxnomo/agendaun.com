@@ -20,22 +20,25 @@ type Props = {
 
 export default function AuthVerify({ userId, secret }: Props) {
   const router = useRouter()
-  const { refreshAuth } = useAuthContext()
+  const { refreshAuth, user } = useAuthContext()
   const [error, setError] = useState(false)
+  const [sessionCreated, setSessionCreated] = useState(false)
 
+  // Primer useEffect: Crear la sesión
   useEffect(() => {
     let cancelled = false
 
     const verifySession = async () => {
       try {
+        // Crear la sesión en el servidor
         await createSession(userId, secret)
 
         if (!cancelled) {
-          await refreshAuth()
+          setSessionCreated(true)
           toast.success("Sesión verificada correctamente")
-          router.push("/calendars/personal")
         }
-      } catch {
+      } catch (error) {
+        console.error("Error creating session:", error)
         if (!cancelled) {
           setError(true)
         }
@@ -47,7 +50,22 @@ export default function AuthVerify({ userId, secret }: Props) {
     return () => {
       cancelled = true
     }
-  }, [userId, secret, router, refreshAuth])
+  }, [userId, secret])
+
+  // Segundo useEffect: Refrescar contexto cuando la sesión se cree
+  useEffect(() => {
+    if (sessionCreated) {
+      void refreshAuth()
+    }
+  }, [sessionCreated, refreshAuth])
+
+  // Tercer useEffect: Redirigir cuando tengamos usuario
+  useEffect(() => {
+    if (sessionCreated && user) {
+      // Usar replace para evitar que el usuario vuelva a /auth/verify
+      router.replace("/calendars/personal")
+    }
+  }, [sessionCreated, user, router])
 
   return (
     <>

@@ -24,7 +24,7 @@ export default function SchedulesCategoriesLoading() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="bg-muted/40 block overflow-hidden rounded-xl border p-6"
+              className="bg-muted/40 block overflow-hidden rounded-xl p-6"
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4">

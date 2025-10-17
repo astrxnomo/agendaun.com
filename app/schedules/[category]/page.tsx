@@ -1,14 +1,18 @@
-import { ArrowRight, CalendarClock, Clock } from "lucide-react"
+import { ArrowRight, CalendarClock } from "lucide-react"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 
+import { RequireConfig } from "@/components/auth/require-config"
 import { PageHeader } from "@/components/page-header"
 import { ScheduleDialog } from "@/components/schedule/schedule-dialog"
 import { ScheduleItemActions } from "@/components/schedule/schedule-item-actions"
+import { getProfile } from "@/lib/actions/profiles.actions"
 import { getSchedulesByCategory } from "@/lib/actions/schedule/schedules.actions"
 import {
   canEditSchedule,
   canEditScheduleCategory,
 } from "@/lib/actions/users.actions"
+import { getUser } from "@/lib/appwrite/dal"
 
 type Props = {
   params: Promise<{ category: string }>
@@ -17,29 +21,28 @@ type Props = {
 export default async function ScheduleCategoryPage({ params }: Props) {
   const { category: categorySlug } = await params
 
-  const { schedules, category } = await getSchedulesByCategory(categorySlug)
+  const user = await getUser()
+  const profile = await getProfile(user.$id)
 
-  // Verificar permisos para cada horario
+  if (!profile?.sede) {
+    return <RequireConfig />
+  }
+
+  const [{ schedules, category }, canEditCategory] = await Promise.all([
+    getSchedulesByCategory(categorySlug, profile),
+    canEditScheduleCategory(categorySlug),
+  ])
+
+  if (!category) {
+    notFound()
+  }
+
   const schedulesWithPermissions = await Promise.all(
     schedules.map(async (schedule) => ({
       schedule,
       canEdit: await canEditSchedule(schedule),
     })),
   )
-
-  if (!category) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center p-12 text-center">
-        <Clock className="text-muted-foreground mb-4 h-12 w-12" />
-        <h3 className="text-lg font-semibold">Categoría no encontrada</h3>
-        <p className="text-muted-foreground text-sm">
-          No se encontró la categoría solicitada.
-        </p>
-      </div>
-    )
-  }
-
-  const canEdit = await canEditScheduleCategory(categorySlug)
 
   return (
     <>
@@ -54,7 +57,7 @@ export default async function ScheduleCategoryPage({ params }: Props) {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">{category.name}</h1>
 
-          {canEdit && <ScheduleDialog category={category} />}
+          {canEditCategory && <ScheduleDialog category={category} />}
         </div>
       </div>
 
@@ -83,7 +86,7 @@ export default async function ScheduleCategoryPage({ params }: Props) {
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="group-hover:text-primary line-clamp-2 text-lg font-semibold transition-colors">
+                        <h3 className="group-hover:text-primary truncate text-lg font-semibold transition-colors">
                           {schedule.name}
                         </h3>
                         <div className="flex flex-shrink-0 items-center gap-2">
