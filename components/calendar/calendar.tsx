@@ -1,5 +1,6 @@
 "use client"
 
+import { Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -11,8 +12,10 @@ import { getCalendarEvents } from "@/lib/actions/calendar/events.actions"
 import { getProfile } from "@/lib/actions/profiles.actions"
 import { canEditCalendar } from "@/lib/actions/users.actions"
 
-import { RequireConfig } from "../auth/require-config"
+import { ConfigDialog } from "../auth/config-dialog"
 import { PageHeader } from "../page-header"
+import { StatusMessage } from "../status-message"
+import { Button } from "../ui/button"
 import { CalendarError } from "./calendar-error"
 import { CalendarSkeleton } from "./calendar-skeleton"
 
@@ -81,7 +84,9 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
 
   useEffect(() => {
     if (!user) {
-      router.push("/auth/unauthorized/require-auth")
+      router.push(
+        "/auth/login?message=Debes iniciar sesión para acceder a esta página",
+      )
     }
   }, [user, router])
 
@@ -179,7 +184,26 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   }
 
   if (calendar.requireConfig && !canGetEvents(calendar, profile)) {
-    return <RequireConfig />
+    return (
+      <StatusMessage
+        type="warning"
+        title="Completa tu información"
+        description="Para acceder a este calendario, necesitas completar la información de tu cuenta"
+        button={
+          <div className="flex justify-center">
+            <ConfigDialog>
+              <Button
+                size="lg"
+                className="bg-yellow-600 text-white shadow-lg hover:scale-105 hover:bg-yellow-700 hover:shadow-xl dark:bg-yellow-500 dark:hover:bg-yellow-600"
+              >
+                <Settings className="size-4" />
+                Completar ahora
+              </Button>
+            </ConfigDialog>
+          </div>
+        }
+      />
+    )
   }
 
   const visibleEvents = events.filter((event) =>

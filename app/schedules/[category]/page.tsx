@@ -1,11 +1,13 @@
-import { ArrowRight, CalendarClock } from "lucide-react"
+import { ArrowRight, CalendarClock, Settings } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { RequireConfig } from "@/components/auth/require-config"
+import { ConfigDialog } from "@/components/auth/config-dialog"
 import { PageHeader } from "@/components/page-header"
 import { ScheduleDialog } from "@/components/schedule/schedule-dialog"
 import { ScheduleItemActions } from "@/components/schedule/schedule-item-actions"
+import { StatusMessage } from "@/components/status-message"
+import { Button } from "@/components/ui/button"
 import { getProfile } from "@/lib/actions/profiles.actions"
 import { getSchedulesByCategory } from "@/lib/actions/schedule/schedules.actions"
 import {
@@ -25,7 +27,26 @@ export default async function ScheduleCategoryPage({ params }: Props) {
   const profile = await getProfile(user.$id)
 
   if (!profile?.sede) {
-    return <RequireConfig />
+    return (
+      <StatusMessage
+        type="warning"
+        title="Completa tu información"
+        description="Para acceder a estos horarios, necesitas completar la información de tu cuenta"
+        button={
+          <div className="flex justify-center">
+            <ConfigDialog>
+              <Button
+                size="lg"
+                className="bg-yellow-600 text-white shadow-lg hover:scale-105 hover:bg-yellow-700 hover:shadow-xl dark:bg-yellow-600 dark:hover:bg-yellow-500"
+              >
+                <Settings className="size-4" />
+                Completar ahora
+              </Button>
+            </ConfigDialog>
+          </div>
+        }
+      />
+    )
   }
 
   const [{ schedules, category }, canEditCategory] = await Promise.all([

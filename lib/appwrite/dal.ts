@@ -11,7 +11,9 @@ export const verifySession = cache(async () => {
   const session = cookieStore.get("session")
 
   if (!session?.value) {
-    redirect("/auth/unauthorized/require-auth")
+    redirect(
+      "/status/error?title=Permiso denegado&description=No tienes permiso para acceder a esta página",
+    )
   }
 
   return session.value
@@ -26,7 +28,7 @@ export const getUser = cache(async () => {
     return user
   } catch (error) {
     console.error("Error getting user:", error)
-    redirect("/auth/unauthorized/require-auth")
+    redirect("/auth/login?message=Tu sesión ha expirado")
   }
 })
 

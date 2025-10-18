@@ -31,7 +31,9 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
 
   useEffect(() => {
     if (!user) {
-      router.push("/auth/unauthorized/require-auth")
+      router.push(
+        "/auth/login?message=Debes iniciar sesión para acceder a esta página",
+      )
       return
     }
 

@@ -27,12 +27,7 @@ const generateRandomEventPositions = () => {
   return positions
 }
 
-/**
- * Full-page calendar skeleton for background use
- * Designed to fill the entire viewport
- */
-export function CalendarSkeletonBackground() {
-  // Use useMemo to generate positions only once per component mount
+export function StatusSkeletonBackground() {
   const randomPositions = useMemo(() => generateRandomEventPositions(), [])
 
   return (

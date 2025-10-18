@@ -1,7 +1,8 @@
 "use client"
 
-import { Loader2, Mail, MailCheck, RotateCw } from "lucide-react"
-import { useState } from "react"
+import { Loader2, Lock, Mail, MailCheck, RotateCw, ShieldX } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/page-header"
@@ -13,9 +14,44 @@ import { sendMagicLink } from "@/lib/appwrite/auth"
 import type React from "react"
 
 export default function LoginPage() {
+  const searchParams = useSearchParams()
   const [username, setUsername] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+
+  useEffect(() => {
+    const message = searchParams.get("message")
+    const type = searchParams.get("type") || "info"
+
+    if (!message) return
+
+    const isError = type === "error"
+
+    toast.custom(
+      () => (
+        <div className="bg-card border-border animate-in fade-in slide-in-from-top-2 pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-lg border p-4 shadow-md">
+          <div
+            className={`${isError ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary"} flex size-9 shrink-0 items-center justify-center rounded`}
+          >
+            {isError ? (
+              <ShieldX className="size-4.5" />
+            ) : (
+              <Lock className="size-4.5" />
+            )}
+          </div>
+          <div className="flex-1 space-y-0.5">
+            <p className="text-card-foreground text-sm leading-none font-medium">
+              {isError ? "Error de verificación" : "Autenticación requerida"}
+            </p>
+            <p className="text-muted-foreground text-xs">{message}</p>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+      },
+    )
+  }, [searchParams])
 
   const sendMagicLinkAction = async () => {
     const email = `${username}@unal.edu.co`

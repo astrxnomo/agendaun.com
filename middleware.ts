@@ -7,7 +7,6 @@ import type { NextRequest } from "next/server"
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Si está intentando acceder a /auth y ya tiene sesión, redirigir a calendars
   if (pathname.startsWith("/auth")) {
     const hasSession = await hasValidSession()
     if (hasSession) {
@@ -16,19 +15,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Rutas protegidas que requieren autenticación
   const isProtectedRoute =
-    pathname.startsWith("/calendars") ||
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/schedules")
+    pathname.startsWith("/calendars") || pathname.startsWith("/schedules")
 
   if (isProtectedRoute) {
     const hasSession = await hasValidSession()
 
     if (!hasSession) {
-      const response = NextResponse.redirect(
-        new URL("/auth/unauthorized/require-auth", request.url),
+      const loginUrl = new URL(
+        "/auth/login?message=Debes iniciar sesión para acceder a esta página",
+        request.url,
       )
+      const response = NextResponse.redirect(loginUrl)
       response.cookies.delete("session")
       return response
     }
