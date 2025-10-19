@@ -1,7 +1,7 @@
 "use client"
 
 import { Loader2, Lock, Mail, MailCheck, RotateCw, ShieldX } from "lucide-react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -9,15 +9,25 @@ import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useAuthContext } from "@/contexts/auth-context"
 import { sendMagicLink } from "@/lib/appwrite/auth"
 
 import type React from "react"
 
 export default function LoginPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const { user, isLoading: authLoading } = useAuthContext()
   const [username, setUsername] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+
+  // Redirigir si el usuario ya está autenticado
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/")
+    }
+  }, [user, authLoading, router])
 
   useEffect(() => {
     const message = searchParams.get("message")
@@ -76,6 +86,10 @@ export default function LoginPage() {
     })
 
     setIsLoading(false)
+  }
+
+  if (authLoading || user) {
+    return null
   }
 
   return (
