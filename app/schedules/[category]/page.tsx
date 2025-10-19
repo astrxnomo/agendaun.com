@@ -1,9 +1,9 @@
 import { ArrowRight, CalendarClock, Settings } from "lucide-react"
 import Link from "next/link"
-import { notFound } from "next/navigation"
 
 import { ConfigDialog } from "@/components/auth/config-dialog"
 import { PageHeader } from "@/components/page-header"
+import { ScheduleCategoryNotFound } from "@/components/schedule"
 import { ScheduleDialog } from "@/components/schedule/schedule-dialog"
 import { ScheduleItemActions } from "@/components/schedule/schedule-item-actions"
 import { StatusMessage } from "@/components/status-message"
@@ -52,7 +52,7 @@ export default async function ScheduleCategoryPage({ params }: Props) {
   ])
 
   if (!category) {
-    notFound()
+    return <ScheduleCategoryNotFound />
   }
 
   const schedulesWithPermissions = await Promise.all(

@@ -1,16 +1,17 @@
-import { FileQuestion, Home } from "lucide-react"
+import { FolderSearch, Home } from "lucide-react"
 import Link from "next/link"
 
 import { PageHeader } from "@/components/page-header"
 import { Button } from "@/components/ui/button"
 
-export default function NotFound() {
+export function ScheduleCategoryNotFound() {
   return (
     <>
       <PageHeader
         breadcrumbs={[
           { label: "Inicio", href: "/" },
-          { label: "404", isCurrentPage: true },
+          { label: "Horarios", href: "/schedules" },
+          { label: "No encontrado", isCurrentPage: true },
         ]}
       />
 
@@ -21,26 +22,26 @@ export default function NotFound() {
               <div className="relative">
                 <div className="bg-destructive/10 absolute inset-0 scale-150 rounded-full blur-xl"></div>
                 <div className="from-destructive/5 to-destructive/10 border-destructive/20 relative rounded-2xl border bg-gradient-to-br p-6 shadow-sm">
-                  <FileQuestion className="text-destructive size-8" />
+                  <FolderSearch className="text-destructive size-8" />
                 </div>
               </div>
             </div>
 
             <div className="space-y-3">
               <h1 className="text-foreground text-2xl font-semibold tracking-tight">
-                Página no encontrada
+                Categoría no encontrada
               </h1>
               <p className="text-muted-foreground mx-auto text-sm leading-relaxed">
-                La página que buscas no existe o no tienes acceso a ella.
+                La categoría de horarios que buscas no existe o fue eliminada.
               </p>
             </div>
           </div>
 
           <div className="space-y-6">
             <Button variant="outline" asChild>
-              <Link href="/">
+              <Link href="/schedules">
                 <Home />
-                Volver al Inicio
+                Volver a Horarios
               </Link>
             </Button>
 

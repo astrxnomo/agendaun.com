@@ -1,6 +1,7 @@
 // Component exports
 export { AgendaView } from "./agenda-view"
 export { CalendarDndProvider, useCalendarDnd } from "./calendar-dnd-context"
+export { CalendarNotFound } from "./calendar-not-found"
 export { DayView } from "./day-view"
 export { DraggableEvent } from "./draggable-event"
 export { DroppableCell } from "./droppable-cell"

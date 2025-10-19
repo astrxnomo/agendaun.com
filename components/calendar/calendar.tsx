@@ -1,11 +1,15 @@
 "use client"
 
 import { Settings } from "lucide-react"
-import { notFound, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import { EtiquettesHeader, SetupCalendar } from "@/components/calendar"
+import {
+  CalendarNotFound,
+  EtiquettesHeader,
+  SetupCalendar,
+} from "@/components/calendar"
 import { useAuthContext } from "@/contexts/auth-context"
 import { canEditCalendar } from "@/lib/actions/users"
 import { getCalendarBySlug } from "@/lib/data/calendars/getBySlug"
@@ -186,7 +190,7 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   }
 
   if (!calendar) {
-    notFound()
+    return <CalendarNotFound />
   }
 
   if (calendar.requireConfig && !canGetEvents(calendar, profile)) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { notFound, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -11,6 +11,7 @@ import { getScheduleById } from "@/lib/data/schedules/getScheduleById"
 import { getScheduleEvents } from "@/lib/data/schedules/getScheduleEvents"
 
 import { ScheduleHeader } from "./schedule-header"
+import { ScheduleNotFound } from "./schedule-not-found"
 import { ScheduleSkeleton } from "./schedule-skeleton"
 import { SetupSchedule } from "./setup-schedule"
 
@@ -74,10 +75,10 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
   if (authLoading || isLoading) return <ScheduleSkeleton />
 
   if (!user) {
-    return null // or return a redirect component
+    return null // El useEffect ya maneja la redirección
   }
 
-  if (!schedule) return notFound()
+  if (!schedule) return <ScheduleNotFound />
 
   return (
     <>
