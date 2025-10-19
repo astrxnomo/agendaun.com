@@ -8,7 +8,9 @@ export async function getUser() {
   const client = await createSessionClient()
 
   if (!client.account) {
-    redirect("/auth/login?message=Tu sesion ha expirado")
+    redirect(
+      "/auth/login?message=Debes iniciar sesión para acceder a esta página",
+    )
   }
 
   const user = await client.account.get()

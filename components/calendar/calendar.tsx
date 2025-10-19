@@ -86,7 +86,6 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   const toggleEditMode = () => setEditMode(!editMode)
 
   useEffect(() => {
-    // Solo redirige si ya terminó de cargar y no hay usuario
     if (!authLoading && !user) {
       router.push(
         "/auth/login?message=Debes iniciar sesión para acceder a esta página",
@@ -186,7 +185,7 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   if (authLoading || isLoading) return <CalendarSkeleton />
 
   if (!user) {
-    return null // El useEffect ya maneja la redirección
+    return null
   }
 
   if (!calendar) {
