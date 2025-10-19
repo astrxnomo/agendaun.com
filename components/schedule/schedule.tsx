@@ -29,15 +29,6 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
   const toggleEditMode = () => setEditMode(!editMode)
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push(
-        "/auth/login?message=Debes iniciar sesión para acceder a esta página",
-      )
-      return
-    }
-
-    if (!user) return
-
     const fetchData = async () => {
       try {
         setIsLoading(true)
@@ -68,10 +59,23 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
       }
     }
 
-    void fetchData()
+    if (!user && !authLoading) {
+      router.push(
+        "/auth/login?message=Debes iniciar sesión para acceder a esta página",
+      )
+      return
+    }
+
+    if (user) {
+      void fetchData()
+    }
   }, [user, authLoading, scheduleId, router])
 
   if (authLoading || isLoading) return <ScheduleSkeleton />
+
+  if (!user) {
+    return null // or return a redirect component
+  }
 
   if (!schedule) return notFound()
 

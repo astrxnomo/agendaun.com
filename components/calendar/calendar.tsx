@@ -97,9 +97,9 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   }, [calendarSlug])
 
   useEffect(() => {
-    if (!user) return
-
     const fetchData = async () => {
+      if (!user) return
+
       try {
         setIsLoading(true)
 
@@ -173,11 +173,17 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
       }
     }
 
-    void fetchData()
+    if (user) {
+      void fetchData()
+    }
   }, [user, calendarSlug, refetchTrigger])
 
   // Mostrar skeleton mientras el auth está cargando
   if (authLoading || isLoading) return <CalendarSkeleton />
+
+  if (!user) {
+    return null // El useEffect ya maneja la redirección
+  }
 
   if (!calendar) {
     notFound()
