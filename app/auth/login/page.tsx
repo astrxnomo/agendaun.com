@@ -48,7 +48,7 @@ export default function LoginPage() {
         </div>
       ),
       {
-        duration: Infinity,
+        duration: 15000,
       },
     )
   }, [searchParams])

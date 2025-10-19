@@ -50,10 +50,14 @@ import {
   createEvent,
   deleteEvent,
   updateEvent,
-} from "@/lib/actions/calendar/events.actions"
+} from "@/lib/actions/calendar/events"
 import { cn } from "@/lib/utils"
 
-import type { CalendarEtiquettes, CalendarEvents, Calendars } from "@/types"
+import type {
+  CalendarEtiquettes,
+  CalendarEvents,
+  Calendars,
+} from "@/lib/appwrite/types"
 
 type CalendarView = "month" | "week" | "day" | "agenda"
 

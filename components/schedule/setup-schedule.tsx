@@ -4,17 +4,17 @@ import { useCallback, useState } from "react"
 import { toast } from "sonner"
 
 import {
-  createScheduleEvent,
-  deleteScheduleEvent,
-  updateScheduleEvent,
-} from "@/lib/actions/schedule/events.actions"
+  createEvent,
+  deleteEvent,
+  updateEvent,
+} from "@/lib/actions/schedule/events"
 
 import { DefaultEventDuration } from "./constants"
 import { ScheduleEventDialog } from "./event-dialog"
 import { ScheduleEventViewDialog } from "./event-view-dialog"
 import { ScheduleView } from "./schedule-view"
 
-import type { ScheduleEvents, Schedules } from "@/types"
+import type { ScheduleEvents, Schedules } from "@/lib/appwrite/types"
 
 export interface SetupScheduleProps {
   schedule: Schedules
@@ -75,7 +75,7 @@ export function SetupSchedule({
   const handleEventSave = async (event: ScheduleEvents) => {
     if (event.$id) {
       // Actualizar evento existente
-      const promise = updateScheduleEvent(event).then((result) => {
+      const promise = updateEvent(event).then((result) => {
         onEventsUpdate((prev) =>
           prev.map((e) => (e.$id === event.$id ? result : e)),
         )
@@ -97,7 +97,7 @@ export function SetupSchedule({
       }
     } else {
       // Crear evento nuevo
-      const promise = createScheduleEvent(event).then((result) => {
+      const promise = createEvent(event).then((result) => {
         onEventsUpdate((prev) => [...prev, result])
         return result
       })
@@ -119,7 +119,7 @@ export function SetupSchedule({
   }
 
   const handleEventDelete = async (eventId: string) => {
-    const promise = deleteScheduleEvent(eventId).then(() => {
+    const promise = deleteEvent(eventId).then(() => {
       onEventsUpdate((prev) => prev.filter((event) => event.$id !== eventId))
       return true
     })

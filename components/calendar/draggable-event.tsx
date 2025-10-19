@@ -6,7 +6,10 @@ import { differenceInDays } from "date-fns"
 import { useRef, useState } from "react"
 
 import { EventItem, useCalendarDnd } from "@/components/calendar"
-import { type CalendarEtiquettes, type CalendarEvents } from "@/types"
+import {
+  type CalendarEtiquettes,
+  type CalendarEvents,
+} from "@/lib/appwrite/types"
 
 interface DraggableEventProps {
   event: CalendarEvents

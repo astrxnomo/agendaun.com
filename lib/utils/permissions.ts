@@ -1,12 +1,11 @@
 import { Permission, Role } from "node-appwrite"
 
-import { getUser } from "../appwrite/dal"
+import { getUser } from "../data/users/getUser"
 
 export async function setPermissions(
   calendarSlug: string | undefined,
 ): Promise<string[]> {
   const user = await getUser()
-  if (!user) throw new Error("User not authenticated")
 
   const permissions: string[] = []
 

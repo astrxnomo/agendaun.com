@@ -1,6 +1,6 @@
 import { isSameDay } from "date-fns"
 
-import { type CalendarEvents, Colors } from "@/types"
+import { Colors, type CalendarEvents } from "@/lib/appwrite/types"
 
 export function getColor(color?: Colors): string {
   switch (color) {

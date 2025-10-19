@@ -42,15 +42,17 @@ import {
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { useAuthContext } from "@/contexts/auth-context"
+import { update } from "@/lib/actions/profiles"
+import { updateUserName } from "@/lib/actions/users"
 import {
-  getFacultiesBySede,
-  getProgramsByFaculty,
-  getSedes,
-} from "@/lib/actions/academic.actions"
-import { updateProfile } from "@/lib/actions/profiles.actions"
-import { updateUserName } from "@/lib/actions/users.actions"
-
-import type { Faculties, Profiles, Programs, Sedes } from "@/types"
+  type Faculties,
+  type Profiles,
+  type Programs,
+  type Sedes,
+} from "@/lib/appwrite/types"
+import { getFacultiesBySede } from "@/lib/data/faculties/getFacultiesBySede"
+import { getProgramsByFaculty } from "@/lib/data/programs/getProgramsByFaculty"
+import { getSedes } from "@/lib/data/sedes/getSedes"
 
 interface UserConfigDialogProps {
   children: React.ReactNode
@@ -194,7 +196,7 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
         await updateUserName(name.trim())
       }
 
-      await updateProfile({
+      await update({
         $id: profile?.$id || "",
         user_id: user.$id,
         sede: selectedSede,

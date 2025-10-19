@@ -8,13 +8,10 @@ import { ScheduleDialog } from "@/components/schedule/schedule-dialog"
 import { ScheduleItemActions } from "@/components/schedule/schedule-item-actions"
 import { StatusMessage } from "@/components/status-message"
 import { Button } from "@/components/ui/button"
-import { getProfile } from "@/lib/actions/profiles.actions"
-import { getSchedulesByCategory } from "@/lib/actions/schedule/schedules.actions"
-import {
-  canEditSchedule,
-  canEditScheduleCategory,
-} from "@/lib/actions/users.actions"
-import { getUser } from "@/lib/appwrite/dal"
+import { canEditSchedule, canEditScheduleCategory } from "@/lib/actions/users"
+import { getProfile } from "@/lib/data/profiles/getProfile"
+import { getSchedulesByCategory } from "@/lib/data/schedules/getSchedulesByCategory"
+import { getUser } from "@/lib/data/users/getUser"
 
 type Props = {
   params: Promise<{ category: string }>

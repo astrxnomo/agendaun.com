@@ -7,10 +7,10 @@ import { toast } from "sonner"
 
 import { EtiquettesHeader, SetupCalendar } from "@/components/calendar"
 import { useAuthContext } from "@/contexts/auth-context"
-import { getCalendarBySlug } from "@/lib/actions/calendar/calendars.actions"
-import { getCalendarEvents } from "@/lib/actions/calendar/events.actions"
-import { getProfile } from "@/lib/actions/profiles.actions"
-import { canEditCalendar } from "@/lib/actions/users.actions"
+import { canEditCalendar } from "@/lib/actions/users"
+import { getCalendarBySlug } from "@/lib/data/calendars/getBySlug"
+import { getEvents } from "@/lib/data/calendars/getEvents"
+import { getProfile } from "@/lib/data/profiles/getProfile"
 
 import { ConfigDialog } from "../auth/config-dialog"
 import { PageHeader } from "../page-header"
@@ -24,10 +24,10 @@ import type {
   CalendarEvents,
   Calendars,
   Profiles,
-} from "@/types"
+} from "@/lib/appwrite/types"
 
 export default function Calendar({ slug: calendarSlug }: { slug: string }) {
-  const { user } = useAuthContext()
+  const { user, isLoading: authLoading } = useAuthContext()
   const router = useRouter()
 
   const [calendar, setCalendar] = useState<Calendars | null>(null)
@@ -83,12 +83,13 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   const toggleEditMode = () => setEditMode(!editMode)
 
   useEffect(() => {
-    if (!user) {
+    // Solo redirige si ya terminó de cargar y no hay usuario
+    if (!authLoading && !user) {
       router.push(
         "/auth/login?message=Debes iniciar sesión para acceder a esta página",
       )
     }
-  }, [user, router])
+  }, [user, authLoading, router])
 
   useEffect(() => {
     setCalendar(null)
@@ -143,7 +144,7 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
 
         if (canGetEvents(calendarResult, currentProfile)) {
           try {
-            const eventsResult = await getCalendarEvents(
+            const eventsResult = await getEvents(
               calendarResult,
               currentProfile ?? undefined,
             )
@@ -177,7 +178,8 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
     void fetchData()
   }, [user, calendarSlug, refetchTrigger])
 
-  if (isLoading) return <CalendarSkeleton />
+  // Mostrar skeleton mientras el auth está cargando
+  if (authLoading || isLoading) return <CalendarSkeleton />
 
   if (!calendar) {
     return <CalendarError />

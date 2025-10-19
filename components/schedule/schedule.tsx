@@ -6,19 +6,19 @@ import { toast } from "sonner"
 
 import { PageHeader } from "@/components/page-header"
 import { useAuthContext } from "@/contexts/auth-context"
-import { getScheduleEvents } from "@/lib/actions/schedule/events.actions"
-import { getScheduleById } from "@/lib/actions/schedule/schedules.actions"
-import { canEditSchedule } from "@/lib/actions/users.actions"
+import { canEditSchedule } from "@/lib/actions/users"
+import { getScheduleById } from "@/lib/data/schedules/getScheduleById"
+import { getScheduleEvents } from "@/lib/data/schedules/getScheduleEvents"
 
 import { ScheduleError } from "./schedule-error"
 import { ScheduleHeader } from "./schedule-header"
 import { ScheduleSkeleton } from "./schedule-skeleton"
 import { SetupSchedule } from "./setup-schedule"
 
-import type { ScheduleEvents, Schedules } from "@/types"
+import type { ScheduleEvents, Schedules } from "@/lib/appwrite/types"
 
 export function Schedule({ scheduleId }: { scheduleId: string }) {
-  const { user } = useAuthContext()
+  const { user, isLoading: authLoading } = useAuthContext()
   const [schedule, setSchedule] = useState<Schedules | null>(null)
   const [events, setEvents] = useState<ScheduleEvents[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -30,12 +30,14 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
   const toggleEditMode = () => setEditMode(!editMode)
 
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       router.push(
         "/auth/login?message=Debes iniciar sesión para acceder a esta página",
       )
       return
     }
+
+    if (!user) return
 
     const fetchData = async () => {
       try {
@@ -69,9 +71,10 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
     }
 
     void fetchData()
-  }, [user, scheduleId, router])
+  }, [user, authLoading, scheduleId, router])
 
-  if (isLoading) return <ScheduleSkeleton />
+  // Mostrar skeleton mientras el auth está cargando
+  if (authLoading || isLoading) return <ScheduleSkeleton />
 
   if (!schedule) return <ScheduleError />
 

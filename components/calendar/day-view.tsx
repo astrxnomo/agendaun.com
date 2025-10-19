@@ -29,7 +29,7 @@ import {
 } from "@/components/calendar/constants"
 import { cn } from "@/lib/utils"
 
-import type { CalendarEtiquettes, CalendarEvents } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/lib/appwrite/types"
 
 interface DayViewProps {
   currentDate: Date

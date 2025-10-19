@@ -11,7 +11,7 @@ import {
   getAgendaEventsForDay,
 } from "@/components/calendar"
 
-import type { CalendarEtiquettes, CalendarEvents } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/lib/appwrite/types"
 
 interface AgendaViewProps {
   currentDate: Date

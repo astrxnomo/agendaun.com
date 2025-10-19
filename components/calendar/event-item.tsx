@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-import type { CalendarEtiquettes, CalendarEvents } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/lib/appwrite/types"
 import type { DraggableAttributes } from "@dnd-kit/core"
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities"
 

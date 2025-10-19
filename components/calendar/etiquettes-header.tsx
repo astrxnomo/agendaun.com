@@ -12,7 +12,7 @@ import {
 import { EditModeToggle } from "./edit-mode-toggle"
 import { EtiquettesManager } from "./etiquettes-manager"
 
-import type { Calendars } from "@/types"
+import type { Calendars } from "@/lib/appwrite/types"
 
 interface EtiquettesHeaderProps {
   calendar: Calendars

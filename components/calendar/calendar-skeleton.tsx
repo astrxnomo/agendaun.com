@@ -1,35 +1,31 @@
-import { useMemo } from "react"
-
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
-// Generate random event positions for skeleton - memoized to prevent re-renders
-const generateRandomEventPositions = () => {
-  const positions = []
+// Generate deterministic event positions for skeleton (fixed pattern to avoid hydration errors)
+const generateEventPositions = () => {
+  // Use a deterministic pattern instead of random values
+  // This ensures the same output on server and client
+  const pattern = [
+    { cellIndex: 2, width: "w-full", hasMultiple: false },
+    { cellIndex: 5, width: "w-4/5", hasMultiple: true },
+    { cellIndex: 8, width: "w-3/4", hasMultiple: false },
+    { cellIndex: 12, width: "w-5/6", hasMultiple: false },
+    { cellIndex: 15, width: "w-full", hasMultiple: false },
+    { cellIndex: 18, width: "w-4/5", hasMultiple: false },
+    { cellIndex: 23, width: "w-3/4", hasMultiple: true },
+    { cellIndex: 27, width: "w-5/6", hasMultiple: false },
+    { cellIndex: 28, width: "w-full", hasMultiple: true },
+    { cellIndex: 33, width: "w-4/5", hasMultiple: false },
+    { cellIndex: 37, width: "w-3/4", hasMultiple: false },
+    { cellIndex: 40, width: "w-5/6", hasMultiple: false },
+  ]
 
-  // Generate 8-15 random event positions across the 42 cells
-  const eventCount = Math.floor(Math.random() * 8) + 8
-
-  for (let i = 0; i < eventCount; i++) {
-    const cellIndex = Math.floor(Math.random() * 42)
-    const width = ["w-full", "w-4/5", "w-3/4", "w-5/6"][
-      Math.floor(Math.random() * 4)
-    ]
-    const hasMultiple = Math.random() > 0.8 // 20% chance of having multiple events
-
-    positions.push({
-      cellIndex,
-      width,
-      hasMultiple,
-    })
-  }
-
-  return positions
+  return pattern
 }
 
 export function CalendarSkeleton() {
-  // Use useMemo to generate positions only once per component mount
-  const randomPositions = useMemo(() => generateRandomEventPositions(), [])
+  // Use a fixed pattern to avoid hydration mismatches
+  const eventPositions = generateEventPositions()
   return (
     <div className="flex h-full flex-col">
       <header className="flex h-12 items-center border-b px-6">
@@ -84,7 +80,7 @@ export function CalendarSkeleton() {
             >
               {Array.from({ length: 7 }).map((_, dayIndex) => {
                 const cellIndex = weekIndex * 7 + dayIndex
-                const cellPositions = randomPositions.filter(
+                const cellPositions = eventPositions.filter(
                   (pos) => pos.cellIndex === cellIndex,
                 )
 

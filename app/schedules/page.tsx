@@ -2,7 +2,7 @@ import { ArrowRight, Clock } from "lucide-react"
 import Link from "next/link"
 
 import { PageHeader } from "@/components/page-header"
-import { getAllScheduleCategories } from "@/lib/actions/schedule/schedules.actions"
+import { getAllScheduleCategories } from "@/lib/data/schedules/getAllScheduleCategories"
 import { getIcon } from "@/lib/utils"
 
 export default async function SchedulesCategoriesPage() {

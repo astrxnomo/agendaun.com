@@ -20,8 +20,12 @@ import {
   createEtiquette,
   deleteEtiquette,
   updateEtiquette,
-} from "@/lib/actions/calendar/etiquettes.actions"
-import { Colors, type CalendarEtiquettes, type Calendars } from "@/types"
+} from "@/lib/actions/calendar/etiquettes"
+import {
+  Colors,
+  type CalendarEtiquettes,
+  type Calendars,
+} from "@/lib/appwrite/types"
 
 import { getColorIndicator } from "./utils"
 

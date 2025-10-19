@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef } from "react"
 
 import { EventItem } from "@/components/calendar/event-item"
 
-import type { CalendarEtiquettes, CalendarEvents } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/lib/appwrite/types"
 
 interface EventsPopupProps {
   date: Date

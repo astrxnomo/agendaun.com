@@ -17,7 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
-import type { CalendarEtiquettes, CalendarEvents } from "@/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/lib/appwrite/types"
 
 interface EventViewDialogProps {
   event: CalendarEvents | null

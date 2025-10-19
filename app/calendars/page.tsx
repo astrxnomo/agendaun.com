@@ -2,7 +2,7 @@ import { ArrowRight, Calendar } from "lucide-react"
 import Link from "next/link"
 
 import { PageHeader } from "@/components/page-header"
-import { getCalendars } from "@/lib/actions/calendar/calendars.actions"
+import { getCalendars } from "@/lib/data/calendars/getCalendars"
 import { getIcon } from "@/lib/utils"
 
 export default async function Page() {

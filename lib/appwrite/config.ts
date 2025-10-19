@@ -1,47 +1,14 @@
-"use server"
+export const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID!
 
-import { Account, Client, TablesDB, Users } from "node-appwrite"
-
-export const createAdminClient = async () => {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
-    .setKey(process.env.NEXT_APPWRITE_KEY!)
-    .setLocale("es-co")
-
-  return {
-    get account() {
-      return new Account(client)
-    },
-
-    get database() {
-      return new TablesDB(client)
-    },
-
-    get users() {
-      return new Users(client)
-    },
-  }
-}
-
-export const createSessionClient = async (sessionValue: string) => {
-  const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
-    .setLocale("es-co")
-    .setSession(sessionValue)
-
-  return {
-    get account() {
-      return new Account(client)
-    },
-
-    get database() {
-      return new TablesDB(client)
-    },
-
-    get users() {
-      return new Users(client)
-    },
-  }
-}
+export const TABLES = {
+  CALENDAR_EVENTS: process.env.NEXT_PUBLIC_COLLECTION_EVENTS!,
+  CALENDARS: process.env.NEXT_PUBLIC_COLLECTION_CALENDARS!,
+  ETIQUETTES: process.env.NEXT_PUBLIC_COLLECTION_ETIQUETTES!,
+  SEDES: process.env.NEXT_PUBLIC_COLLECTION_SEDES!,
+  FACULTIES: process.env.NEXT_PUBLIC_COLLECTION_FACULTIES!,
+  PROGRAMS: process.env.NEXT_PUBLIC_COLLECTION_PROGRAMS!,
+  PROFILES: process.env.NEXT_PUBLIC_COLLECTION_PROFILES!,
+  SCHEDULES: process.env.NEXT_PUBLIC_COLLECTION_SCHEDULES!,
+  SCHEDULE_EVENTS: process.env.NEXT_PUBLIC_COLLECTION_SCHEDULE_EVENTS!,
+  SCHEDULE_CATEGORIES: process.env.NEXT_PUBLIC_COLLECTION_SCHEDULES_CATEGORIES!,
+} as const

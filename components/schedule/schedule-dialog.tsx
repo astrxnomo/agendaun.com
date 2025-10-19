@@ -19,9 +19,9 @@ import { Textarea } from "@/components/ui/textarea"
 import {
   createSchedule,
   updateSchedule,
-} from "@/lib/actions/schedule/schedules.actions"
+} from "@/lib/actions/schedule/schedules"
 
-import type { ScheduleCategories, Schedules } from "@/types"
+import type { ScheduleCategories, Schedules } from "@/lib/appwrite/types"
 
 type ScheduleDialogProps = {
   category: ScheduleCategories

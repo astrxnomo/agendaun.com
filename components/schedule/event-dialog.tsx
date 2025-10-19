@@ -24,7 +24,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 
-import type { ScheduleEvents, Schedules } from "@/types"
+import type { ScheduleEvents, Schedules } from "@/lib/appwrite/types"
 
 interface ScheduleEventDialogProps {
   schedule: Schedules

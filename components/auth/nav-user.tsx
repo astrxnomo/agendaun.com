@@ -23,7 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useAuthContext } from "@/contexts/auth-context"
-import { deleteSession } from "@/lib/appwrite/auth"
+import { logout } from "@/lib/appwrite/auth"
 
 const getInitials = (name: string) => {
   return name
@@ -53,7 +53,7 @@ export function NavUser() {
 
     setIsLoggingOut(true)
     try {
-      await deleteSession()
+      await logout()
       await refreshAuth()
       toast.success("Sesión cerrada exitosamente")
       router.push("/")

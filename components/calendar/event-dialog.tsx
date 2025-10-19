@@ -42,7 +42,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { useAuthContext } from "@/contexts/auth-context"
 import { cn } from "@/lib/utils"
 
-import type { CalendarEtiquettes, CalendarEvents, Calendars } from "@/types"
+import type {
+  CalendarEtiquettes,
+  CalendarEvents,
+  Calendars,
+} from "@/lib/appwrite/types"
 
 interface EventDialogProps {
   calendar: Calendars

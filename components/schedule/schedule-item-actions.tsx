@@ -16,11 +16,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { deleteSchedule } from "@/lib/actions/schedule/schedules.actions"
+import { deleteSchedule } from "@/lib/actions/schedule/schedules"
 
 import { ScheduleDialog } from "./schedule-dialog"
 
-import type { Schedules } from "@/types"
+import type { Schedules } from "@/lib/appwrite/types"
 
 type ScheduleItemActionsProps = {
   schedule: Schedules

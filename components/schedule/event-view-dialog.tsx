@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-import type { ScheduleEvents } from "@/types"
+import type { ScheduleEvents } from "@/lib/appwrite/types"
 
 interface ScheduleEventViewDialogProps {
   event: ScheduleEvents | null

@@ -1,9 +1,9 @@
 "use server"
 
-import { createAdminClient, createSessionClient } from "@/lib/appwrite/config"
-import { getUser, verifySession } from "@/lib/appwrite/dal"
-import { type Calendars, type Schedules, type User } from "@/types"
+import { createAdminClient, createSessionClient } from "@/lib/appwrite"
+import { type Calendars, type Schedules, type User } from "@/lib/appwrite/types"
 
+import { getUser } from "../data/users/getUser"
 import { handleError } from "../utils/error-handler"
 
 export async function updateUserName(name: string): Promise<User> {
@@ -12,10 +12,13 @@ export async function updateUserName(name: string): Promise<User> {
       throw new Error("El nombre es requerido")
     }
 
-    const session = await verifySession()
-    const { account } = await createSessionClient(session)
+    const client = await createSessionClient()
 
-    const result = await account.updateName({
+    if (!client.account) {
+      throw new Error("No hay sesión activa")
+    }
+
+    const result = await client.account.updateName({
       name: name.trim(),
     })
 
@@ -89,9 +92,6 @@ export async function canEditScheduleCategory(
   categorySlug: string,
 ): Promise<boolean> {
   try {
-    const user = await getUser()
-    if (!user) return false
-
     const roles = await getUserEditorRoles()
     return checkPermissions(roles, [
       "schedules-admin",

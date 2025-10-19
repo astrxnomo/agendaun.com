@@ -19,10 +19,9 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getAllScheduleCategories } from "@/lib/actions/schedule/schedules.actions"
+import { type ScheduleCategories } from "@/lib/appwrite/types"
+import { getAllScheduleCategories } from "@/lib/data/schedules/getAllScheduleCategories"
 import { getIcon } from "@/lib/utils"
-
-import type { ScheduleCategories } from "@/types"
 
 export function SchedulesSidebar() {
   const [categories, setCategories] = useState<ScheduleCategories[]>([])

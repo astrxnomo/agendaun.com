@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-import { createSession } from "@/lib/appwrite/auth"
+import { login } from "@/lib/appwrite/auth"
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -17,9 +17,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    await createSession(userId, secret)
+    await login(userId, secret)
 
-    return NextResponse.redirect(new URL("/calendars/personal", request.url))
+    // Redirigir al calendario personal
+    const redirectUrl = new URL("/calendars/personal", request.url)
+    const response = NextResponse.redirect(redirectUrl)
+
+    return response
   } catch (error) {
     console.error("Error creating session:", error)
     return NextResponse.redirect(
