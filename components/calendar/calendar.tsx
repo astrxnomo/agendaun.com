@@ -1,7 +1,7 @@
 "use client"
 
 import { Settings } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { notFound, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -16,7 +16,6 @@ import { ConfigDialog } from "../auth/config-dialog"
 import { PageHeader } from "../page-header"
 import { StatusMessage } from "../status-message"
 import { Button } from "../ui/button"
-import { CalendarError } from "./calendar-error"
 import { CalendarSkeleton } from "./calendar-skeleton"
 
 import type {
@@ -112,7 +111,6 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
         const calendarResult = await getCalendarBySlug(slug)
 
         if (!calendarResult) {
-          toast.error("Calendario no encontrado")
           return
         }
 
@@ -182,7 +180,7 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   if (authLoading || isLoading) return <CalendarSkeleton />
 
   if (!calendar) {
-    return <CalendarError />
+    notFound()
   }
 
   if (calendar.requireConfig && !canGetEvents(calendar, profile)) {

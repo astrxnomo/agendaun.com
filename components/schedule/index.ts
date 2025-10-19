@@ -1,5 +1,4 @@
 export { Schedule } from "./schedule"
-export { ScheduleError } from "./schedule-error"
 export { ScheduleHeader } from "./schedule-header"
 export { ScheduleSkeleton } from "./schedule-skeleton"
 export { ScheduleView } from "./schedule-view"

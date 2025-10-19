@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { notFound, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -10,7 +10,6 @@ import { canEditSchedule } from "@/lib/actions/users"
 import { getScheduleById } from "@/lib/data/schedules/getScheduleById"
 import { getScheduleEvents } from "@/lib/data/schedules/getScheduleEvents"
 
-import { ScheduleError } from "./schedule-error"
 import { ScheduleHeader } from "./schedule-header"
 import { ScheduleSkeleton } from "./schedule-skeleton"
 import { SetupSchedule } from "./setup-schedule"
@@ -46,7 +45,6 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
         const scheduleResult = await getScheduleById(scheduleId)
 
         if (!scheduleResult) {
-          toast.error("Horario no encontrado")
           return
         }
 
@@ -73,10 +71,9 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
     void fetchData()
   }, [user, authLoading, scheduleId, router])
 
-  // Mostrar skeleton mientras el auth está cargando
   if (authLoading || isLoading) return <ScheduleSkeleton />
 
-  if (!schedule) return <ScheduleError />
+  if (!schedule) return notFound()
 
   return (
     <>

@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
   try {
     await login(userId, secret)
 
-    // Redirigir al calendario personal
-    const redirectUrl = new URL("/calendars/personal", request.url)
-    const response = NextResponse.redirect(redirectUrl)
+    const response = NextResponse.redirect(
+      new URL("/calendars/personal", request.url),
+    )
 
     return response
   } catch (error) {
