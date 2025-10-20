@@ -75,7 +75,7 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
   if (authLoading || isLoading) return <ScheduleSkeleton />
 
   if (!user) {
-    return null // El useEffect ya maneja la redirección
+    return null
   }
 
   if (!schedule) return <ScheduleNotFound />

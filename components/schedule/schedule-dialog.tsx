@@ -66,21 +66,21 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
           category: category.$id as any,
         } as any)
 
-    toast.promise(promise, {
-      loading: schedule ? "Actualizando horario..." : "Creando horario...",
-      success: schedule
-        ? "Horario actualizado correctamente"
-        : "Horario creado correctamente",
-      error: "Error al guardar el horario",
-    })
-
     try {
       await promise
+      toast.success(
+        schedule
+          ? "Horario actualizado correctamente"
+          : "Horario creado correctamente",
+      )
       setOpen(false)
       setName("")
       setDescription("")
     } catch (error) {
       console.error("Error in schedule dialog:", error)
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al guardar el horario"
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -130,14 +130,20 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descripción (opcional)</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="description">Descripción (opcional)</Label>
+              <span className="text-muted-foreground text-xs">
+                {description.length}/200
+              </span>
+            </div>
             <Textarea
               id="description"
               placeholder="Describe brevemente este horario..."
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value.slice(0, 200))}
               disabled={loading}
               rows={3}
+              maxLength={200}
             />
           </div>
 

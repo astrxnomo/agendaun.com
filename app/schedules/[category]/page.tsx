@@ -91,14 +91,17 @@ export default async function ScheduleCategoryPage({ params }: Props) {
             </p>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {schedulesWithPermissions.map(({ schedule, canEdit }) => (
-              <div key={schedule.$id} className="relative h-full">
-                <Link
-                  href={`/schedules/${categorySlug}/${schedule.$id}`}
-                  className="group bg-muted/40 hover:border-primary/30 hover:bg-muted/60 relative flex h-full flex-col overflow-hidden rounded-xl border border-transparent p-6 transition-all duration-200 hover:shadow-xl"
-                >
-                  <div className="flex items-start gap-4">
+              <div
+                key={schedule.$id}
+                className="bg-muted/40 hover:border-primary/30 relative flex h-full flex-col overflow-hidden rounded-xl border border-transparent transition-all duration-200 hover:shadow-xl"
+              >
+                <div className="flex items-start gap-4 p-6">
+                  <Link
+                    href={`/schedules/${categorySlug}/${schedule.$id}`}
+                    className="group flex min-w-0 flex-1 items-start gap-4"
+                  >
                     <span className="bg-primary/10 text-primary flex-shrink-0 rounded-lg p-3">
                       <CalendarClock className="h-6 w-6" />
                     </span>
@@ -107,12 +110,9 @@ export default async function ScheduleCategoryPage({ params }: Props) {
                         <h3 className="group-hover:text-primary truncate text-lg font-semibold transition-colors">
                           {schedule.name}
                         </h3>
-                        <div className="flex flex-shrink-0 items-center gap-2">
-                          {canEdit && (
-                            <ScheduleItemActions schedule={schedule} />
-                          )}
-                          <ArrowRight className="text-muted-foreground h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100" />
-                        </div>
+                        {!canEdit && (
+                          <ArrowRight className="text-muted-foreground h-4 w-4 flex-shrink-0 opacity-0 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100" />
+                        )}
                       </div>
                       {schedule.description && (
                         <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
@@ -120,8 +120,13 @@ export default async function ScheduleCategoryPage({ params }: Props) {
                         </p>
                       )}
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                  {canEdit && (
+                    <div className="flex flex-shrink-0 items-center">
+                      <ScheduleItemActions schedule={schedule} />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>

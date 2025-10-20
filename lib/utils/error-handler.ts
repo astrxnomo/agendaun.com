@@ -4,6 +4,16 @@ export function handleError(error: unknown): never {
   console.error("Error:", error)
 
   if (error instanceof AppwriteException) {
+    // Para errores de estructura/validación, mostrar el mensaje detallado de Appwrite
+    if (
+      error.type === "row_invalid_structure" ||
+      error.type === "document_invalid_structure" ||
+      error.type === "attribute_value_invalid" ||
+      error.type === "attribute_type_invalid"
+    ) {
+      throw new Error(error.message)
+    }
+
     // Mapeo simple de errores comunes
     const userFriendlyMessages: Record<string, string> = {
       // Errores de autenticación
@@ -31,11 +41,8 @@ export function handleError(error: unknown): never {
       general_phone_disabled: "Verificación por teléfono deshabilitada",
 
       // Errores de validación
-      document_invalid_structure: "Estructura de documento inválida",
       document_missing_data: "Faltan datos requeridos",
       document_missing_payload: "Datos faltantes en la solicitud",
-      attribute_value_invalid: "Valor de atributo inválido",
-      attribute_type_invalid: "Tipo de atributo inválido",
 
       // Errores de archivos
       storage_file_not_found: "Archivo no encontrado",
