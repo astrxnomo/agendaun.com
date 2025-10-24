@@ -5,6 +5,7 @@ export { ScheduleNotFound } from "./schedule-not-found"
 export { SchedulePagination } from "./schedule-pagination"
 export { ScheduleSkeleton } from "./schedule-skeleton"
 export { ScheduleView } from "./schedule-view"
+export { SchedulesList } from "./schedules-list"
 export { SetupSchedule } from "./setup-schedule"
 
 // Dialogs

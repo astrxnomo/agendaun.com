@@ -1,49 +1,53 @@
 "use client"
 
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
-import { useSearchParams } from "next/navigation"
 
+import { Button } from "@/components/ui/button"
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
 } from "@/components/ui/pagination"
 
 type SchedulePaginationProps = {
   currentPage: number
   totalPages: number
-  category: string
+  onPageChange?: (page: number) => void
+  isPending?: boolean
 }
 
 export function SchedulePagination({
   currentPage,
   totalPages,
-  category,
+  onPageChange,
+  isPending = false,
 }: SchedulePaginationProps) {
-  const searchParams = useSearchParams()
+  const handlePrevious = () => {
+    if (currentPage > 1 && onPageChange) {
+      onPageChange(currentPage - 1)
+    }
+  }
 
-  const createPageURL = (pageNumber: number) => {
-    const params = new URLSearchParams(searchParams)
-    params.set("page", pageNumber.toString())
-    return `/schedules/${category}?${params.toString()}`
+  const handleNext = () => {
+    if (currentPage < totalPages && onPageChange) {
+      onPageChange(currentPage + 1)
+    }
   }
 
   return (
     <Pagination>
       <PaginationContent className="gap-3">
         <PaginationItem>
-          <PaginationLink
-            className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-            href={
-              currentPage === 1 ? undefined : createPageURL(currentPage - 1)
-            }
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handlePrevious}
+            disabled={currentPage === 1 || isPending}
             aria-label="Ir a la página anterior"
-            aria-disabled={currentPage === 1 ? true : undefined}
-            role={currentPage === 1 ? "link" : undefined}
+            className="h-9 w-9"
           >
             <ChevronLeftIcon size={16} aria-hidden="true" />
-          </PaginationLink>
+          </Button>
         </PaginationItem>
         <PaginationItem>
           <p className="text-muted-foreground text-sm" aria-live="polite">
@@ -52,19 +56,16 @@ export function SchedulePagination({
           </p>
         </PaginationItem>
         <PaginationItem>
-          <PaginationLink
-            className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-            href={
-              currentPage === totalPages
-                ? undefined
-                : createPageURL(currentPage + 1)
-            }
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleNext}
+            disabled={currentPage === totalPages || isPending}
             aria-label="Ir a la página siguiente"
-            aria-disabled={currentPage === totalPages ? true : undefined}
-            role={currentPage === totalPages ? "link" : undefined}
+            className="h-9 w-9"
           >
             <ChevronRightIcon size={16} aria-hidden="true" />
-          </PaginationLink>
+          </Button>
         </PaginationItem>
       </PaginationContent>
     </Pagination>
