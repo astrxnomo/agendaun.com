@@ -14,9 +14,14 @@ import { handleError } from "@/lib/utils/error-handler"
 export async function getSchedulesByCategory(
   categorySlug: string,
   profile: Profiles,
+  page = 1,
+  limit = 12,
 ): Promise<{
   schedules: Schedules[]
   category: ScheduleCategories | null
+  total: number
+  totalPages: number
+  currentPage: number
 }> {
   const { database } = await createSessionClient()
 
@@ -30,7 +35,13 @@ export async function getSchedulesByCategory(
     const category = categoryResult.rows[0] as unknown as ScheduleCategories
 
     if (!category) {
-      return { schedules: [], category: null }
+      return {
+        schedules: [],
+        category: null,
+        total: 0,
+        totalPages: 0,
+        currentPage: page,
+      }
     }
 
     const queries = [Query.equal("category", category.$id)]
@@ -40,6 +51,8 @@ export async function getSchedulesByCategory(
 
     queries.push(Query.select(["*", "sede.*", "category.*"]))
     queries.push(Query.orderAsc("name"))
+    queries.push(Query.limit(limit))
+    queries.push(Query.offset((page - 1) * limit))
 
     const result = await database.listRows({
       databaseId: DATABASE_ID,
@@ -47,9 +60,14 @@ export async function getSchedulesByCategory(
       queries,
     })
 
+    const totalPages = Math.ceil(result.total / limit)
+
     return {
       schedules: result.rows as unknown as Schedules[],
       category,
+      total: result.total,
+      totalPages,
+      currentPage: page,
     }
   } catch (error) {
     console.error(

@@ -1,5 +1,18 @@
 import { AppwriteException } from "node-appwrite"
 
+/**
+ * Error personalizado que puede ser mostrado al usuario
+ * Next.js permite que estos errores se muestren en producción
+ */
+export class UserFacingError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = "UserFacingError"
+    // Hace que el error sea serializable para Next.js
+    Object.setPrototypeOf(this, UserFacingError.prototype)
+  }
+}
+
 export function handleError(error: unknown): never {
   console.error("Error:", error)
 
@@ -11,7 +24,7 @@ export function handleError(error: unknown): never {
       error.type === "attribute_value_invalid" ||
       error.type === "attribute_type_invalid"
     ) {
-      throw new Error(error.message)
+      throw new UserFacingError(error.message)
     }
 
     // Mapeo simple de errores comunes
@@ -60,8 +73,8 @@ export function handleError(error: unknown): never {
     const message =
       userFriendlyMessages[error.type] ||
       "Error inesperado, inténtalo más tarde"
-    throw new Error(message)
+    throw new UserFacingError(message)
   }
 
-  throw new Error("Error inesperado, inténtalo más tarde")
+  throw new UserFacingError("Error inesperado, inténtalo más tarde")
 }

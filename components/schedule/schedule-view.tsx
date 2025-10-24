@@ -12,6 +12,7 @@ import {
 import { es } from "date-fns/locale"
 import React, { useMemo } from "react"
 
+import { getColor } from "@/components/calendar"
 import { cn } from "@/lib/utils"
 
 import {
@@ -310,22 +311,34 @@ const ScheduleEvents = React.memo(function ScheduleEvents({
   const startTime = new Date(event.start_time)
   const endTime = new Date(event.end_time)
   const showTime = height >= MinEventHeight
+  // Show description if height is at least 80px (enough for title + time + description)
+  const showDescription = height >= 80 && event.description
+
+  // Get color classes based on event color
+  const colorClass = getColor(event.color)
 
   return (
     <div
       className={cn(
-        "flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-md bg-green-200 px-2 py-1 text-green-900/90 shadow-green-700/8 transition-all hover:bg-green-200/40",
-        "dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-900/90",
+        "flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-md px-1.5 py-1 transition-all sm:px-2",
+        colorClass,
       )}
       onClick={onClick}
     >
       <div className="flex-1 overflow-hidden">
-        <div className="truncate text-xs font-medium">{event.title}</div>
+        <div className="truncate text-[10px] font-medium sm:text-sm">
+          {event.title}
+        </div>
         {showTime && (
-          <div className="text-xs opacity-75">
+          <div className="text-[8px] opacity-75 sm:text-xs">
             {format(startTime, "h:mm a", { locale: es })}
             {" - "}
             {format(endTime, "h:mm a", { locale: es })}
+          </div>
+        )}
+        {showDescription && (
+          <div className="mt-0.5 line-clamp-10 text-[9px] opacity-60 sm:mt-1 sm:text-xs">
+            {event.description}
           </div>
         )}
       </div>

@@ -3,7 +3,10 @@ import Link from "next/link"
 
 import { ConfigDialog } from "@/components/auth/config-dialog"
 import { PageHeader } from "@/components/page-header"
-import { ScheduleCategoryNotFound } from "@/components/schedule"
+import {
+  ScheduleCategoryNotFound,
+  SchedulePagination,
+} from "@/components/schedule"
 import { ScheduleDialog } from "@/components/schedule/schedule-dialog"
 import { ScheduleItemActions } from "@/components/schedule/schedule-item-actions"
 import { StatusMessage } from "@/components/status-message"
@@ -15,10 +18,17 @@ import { getUser } from "@/lib/data/users/getUser"
 
 type Props = {
   params: Promise<{ category: string }>
+  searchParams: Promise<{ page?: string }>
 }
 
-export default async function ScheduleCategoryPage({ params }: Props) {
+export default async function ScheduleCategoryPage({
+  params,
+  searchParams,
+}: Props) {
   const { category: categorySlug } = await params
+  const { page: pageParam } = await searchParams
+
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1
 
   const user = await getUser()
   const profile = await getProfile(user.$id)
@@ -46,8 +56,11 @@ export default async function ScheduleCategoryPage({ params }: Props) {
     )
   }
 
-  const [{ schedules, category }, canEditCategory] = await Promise.all([
-    getSchedulesByCategory(categorySlug, profile),
+  const [
+    { schedules, category, total, totalPages, currentPage: page },
+    canEditCategory,
+  ] = await Promise.all([
+    getSchedulesByCategory(categorySlug, profile, currentPage),
     canEditScheduleCategory(categorySlug),
   ])
 
@@ -73,7 +86,14 @@ export default async function ScheduleCategoryPage({ params }: Props) {
       />
       <div className="border-b p-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">{category.name}</h1>
+          <div>
+            <h1 className="text-3xl font-bold">{category.name}</h1>
+            {total > 0 && (
+              <p className="text-muted-foreground mt-1 text-sm">
+                {total} {total === 1 ? "horario" : "horarios"} disponibles
+              </p>
+            )}
+          </div>
 
           {canEditCategory && <ScheduleDialog category={category} />}
         </div>
@@ -129,6 +149,16 @@ export default async function ScheduleCategoryPage({ params }: Props) {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-center">
+            <SchedulePagination
+              currentPage={page}
+              totalPages={totalPages}
+              category={categorySlug}
+            />
           </div>
         )}
       </div>

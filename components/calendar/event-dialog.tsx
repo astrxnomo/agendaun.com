@@ -1,9 +1,11 @@
 "use client"
 
+import { Time } from "@internationalized/date"
 import { format, isBefore } from "date-fns"
 import { es } from "date-fns/locale"
-import { CalendarIcon, Trash } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { CalendarIcon, ClockIcon, Trash } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Label as AriaLabel } from "react-aria-components"
 
 import { getColorIndicator } from "@/components/calendar"
 import {
@@ -15,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
+import { DateInput, TimeField } from "@/components/ui/datefield-rac"
 import {
   Dialog,
   DialogContent,
@@ -31,13 +34,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthContext } from "@/contexts/auth-context"
 import { cn } from "@/lib/utils"
@@ -72,8 +68,10 @@ export function EventDialog({
   const [description, setDescription] = useState("")
   const [startDate, setStartDate] = useState<Date>(new Date())
   const [endDate, setEndDate] = useState<Date>(new Date())
-  const [startTime, setStartTime] = useState(`${DefaultStartHour}:00`)
-  const [endTime, setEndTime] = useState(`${DefaultEndHour}:00`)
+  const [startTime, setStartTime] = useState<Time>(
+    new Time(DefaultStartHour, 0),
+  )
+  const [endTime, setEndTime] = useState<Time>(new Time(DefaultEndHour, 0))
   const [allDay, setAllDay] = useState(false)
   const [location, setLocation] = useState("")
   const [etiquette, setEtiquette] = useState<CalendarEtiquettes | null>(null)
@@ -94,8 +92,8 @@ export function EventDialog({
 
       setStartDate(start)
       setEndDate(end)
-      setStartTime(formatTimeForInput(start))
-      setEndTime(formatTimeForInput(end))
+      setStartTime(new Time(start.getHours(), start.getMinutes()))
+      setEndTime(new Time(end.getHours(), end.getMinutes()))
       setAllDay(event.all_day || false)
       setLocation(event.location || "")
       setEtiquette(matchingEtiquette || null)
@@ -110,46 +108,23 @@ export function EventDialog({
     setDescription("")
     setStartDate(new Date())
     setEndDate(new Date())
-    setStartTime(`${DefaultStartHour}:00`)
-    setEndTime(`${DefaultEndHour}:00`)
+    setStartTime(new Time(DefaultStartHour, 0))
+    setEndTime(new Time(DefaultEndHour, 0))
     setAllDay(false)
     setLocation("")
     setEtiquette(null)
     setError(null)
   }
 
-  const formatTimeForInput = (date: Date) => {
-    const hours = date.getHours().toString().padStart(2, "0")
-    const minutes = Math.floor(date.getMinutes() / 15) * 15
-    return `${hours}:${minutes.toString().padStart(2, "0")}`
-  }
-
-  // Memoize time options so they're only calculated once
-  const timeOptions = useMemo(() => {
-    const options = []
-    for (let hour = StartHour; hour <= EndHour; hour++) {
-      for (let minute = 0; minute < 60; minute += 15) {
-        const formattedHour = hour.toString().padStart(2, "0")
-        const formattedMinute = minute.toString().padStart(2, "0")
-        const value = `${formattedHour}:${formattedMinute}`
-        // Use a fixed date to avoid unnecessary date object creations
-        const date = new Date(2000, 0, 1, hour, minute)
-        const label = format(date, "h:mm a", { locale: es })
-        options.push({ value, label })
-      }
-    }
-    return options
-  }, []) // Empty dependency array ensures this only runs once
-
   const handleSave = () => {
     const start = new Date(startDate)
     const end = new Date(endDate)
 
     if (!allDay) {
-      const [startHours = 0, startMinutes = 0] = startTime
-        .split(":")
-        .map(Number)
-      const [endHours = 0, endMinutes = 0] = endTime.split(":").map(Number)
+      const startHours = startTime.hour
+      const startMinutes = startTime.minute
+      const endHours = endTime.hour
+      const endMinutes = endTime.minute
 
       if (
         startHours < StartHour ||
@@ -248,7 +223,7 @@ export function EventDialog({
           </div>
 
           <div className="flex gap-4">
-            <div className="flex-1 *:not-first:mt-1.5">
+            <div className="flex-1 space-y-2">
               <Label htmlFor="start-date">Fecha de inicio</Label>
               <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                 <PopoverTrigger asChild>
@@ -299,26 +274,30 @@ export function EventDialog({
               </Popover>
             </div>
             {!allDay && (
-              <div className="min-w-28 *:not-first:mt-1.5">
-                <Label htmlFor="start-time">Hora de Inicio</Label>
-                <Select value={startTime} onValueChange={setStartTime}>
-                  <SelectTrigger id="start-time">
-                    <SelectValue placeholder="Seleccionar hora" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="w-36 space-y-2">
+                <TimeField
+                  value={startTime}
+                  onChange={(value) => {
+                    if (value) setStartTime(value)
+                  }}
+                  hourCycle={12}
+                >
+                  <AriaLabel className="text-sm font-medium">
+                    Hora de Inicio
+                  </AriaLabel>
+                  <div className="relative">
+                    <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
+                      <ClockIcon size={16} aria-hidden="true" />
+                    </div>
+                    <DateInput className="ps-9" />
+                  </div>
+                </TimeField>
               </div>
             )}
           </div>
 
           <div className="flex gap-4">
-            <div className="flex-1 *:not-first:mt-1.5">
+            <div className="flex-1 space-y-2">
               <Label htmlFor="end-date">Fecha de Fin</Label>
               <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
                 <PopoverTrigger asChild>
@@ -367,20 +346,24 @@ export function EventDialog({
             </div>
 
             {!allDay && (
-              <div className="min-w-28 *:not-first:mt-1.5">
-                <Label htmlFor="end-time">Hora de Fin</Label>
-                <Select value={endTime} onValueChange={setEndTime}>
-                  <SelectTrigger id="end-time">
-                    <SelectValue placeholder="Seleccionar hora" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="w-36 space-y-2">
+                <TimeField
+                  value={endTime}
+                  onChange={(value) => {
+                    if (value) setEndTime(value)
+                  }}
+                  hourCycle={12}
+                >
+                  <AriaLabel className="text-sm font-medium">
+                    Hora de Fin
+                  </AriaLabel>
+                  <div className="relative">
+                    <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
+                      <ClockIcon size={16} aria-hidden="true" />
+                    </div>
+                    <DateInput className="ps-9" />
+                  </div>
+                </TimeField>
               </div>
             )}
           </div>
@@ -443,14 +426,8 @@ export function EventDialog({
         </div>
         <DialogFooter className="flex-row sm:justify-between">
           {event?.$id && (
-            <Button
-              variant="outline"
-              className="text-destructive hover:text-destructive"
-              size="icon"
-              onClick={handleDelete}
-              aria-label="Delete event"
-            >
-              <Trash size={16} aria-hidden="true" />
+            <Button variant="destructive" onClick={handleDelete}>
+              <Trash />
             </Button>
           )}
           <div className="flex flex-1 justify-end gap-2">
