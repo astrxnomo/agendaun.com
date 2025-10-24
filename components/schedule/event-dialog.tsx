@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
   SelectContent,
@@ -221,41 +222,29 @@ export function ScheduleEventDialog({
           {/* Color */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Color</Label>
-            <Select
+            <RadioGroup
               value={color}
               onValueChange={(value) => setColor(value as Colors)}
+              className="bg-muted/30 flex flex-wrap justify-center gap-3 rounded-lg p-3"
             >
-              <SelectTrigger className="text-sm">
-                <SelectValue>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`h-3 w-3 rounded-full ${getColorIndicator(color)}`}
-                    />
-                    <span className="capitalize">
-                      {color.toLowerCase().replace("_", " ")}
-                    </span>
-                  </div>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(Colors).map((colorOption) => (
-                  <SelectItem
-                    key={colorOption}
+              {Object.values(Colors).map((colorOption) => (
+                <div key={colorOption} className="relative">
+                  <RadioGroupItem
                     value={colorOption}
-                    className="text-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`h-3 w-3 rounded-full ${getColorIndicator(colorOption)}`}
-                      />
-                      <span className="capitalize">
-                        {colorOption.toLowerCase().replace("_", " ")}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    id={`color-${colorOption}`}
+                    className="sr-only"
+                  />
+                  <Label
+                    htmlFor={`color-${colorOption}`}
+                    className={`block h-5 w-5 cursor-pointer rounded-full transition-all duration-200 ${getColorIndicator(colorOption)} ${
+                      color === colorOption
+                        ? "ring-foreground/20 ring-offset-background scale-125 shadow-lg ring-2 ring-offset-2"
+                        : "hover:scale-110 hover:shadow-md"
+                    }`}
+                  />
+                </div>
+              ))}
+            </RadioGroup>
           </div>
 
           <Separator />
