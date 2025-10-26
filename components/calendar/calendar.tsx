@@ -16,7 +16,8 @@ import { getCalendarBySlug } from "@/lib/data/calendars/getBySlug"
 import { getEvents } from "@/lib/data/calendars/getEvents"
 import { getProfile } from "@/lib/data/profiles/getProfile"
 
-import { ConfigDialog } from "../auth/config-dialog"
+import { ConfigDialog } from "@/components/config-dialog"
+
 import { PageHeader } from "../page-header"
 import { StatusMessage } from "../status-message"
 import { Button } from "../ui/button"
