@@ -19,7 +19,6 @@ export async function getScheduleEvents(
       queries: [
         Query.equal("schedule", schedule.$id),
         Query.select(["*", "schedule.*", "schedule.category.*"]),
-        Query.orderAsc("start_time"),
       ],
     })
 

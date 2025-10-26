@@ -59,11 +59,15 @@ export type CalendarEvents = Models.Document & {
 export type ScheduleEvents = Models.Document & {
   title: string
   description: string | null
-  start_time: string
-  end_time: string
   location: string | null
   schedule: Schedules
   color: Colors
+  // Campos para eventos recurrentes en múltiples días
+  days_of_week: number[] // Array de días: 1=Lunes, 2=Martes, ..., 7=Domingo
+  start_hour: number // Hora de inicio: 0-23
+  start_minute: number // Minuto de inicio: 0-59
+  end_hour: number // Hora de fin: 0-23
+  end_minute: number // Minuto de fin: 0-59
 }
 
 export type CalendarEtiquettes = Models.Document & {

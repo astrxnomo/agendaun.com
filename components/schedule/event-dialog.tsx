@@ -18,13 +18,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { Colors } from "@/lib/appwrite/types"
@@ -50,7 +43,7 @@ export function ScheduleEventDialog({
 }: ScheduleEventDialogProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [dayOfWeek, setDayOfWeek] = useState(1) // 1 = Monday, 7 = Sunday
+  const [selectedDays, setSelectedDays] = useState<number[]>([1]) // Array de días seleccionados
   const [startTime, setStartTime] = useState<Time>(new Time(9, 0))
   const [endTime, setEndTime] = useState<Time>(new Time(10, 0))
   const [location, setLocation] = useState("")
@@ -64,21 +57,15 @@ export function ScheduleEventDialog({
       setLocation(event.location || "")
       setColor(event.color || Colors.GREEN)
 
-      if (event.start_time) {
-        const startDateTime = new Date(event.start_time)
-        // Convert JavaScript day (0 = Sunday) to Monday-first (1 = Monday)
-        const jsDay = startDateTime.getDay()
-        const mondayFirstDay = jsDay === 0 ? 7 : jsDay
-        setDayOfWeek(mondayFirstDay)
-        setStartTime(
-          new Time(startDateTime.getHours(), startDateTime.getMinutes()),
-        )
+      // Usar los campos de días y horas
+      if (event.days_of_week && event.days_of_week.length > 0) {
+        setSelectedDays(event.days_of_week)
+      } else {
+        setSelectedDays([1]) // Default: Lunes
       }
 
-      if (event.end_time) {
-        const endDateTime = new Date(event.end_time)
-        setEndTime(new Time(endDateTime.getHours(), endDateTime.getMinutes()))
-      }
+      setStartTime(new Time(event.start_hour ?? 9, event.start_minute ?? 0))
+      setEndTime(new Time(event.end_hour ?? 10, event.end_minute ?? 0))
     } else {
       resetForm()
     }
@@ -88,7 +75,7 @@ export function ScheduleEventDialog({
     setTitle("")
     setDescription("")
     setLocation("")
-    setDayOfWeek(1) // Monday
+    setSelectedDays([1]) // Lunes por defecto
     setStartTime(new Time(9, 0))
     setEndTime(new Time(10, 0))
     setColor(Colors.GREEN)
@@ -97,13 +84,13 @@ export function ScheduleEventDialog({
 
   // Days of the week options
   const daysOfWeek = [
-    { value: 1, label: "Lunes" },
-    { value: 2, label: "Martes" },
-    { value: 3, label: "Miércoles" },
-    { value: 4, label: "Jueves" },
-    { value: 5, label: "Viernes" },
-    { value: 6, label: "Sábado" },
-    { value: 7, label: "Domingo" },
+    { value: 1, label: "Lunes", short: "L" },
+    { value: 2, label: "Martes", short: "M" },
+    { value: 3, label: "Miércoles", short: "M" },
+    { value: 4, label: "Jueves", short: "J" },
+    { value: 5, label: "Viernes", short: "V" },
+    { value: 6, label: "Sábado", short: "S" },
+    { value: 7, label: "Domingo", short: "D" },
   ]
 
   const handleSave = () => {
@@ -112,23 +99,18 @@ export function ScheduleEventDialog({
       return
     }
 
+    if (selectedDays.length === 0) {
+      setError("Debes seleccionar al menos un día")
+      return
+    }
+
     setError(null)
 
-    // Create dates based on day of week and times
-    // Get a date for the selected day of week in current week
-    const today = new Date()
-    const currentDayOfWeek = today.getDay() === 0 ? 7 : today.getDay() // Convert to Monday-first
-    const daysToAdd = dayOfWeek - currentDayOfWeek
-    const targetDate = new Date(today)
-    targetDate.setDate(today.getDate() + daysToAdd)
-
-    const startDateTime = new Date(targetDate)
-    startDateTime.setHours(startTime.hour, startTime.minute, 0, 0)
-
-    const endDateTime = new Date(targetDate)
-    endDateTime.setHours(endTime.hour, endTime.minute, 0, 0)
-
-    if (startDateTime >= endDateTime) {
+    // Validar que la hora de inicio sea antes que la de fin
+    if (
+      startTime.hour > endTime.hour ||
+      (startTime.hour === endTime.hour && startTime.minute >= endTime.minute)
+    ) {
       setError("La hora de inicio debe ser anterior a la hora de fin")
       return
     }
@@ -138,8 +120,12 @@ export function ScheduleEventDialog({
       $id: event?.$id || "",
       title: title.trim(),
       description: description.trim() || null,
-      start_time: startDateTime.toISOString(),
-      end_time: endDateTime.toISOString(),
+      // Campos de días y horarios
+      days_of_week: selectedDays,
+      start_hour: startTime.hour,
+      start_minute: startTime.minute,
+      end_hour: endTime.hour,
+      end_minute: endTime.minute,
       location: location.trim() || null,
       color,
       schedule: event?.schedule || schedule,
@@ -249,30 +235,44 @@ export function ScheduleEventDialog({
 
           <Separator />
 
-          {/* Day of Week */}
-          <div className="space-y-2">
-            <Label htmlFor="dayOfWeek" className="text-sm font-medium">
-              Día de la semana
-            </Label>
-            <Select
-              value={dayOfWeek.toString()}
-              onValueChange={(value) => setDayOfWeek(Number(value))}
-            >
-              <SelectTrigger className="text-sm">
-                <SelectValue placeholder="Selecciona un día" />
-              </SelectTrigger>
-              <SelectContent>
-                {daysOfWeek.map((day: { value: number; label: string }) => (
-                  <SelectItem
+          {/* Days of Week - Multiple Selection */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Días de la semana</Label>
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              {daysOfWeek.map((day) => {
+                const isSelected = selectedDays.includes(day.value)
+                return (
+                  <button
                     key={day.value}
-                    value={day.value.toString()}
-                    className="text-sm"
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedDays(
+                          selectedDays.filter((d) => d !== day.value),
+                        )
+                      } else {
+                        setSelectedDays([...selectedDays, day.value].sort())
+                      }
+                    }}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
+                    title={day.label}
                   >
-                    {day.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    {day.short}
+                  </button>
+                )
+              })}
+            </div>
+            {selectedDays.length > 0 && (
+              <p className="text-muted-foreground text-center text-xs">
+                {selectedDays.length === 7
+                  ? "Todos los días"
+                  : `${selectedDays.length} día${selectedDays.length > 1 ? "s" : ""} seleccionado${selectedDays.length > 1 ? "s" : ""}`}
+              </p>
+            )}
           </div>
 
           {/* Time Range */}

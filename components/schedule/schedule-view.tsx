@@ -1,14 +1,6 @@
 "use client"
 
-import {
-  addHours,
-  differenceInMinutes,
-  eachHourOfInterval,
-  format,
-  getHours,
-  getMinutes,
-  startOfDay,
-} from "date-fns"
+import { addHours, eachHourOfInterval, format, startOfDay } from "date-fns"
 import { es } from "date-fns/locale"
 import React, { useMemo } from "react"
 
@@ -62,27 +54,27 @@ export function ScheduleView({
   // Process events for each day (0 = Monday, 6 = Sunday)
   const processedDayEvents = useMemo(() => {
     const result = Array.from({ length: 7 }, (_, dayIndex) => {
-      // Filter events for this day of the week
+      // Filter events for this day of the week (dayIndex: 0=Monday, 6=Sunday)
       const dayEvents = events.filter((event) => {
-        const eventStart = new Date(event.start_time)
-        const eventDayOfWeek = (eventStart.getDay() + 6) % 7 // Convert Sunday=0 to Monday=0
-        return eventDayOfWeek === dayIndex
+        const mondayFirstDay = dayIndex + 1 // Convertir 0=Monday a 1=Monday
+        return event.days_of_week.includes(mondayFirstDay)
       })
 
       // Sort events by start time and duration
       const sortedEvents = [...dayEvents].sort((a, b) => {
-        const aStart = new Date(a.start_time)
-        const bStart = new Date(b.start_time)
-        const aEnd = new Date(a.end_time)
-        const bEnd = new Date(b.end_time)
+        // Comparar hora de inicio
+        const aStartMinutes = a.start_hour * 60 + a.start_minute
+        const bStartMinutes = b.start_hour * 60 + b.start_minute
 
         // First sort by start time
-        if (aStart < bStart) return -1
-        if (aStart > bStart) return 1
+        if (aStartMinutes < bStartMinutes) return -1
+        if (aStartMinutes > bStartMinutes) return 1
 
         // If start times are equal, sort by duration (longer events first)
-        const aDuration = differenceInMinutes(aEnd, aStart)
-        const bDuration = differenceInMinutes(bEnd, bStart)
+        const aDuration =
+          a.end_hour * 60 + a.end_minute - (a.start_hour * 60 + a.start_minute)
+        const bDuration =
+          b.end_hour * 60 + b.end_minute - (b.start_hour * 60 + b.start_minute)
         return bDuration - aDuration
       })
 
@@ -93,12 +85,9 @@ export function ScheduleView({
       const columns: { event: ScheduleEvents; endHour: number }[][] = []
 
       sortedEvents.forEach((event) => {
-        const eventStart = new Date(event.start_time)
-        const eventEnd = new Date(event.end_time)
-
-        // Calculate top position and height
-        const startHour = getHours(eventStart) + getMinutes(eventStart) / 60
-        const endHour = getHours(eventEnd) + getMinutes(eventEnd) / 60
+        // Usar los campos de hora directamente
+        const startHour = event.start_hour + event.start_minute / 60
+        const endHour = event.end_hour + event.end_minute / 60
 
         // Skip events outside our time range
         if (endHour <= StartHour || startHour >= EndHour) return
@@ -121,10 +110,8 @@ export function ScheduleView({
             placed = true
           } else {
             const overlaps = col.some((c) => {
-              // Check if events overlap
-              const cStartHour =
-                getHours(new Date(c.event.start_time)) +
-                getMinutes(new Date(c.event.start_time)) / 60
+              // Calcular hora de inicio del evento en la columna
+              const cStartHour = c.event.start_hour + c.event.start_minute / 60
               return clampedStartHour < c.endHour && clampedEndHour > cStartHour
             })
             if (!overlaps) {
@@ -242,7 +229,7 @@ export function ScheduleView({
 
             {/* Hour cells with click to create functionality */}
             {hours.map((hour) => {
-              const hourValue = getHours(hour)
+              const hourValue = hour.getHours()
               return (
                 <div
                   key={hour.toString()}
@@ -308,8 +295,12 @@ const ScheduleEvents = React.memo(function ScheduleEvents({
   onClick,
   height,
 }: ScheduleEventsProps) {
-  const startTime = new Date(event.start_time)
-  const endTime = new Date(event.end_time)
+  // Usar los campos de hora directamente
+  const startHour = event.start_hour
+  const startMinute = event.start_minute
+  const endHour = event.end_hour
+  const endMinute = event.end_minute
+
   const showTime = height >= MinEventHeight
   // Show description if height is at least 80px (enough for title + time + description)
   const showDescription = height >= 80 && event.description
@@ -331,9 +322,12 @@ const ScheduleEvents = React.memo(function ScheduleEvents({
         </div>
         {showTime && (
           <div className="text-[8px] opacity-75 sm:text-xs">
-            {format(startTime, "h:mm a", { locale: es })}
+            {String(startHour % 12 || 12).padStart(2, "0")}:
+            {String(startMinute).padStart(2, "0")}{" "}
+            {startHour >= 12 ? "PM" : "AM"}
             {" - "}
-            {format(endTime, "h:mm a", { locale: es })}
+            {String(endHour % 12 || 12).padStart(2, "0")}:
+            {String(endMinute).padStart(2, "0")} {endHour >= 12 ? "PM" : "AM"}
           </div>
         )}
         {showDescription && (

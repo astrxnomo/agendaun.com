@@ -55,14 +55,22 @@ export function SetupSchedule({
     (startTime: Date) => {
       if (!editable || !canEdit) return
 
+      // Calcular día de la semana (1-7, donde 1=Lunes)
+      const jsDay = startTime.getDay()
+      const dayOfWeek = jsDay === 0 ? 7 : jsDay
+
       const endTime = new Date(
         startTime.getTime() + DefaultEventDuration * 60 * 1000,
       )
+
       const newEvent: Partial<ScheduleEvents> = {
         title: "",
         description: null,
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
+        days_of_week: [dayOfWeek],
+        start_hour: startTime.getHours(),
+        start_minute: startTime.getMinutes(),
+        end_hour: endTime.getHours(),
+        end_minute: endTime.getMinutes(),
         location: null,
         schedule: schedule,
       }
