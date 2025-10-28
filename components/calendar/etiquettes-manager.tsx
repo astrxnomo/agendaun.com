@@ -122,7 +122,7 @@ export function EtiquettesManager({
 
     if (result.success) {
       toast.success(`Etiqueta "${etiquette.name}" eliminada`)
-      
+
       // Actualizar el calendario padre sin reload
       if (onCalendarUpdate) {
         const currentCalendar = calendarRef.current
@@ -173,11 +173,22 @@ export function EtiquettesManager({
             >
               {editingId === etiquette.$id ? (
                 // Modo edición inline
-                <form action={formAction} className="flex flex-1 items-center gap-2">
+                <form
+                  action={formAction}
+                  className="flex flex-1 items-center gap-2"
+                >
                   <input type="hidden" name="calendar" value={calendar.$id} />
-                  <input type="hidden" name="calendarSlug" value={calendar.slug} />
+                  <input
+                    type="hidden"
+                    name="calendarSlug"
+                    value={calendar.slug}
+                  />
                   <input type="hidden" name="isActive" value="true" />
-                  <input type="hidden" name="etiquetteId" value={etiquette.$id} />
+                  <input
+                    type="hidden"
+                    name="etiquetteId"
+                    value={etiquette.$id}
+                  />
                   <input type="hidden" name="color" value={newColor} />
 
                   <Input
@@ -199,7 +210,8 @@ export function EtiquettesManager({
                         className={cn(
                           "h-6 w-6 rounded-full transition-transform hover:scale-110",
                           getColorIndicator(color),
-                          newColor === color && "ring-ring ring-2 ring-offset-2",
+                          newColor === color &&
+                            "ring-ring ring-2 ring-offset-2",
                         )}
                         disabled={isPending}
                       />
@@ -264,7 +276,10 @@ export function EtiquettesManager({
 
           {/* Formulario nueva etiqueta */}
           {editingId === "new" ? (
-            <form action={formAction} className="flex items-center gap-2 rounded-lg border border-dashed p-2">
+            <form
+              action={formAction}
+              className="flex items-center gap-2 rounded-lg border border-dashed p-2"
+            >
               <input type="hidden" name="calendar" value={calendar.$id} />
               <input type="hidden" name="calendarSlug" value={calendar.slug} />
               <input type="hidden" name="isActive" value="true" />
@@ -328,7 +343,7 @@ export function EtiquettesManager({
               className="w-full border-dashed"
               disabled={isPending || availableColors.length === 0}
             >
-              <Plus  />
+              <Plus />
               Nueva etiqueta
             </Button>
           )}

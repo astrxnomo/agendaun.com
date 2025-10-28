@@ -306,7 +306,6 @@ export function ScheduleEventDialog({
             </p>
           )}
 
-
           {/* Color */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Color</Label>

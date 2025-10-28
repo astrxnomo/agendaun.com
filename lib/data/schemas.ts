@@ -43,7 +43,8 @@ export const calendarEventSchema = calendarEventSchemaRaw.refine(
     return data.end > data.start
   },
   {
-    message: "La fecha y hora de fin debe ser después de la fecha y hora de inicio",
+    message:
+      "La fecha y hora de fin debe ser después de la fecha y hora de inicio",
     path: ["end"],
   },
 )
