@@ -2,10 +2,10 @@
 
 import { Time } from "@internationalized/date"
 import { ClockIcon, Trash } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import { Label as AriaLabel } from "react-aria-components"
+import { toast } from "sonner"
 
-import { getColorIndicator } from "@/components/calendar"
 import { Button } from "@/components/ui/button"
 import { DateInput, TimeField } from "@/components/ui/datefield-rac"
 import {
@@ -35,6 +35,11 @@ interface ScheduleEventDialogProps {
   onDelete?: (eventId: string) => void
 }
 
+const initialState: EventActionState = {
+  success: false,
+  message: "",
+}
+
 export function ScheduleEventDialog({
   schedule,
   event,
@@ -43,48 +48,52 @@ export function ScheduleEventDialog({
   onSave,
   onDelete,
 }: ScheduleEventDialogProps) {
+  // Estados controlados del formulario
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [selectedDays, setSelectedDays] = useState<number[]>([1]) // Array de días seleccionados
+  const [location, setLocation] = useState("")
   const [startTime, setStartTime] = useState<Time>(new Time(9, 0))
   const [endTime, setEndTime] = useState<Time>(new Time(10, 0))
-  const [location, setLocation] = useState("")
+  const [selectedDays, setSelectedDays] = useState<number[]>([1])
   const [color, setColor] = useState<Colors>(Colors.GREEN)
-  const [error, setError] = useState<string | null>(null)
+
+  const [state, formAction, isPending] = useActionState(saveEvent, initialState)
 
   useEffect(() => {
-    if (event) {
+    if (isOpen && event) {
+      // Cargar datos del evento existente
       setTitle(event.title || "")
       setDescription(event.description || "")
       setLocation(event.location || "")
-      setColor(event.color || Colors.GREEN)
-
-      // Usar los campos de días y horas
       if (event.days_of_week && event.days_of_week.length > 0) {
         setSelectedDays(event.days_of_week)
-      } else {
-        setSelectedDays([1]) // Default: Lunes
       }
-
       setStartTime(new Time(event.start_hour ?? 9, event.start_minute ?? 0))
       setEndTime(new Time(event.end_hour ?? 10, event.end_minute ?? 0))
-    } else {
-      resetForm()
+      setColor(event.color || Colors.GREEN)
+    } else if (isOpen && !event) {
+      // Resetear para evento nuevo
+      setTitle("")
+      setDescription("")
+      setLocation("")
+      setSelectedDays([1])
+      setStartTime(new Time(9, 0))
+      setEndTime(new Time(10, 0))
+      setColor(Colors.GREEN)
     }
-  }, [event])
+  }, [isOpen, event])
 
-  const resetForm = () => {
-    setTitle("")
-    setDescription("")
-    setLocation("")
-    setSelectedDays([1]) // Lunes por defecto
-    setStartTime(new Time(9, 0))
-    setEndTime(new Time(10, 0))
-    setColor(Colors.GREEN)
-    setError(null)
-  }
+  useEffect(() => {
+    if (state.message) {
+      if (state.success && state.data) {
+        toast.success(state.message)
+        onSave(state.data)
+      } else if (!state.success && !state.errors) {
+        toast.error(state.message)
+      }
+    }
+  }, [state, onSave])
 
-  // Days of the week options
   const daysOfWeek = [
     { value: 1, label: "Lunes", short: "L" },
     { value: 2, label: "Martes", short: "M" },
@@ -95,117 +104,208 @@ export function ScheduleEventDialog({
     { value: 7, label: "Domingo", short: "D" },
   ]
 
-  const handleSave = () => {
-    if (!title.trim()) {
-      setError("El título es requerido")
-      return
-    }
-
-    if (selectedDays.length === 0) {
-      setError("Debes seleccionar al menos un día")
-      return
-    }
-
-    setError(null)
-
-    // Validar que la hora de inicio sea antes que la de fin
-    if (
-      startTime.hour > endTime.hour ||
-      (startTime.hour === endTime.hour && startTime.minute >= endTime.minute)
-    ) {
-      setError("La hora de inicio debe ser anterior a la hora de fin")
-      return
-    }
-
-    const savedEvent: ScheduleEvents = {
-      ...event,
-      $id: event?.$id || "",
-      title: title.trim(),
-      description: description.trim() || null,
-      // Campos de días y horarios
-      days_of_week: selectedDays,
-      start_hour: startTime.hour,
-      start_minute: startTime.minute,
-      end_hour: endTime.hour,
-      end_minute: endTime.minute,
-      location: location.trim() || null,
-      color,
-      schedule: event?.schedule || schedule,
-    } as ScheduleEvents
-
-    onSave(savedEvent)
-    onClose()
-    resetForm()
-  }
-
-  const handleDelete = () => {
-    if (event?.$id && onDelete) {
-      onDelete(event.$id)
-      onClose()
-      resetForm()
-    }
-  }
-
-  const isEditing = !!event?.$id
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-base sm:text-lg">
-            {isEditing ? "Editar evento" : "Crear evento"}
+            {event?.$id ? "Editar evento" : "Crear evento"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {error && (
+        <form action={formAction} className="space-y-4">
+          {/* Campos ocultos */}
+          <input type="hidden" name="schedule" value={schedule.$id} />
+          {event?.$id && (
+            <input type="hidden" name="eventId" value={event.$id} />
+          )}
+          <input
+            type="hidden"
+            name="days_of_week"
+            value={JSON.stringify(selectedDays)}
+          />
+          <input type="hidden" name="start_hour" value={startTime.hour} />
+          <input type="hidden" name="start_minute" value={startTime.minute} />
+          <input type="hidden" name="end_hour" value={endTime.hour} />
+          <input type="hidden" name="end_minute" value={endTime.minute} />
+          <input type="hidden" name="color" value={color} />
+
+          {/* Errores generales */}
+          {state.errors?._form && (
             <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
-              {error}
+              {state.errors._form.join(", ")}
             </div>
           )}
 
-          {/* Title */}
+          {/* Título */}
           <div className="space-y-2">
             <Label htmlFor="title" className="text-sm font-medium">
               Título *
             </Label>
             <Input
               id="title"
+              name="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ej: Matemáticas I - Grupo 01"
               className="text-sm"
+              aria-invalid={state.errors?.title ? "true" : "false"}
+              aria-describedby={state.errors?.title ? "title-error" : undefined}
             />
+            {state.errors?.title && (
+              <p id="title-error" className="text-destructive text-sm">
+                {state.errors.title.join(", ")}
+              </p>
+            )}
           </div>
 
-          {/* Description */}
+          {/* Descripción */}
           <div className="space-y-2">
             <Label htmlFor="description" className="text-sm font-medium">
               Descripción
             </Label>
             <Textarea
               id="description"
+              name="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Información adicional sobre el evento..."
               rows={3}
               className="resize-none text-sm"
+              aria-invalid={state.errors?.description ? "true" : "false"}
+              aria-describedby={
+                state.errors?.description ? "description-error" : undefined
+              }
             />
+            {state.errors?.description && (
+              <p id="description-error" className="text-destructive text-sm">
+                {state.errors.description.join(", ")}
+              </p>
+            )}
           </div>
 
-          {/* Location */}
+          {/* Ubicación */}
           <div className="space-y-2">
             <Label htmlFor="location" className="text-sm font-medium">
               Ubicación
             </Label>
             <Input
               id="location"
+              name="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Ej: Edificio 401, Salón 201"
+              placeholder="Ej: Edificio A - Salón 201"
               className="text-sm"
+              aria-invalid={state.errors?.location ? "true" : "false"}
+              aria-describedby={
+                state.errors?.location ? "location-error" : undefined
+              }
             />
+            {state.errors?.location && (
+              <p id="location-error" className="text-destructive text-sm">
+                {state.errors.location.join(", ")}
+              </p>
+            )}
           </div>
+
+          {/* Días de la semana */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Días de la semana *</Label>
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              {daysOfWeek.map((day) => {
+                const isSelected = selectedDays.includes(day.value)
+                return (
+                  <button
+                    key={day.value}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        setSelectedDays(
+                          selectedDays.filter((d) => d !== day.value),
+                        )
+                      } else {
+                        setSelectedDays([...selectedDays, day.value].sort())
+                      }
+                    }}
+                    className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-sm font-medium transition-all ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
+                    title={day.label}
+                    aria-label={day.label}
+                    aria-pressed={isSelected}
+                  >
+                    {day.short}
+                  </button>
+                )
+              })}
+            </div>
+            {selectedDays.length > 0 && (
+              <p className="text-muted-foreground text-center text-xs">
+                {selectedDays.length === 7
+                  ? "Todos los días"
+                  : `${selectedDays.length} día${selectedDays.length > 1 ? "s" : ""} seleccionado${selectedDays.length > 1 ? "s" : ""}`}
+              </p>
+            )}
+            {state.errors?.days_of_week && (
+              <p className="text-destructive text-center text-sm">
+                {state.errors.days_of_week.join(", ")}
+              </p>
+            )}
+          </div>
+
+          {/* Horario */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* Hora de inicio */}
+            <TimeField
+              value={startTime}
+              onChange={(time) => {
+                if (time) setStartTime(time)
+              }}
+              hourCycle={12}
+            >
+              <AriaLabel className="text-sm font-medium">
+                Hora de inicio *
+              </AriaLabel>
+              <div className="relative">
+                <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
+                  <ClockIcon size={16} aria-hidden="true" />
+                </div>
+                <DateInput className="ps-9" />
+              </div>
+            </TimeField>
+
+            {/* Hora de fin */}
+            <TimeField
+              value={endTime}
+              onChange={(time) => {
+                if (time) setEndTime(time)
+              }}
+              hourCycle={12}
+            >
+              <AriaLabel className="text-sm font-medium">
+                Hora de fin *
+              </AriaLabel>
+              <div className="relative">
+                <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
+                  <ClockIcon size={16} aria-hidden="true" />
+                </div>
+                <DateInput className="ps-9" />
+              </div>
+            </TimeField>
+          </div>
+          {state.errors?.start_hour && (
+            <p className="text-destructive text-sm">
+              {state.errors.start_hour.join(", ")}
+            </p>
+          )}
+          {state.errors?.end_hour && (
+            <p className="text-destructive text-sm">
+              {state.errors.end_hour.join(", ")}
+            </p>
+          )}
+
 
           {/* Color */}
           <div className="space-y-2">
@@ -237,105 +337,33 @@ export function ScheduleEventDialog({
 
           <Separator />
 
-          {/* Days of Week - Multiple Selection */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Días de la semana</Label>
-            <div className="mt-2 flex flex-wrap justify-center gap-2">
-              {daysOfWeek.map((day) => {
-                const isSelected = selectedDays.includes(day.value)
-                return (
-                  <button
-                    key={day.value}
-                    type="button"
-                    onClick={() => {
-                      if (isSelected) {
-                        setSelectedDays(
-                          selectedDays.filter((d) => d !== day.value),
-                        )
-                      } else {
-                        setSelectedDays([...selectedDays, day.value].sort())
-                      }
-                    }}
-                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all ${
-                      isSelected
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    }`}
-                    title={day.label}
-                  >
-                    {day.short}
-                  </button>
-                )
-              })}
+          <DialogFooter className="flex-row justify-between gap-2">
+            <div className="mr-auto flex items-center justify-start">
+              {event?.$id && onDelete && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => onDelete(event.$id!)}
+                >
+                  <Trash />
+                </Button>
+              )}
             </div>
-            {selectedDays.length > 0 && (
-              <p className="text-muted-foreground text-center text-xs">
-                {selectedDays.length === 7
-                  ? "Todos los días"
-                  : `${selectedDays.length} día${selectedDays.length > 1 ? "s" : ""} seleccionado${selectedDays.length > 1 ? "s" : ""}`}
-              </p>
-            )}
-          </div>
-
-          {/* Time Range */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Start Time */}
-            <TimeField
-              value={startTime}
-              onChange={(value) => {
-                if (value) setStartTime(value)
-              }}
-              hourCycle={12}
-            >
-              <AriaLabel className="text-sm font-medium">
-                Hora de inicio
-              </AriaLabel>
-              <div className="relative">
-                <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
-                  <ClockIcon size={16} aria-hidden="true" />
-                </div>
-                <DateInput className="ps-9" />
-              </div>
-            </TimeField>
-
-            {/* End Time */}
-            <TimeField
-              value={endTime}
-              onChange={(value) => {
-                if (value) setEndTime(value)
-              }}
-              hourCycle={12}
-            >
-              <AriaLabel className="text-sm font-medium">Hora de fin</AriaLabel>
-              <div className="relative">
-                <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
-                  <ClockIcon size={16} aria-hidden="true" />
-                </div>
-                <DateInput className="ps-9" />
-              </div>
-            </TimeField>
-          </div>
-        </div>
-
-        <Separator />
-
-        <DialogFooter className="flex-row justify-between gap-2">
-          <div className="mr-auto flex items-center justify-start">
-            {isEditing && onDelete && (
-              <Button variant="destructive" onClick={handleDelete}>
-                <Trash />
+            <div className="flex w-auto justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isPending}
+              >
+                Cancelar
               </Button>
-            )}
-          </div>
-          <div className="flex w-auto justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave}>
-              {isEditing ? "Guardar" : "Crear"}
-            </Button>
-          </div>
-        </DialogFooter>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Guardando..." : event?.$id ? "Guardar" : "Crear"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )
