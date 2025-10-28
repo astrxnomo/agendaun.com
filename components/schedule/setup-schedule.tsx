@@ -3,18 +3,14 @@
 import { useCallback, useState } from "react"
 import { toast } from "sonner"
 
-import {
-  createEvent,
-  deleteEvent,
-  updateEvent,
-} from "@/lib/actions/schedule/events"
+import { deleteEvent } from "@/lib/actions/schedule/events"
 
 import { DefaultEventDuration } from "./constants"
 import { ScheduleEventDialog } from "./event-dialog"
 import { ScheduleEventViewDialog } from "./event-view-dialog"
 import { ScheduleView } from "./schedule-view"
 
-import type { ScheduleEvents, Schedules } from "@/lib/appwrite/types"
+import type { ScheduleEvents, Schedules } from "@/lib/data/types"
 
 export interface SetupScheduleProps {
   schedule: Schedules

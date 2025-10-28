@@ -28,7 +28,7 @@ import type {
   CalendarEvents,
   Calendars,
   Profiles,
-} from "@/lib/appwrite/types"
+} from "@/lib/data/types"
 
 export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   const { user, isLoading: authLoading } = useAuthContext()

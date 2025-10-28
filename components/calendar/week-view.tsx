@@ -34,7 +34,7 @@ import {
 } from "@/components/calendar/constants"
 import { cn } from "@/lib/utils"
 
-import type { CalendarEtiquettes, CalendarEvents } from "@/lib/appwrite/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/lib/data/types"
 
 interface WeekViewProps {
   currentDate: Date

@@ -1,6 +1,6 @@
 import { EditModeToggle } from "@/components/calendar/edit-mode-toggle"
 
-import type { Schedules } from "@/lib/appwrite/types"
+import type { Schedules } from "@/lib/data/types"
 
 interface ScheduleHeaderProps {
   schedule: Schedules

@@ -19,8 +19,8 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { type ScheduleCategories } from "@/lib/appwrite/types"
 import { getAllScheduleCategories } from "@/lib/data/schedules/getAllScheduleCategories"
+import { type ScheduleCategories } from "@/lib/data/types"
 import { getIcon } from "@/lib/utils"
 
 export function SchedulesSidebar() {

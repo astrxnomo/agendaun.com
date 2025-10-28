@@ -5,15 +5,14 @@ import { es } from "date-fns/locale"
 import { CalendarIcon, ClockIcon, MapPinIcon } from "lucide-react"
 import { useMemo } from "react"
 
-import { getBorderRadiusClasses, getColor } from "@/components/calendar"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
+import { cn, getBorderRadiusClasses, getColor } from "@/lib/utils"
 
-import type { CalendarEtiquettes, CalendarEvents } from "@/lib/appwrite/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/lib/data/types"
 import type { DraggableAttributes } from "@dnd-kit/core"
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities"
 

@@ -4,7 +4,7 @@ import { ID } from "node-appwrite"
 
 import { createSessionClient } from "@/lib/appwrite"
 import { DATABASE_ID, TABLES } from "@/lib/appwrite/config"
-import { type CalendarEtiquettes } from "@/lib/appwrite/types"
+import { type CalendarEtiquettes } from "@/lib/data/types"
 import { handleError } from "@/lib/utils/error-handler"
 import { setPermissions } from "@/lib/utils/permissions"
 

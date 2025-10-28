@@ -20,9 +20,11 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import { Colors } from "@/lib/appwrite/types"
+import { saveEvent, type EventActionState } from "@/lib/actions/schedule/events"
+import { Colors } from "@/lib/data/types"
 
-import type { ScheduleEvents, Schedules } from "@/lib/appwrite/types"
+import type { ScheduleEvents, Schedules } from "@/lib/data/types"
+import { getColorIndicator } from "@/lib/utils"
 
 interface ScheduleEventDialogProps {
   schedule: Schedules

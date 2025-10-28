@@ -5,8 +5,8 @@ import { ID } from "node-appwrite"
 
 import { createSessionClient } from "@/lib/appwrite"
 import { DATABASE_ID, TABLES } from "@/lib/appwrite/config"
-import { type Schedules } from "@/lib/appwrite/types"
 import { getProfile } from "@/lib/data/profiles/getProfile"
+import { type Schedules } from "@/lib/data/types"
 import { getUser } from "@/lib/data/users/getUser"
 import { handleError } from "@/lib/utils/error-handler"
 

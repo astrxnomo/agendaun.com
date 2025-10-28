@@ -8,7 +8,7 @@ import { useTransition } from "react"
 import { ScheduleItemActions } from "@/components/schedule/schedule-item-actions"
 import { SchedulePagination } from "@/components/schedule/schedule-pagination"
 
-import type { Schedules } from "@/lib/appwrite/types"
+import type { Schedules } from "@/lib/data/types"
 
 type SchedulesListProps = {
   schedules: Array<{

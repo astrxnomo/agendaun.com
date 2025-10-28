@@ -21,7 +21,7 @@ import {
   updateSchedule,
 } from "@/lib/actions/schedule/schedules"
 
-import type { ScheduleCategories, Schedules } from "@/lib/appwrite/types"
+import type { ScheduleCategories, Schedules } from "@/lib/data/types"
 
 type ScheduleDialogProps = {
   category: ScheduleCategories

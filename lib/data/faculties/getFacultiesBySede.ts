@@ -4,7 +4,7 @@ import { Query } from "node-appwrite"
 
 import { createSessionClient } from "@/lib/appwrite"
 import { DATABASE_ID, TABLES } from "@/lib/appwrite/config"
-import { type Faculties } from "@/lib/appwrite/types"
+import { type Faculties } from "@/lib/data/types"
 import { handleError } from "@/lib/utils/error-handler"
 
 export async function getFacultiesBySede(sedeId: string): Promise<Faculties[]> {

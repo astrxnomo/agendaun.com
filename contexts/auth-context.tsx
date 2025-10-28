@@ -8,8 +8,8 @@ import {
   useState,
 } from "react"
 
-import { type Profiles, type User } from "@/lib/appwrite/types"
 import { getProfile } from "@/lib/data/profiles/getProfile"
+import { type Profiles, type User } from "@/lib/data/types"
 import { getOptionalUser } from "@/lib/data/users/getUser"
 
 interface AuthContextType {

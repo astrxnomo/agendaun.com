@@ -25,9 +25,8 @@ import {
   Colors,
   type CalendarEtiquettes,
   type Calendars,
-} from "@/lib/appwrite/types"
-
-import { getColorIndicator } from "./utils"
+} from "@/lib/data/types"
+import { getColorIndicator } from "@/lib/utils"
 
 interface EtiquettesManagerProps {
   calendar: Calendars

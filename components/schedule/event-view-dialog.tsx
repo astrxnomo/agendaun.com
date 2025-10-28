@@ -10,9 +10,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
+import { cn, getColor } from "@/lib/utils"
 
-import type { ScheduleEvents } from "@/lib/appwrite/types"
+import type { ScheduleEvents } from "@/lib/data/types"
 
 interface ScheduleEventViewDialogProps {
   event: ScheduleEvents | null

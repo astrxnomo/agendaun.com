@@ -2,7 +2,7 @@
 
 import { createAdminClient } from "@/lib/appwrite"
 import { DATABASE_ID, TABLES } from "@/lib/appwrite/config"
-import { type Profiles } from "@/lib/appwrite/types"
+import { type Profiles } from "@/lib/data/types"
 import { handleError } from "@/lib/utils/error-handler"
 
 export async function update(profile: Profiles): Promise<Profiles> {

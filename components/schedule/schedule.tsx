@@ -15,7 +15,7 @@ import { ScheduleNotFound } from "./schedule-not-found"
 import { ScheduleSkeleton } from "./schedule-skeleton"
 import { SetupSchedule } from "./setup-schedule"
 
-import type { ScheduleEvents, Schedules } from "@/lib/appwrite/types"
+import type { ScheduleEvents, Schedules } from "@/lib/data/types"
 
 export function Schedule({ scheduleId }: { scheduleId: string }) {
   const { user, isLoading: authLoading } = useAuthContext()

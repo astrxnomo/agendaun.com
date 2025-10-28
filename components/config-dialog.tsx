@@ -44,15 +44,15 @@ import { Separator } from "@/components/ui/separator"
 import { useAuthContext } from "@/contexts/auth-context"
 import { update } from "@/lib/actions/profiles"
 import { updateUserName } from "@/lib/actions/users"
+import { getFacultiesBySede } from "@/lib/data/faculties/getFacultiesBySede"
+import { getProgramsByFaculty } from "@/lib/data/programs/getProgramsByFaculty"
+import { getSedes } from "@/lib/data/sedes/getSedes"
 import {
   type Faculties,
   type Profiles,
   type Programs,
   type Sedes,
-} from "@/lib/appwrite/types"
-import { getFacultiesBySede } from "@/lib/data/faculties/getFacultiesBySede"
-import { getProgramsByFaculty } from "@/lib/data/programs/getProgramsByFaculty"
-import { getSedes } from "@/lib/data/sedes/getSedes"
+} from "@/lib/data/types"
 
 interface UserConfigDialogProps {
   children: React.ReactNode

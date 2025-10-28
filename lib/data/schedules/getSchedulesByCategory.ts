@@ -8,7 +8,7 @@ import {
   type Profiles,
   type ScheduleCategories,
   type Schedules,
-} from "@/lib/appwrite/types"
+} from "@/lib/data/types"
 import { handleError } from "@/lib/utils/error-handler"
 
 export async function getSchedulesByCategory(

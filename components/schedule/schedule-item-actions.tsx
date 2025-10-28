@@ -20,7 +20,7 @@ import { deleteSchedule } from "@/lib/actions/schedule/schedules"
 
 import { ScheduleDialog } from "./schedule-dialog"
 
-import type { Schedules } from "@/lib/appwrite/types"
+import type { Schedules } from "@/lib/data/types"
 
 type ScheduleItemActionsProps = {
   schedule: Schedules

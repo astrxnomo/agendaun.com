@@ -15,9 +15,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
-import { cn } from "@/lib/utils"
+import { cn, getColor } from "@/lib/utils"
 
-import type { CalendarEtiquettes, CalendarEvents } from "@/lib/appwrite/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/lib/data/types"
 
 interface EventViewDialogProps {
   event: CalendarEvents | null

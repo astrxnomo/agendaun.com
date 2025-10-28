@@ -36,7 +36,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-import type { CalendarEtiquettes, CalendarEvents } from "@/lib/appwrite/types"
+import type { CalendarEtiquettes, CalendarEvents } from "@/lib/data/types"
 
 interface MonthViewProps {
   currentDate: Date

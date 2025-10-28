@@ -16,7 +16,7 @@ import {
   WeekCellsHeight,
 } from "./constants"
 
-import type { ScheduleEvents } from "@/lib/appwrite/types"
+import type { ScheduleEvents } from "@/lib/data/types"
 
 interface ScheduleViewProps {
   events: ScheduleEvents[]

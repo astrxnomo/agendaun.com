@@ -57,7 +57,7 @@ import type {
   CalendarEtiquettes,
   CalendarEvents,
   Calendars,
-} from "@/lib/appwrite/types"
+} from "@/lib/data/types"
 
 type CalendarView = "month" | "week" | "day" | "agenda"
 

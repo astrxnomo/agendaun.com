@@ -1,7 +1,7 @@
 "use server"
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite"
-import { type Calendars, type Schedules, type User } from "@/lib/appwrite/types"
+import { type Calendars, type Schedules, type User } from "@/lib/data/types"
 
 import { getUser } from "../data/users/getUser"
 import { handleError } from "../utils/error-handler"
