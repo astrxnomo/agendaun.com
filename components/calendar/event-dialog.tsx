@@ -7,7 +7,6 @@ import { CalendarIcon, ClockIcon, Trash } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Label as AriaLabel } from "react-aria-components"
 
-import { getColorIndicator } from "@/components/calendar"
 import {
   DefaultEndHour,
   DefaultStartHour,

@@ -1,6 +1,5 @@
 import { CalendarSync } from "lucide-react"
 
-import { getColor } from "@/components/calendar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -8,11 +7,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { getColor } from "@/lib/utils"
 
 import { EditModeToggle } from "./edit-mode-toggle"
 import { EtiquettesManager } from "./etiquettes-manager"
 
-import type { Calendars } from "@/lib/appwrite/types"
+import type { Calendars } from "@/lib/data/types"
 
 interface EtiquettesHeaderProps {
   calendar: Calendars

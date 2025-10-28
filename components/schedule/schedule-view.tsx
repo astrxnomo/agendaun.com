@@ -4,8 +4,7 @@ import { addHours, eachHourOfInterval, format, startOfDay } from "date-fns"
 import { es } from "date-fns/locale"
 import React, { useMemo } from "react"
 
-import { getColor } from "@/components/calendar"
-import { cn } from "@/lib/utils"
+import { cn, getColor } from "@/lib/utils"
 
 import {
   DaysOfWeek,

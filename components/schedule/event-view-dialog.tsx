@@ -2,7 +2,6 @@
 
 import { Calendar, Clock, FileText, MapPin } from "lucide-react"
 
-import { getColor } from "@/components/calendar"
 import {
   Dialog,
   DialogContent,
