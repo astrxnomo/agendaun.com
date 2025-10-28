@@ -5,7 +5,7 @@ import { Colors, DefaultView } from "@/lib/data/types"
 /**
  * Schema para validación de eventos de calendario
  */
-export const calendarEventSchema = z.object({
+export const calendarEventSchemaRaw = z.object({
   title: z
     .string()
     .min(1, "El título es requerido")
@@ -29,6 +29,24 @@ export const calendarEventSchema = z.object({
   faculty: z.string().optional().nullable(),
   program: z.string().optional().nullable(),
 })
+
+/**
+ * Refinamiento para validar que la fecha/hora de fin sea después de la fecha/hora de inicio
+ */
+export const calendarEventSchema = calendarEventSchemaRaw.refine(
+  (data) => {
+    // Si es todo el día, solo validamos las fechas
+    if (data.all_day) {
+      return data.end >= data.start
+    }
+    // Si no es todo el día, validamos fecha y hora completas
+    return data.end > data.start
+  },
+  {
+    message: "La fecha y hora de fin debe ser después de la fecha y hora de inicio",
+    path: ["end"],
+  },
+)
 
 /**
  * Schema para validación de eventos de horario
