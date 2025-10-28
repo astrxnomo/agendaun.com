@@ -1,7 +1,7 @@
 "use client"
 
 import { Loader2, Pencil, Plus } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -17,11 +17,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
-  createSchedule,
-  updateSchedule,
+  saveSchedule,
+  type ScheduleActionState,
 } from "@/lib/actions/schedule/schedules"
 
 import type { ScheduleCategories, Schedules } from "@/lib/data/types"
+
+const initialState: ScheduleActionState = {
+  success: false,
+  message: "",
+}
 
 type ScheduleDialogProps = {
   category: ScheduleCategories
@@ -30,9 +35,13 @@ type ScheduleDialogProps = {
 
 export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [name, setName] = useState(schedule?.name || "")
   const [description, setDescription] = useState(schedule?.description || "")
+
+  const [state, formAction, isPending] = useActionState(
+    saveSchedule,
+    initialState,
+  )
 
   useEffect(() => {
     if (open && schedule) {
@@ -44,47 +53,18 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
     }
   }, [open, schedule])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!name.trim()) {
-      toast.error("El nombre es requerido")
-      return
+  useEffect(() => {
+    if (state.message) {
+      if (state.success && state.data) {
+        toast.success(state.message)
+        setOpen(false)
+        setName("")
+        setDescription("")
+      } else if (!state.success && !state.errors) {
+        toast.error(state.message)
+      }
     }
-
-    setLoading(true)
-
-    const promise = schedule
-      ? updateSchedule({
-          ...schedule,
-          name: name.trim(),
-          description: description.trim() || null,
-        })
-      : createSchedule({
-          name: name.trim(),
-          description: description.trim() || null,
-          category: category.$id as any,
-        } as any)
-
-    try {
-      await promise
-      toast.success(
-        schedule
-          ? "Horario actualizado correctamente"
-          : "Horario creado correctamente",
-      )
-      setOpen(false)
-      setName("")
-      setDescription("")
-    } catch (error) {
-      console.error("Error in schedule dialog:", error)
-      const errorMessage =
-        error instanceof Error ? error.message : "Error al guardar el horario"
-      toast.error(errorMessage)
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [state])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -116,17 +96,37 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
               : `Crea un nuevo horario para ${category.name}`}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form action={formAction} className="space-y-4">
+          {/* Campos ocultos */}
+          <input type="hidden" name="category" value={category.$id} />
+          {schedule?.$id && (
+            <input type="hidden" name="scheduleId" value={schedule.$id} />
+          )}
+
+          {/* Errores generales */}
+          {state.errors?._form && (
+            <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
+              {state.errors._form.join(", ")}
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="name">Nombre</Label>
             <Input
               id="name"
+              name="name"
               placeholder="Ej: Primer Semestre 2025"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={loading}
-              required
+              disabled={isPending}
+              aria-invalid={state.errors?.name ? "true" : "false"}
+              aria-describedby={state.errors?.name ? "name-error" : undefined}
             />
+            {state.errors?.name && (
+              <p id="name-error" className="text-destructive text-sm">
+                {state.errors.name.join(", ")}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -138,13 +138,23 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
             </div>
             <Textarea
               id="description"
+              name="description"
               placeholder="Describe brevemente este horario..."
               value={description}
               onChange={(e) => setDescription(e.target.value.slice(0, 200))}
-              disabled={loading}
+              disabled={isPending}
               rows={3}
               maxLength={200}
+              aria-invalid={state.errors?.description ? "true" : "false"}
+              aria-describedby={
+                state.errors?.description ? "description-error" : undefined
+              }
             />
+            {state.errors?.description && (
+              <p id="description-error" className="text-destructive text-sm">
+                {state.errors.description.join(", ")}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
@@ -152,12 +162,12 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={loading}
+              disabled={isPending}
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? (
+            <Button type="submit" disabled={isPending}>
+              {isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </>
