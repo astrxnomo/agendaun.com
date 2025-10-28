@@ -56,7 +56,7 @@ export function SchedulesList({
     <>
       <div
         className={`grid gap-6 md:grid-cols-2 xl:grid-cols-3 ${
-          isPending ? "opacity-50 transition-opacity" : ""
+          isPending ? "pointer-events-none opacity-50 transition-opacity" : ""
         }`}
       >
         {schedules.map(({ schedule, canEdit }) => (

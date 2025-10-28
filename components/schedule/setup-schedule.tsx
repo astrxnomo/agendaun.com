@@ -51,9 +51,8 @@ export function SetupSchedule({
     (startTime: Date) => {
       if (!editable || !canEdit) return
 
-      // Calcular día de la semana (1-7, donde 1=Lunes)
-      const jsDay = startTime.getDay()
-      const dayOfWeek = jsDay === 0 ? 7 : jsDay
+      const day = startTime.getDay()
+      const dayOfWeek = day === 0 ? 7 : day
 
       const endTime = new Date(
         startTime.getTime() + DefaultEventDuration * 60 * 1000,
@@ -76,71 +75,46 @@ export function SetupSchedule({
     [editable, canEdit, schedule],
   )
 
-  const handleEventSave = async (event: ScheduleEvents) => {
-    if (event.$id) {
-      // Actualizar evento existente
-      const promise = updateEvent(event).then((result) => {
+  const handleEventSave = useCallback(
+    (savedEvent: ScheduleEvents) => {
+      // Verificar si es actualización de evento existente
+      const isExistingEvent = selectedEvent?.$id && savedEvent.$id
+
+      if (isExistingEvent) {
+        // Actualizar evento existente
         onEventsUpdate((prev) =>
-          prev.map((e) => (e.$id === event.$id ? result : e)),
+          prev.map((e) => (e.$id === savedEvent.$id ? savedEvent : e)),
         )
-        return result
-      })
-
-      toast.promise(promise, {
-        loading: "Actualizando evento...",
-        success: (result) => `Evento "${result.title}" actualizado`,
-        error: (err: Error) => err.message,
-      })
-
-      try {
-        await promise
-        setIsEventDialogOpen(false)
-        setSelectedEvent(null)
-      } catch {
-        // El diálogo permanece abierto si hay error
+      } else {
+        // Crear nuevo evento - siempre agregar
+        onEventsUpdate((prev) => [...prev, savedEvent])
       }
-    } else {
-      // Crear evento nuevo
-      const promise = createEvent(event).then((result) => {
-        onEventsUpdate((prev) => [...prev, result])
-        return result
-      })
 
-      toast.promise(promise, {
-        loading: "Creando evento...",
-        success: (result) => `Evento "${result.title}" creado`,
-        error: (err: Error) => err.message,
-      })
-
-      try {
-        await promise
-        setIsEventDialogOpen(false)
-        setSelectedEvent(null)
-      } catch {
-        // El diálogo permanece abierto si hay error
-      }
-    }
-  }
-
-  const handleEventDelete = async (eventId: string) => {
-    const promise = deleteEvent(eventId).then(() => {
-      onEventsUpdate((prev) => prev.filter((event) => event.$id !== eventId))
-      return true
-    })
-
-    toast.promise(promise, {
-      loading: "Eliminando evento...",
-      success: "Evento eliminado",
-      error: (err: Error) => err.message,
-    })
-
-    try {
-      await promise
+      // Cerrar dialog y limpiar estado
       setIsEventDialogOpen(false)
       setSelectedEvent(null)
-    } catch {
-      // El diálogo permanece abierto si hay error
-    }
+    },
+    [selectedEvent, onEventsUpdate],
+  )
+
+  const handleEventDelete = async (eventId: string) => {
+    const deletePromise = deleteEvent(eventId)
+
+    toast.promise(deletePromise, {
+      loading: "Eliminando evento...",
+      success: (result) => {
+        if (result.success) {
+          onEventsUpdate((prev) =>
+            prev.filter((event) => event.$id !== eventId),
+          )
+          setIsEventDialogOpen(false)
+          setSelectedEvent(null)
+          return result.message
+        }
+        throw new Error(result.message)
+      },
+      error: (err) => err.message || "Error al eliminar el evento",
+    })
   }
 
   return (

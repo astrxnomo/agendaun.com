@@ -26,13 +26,11 @@ export function ScheduleEventViewDialog({
 }: ScheduleEventViewDialogProps) {
   if (!event) return null
 
-  // Usar los campos de hora directamente
   const startHour = event.start_hour
   const startMinute = event.start_minute
   const endHour = event.end_hour
   const endMinute = event.end_minute
 
-  // Obtener nombres de días
   const daysMap: { [key: number]: string } = {
     1: "Lunes",
     2: "Martes",

@@ -310,7 +310,7 @@ const ScheduleEvents = React.memo(function ScheduleEvents({
   return (
     <div
       className={cn(
-        "flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-md px-1.5 py-1 transition-all sm:px-2",
+        "flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-md px-1.5 py-1 backdrop-blur-md transition-all sm:px-2",
         colorClass,
       )}
       onClick={onClick}
