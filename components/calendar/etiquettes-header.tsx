@@ -12,7 +12,7 @@ import { getColor } from "@/lib/utils"
 import { EditModeToggle } from "./edit-mode-toggle"
 import { EtiquettesManager } from "./etiquettes-manager"
 
-import type { CalendarEtiquettes, Calendars } from "@/lib/data/types"
+import type { Calendars } from "@/lib/data/types"
 
 interface EtiquettesHeaderProps {
   calendar: Calendars
@@ -20,9 +20,6 @@ interface EtiquettesHeaderProps {
   canEdit: boolean
   onToggleEditMode: () => void
   onManualRefetch: () => void
-  onCalendarUpdate?: (updatedCalendar: Calendars) => void
-  onEtiquetteUpdate?: (updatedEtiquette: CalendarEtiquettes) => void
-  onEtiquetteDelete?: (deletedEtiquetteId: string) => void
   isEtiquetteVisible: (etiquetteId: string | undefined) => boolean
   toggleEtiquetteVisibility: (etiquetteId: string) => void
 }
@@ -33,9 +30,6 @@ export function EtiquettesHeader({
   canEdit,
   onToggleEditMode,
   onManualRefetch,
-  onCalendarUpdate,
-  onEtiquetteUpdate,
-  onEtiquetteDelete,
   isEtiquetteVisible,
   toggleEtiquetteVisibility,
 }: EtiquettesHeaderProps) {
@@ -44,14 +38,7 @@ export function EtiquettesHeader({
       <div className="flex items-center justify-between">
         <div className="scrollbar-none flex h-12 items-center overflow-x-auto">
           {canEdit && editMode && (
-            <div className="ml-2">
-              <EtiquettesManager
-                calendar={calendar}
-                onCalendarUpdate={onCalendarUpdate}
-                onEtiquetteUpdate={onEtiquetteUpdate}
-                onEtiquetteDelete={onEtiquetteDelete}
-              />
-            </div>
+            <EtiquettesManager calendar={calendar} onUpdate={onManualRefetch} />
           )}
           <div className="ml-2 flex shrink-0 items-center gap-1">
             {calendar.etiquettes.map((etiquette) => (
