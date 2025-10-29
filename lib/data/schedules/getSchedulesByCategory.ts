@@ -50,7 +50,6 @@ export async function getSchedulesByCategory(
     }
 
     queries.push(Query.select(["*", "sede.*", "category.*"]))
-    queries.push(Query.orderDesc("$createdAt"))
     queries.push(Query.limit(limit))
     queries.push(Query.offset((page - 1) * limit))
 
