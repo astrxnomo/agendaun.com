@@ -31,12 +31,24 @@ export async function saveSchedule(
   formData: FormData,
 ): Promise<ScheduleActionState> {
   try {
+    // Primero obtener el perfil del usuario para la sede
+    const user = await getUser()
+    const profile = await getProfile(user.$id)
+
+    if (!profile?.sede) {
+      return {
+        success: false,
+        message: "El usuario no tiene una sede asignada",
+        errors: { _form: ["El usuario no tiene una sede asignada"] },
+      }
+    }
+
     const rawData = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
-      sede: formData.get("sede") as string,
-      faculty: formData.get("faculty") as string | null,
-      program: formData.get("program") as string | null,
+      sede: profile.sede.$id, // Usar la sede del perfil
+      faculty: profile.faculty?.$id || null,
+      program: profile.program?.$id || null,
       category: formData.get("category") as string,
     }
 
@@ -52,16 +64,6 @@ export async function saveSchedule(
 
     const validData = validationResult.data
 
-    const user = await getUser()
-    const profile = await getProfile(user.$id)
-    if (!profile?.sede) {
-      return {
-        success: false,
-        message: "El usuario no tiene una sede asignada",
-        errors: { _form: ["El usuario no tiene una sede asignada"] },
-      }
-    }
-
     const { database } = await createSessionClient()
 
     const scheduleId = formData.get("scheduleId") as string | null
@@ -69,7 +71,7 @@ export async function saveSchedule(
     const scheduleData = {
       name: validData.name,
       description: validData.description || null,
-      sede: profile.sede.$id,
+      sede: validData.sede,
       faculty: validData.faculty || null,
       program: validData.program || null,
       category: validData.category,
@@ -101,63 +103,6 @@ export async function saveSchedule(
         _form: [error instanceof Error ? error.message : "Error desconocido"],
       },
     }
-  }
-}
-
-export async function createSchedule(
-  schedule: Partial<Schedules>,
-): Promise<Schedules> {
-  try {
-    const user = await getUser()
-
-    const { database } = await createSessionClient()
-
-    const profile = await getProfile(user.$id)
-    if (!profile?.sede) {
-      throw new Error("El usuario no tiene una sede asignada")
-    }
-
-    const result = await database.upsertRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLES.SCHEDULES,
-      rowId: ID.unique(),
-      data: {
-        ...schedule,
-        sede: profile.sede.$id,
-      },
-      permissions: [],
-    })
-
-    revalidatePath("/schedules")
-    return result as unknown as Schedules
-  } catch (error) {
-    console.error("Error creating schedule:", error)
-    handleError(error)
-  }
-}
-
-export async function updateSchedule(schedule: Schedules): Promise<Schedules> {
-  try {
-    const sessionClient = await createSessionClient()
-    if (!sessionClient) {
-      throw new Error("No hay sesión activa")
-    }
-
-    const { database } = sessionClient
-
-    const result = await database.upsertRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLES.SCHEDULES,
-      rowId: schedule.$id,
-      data: schedule,
-      permissions: [],
-    })
-
-    revalidatePath("/schedules")
-    return result as unknown as Schedules
-  } catch (error) {
-    console.error("Error updating schedule:", error)
-    handleError(error)
   }
 }
 
