@@ -2,7 +2,7 @@
 
 import { Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import {
@@ -43,39 +43,33 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   const [refetchTrigger, setRefetchTrigger] = useState(0)
   const [profile, setProfile] = useState<Profiles | null>(null)
 
-  const manualRefetch = useCallback(() => {
+  const manualRefetch = () => {
     setRefetchTrigger((prev) => prev + 1)
-  }, [])
+  }
 
-  const canGetEvents = useCallback(
-    (calendar: Calendars, profile: Profiles | null) => {
-      if (!calendar.requireConfig) return true
-      if (!profile) return false
+  const canGetEvents = (calendar: Calendars, profile: Profiles | null) => {
+    if (!calendar.requireConfig) return true
+    if (!profile) return false
 
-      switch (calendar.slug) {
-        case "sede":
-          return !!profile.sede
-        case "faculty":
-          return !!profile.faculty
-        case "program":
-          return !!profile.program
-        default:
-          return true
-      }
-    },
-    [],
-  )
+    switch (calendar.slug) {
+      case "sede":
+        return !!profile.sede
+      case "faculty":
+        return !!profile.faculty
+      case "program":
+        return !!profile.program
+      default:
+        return true
+    }
+  }
 
-  const getActiveEtiquette = useCallback(
-    (etiquettes: CalendarEtiquettes[]): string[] => {
-      return etiquettes
-        .filter((etiquette) => etiquette.isActive)
-        .map((etiquette) => etiquette.$id)
-    },
-    [],
-  )
+  const getActiveEtiquette = (etiquettes: CalendarEtiquettes[]): string[] => {
+    return etiquettes
+      .filter((etiquette) => etiquette.isActive)
+      .map((etiquette) => etiquette.$id)
+  }
 
-  const toggleEtiquetteVisibility = useCallback((etiquetteId: string) => {
+  const toggleEtiquetteVisibility = (etiquetteId: string) => {
     setVisibleEtiquettes((prev) => {
       if (prev.includes(etiquetteId)) {
         return prev.filter((id) => id !== etiquetteId)
@@ -83,61 +77,14 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
         return [...prev, etiquetteId]
       }
     })
-  }, [])
+  }
 
-  const isEtiquetteVisible = useCallback(
-    (etiquetteId: string | undefined) => {
-      if (!etiquetteId) return true
-      return visibleEtiquettes.includes(etiquetteId)
-    },
-    [visibleEtiquettes],
-  )
+  const isEtiquetteVisible = (etiquetteId: string | undefined) => {
+    if (!etiquetteId) return true
+    return visibleEtiquettes.includes(etiquetteId)
+  }
 
-  const toggleEditMode = useCallback(() => {
-    setEditMode((prev) => !prev)
-  }, [])
-
-  const handleEtiquetteUpdate = useCallback(
-    (updatedEtiquette: CalendarEtiquettes) => {
-      // Actualizar todos los eventos que usan esta etiqueta
-      setEvents((prevEvents) =>
-        prevEvents.map((event) => {
-          if (event.etiquette?.$id === updatedEtiquette.$id) {
-            return {
-              ...event,
-              etiquette: updatedEtiquette,
-            }
-          }
-          return event
-        }),
-      )
-    },
-    [],
-  )
-
-  const handleCalendarUpdate = useCallback((updatedCalendar: Calendars) => {
-    setCalendar(updatedCalendar)
-  }, [])
-
-  const handleEtiquetteDelete = useCallback((deletedEtiquetteId: string) => {
-    // Limpiar la etiqueta de los eventos que la usaban
-    setEvents((prevEvents) =>
-      prevEvents.map((event) => {
-        if (event.etiquette?.$id === deletedEtiquetteId) {
-          return {
-            ...event,
-            etiquette: null as any, // Los eventos quedan sin etiqueta
-          }
-        }
-        return event
-      }),
-    )
-  }, [])
-
-  const visibleEvents = useMemo(
-    () => events.filter((event) => isEtiquetteVisible(event.etiquette?.$id)),
-    [events, isEtiquetteVisible],
-  )
+  const toggleEditMode = () => setEditMode(!editMode)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -269,6 +216,10 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
     )
   }
 
+  const visibleEvents = events.filter((event) =>
+    isEtiquetteVisible(event.etiquette?.$id),
+  )
+
   return (
     <>
       <PageHeader
@@ -290,9 +241,6 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
         canEdit={canEdit}
         onToggleEditMode={toggleEditMode}
         onManualRefetch={manualRefetch}
-        onCalendarUpdate={handleCalendarUpdate}
-        onEtiquetteUpdate={handleEtiquetteUpdate}
-        onEtiquetteDelete={handleEtiquetteDelete}
       />
       <SetupCalendar
         initialView={calendar.defaultView}
