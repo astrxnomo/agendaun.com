@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { PageHeader } from "@/components/page-header"
@@ -24,10 +24,17 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
   const [isLoading, setIsLoading] = useState(true)
   const [canEdit, setCanEdit] = useState(false)
   const [editMode, setEditMode] = useState(false)
+  const newEventTriggerRef = useRef<(() => void) | null>(null)
 
   const router = useRouter()
 
   const toggleEditMode = () => setEditMode(!editMode)
+
+  const handleNewEventClick = () => {
+    if (newEventTriggerRef.current) {
+      newEventTriggerRef.current()
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,6 +105,7 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
         editMode={editMode}
         canEdit={canEdit}
         onToggleEditMode={toggleEditMode}
+        onNewEvent={handleNewEventClick}
       />
       <SetupSchedule
         schedule={schedule}
@@ -105,6 +113,7 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
         onEventsUpdate={setEvents}
         editable={editMode}
         canEdit={canEdit}
+        newEventTriggerRef={newEventTriggerRef}
       />
     </>
   )

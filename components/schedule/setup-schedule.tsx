@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { deleteEvent } from "@/lib/actions/schedule/events"
@@ -20,6 +20,7 @@ export interface SetupScheduleProps {
   ) => void
   editable?: boolean
   canEdit?: boolean
+  newEventTriggerRef?: React.MutableRefObject<(() => void) | null>
 }
 
 export function SetupSchedule({
@@ -28,6 +29,7 @@ export function SetupSchedule({
   onEventsUpdate,
   editable = true,
   canEdit = false,
+  newEventTriggerRef,
 }: SetupScheduleProps) {
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvents | null>(
     null,
@@ -116,6 +118,17 @@ export function SetupSchedule({
       error: (err) => err.message || "Error al eliminar el evento",
     })
   }
+
+  // Exponer handleEventCreate a través del ref para el botón del header
+  useEffect(() => {
+    if (newEventTriggerRef) {
+      newEventTriggerRef.current = () => {
+        const defaultDate = new Date()
+        defaultDate.setHours(9, 0, 0, 0)
+        handleEventCreate(defaultDate)
+      }
+    }
+  }, [handleEventCreate, newEventTriggerRef])
 
   return (
     <>
