@@ -1,4 +1,7 @@
+import { Plus } from "lucide-react"
+
 import { EditModeToggle } from "@/components/calendar/edit-mode-toggle"
+import { Button } from "@/components/ui/button"
 
 import type { Schedules } from "@/lib/data/types"
 
@@ -7,6 +10,7 @@ interface ScheduleHeaderProps {
   editMode: boolean
   canEdit: boolean
   onToggleEditMode: () => void
+  onNewEvent?: () => void
 }
 
 export function ScheduleHeader({
@@ -14,6 +18,7 @@ export function ScheduleHeader({
   editMode,
   canEdit,
   onToggleEditMode,
+  onNewEvent,
 }: ScheduleHeaderProps) {
   return (
     <div className="bg-background top-12 z-30">
@@ -37,6 +42,12 @@ export function ScheduleHeader({
         </div>
         {canEdit && (
           <div className="flex shrink-0 items-center gap-2">
+            {editMode && onNewEvent && (
+              <Button onClick={onNewEvent} size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Nuevo Evento
+              </Button>
+            )}
             <EditModeToggle
               checked={editMode}
               onCheckedChange={onToggleEditMode}
