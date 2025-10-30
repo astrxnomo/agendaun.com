@@ -24,7 +24,10 @@ export default async function ScheduleCategoryPage({
         breadcrumbs={[
           { label: "Inicio", href: "/" },
           { label: "Horarios", href: "/schedules" },
-          { label: "...", isCurrentPage: true },
+          {
+            label: categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1),
+            isCurrentPage: true,
+          },
         ]}
       />
 
