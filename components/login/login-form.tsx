@@ -2,24 +2,29 @@
 
 import { Loader2, Lock, Mail, MailCheck, RotateCw, ShieldX } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuthContext } from "@/contexts/auth-context"
-import { sendMagicLink } from "@/lib/appwrite/auth"
+import { sendLink, type sendLinkState } from "@/lib/actions/auth/sendLink"
 
-import type React from "react"
+const initialState: sendLinkState = {
+  success: false,
+  message: "",
+}
 
 export function LoginForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, isLoading: authLoading } = useAuthContext()
   const [username, setUsername] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+  const [sentEmail, setSentEmail] = useState("")
+
+  const [state, formAction, isPending] = useActionState(sendLink, initialState)
 
   // Redirigir si el usuario ya está autenticado
   useEffect(() => {
@@ -62,30 +67,18 @@ export function LoginForm() {
     )
   }, [searchParams])
 
-  const sendMagicLinkAction = async () => {
-    const email = `${username}@unal.edu.co`
-    await sendMagicLink(email)
-    setEmailSent(true)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!username.trim()) {
-      return toast.error("Por favor ingresa tu usuario")
+  // Manejar respuestas del estado
+  useEffect(() => {
+    if (state.message) {
+      if (state.success && state.email) {
+        toast.success(state.message)
+        setEmailSent(true)
+        setSentEmail(state.email)
+      } else if (!state.success && !state.errors) {
+        toast.error(state.message)
+      }
     }
-
-    setIsLoading(true)
-
-    toast.promise(sendMagicLinkAction(), {
-      loading: "Enviando enlace...",
-      success: "¡Enlace enviado! Revisa tu correo electrónico",
-      error: (error: Error) =>
-        error.message || "Error enviando el enlace de acceso",
-    })
-
-    setIsLoading(false)
-  }
+  }, [state])
 
   if (authLoading || user) {
     return null
@@ -124,8 +117,18 @@ export function LoginForm() {
         </div>
 
         {!emailSent ? (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-3">
+          <form action={formAction} className="space-y-6">
+            {/* Campo oculto para el username */}
+            <input type="hidden" name="username" value={username} />
+
+            {/* Errores generales */}
+            {state.errors?._form && (
+              <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
+                {state.errors._form.join(", ")}
+              </div>
+            )}
+
+            <div className="space-y-1">
               <Label
                 htmlFor="email"
                 className="text-foreground text-sm font-medium"
@@ -139,22 +142,31 @@ export function LoginForm() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  disabled={isLoading}
+                  disabled={isPending}
                   required
                   className="bg-background/50 border-border/50 focus:border-primary/50 focus:ring-primary/20 placeholder:text-muted-foreground/60 h-12 rounded px-4 pe-32 transition-all duration-200"
+                  aria-invalid={state.errors?.username ? "true" : "false"}
+                  aria-describedby={
+                    state.errors?.username ? "username-error" : undefined
+                  }
                 />
                 <span className="text-muted-foreground pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 text-sm peer-disabled:opacity-50">
                   @unal.edu.co
                 </span>
               </div>
+              {state.errors?.username && (
+                <p id="username-error" className="text-destructive text-sm">
+                  {state.errors.username.join(", ")}
+                </p>
+              )}
             </div>
 
             <Button
               type="submit"
               className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 w-full rounded font-medium shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50"
-              disabled={isLoading}
+              disabled={isPending}
             >
-              {isLoading ? (
+              {isPending ? (
                 <>
                   <Loader2 className="animate-spin" />
                   Enviando enlace...
@@ -173,7 +185,7 @@ export function LoginForm() {
               <div className="space-y-2 text-center">
                 <p className="text-sm">Enlace enviado a</p>
                 <p className="text-primary text-sm font-semibold">
-                  {username}@unal.edu.co
+                  {sentEmail || `${username}@unal.edu.co`}
                 </p>
               </div>
             </div>
