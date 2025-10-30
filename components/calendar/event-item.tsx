@@ -138,6 +138,7 @@ function EventWrapper({
         <button
           className={cn(
             "focus-visible:border-ring focus-visible:ring-ring/50 flex h-full w-full overflow-hidden px-1 text-left font-medium backdrop-blur-md transition-all duration-150 outline-none select-none hover:brightness-110 focus-visible:ring-[3px] data-dragging:cursor-grabbing data-dragging:shadow-lg data-past-event:line-through sm:px-2",
+            dndListeners ? "cursor-grab" : "cursor-pointer",
             colorClass,
             getBorderRadiusClasses(isFirstDay, isLastDay),
             className,
