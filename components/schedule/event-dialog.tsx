@@ -139,16 +139,22 @@ export function ScheduleEventDialog({
 
           {/* Título */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="text-sm font-medium">
-              Título *
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="title" className="text-sm font-medium">
+                Título *
+              </Label>
+              <span className="text-muted-foreground text-xs">
+                {title.length}/100
+              </span>
+            </div>
             <Input
               id="title"
               name="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(e.target.value.slice(0, 100))}
               placeholder="Ej: Matemáticas I - Grupo 01"
               className="text-sm"
+              maxLength={100}
               aria-invalid={state.errors?.title ? "true" : "false"}
               aria-describedby={state.errors?.title ? "title-error" : undefined}
             />
@@ -161,17 +167,23 @@ export function ScheduleEventDialog({
 
           {/* Descripción */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-medium">
-              Descripción
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="description" className="text-sm font-medium">
+                Descripción
+              </Label>
+              <span className="text-muted-foreground text-xs">
+                {description.length}/3000
+              </span>
+            </div>
             <Textarea
               id="description"
               name="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value.slice(0, 3000))}
               placeholder="Información adicional sobre el evento..."
               rows={3}
               className="resize-none text-sm"
+              maxLength={3000}
               aria-invalid={state.errors?.description ? "true" : "false"}
               aria-describedby={
                 state.errors?.description ? "description-error" : undefined
@@ -186,16 +198,22 @@ export function ScheduleEventDialog({
 
           {/* Ubicación */}
           <div className="space-y-2">
-            <Label htmlFor="location" className="text-sm font-medium">
-              Ubicación
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="location" className="text-sm font-medium">
+                Ubicación
+              </Label>
+              <span className="text-muted-foreground text-xs">
+                {location.length}/200
+              </span>
+            </div>
             <Input
               id="location"
               name="location"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(e) => setLocation(e.target.value.slice(0, 200))}
               placeholder="Ej: Edificio A - Salón 201"
               className="text-sm"
+              maxLength={200}
               aria-invalid={state.errors?.location ? "true" : "false"}
               aria-describedby={
                 state.errors?.location ? "location-error" : undefined

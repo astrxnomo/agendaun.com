@@ -4,6 +4,12 @@ import { addHours, eachHourOfInterval, format, startOfDay } from "date-fns"
 import { es } from "date-fns/locale"
 import React, { useMemo } from "react"
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn, getColor } from "@/lib/utils"
 
 import {
@@ -241,35 +247,46 @@ export function ScheduleView({
                       const dayOfWeek = dayIndex // 0 = Monday, 6 = Sunday
 
                       return (
-                        <div
-                          key={`${hour.toString()}-${quarter}`}
-                          className={cn(
-                            "hover:bg-foreground/10 absolute h-[calc(var(--week-cells-height)/4)] w-full cursor-pointer transition-colors",
-                            quarter === 0 && "top-0",
-                            quarter === 1 &&
-                              "top-[calc(var(--week-cells-height)/4)]",
-                            quarter === 2 &&
-                              "top-[calc(var(--week-cells-height)/4*2)]",
-                            quarter === 3 &&
-                              "top-[calc(var(--week-cells-height)/4*3)]",
-                          )}
-                          title="Crear evento"
-                          onClick={() => {
-                            if (onEventCreate) {
-                              // Create a date for this day of week and time
-                              const today = new Date()
-                              const currentDayOfWeek = (today.getDay() + 6) % 7 // Convert to Monday=0
-                              const daysToAdd = dayOfWeek - currentDayOfWeek
-                              const startTime = new Date(today)
-                              startTime.setDate(today.getDate() + daysToAdd)
-                              startTime.setHours(hourValue)
-                              startTime.setMinutes(quarter * 15)
-                              startTime.setSeconds(0)
-                              startTime.setMilliseconds(0)
-                              onEventCreate(startTime)
-                            }
-                          }}
-                        />
+                        <TooltipProvider key={`${hour.toString()}-${quarter}`}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div
+                                className={cn(
+                                  "hover:bg-foreground/10 absolute h-[calc(var(--week-cells-height)/4)] w-full cursor-pointer transition-colors",
+                                  quarter === 0 && "top-0",
+                                  quarter === 1 &&
+                                    "top-[calc(var(--week-cells-height)/4)]",
+                                  quarter === 2 &&
+                                    "top-[calc(var(--week-cells-height)/4*2)]",
+                                  quarter === 3 &&
+                                    "top-[calc(var(--week-cells-height)/4*3)]",
+                                )}
+                                onClick={() => {
+                                  if (onEventCreate) {
+                                    // Create a date for this day of week and time
+                                    const today = new Date()
+                                    const currentDayOfWeek =
+                                      (today.getDay() + 6) % 7 // Convert to Monday=0
+                                    const daysToAdd =
+                                      dayOfWeek - currentDayOfWeek
+                                    const startTime = new Date(today)
+                                    startTime.setDate(
+                                      today.getDate() + daysToAdd,
+                                    )
+                                    startTime.setHours(hourValue)
+                                    startTime.setMinutes(quarter * 15)
+                                    startTime.setSeconds(0)
+                                    startTime.setMilliseconds(0)
+                                    onEventCreate(startTime)
+                                  }
+                                }}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Crear evento</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )
                     })}
                 </div>

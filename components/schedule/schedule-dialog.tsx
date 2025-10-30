@@ -111,14 +111,20 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="name">Nombre</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="name">Nombre *</Label>
+              <span className="text-muted-foreground text-xs">
+                {name.length}/100
+              </span>
+            </div>
             <Input
               id="name"
               name="name"
               placeholder="Ej: Primer Semestre 2025"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value.slice(0, 100))}
               disabled={isPending}
+              maxLength={100}
               aria-invalid={state.errors?.name ? "true" : "false"}
               aria-describedby={state.errors?.name ? "name-error" : undefined}
             />
@@ -131,9 +137,9 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="description">Descripción (opcional)</Label>
+              <Label htmlFor="description">Descripción</Label>
               <span className="text-muted-foreground text-xs">
-                {description.length}/200
+                {description.length}/500
               </span>
             </div>
             <Textarea
@@ -141,10 +147,10 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
               name="description"
               placeholder="Describe brevemente este horario..."
               value={description}
-              onChange={(e) => setDescription(e.target.value.slice(0, 200))}
+              onChange={(e) => setDescription(e.target.value.slice(0, 500))}
               disabled={isPending}
               rows={3}
-              maxLength={200}
+              maxLength={500}
               aria-invalid={state.errors?.description ? "true" : "false"}
               aria-describedby={
                 state.errors?.description ? "description-error" : undefined
