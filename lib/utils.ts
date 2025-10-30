@@ -128,3 +128,16 @@ export function getBorderRadiusClasses(
     return "rounded-none not-in-data-[slot=popover-content]:w-[calc(100%+9px)] not-in-data-[slot=popover-content]:-translate-x-[4px]"
   }
 }
+
+export const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+export const formatUserName = (name: string | undefined, email: string) => {
+  return (name || email)?.replace(/@unal\.edu\.co$/, "")
+}

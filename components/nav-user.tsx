@@ -24,19 +24,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useAuthContext } from "@/contexts/auth-context"
 import { logout } from "@/lib/appwrite/auth"
-
-const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .map((word) => word.charAt(0))
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
-}
-
-const formatUserName = (name: string | undefined, email: string) => {
-  return (name || email)?.replace(/@unal\.edu\.co$/, "")
-}
+import { formatUserName, getInitials } from "@/lib/utils"
 
 export function NavUser() {
   const { isMobile } = useSidebar()
