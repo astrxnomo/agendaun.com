@@ -11,7 +11,7 @@ import {
   User,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useId, useState } from "react"
+import { useActionState, useEffect, useId, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -42,20 +42,23 @@ import {
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { useAuthContext } from "@/contexts/auth-context"
-import { update } from "@/lib/actions/profiles"
-import { updateUserName } from "@/lib/actions/users"
+
+import {
+  ProfileConfigState,
+  saveProfileConfig,
+} from "@/lib/actions/profile/profile-config"
 import { getFacultiesBySede } from "@/lib/data/faculties/getFacultiesBySede"
 import { getProgramsByFaculty } from "@/lib/data/programs/getProgramsByFaculty"
 import { getSedes } from "@/lib/data/sedes/getSedes"
-import {
-  type Faculties,
-  type Profiles,
-  type Programs,
-  type Sedes,
-} from "@/lib/data/types"
+import { type Faculties, type Programs, type Sedes } from "@/lib/data/types"
 
 interface UserConfigDialogProps {
   children: React.ReactNode
+}
+
+const initialState: ProfileConfigState = {
+  success: false,
+  message: "",
 }
 
 export function ConfigDialog({ children }: UserConfigDialogProps) {
@@ -89,9 +92,13 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
   const [isSedesLoaded, setIsSedesLoaded] = useState(false)
   const [isLoadingFaculties, setIsLoadingFaculties] = useState(false)
   const [isLoadingPrograms, setIsLoadingPrograms] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
+
+  const [state, formAction, isPending] = useActionState(
+    saveProfileConfig,
+    initialState,
+  )
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen)
@@ -177,62 +184,19 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
     setSelectedProgram(program)
   }
 
-  const saveUserConfig = async () => {
-    if (!user?.$id) {
-      throw new Error("Usuario no autenticado")
-    }
-
-    if (!selectedSede || !selectedFaculty || !selectedProgram) {
-      throw new Error("Selecciona sede, facultad y programa")
-    }
-
-    if (!name.trim()) {
-      throw new Error("El nombre es requerido")
-    }
-
-    setIsSaving(true)
-    try {
-      if (name.trim() !== user.name) {
-        await updateUserName(name.trim())
+  // Manejar respuestas del estado
+  useEffect(() => {
+    if (state.message) {
+      if (state.success) {
+        toast.success(state.message)
+        refreshAuth()
+        router.refresh()
+        setOpen(false)
+      } else if (!state.success && !state.errors) {
+        toast.error(state.message)
       }
-
-      await update({
-        $id: profile?.$id || "",
-        user_id: user.$id,
-        sede: selectedSede,
-        faculty: selectedFaculty,
-        program: selectedProgram,
-      } as Profiles)
-
-      // Refresh both user and profile data from server
-      await refreshAuth()
-      router.refresh()
-      setOpen(false)
-    } catch (error) {
-      console.error("Error saving user config:", error)
-      throw error
-    } finally {
-      setIsSaving(false)
     }
-  }
-
-  const handleSave = () => {
-    if (!name.trim()) {
-      toast.error("El nombre es requerido")
-      return
-    }
-
-    if (!selectedSede || !selectedFaculty || !selectedProgram) {
-      toast.error("Selecciona sede, facultad y programa")
-      return
-    }
-
-    toast.promise(saveUserConfig(), {
-      loading: "Guardando configuración...",
-      success: "Configuración guardada correctamente",
-      error: (error: Error) => error.message,
-    })
-  }
+  }, [state, refreshAuth, router])
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -255,23 +219,79 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
               </div>
             )}
 
-            <form className="space-y-4">
+            <form
+              action={formAction}
+              id={`${id}-config-form`}
+              className="space-y-4"
+            >
+              {/* Campos ocultos */}
+              <input type="hidden" name="userId" value={user?.$id || ""} />
+              <input
+                type="hidden"
+                name="profileId"
+                value={profile?.$id || ""}
+              />
+              <input
+                type="hidden"
+                name="currentUserName"
+                value={user?.name || ""}
+              />
+              <input
+                type="hidden"
+                name="sede"
+                value={selectedSede?.$id || ""}
+              />
+              <input
+                type="hidden"
+                name="faculty"
+                value={selectedFaculty?.$id || ""}
+              />
+              <input
+                type="hidden"
+                name="program"
+                value={selectedProgram?.$id || ""}
+              />
+
+              {/* Errores generales */}
+              {state.errors?._form && (
+                <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
+                  {state.errors._form.join(", ")}
+                </div>
+              )}
+
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor={`${id}-name`}
-                    className="flex items-center text-sm font-medium"
-                  >
-                    <User className="mr-1 size-4" />
-                    Nombre
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor={`${id}-name`}
+                      className="flex items-center text-sm font-medium"
+                    >
+                      <User className="mr-1 size-4" />
+                      Nombre
+                    </Label>
+                    <span className="text-muted-foreground text-xs">
+                      {name.length}/50
+                    </span>
+                  </div>
                   <Input
                     id={`${id}-name`}
+                    name="name"
                     placeholder="Tu nombre"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(e.target.value.slice(0, 50))}
                     type="text"
+                    maxLength={50}
+                    disabled={isPending}
+                    aria-invalid={state.errors?.name ? "true" : "false"}
+                    aria-describedby={
+                      state.errors?.name ? "name-error" : undefined
+                    }
                   />
+                  {state.errors?.name && (
+                    <p id="name-error" className="text-destructive text-sm">
+                      {state.errors.name.join(", ")}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -502,22 +522,22 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
 
         <DialogFooter className="border-t px-6 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline" disabled={isSaving}>
+            <Button type="button" variant="outline" disabled={isPending}>
               Cancelar
             </Button>
           </DialogClose>
           <Button
-            type="button"
-            onClick={handleSave}
+            type="submit"
+            form={`${id}-config-form`}
             disabled={
               !name.trim() ||
               !selectedSede ||
               !selectedFaculty ||
               !selectedProgram ||
-              isSaving
+              isPending
             }
           >
-            {isSaving ? <Loader2 className="animate-spin" /> : "Guardar"}
+            {isPending ? <Loader2 className="animate-spin" /> : "Guardar"}
           </Button>
         </DialogFooter>
       </DialogContent>

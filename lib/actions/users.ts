@@ -1,33 +1,10 @@
 "use server"
 
-import { createAdminClient, createSessionClient } from "@/lib/appwrite"
-import { type Calendars, type Schedules, type User } from "@/lib/data/types"
+import { createAdminClient } from "@/lib/appwrite"
+import { type Calendars, type Schedules } from "@/lib/data/types"
 
 import { getUser } from "../data/users/getUser"
 import { handleError } from "../utils/error-handler"
-
-export async function updateUserName(name: string): Promise<User> {
-  try {
-    if (!name.trim()) {
-      throw new Error("El nombre es requerido")
-    }
-
-    const client = await createSessionClient()
-
-    if (!client.account) {
-      throw new Error("No hay sesión activa")
-    }
-
-    const result = await client.account.updateName({
-      name: name.trim(),
-    })
-
-    return result as User
-  } catch (error) {
-    console.error("Error updating user name:", error)
-    handleError(error)
-  }
-}
 
 async function getUserEditorRoles(): Promise<string[]> {
   try {
