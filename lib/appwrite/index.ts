@@ -1,7 +1,7 @@
 "use server"
 
 import { cookies } from "next/headers"
-import { Account, Client, TablesDB, Users } from "node-appwrite"
+import { Account, Client, Storage, TablesDB, Users } from "node-appwrite"
 
 export const createSessionClient = async () => {
   const cookieStore = await cookies()
@@ -19,6 +19,7 @@ export const createSessionClient = async () => {
   return {
     ...(session?.value && { account: new Account(client) }),
     database: new TablesDB(client),
+    storage: new Storage(client),
   }
 }
 
@@ -33,5 +34,6 @@ export const createAdminClient = async () => {
     account: new Account(client),
     database: new TablesDB(client),
     users: new Users(client),
+    storage: new Storage(client),
   }
 }

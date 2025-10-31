@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache"
 import { ID } from "node-appwrite"
 
 import { createSessionClient } from "@/lib/appwrite"
-import { DATABASE_ID, TABLES } from "@/lib/appwrite/config"
+import { BUCKETS, DATABASE_ID, TABLES } from "@/lib/appwrite/config"
 import { scheduleEventSchema } from "@/lib/data/schemas"
 import { Colors, type ScheduleEvents } from "@/lib/data/types"
+import { buildImageUrl, extractImageUrl } from "@/lib/utils"
 
 export type EventActionState = {
   success: boolean
@@ -22,6 +23,7 @@ export type EventActionState = {
     end_minute?: string[]
     color?: string[]
     schedule?: string[]
+    image?: string[]
     _form?: string[]
   }
   data?: ScheduleEvents
@@ -47,6 +49,12 @@ export async function saveEvent(
       schedule: formData.get("schedule") as string,
     }
 
+    const imageFile = formData.get("image") as File | null
+    const currentImageId =
+      (formData.get("currentImageId") as string | null) || null
+    const previousImageId =
+      (formData.get("previousImageId") as string | null) || null
+
     const validationResult = scheduleEventSchema.safeParse(rawData)
 
     if (!validationResult.success) {
@@ -59,7 +67,68 @@ export async function saveEvent(
 
     const validData = validationResult.data
 
-    const { database } = await createSessionClient()
+    const { storage, database } = await createSessionClient()
+
+    let uploadedImageUrl: string | null = null
+
+    if (imageFile && imageFile.size > 0) {
+      try {
+        if (previousImageId) {
+          try {
+            const imageId = extractImageUrl(previousImageId)
+            if (imageId) {
+              await storage.deleteFile({
+                bucketId: BUCKETS.SCHEDULE_EVENTS_IMAGES,
+                fileId: imageId || "",
+              })
+            }
+          } catch (error) {
+            console.error("Error deleting old image:", error)
+          }
+        }
+
+        const uploadedFile = await storage.createFile({
+          bucketId: BUCKETS.SCHEDULE_EVENTS_IMAGES,
+          fileId: ID.unique(),
+          file: imageFile,
+        })
+
+        uploadedImageUrl = buildImageUrl(
+          BUCKETS.SCHEDULE_EVENTS_IMAGES,
+          uploadedFile.$id,
+        )
+      } catch (error) {
+        console.error("Error uploading image:", error)
+        return {
+          success: false,
+          message: "Error al subir la imagen",
+          errors: {
+            image: [
+              error instanceof Error
+                ? error.message
+                : "Error al subir la imagen",
+            ],
+          },
+        }
+      }
+    } else if (!imageFile) {
+      if (!currentImageId && previousImageId) {
+        try {
+          const imageId = extractImageUrl(previousImageId)
+          if (imageId) {
+            await storage.deleteFile({
+              bucketId: BUCKETS.SCHEDULE_EVENTS_IMAGES,
+              fileId: imageId || "",
+            })
+          }
+        } catch (error) {
+          console.error("Error deleting removed image:", error)
+        }
+        uploadedImageUrl = null
+      } else {
+        uploadedImageUrl = currentImageId
+      }
+    }
 
     const eventId = formData.get("eventId") as string | null
 
@@ -74,6 +143,7 @@ export async function saveEvent(
       end_minute: validData.end_minute,
       color: validData.color,
       schedule: validData.schedule,
+      image: uploadedImageUrl,
     }
 
     const result = await database.upsertRow({
@@ -106,13 +176,37 @@ export async function saveEvent(
 
 export async function deleteEvent(eventId: string): Promise<EventActionState> {
   try {
-    const { database } = await createSessionClient()
+    const { database, storage } = await createSessionClient()
+
+    let eventImage: string | null = null
+    try {
+      const existingEvent = await database.getRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLES.SCHEDULE_EVENTS,
+        rowId: eventId,
+      })
+      eventImage = (existingEvent as unknown as ScheduleEvents).image
+    } catch (error) {}
 
     await database.deleteRow({
       databaseId: DATABASE_ID,
       tableId: TABLES.SCHEDULE_EVENTS,
       rowId: eventId,
     })
+
+    if (eventImage) {
+      try {
+        const fileId = extractImageUrl(eventImage)
+        if (fileId) {
+          await storage.deleteFile({
+            bucketId: BUCKETS.SCHEDULE_EVENTS_IMAGES,
+            fileId: fileId,
+          })
+        }
+      } catch (error) {
+        console.error("Error deleting event image:", error)
+      }
+    }
 
     revalidatePath(`/schedules/[category]/[slug]`, "page")
 

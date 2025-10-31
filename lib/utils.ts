@@ -19,6 +19,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { twMerge } from "tailwind-merge"
+import { APPWRITE } from "./appwrite/config"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -140,4 +141,34 @@ export const getInitials = (name: string) => {
 
 export const formatUserName = (name: string | undefined, email: string) => {
   return (name || email)?.replace(/@unal\.edu\.co$/, "")
+}
+
+export function formatHour(hour: number): string {
+  const period = hour >= 12 ? "PM" : "AM"
+  const displayHour = hour % 12 || 12
+  return `${displayHour}:00 ${period}`
+}
+
+export const formatTime = (hour: number, minute: number) => {
+  const period = hour >= 12 ? "PM" : "AM"
+  const displayHour = hour % 12 || 12
+  return `${displayHour}:${String(minute).padStart(2, "0")} ${period}`
+}
+
+export function extractImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  try {
+    const parts = url.split("/files/")
+    if (parts.length !== 2) return null
+    const fileId = parts[1].split("/")[0]
+    return fileId || null
+  } catch {
+    return null
+  }
+}
+
+export function buildImageUrl(bucketId: string, fileId: string): string {
+  const baseUrl = APPWRITE.ENDPOINT || ""
+  const proj = APPWRITE.PROJECT_ID || ""
+  return `${baseUrl}/storage/buckets/${bucketId}/files/${fileId}/preview?project=${proj}`
 }
