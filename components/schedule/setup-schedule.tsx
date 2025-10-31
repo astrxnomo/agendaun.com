@@ -142,6 +142,7 @@ export function SetupSchedule({
       >
         <div className="flex flex-1 flex-col">
           <ScheduleView
+            schedule={schedule}
             events={events}
             onEventSelect={handleEventSelect}
             onEventCreate={handleEventCreate}

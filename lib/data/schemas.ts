@@ -149,6 +149,16 @@ export const scheduleSchema = z.object({
   faculty: z.string().nullable().optional(),
   program: z.string().nullable().optional(),
   category: z.string().min(1, "La categoría es requerida"),
+  start_hour: z
+    .number()
+    .int()
+    .min(0, "La hora de inicio debe ser entre 0 y 23")
+    .max(23, "La hora de inicio debe ser entre 0 y 23"),
+  end_hour: z
+    .number()
+    .int()
+    .min(0, "La hora de fin debe ser entre 0 y 23")
+    .max(23, "La hora de fin debe ser entre 0 y 23"),
 })
 
 /**

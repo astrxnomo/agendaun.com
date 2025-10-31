@@ -94,6 +94,8 @@ export type Schedules = Models.Document & {
   faculty: Faculties | null
   program: Programs | null
   category: ScheduleCategories
+  start_hour: number
+  end_hour: number
 }
 
 export type ScheduleCategories = Models.Document & {

@@ -50,6 +50,8 @@ export async function saveSchedule(
       faculty: profile.faculty?.$id || null,
       program: profile.program?.$id || null,
       category: formData.get("category") as string,
+      start_hour: parseInt(formData.get("start_hour") as string) || 6,
+      end_hour: parseInt(formData.get("end_hour") as string) || 22,
     }
 
     const validationResult = scheduleSchema.safeParse(rawData)
@@ -75,6 +77,8 @@ export async function saveSchedule(
       faculty: validData.faculty || null,
       program: validData.program || null,
       category: validData.category,
+      start_hour: validData.start_hour,
+      end_hour: validData.end_hour,
     }
 
     const result = await database.upsertRow({

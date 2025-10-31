@@ -1,10 +1,13 @@
 "use client"
 
-import { Loader2, Pencil, Plus } from "lucide-react"
+import { Time } from "@internationalized/date"
+import { ClockIcon, Loader2, Pencil, Plus } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
+import { Label as AriaLabel } from "react-aria-components"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { DateInput, TimeField } from "@/components/ui/datefield-rac"
 import {
   Dialog,
   DialogContent,
@@ -37,21 +40,66 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(schedule?.name || "")
   const [description, setDescription] = useState(schedule?.description || "")
+  const [startTime, setStartTime] = useState<Time>(new Time(6, 0))
+  const [endTime, setEndTime] = useState<Time>(new Time(22, 0))
+  const [error, setError] = useState<string | null>(null)
 
   const [state, formAction, isPending] = useActionState(
     saveSchedule,
     initialState,
   )
 
+  const validateHours = (start: Time, end: Time) => {
+    const startHour = start.hour
+    const endHour = end.hour
+
+    // Calcular la diferencia considerando que puede cruzar medianoche
+    let diff = endHour - startHour
+    if (diff <= 0) {
+      diff = 24 + diff // Si end es menor que start, cruza medianoche
+    }
+
+    if (diff < 5) {
+      setError("El horario debe tener un mínimo de 5 horas")
+      return false
+    }
+    setError(null)
+    return true
+  }
+
   useEffect(() => {
     if (open && schedule) {
+      const start = schedule.start_hour ?? 6
+      const end = schedule.end_hour ?? 22
       setName(schedule.name || "")
       setDescription(schedule.description || "")
+      setStartTime(new Time(start, 0))
+      setEndTime(new Time(end, 0))
+      setError(null)
+      validateHours(new Time(start, 0), new Time(end, 0))
     } else if (open && !schedule) {
       setName("")
       setDescription("")
+      setStartTime(new Time(6, 0))
+      setEndTime(new Time(22, 0))
+      setError(null)
     }
   }, [open, schedule])
+
+  // Manejar cambios en las horas con validación
+  const handleStartTimeChange = (time: Time | null) => {
+    if (time) {
+      setStartTime(time)
+      validateHours(time, endTime)
+    }
+  }
+
+  const handleEndTimeChange = (time: Time | null) => {
+    if (time) {
+      setEndTime(time)
+      validateHours(startTime, time)
+    }
+  }
 
   useEffect(() => {
     if (state.message) {
@@ -60,6 +108,9 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
         setOpen(false)
         setName("")
         setDescription("")
+        setStartTime(new Time(6, 0))
+        setEndTime(new Time(22, 0))
+        setError(null)
       } else if (!state.success && !state.errors) {
         toast.error(state.message)
       }
@@ -102,6 +153,8 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
           {schedule?.$id && (
             <input type="hidden" name="scheduleId" value={schedule.$id} />
           )}
+          <input type="hidden" name="start_hour" value={startTime.hour} />
+          <input type="hidden" name="end_hour" value={endTime.hour} />
 
           {/* Errores generales */}
           {state.errors?._form && (
@@ -163,6 +216,55 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
             )}
           </div>
 
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {/* Hora de inicio */}
+              <TimeField
+                value={startTime}
+                onChange={handleStartTimeChange}
+                hourCycle={12}
+                granularity="hour"
+                isDisabled={isPending}
+              >
+                <AriaLabel className="text-sm font-medium">
+                  Hora de inicio
+                </AriaLabel>
+                <div className="relative">
+                  <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
+                    <ClockIcon size={16} aria-hidden="true" />
+                  </div>
+                  <DateInput className="ps-9" />
+                </div>
+              </TimeField>
+
+              {/* Hora de fin */}
+              <TimeField
+                value={endTime}
+                onChange={handleEndTimeChange}
+                hourCycle={12}
+                granularity="hour"
+                isDisabled={isPending}
+              >
+                <AriaLabel className="text-sm font-medium">
+                  Hora de fin
+                </AriaLabel>
+                <div className="relative">
+                  <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
+                    <ClockIcon size={16} aria-hidden="true" />
+                  </div>
+                  <DateInput className="ps-9" />
+                </div>
+              </TimeField>
+            </div>
+
+            {error && <p className="text-destructive text-sm">{error}</p>}
+
+            <p className="text-muted-foreground text-xs">
+              Rango de horas visible en el horario. Los eventos solo podrán
+              crearse dentro de este rango. Mínimo 5 horas.
+            </p>
+          </div>
+
           <div className="flex justify-end gap-2 pt-4">
             <Button
               type="button"
@@ -172,7 +274,7 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending || !!error}>
               {isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />

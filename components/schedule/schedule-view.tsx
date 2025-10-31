@@ -2,14 +2,9 @@
 
 import { addHours, eachHourOfInterval, format, startOfDay } from "date-fns"
 import { es } from "date-fns/locale"
+import { Plus } from "lucide-react"
 import React, { useMemo } from "react"
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { cn, getColor } from "@/lib/utils"
 
 import {
@@ -21,9 +16,10 @@ import {
   WeekCellsHeight,
 } from "./constants"
 
-import type { ScheduleEvents } from "@/lib/data/types"
+import type { ScheduleEvents, Schedules } from "@/lib/data/types"
 
 interface ScheduleViewProps {
+  schedule: Schedules
   events: ScheduleEvents[]
   onEventSelect?: (event: ScheduleEvents) => void
   onEventCreate?: (startTime: Date) => void
@@ -41,20 +37,41 @@ interface PositionedEvent {
 }
 
 export function ScheduleView({
+  schedule,
   events,
   onEventSelect,
   onEventCreate,
   editable = false,
   canEdit = false,
 }: ScheduleViewProps) {
+  // Usar las horas personalizadas del horario
+  const startHour = schedule.start_hour ?? StartHour
+  const endHour = schedule.end_hour ?? EndHour
+
   const hours = useMemo(() => {
     const today = new Date()
     const dayStart = startOfDay(today)
+
+    // Si endHour <= startHour, el horario cruza medianoche
+    if (endHour <= startHour) {
+      // Generar horas desde startHour hasta 23, luego de 0 hasta endHour-1
+      const hoursBeforeMidnight = eachHourOfInterval({
+        start: addHours(dayStart, startHour),
+        end: addHours(dayStart, 23),
+      })
+      const hoursAfterMidnight = eachHourOfInterval({
+        start: dayStart,
+        end: addHours(dayStart, endHour - 1),
+      })
+      return [...hoursBeforeMidnight, ...hoursAfterMidnight]
+    }
+
+    // Horario normal (no cruza medianoche)
     return eachHourOfInterval({
-      start: addHours(dayStart, StartHour),
-      end: addHours(dayStart, EndHour - 1),
+      start: addHours(dayStart, startHour),
+      end: addHours(dayStart, endHour - 1),
     })
-  }, [])
+  }, [startHour, endHour])
 
   // Process events for each day (0 = Monday, 6 = Sunday)
   const processedDayEvents = useMemo(() => {
@@ -91,17 +108,42 @@ export function ScheduleView({
 
       sortedEvents.forEach((event) => {
         // Usar los campos de hora directamente
-        const startHour = event.start_hour + event.start_minute / 60
-        const endHour = event.end_hour + event.end_minute / 60
+        let eventStartHour = event.start_hour + event.start_minute / 60
+        let eventEndHour = event.end_hour + event.end_minute / 60
 
-        // Skip events outside our time range
-        if (endHour <= StartHour || startHour >= EndHour) return
+        // Si el evento cruza medianoche (end < start), ajustar endHour
+        if (eventEndHour < eventStartHour) {
+          eventEndHour += 24
+        }
 
-        // Clamp to our time range
-        const clampedStartHour = Math.max(startHour, StartHour)
-        const clampedEndHour = Math.min(endHour, EndHour)
+        // Si el horario cruza medianoche, ajustar el rango de comparación
+        const scheduleEndHour = endHour <= startHour ? endHour + 24 : endHour
 
-        const top = (clampedStartHour - StartHour) * WeekCellsHeight
+        // Skip events ONLY if they are completely outside our time range
+        // Para horarios que cruzan medianoche, también considerar eventos después de medianoche
+        const isOutsideRange =
+          endHour <= startHour
+            ? eventEndHour <= startHour ||
+              (eventStartHour >= scheduleEndHour &&
+                eventStartHour < startHour + 24)
+            : eventEndHour <= startHour || eventStartHour >= endHour
+
+        if (isOutsideRange) return
+
+        // Clamp to our time range to show only the visible portion
+        const clampedStartHour = Math.max(eventStartHour, startHour)
+        const clampedEndHour = Math.min(eventEndHour, scheduleEndHour)
+
+        // Calcular top considerando que el horario puede cruzar medianoche
+        // Si el evento está después de medianoche y el horario cruza medianoche,
+        // necesitamos calcular la distancia desde startHour considerando el wrap
+        let adjustedStartForTop = clampedStartHour
+        if (endHour <= startHour && clampedStartHour < startHour) {
+          // El evento está después de medianoche, ajustar para el cálculo
+          adjustedStartForTop = clampedStartHour + 24
+        }
+
+        const top = (adjustedStartForTop - startHour) * WeekCellsHeight
         const height = (clampedEndHour - clampedStartHour) * WeekCellsHeight
 
         // Find a column for this event
@@ -151,7 +193,7 @@ export function ScheduleView({
     })
 
     return result
-  }, [events])
+  }, [events, startHour, endHour])
 
   const handleEventClick = React.useCallback(
     (event: ScheduleEvents, e: React.MouseEvent) => {
@@ -247,46 +289,36 @@ export function ScheduleView({
                       const dayOfWeek = dayIndex // 0 = Monday, 6 = Sunday
 
                       return (
-                        <TooltipProvider key={`${hour.toString()}-${quarter}`}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div
-                                className={cn(
-                                  "hover:bg-foreground/10 absolute h-[calc(var(--week-cells-height)/4)] w-full cursor-pointer transition-colors",
-                                  quarter === 0 && "top-0",
-                                  quarter === 1 &&
-                                    "top-[calc(var(--week-cells-height)/4)]",
-                                  quarter === 2 &&
-                                    "top-[calc(var(--week-cells-height)/4*2)]",
-                                  quarter === 3 &&
-                                    "top-[calc(var(--week-cells-height)/4*3)]",
-                                )}
-                                onClick={() => {
-                                  if (onEventCreate) {
-                                    // Create a date for this day of week and time
-                                    const today = new Date()
-                                    const currentDayOfWeek =
-                                      (today.getDay() + 6) % 7 // Convert to Monday=0
-                                    const daysToAdd =
-                                      dayOfWeek - currentDayOfWeek
-                                    const startTime = new Date(today)
-                                    startTime.setDate(
-                                      today.getDate() + daysToAdd,
-                                    )
-                                    startTime.setHours(hourValue)
-                                    startTime.setMinutes(quarter * 15)
-                                    startTime.setSeconds(0)
-                                    startTime.setMilliseconds(0)
-                                    onEventCreate(startTime)
-                                  }
-                                }}
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Crear evento</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <div
+                          key={`${hour.toString()}-${quarter}`}
+                          className={cn(
+                            "group hover:bg-foreground/10 absolute flex h-[calc(var(--week-cells-height)/4)] w-full cursor-pointer items-center justify-center transition-colors",
+                            quarter === 0 && "top-0",
+                            quarter === 1 &&
+                              "top-[calc(var(--week-cells-height)/4)]",
+                            quarter === 2 &&
+                              "top-[calc(var(--week-cells-height)/4*2)]",
+                            quarter === 3 &&
+                              "top-[calc(var(--week-cells-height)/4*3)]",
+                          )}
+                          onClick={() => {
+                            if (onEventCreate) {
+                              // Create a date for this day of week and time
+                              const today = new Date()
+                              const currentDayOfWeek = (today.getDay() + 6) % 7 // Convert to Monday=0
+                              const daysToAdd = dayOfWeek - currentDayOfWeek
+                              const startTime = new Date(today)
+                              startTime.setDate(today.getDate() + daysToAdd)
+                              startTime.setHours(hourValue)
+                              startTime.setMinutes(quarter * 15)
+                              startTime.setSeconds(0)
+                              startTime.setMilliseconds(0)
+                              onEventCreate(startTime)
+                            }
+                          }}
+                        >
+                          <Plus className="text-muted-foreground h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+                        </div>
                       )
                     })}
                 </div>
