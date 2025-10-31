@@ -208,19 +208,18 @@ export const scheduleEventSchemaRaw = z.object({
   end_minute: z.number().min(0, "Minuto inválido").max(59, "Minuto inválido"),
   color: z.nativeEnum(Colors),
   schedule: z.string().min(1, "El horario es requerido"),
+  image: z.string().nullable().optional(),
 })
 
-/**
- * Schema para validación de eventos de horario (con validación de horas)
- */
 export const scheduleEventSchema = scheduleEventSchemaRaw.refine(
   (data) => {
     const startMinutes = data.start_hour * 60 + data.start_minute
     const endMinutes = data.end_hour * 60 + data.end_minute
-    return endMinutes > startMinutes
+
+    return endMinutes !== startMinutes
   },
   {
-    message: "La hora de fin debe ser después de la hora de inicio",
+    message: "El evento debe tener una duración mayor a 0 minutos",
     path: ["end_hour"],
   },
 )
