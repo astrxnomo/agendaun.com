@@ -12,6 +12,7 @@ import {
   startOfDay,
 } from "date-fns"
 import { es } from "date-fns/locale"
+import { Plus } from "lucide-react"
 import React, { useMemo } from "react"
 
 import {
@@ -306,7 +307,8 @@ export function DayView({
                       date={currentDate}
                       time={quarterHourTime}
                       className={cn(
-                        "absolute h-[calc(var(--week-cells-height)/4)] w-full",
+                        "group absolute flex h-[calc(var(--week-cells-height)/4)] w-full items-center justify-center",
+                        editable && "hover:bg-foreground/10 transition-colors",
                         quarter === 0 && "top-0",
                         quarter === 1 &&
                           "top-[calc(var(--week-cells-height)/4)]",
@@ -323,7 +325,11 @@ export function DayView({
                           onEventCreate(startTime)
                         },
                       })}
-                    />
+                    >
+                      {editable && (
+                        <Plus className="text-muted-foreground h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+                      )}
+                    </DroppableCell>
                   )
                 })}
               </div>

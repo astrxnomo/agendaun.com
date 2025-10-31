@@ -13,6 +13,7 @@ import {
   startOfWeek,
 } from "date-fns"
 import { es } from "date-fns/locale"
+import { Plus } from "lucide-react"
 import React, { useEffect, useMemo, useState } from "react"
 
 import {
@@ -35,6 +36,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
 
 import type { CalendarEtiquettes, CalendarEvents } from "@/lib/data/types"
 
@@ -154,6 +156,9 @@ export function MonthView({
                   <DroppableCell
                     id={cellId}
                     date={day}
+                    className={cn(
+                      editable && "hover:bg-foreground/10 transition-colors",
+                    )}
                     {...(editable && {
                       onClick: () => {
                         const startTime = new Date(day)
@@ -162,8 +167,13 @@ export function MonthView({
                       },
                     })}
                   >
-                    <div className="group-data-today:bg-primary group-data-today:text-primary-foreground mt-1 inline-flex size-6 items-center justify-center rounded-full text-sm">
-                      {format(day, "d")}
+                    <div className="flex items-center justify-between px-1">
+                      <div className="group-data-today:bg-primary group-data-today:text-primary-foreground mt-1 inline-flex size-6 items-center justify-center rounded-full text-sm">
+                        {format(day, "d")}
+                      </div>
+                      {editable && (
+                        <Plus className="text-muted-foreground mt-1 size-4 opacity-0 transition-opacity group-hover:opacity-100" />
+                      )}
                     </div>
                     <div
                       ref={isReferenceCell ? contentRef : null}
@@ -233,7 +243,7 @@ export function MonthView({
                         <Popover modal>
                           <PopoverTrigger asChild>
                             <button
-                              className="focus-visible:border-ring focus-visible:ring-ring/50 text-muted-foreground hover:text-foreground hover:bg-muted/50 mt-[var(--event-gap)] flex h-[var(--event-height)] w-full items-center overflow-hidden rounded px-1 text-left text-[10px] backdrop-blur-md transition outline-none select-none focus-visible:ring-[3px] sm:px-2 sm:text-xs cursor-pointer"
+                              className="focus-visible:border-ring focus-visible:ring-ring/50 text-muted-foreground hover:text-foreground hover:bg-muted/50 mt-[var(--event-gap)] flex h-[var(--event-height)] w-full cursor-pointer items-center overflow-hidden rounded px-1 text-left text-[10px] backdrop-blur-md transition outline-none select-none focus-visible:ring-[3px] sm:px-2 sm:text-xs"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <span>
