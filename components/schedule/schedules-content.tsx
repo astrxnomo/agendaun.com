@@ -9,6 +9,7 @@ import { canEditSchedule, canEditScheduleCategory } from "@/lib/actions/users"
 import { getProfile } from "@/lib/data/profiles/getProfile"
 import { getSchedulesByCategory } from "@/lib/data/schedules/getSchedulesByCategory"
 import { getUser } from "@/lib/data/users/getUser"
+import { PageHeader } from "../page-header"
 
 type SchedulesContentProps = {
   categorySlug: string
@@ -68,13 +69,24 @@ export async function SchedulesContent({
 
   return (
     <>
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Horarios", href: "/schedules" },
+          {
+            label: category.name,
+            isCurrentPage: true,
+          },
+        ]}
+      />
       <div className="border-b p-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">{category.name}</h1>
             {total > 0 && (
               <p className="text-muted-foreground mt-1 text-sm">
-                {total} {total === 1 ? "horario" : "horarios"} disponibles
+                {total} {total === 1 ? "horario" : "horarios"} disponibles para{" "}
+                {profile.sede.name}
               </p>
             )}
           </div>

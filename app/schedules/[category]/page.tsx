@@ -1,6 +1,5 @@
 import { Suspense } from "react"
 
-import { PageHeader } from "@/components/page-header"
 import { SchedulesContent } from "@/components/schedule/schedules-content"
 import { SchedulesSkeleton } from "@/components/schedule/schedules-skeleton"
 
@@ -19,24 +18,8 @@ export default async function ScheduleCategoryPage({
   const currentPage = pageParam ? parseInt(pageParam, 10) : 1
 
   return (
-    <>
-      <PageHeader
-        breadcrumbs={[
-          { label: "Inicio", href: "/" },
-          { label: "Horarios", href: "/schedules" },
-          {
-            label: categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1),
-            isCurrentPage: true,
-          },
-        ]}
-      />
-
-      <Suspense fallback={<SchedulesSkeleton />}>
-        <SchedulesContent
-          categorySlug={categorySlug}
-          currentPage={currentPage}
-        />
-      </Suspense>
-    </>
+    <Suspense fallback={<SchedulesSkeleton />}>
+      <SchedulesContent categorySlug={categorySlug} currentPage={currentPage} />
+    </Suspense>
   )
 }
