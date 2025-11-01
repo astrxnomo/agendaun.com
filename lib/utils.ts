@@ -2,10 +2,12 @@ import { Colors } from "@/lib/data/types"
 import { clsx, type ClassValue } from "clsx"
 import {
   BookOpen,
+  BookUserIcon,
   Building2,
   Bus,
   Calendar,
   Clock,
+  Dumbbell,
   FlaskConical,
   GraduationCap,
   Landmark,
@@ -44,6 +46,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Stethoscope,
   Wifi,
   MapPin,
+  Dumbbell,
+  BookUserIcon,
 }
 
 export function getIcon(
