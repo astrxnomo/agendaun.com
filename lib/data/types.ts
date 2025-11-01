@@ -54,6 +54,7 @@ export type CalendarEvents = Models.Document & {
   sede: Sedes
   faculty: Faculties
   program: Programs
+  image: string | null
 }
 
 export type ScheduleEvents = Models.Document & {

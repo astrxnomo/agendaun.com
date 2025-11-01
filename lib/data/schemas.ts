@@ -105,6 +105,7 @@ export const calendarEventSchemaRaw = z.object({
   sede: z.string().optional().nullable(),
   faculty: z.string().optional().nullable(),
   program: z.string().optional().nullable(),
+  image: z.string().nullable().optional(),
 })
 
 /**
