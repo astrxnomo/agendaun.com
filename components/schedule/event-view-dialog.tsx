@@ -1,5 +1,5 @@
 import { EventImage } from "@/components/schedule/event-image"
-import { Calendar, Clock, FileText, MapPin } from "lucide-react"
+import { Calendar, FileText, MapPin } from "lucide-react"
 
 import {
   Dialog,
@@ -40,69 +40,85 @@ export function ScheduleEventViewDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={cn("max-w-lg", event.image && "sm:max-w-2xl")}>
+      <DialogContent className={cn("max-w-md", event.image && "sm:max-w-3xl")}>
+        {/* Header */}
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div
               className={cn(
-                "flex size-10 items-center justify-center rounded-full border",
+                "flex size-10 items-center justify-center rounded",
                 eventColor,
               )}
             >
               <Calendar className="size-5" />
             </div>
-            <DialogTitle className="text-left text-base font-semibold sm:text-lg">
-              {event.title}
-            </DialogTitle>
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="text-left text-lg leading-tight font-semibold">
+                {event.title}
+              </DialogTitle>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {formatTime(event.start_hour, event.start_minute)} -{" "}
+                {formatTime(event.end_hour, event.end_minute)}
+              </p>
+            </div>
           </div>
         </DialogHeader>
 
-        <div className={cn(event.image && "flex flex-col gap-6 sm:flex-row")}>
-          <div className={cn("space-y-4", event.image && "flex-1")}>
-            {/* Fecha y hora */}
-            <div className="flex items-start gap-3">
-              <Clock className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Horario</p>
-                <div className="text-muted-foreground space-y-1 text-sm">
-                  <p className="capitalize">
-                    {dayNames.length === 7
-                      ? "Todos los días"
-                      : dayNames.join(", ")}
-                  </p>
-                  <p>
-                    {formatTime(event.start_hour, event.start_minute)} -{" "}
-                    {formatTime(event.end_hour, event.end_minute)}
-                  </p>
-                </div>
+        {/* Contenido principal */}
+        <div
+          className={cn(
+            "space-y-5",
+            event.image && "sm:flex sm:gap-6 sm:space-y-0",
+          )}
+        >
+          {/* Información del evento */}
+          <div className="space-y-5 sm:flex-1">
+            {/* Días de la semana */}
+            <div>
+              <div className="mb-2 flex items-center gap-2">
+                <Calendar className="text-muted-foreground size-4" />
+                <p className="text-sm font-medium">Días</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {dayNames.map((day) => (
+                  <span
+                    key={day}
+                    className="text-muted-foreground inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium"
+                  >
+                    {day}
+                  </span>
+                ))}
               </div>
             </div>
 
             {/* Ubicación */}
             {event.location && (
-              <div className="flex items-start gap-3">
-                <MapPin className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">Ubicación</p>
-                  <p className="text-muted-foreground text-sm">
+              <>
+                <Separator />
+                <div>
+                  <div className="mb-2 flex items-center gap-2">
+                    <MapPin className="text-muted-foreground size-4" />
+                    <p className="text-sm font-medium">Ubicación</p>
+                  </div>
+                  <p className="text-muted-foreground pl-6 text-sm">
                     {event.location}
                   </p>
                 </div>
-              </div>
+              </>
             )}
 
             {/* Descripción */}
             {event.description && (
               <>
                 <Separator />
-                <div className="flex items-start gap-3">
-                  <FileText className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-                  <div className="flex-1">
-                    <p className="mb-2 text-sm font-medium">Descripción</p>
-                    <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
-                      {event.description}
-                    </p>
+                <div>
+                  <div className="mb-2 flex items-center gap-2">
+                    <FileText className="text-muted-foreground size-4" />
+                    <p className="text-sm font-medium">Descripción</p>
                   </div>
+                  <p className="text-muted-foreground pl-6 text-sm leading-relaxed whitespace-pre-wrap">
+                    {event.description}
+                  </p>
                 </div>
               </>
             )}
@@ -110,15 +126,23 @@ export function ScheduleEventViewDialog({
 
           {/* Imagen */}
           {event.image && (
-            <EventImage
-              src={event.image}
-              alt={event.title}
-              width={256}
-              height={160}
-              wrapperClassName="flex-shrink-0 sm:w-64"
-              className="h-auto w-full rounded-lg object-cover"
-              skeletonClassName="h-40 w-full rounded-lg"
-            />
+            <>
+              <Separator
+                orientation="vertical"
+                className="hidden h-auto sm:block"
+              />
+              <div className="sm:w-70 sm:shrink-0">
+                <EventImage
+                  src={event.image}
+                  alt={event.title}
+                  width={208}
+                  height={208}
+                  wrapperClassName="overflow-hidden rounded"
+                  className="h-auto w-full object-cover"
+                  skeletonClassName="aspect-square w-full"
+                />
+              </div>
+            </>
           )}
         </div>
       </DialogContent>
