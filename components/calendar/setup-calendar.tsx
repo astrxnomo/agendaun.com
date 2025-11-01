@@ -19,7 +19,7 @@ import {
   ChevronRightIcon,
   Plus,
 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import {
@@ -46,11 +46,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import {
-  createEvent,
-  deleteEvent,
-  updateEvent,
-} from "@/lib/actions/calendar/events"
+import { deleteEvent, moveEvent } from "@/lib/actions/calendar/events"
 import { cn } from "@/lib/utils"
 
 import type {
@@ -194,19 +190,34 @@ export function SetupCalendar({
     setIsEventDialogOpen(true)
   }
 
-  const handleEventSave = async (event: CalendarEvents) => {
-    if (event.$id) {
-      // Actualizar evento existente
-      const promise = updateEvent(event).then((result) => {
+  const handleEventSave = useCallback(
+    (event: CalendarEvents) => {
+      // Verificar si el evento ya existe en la lista (actualización)
+      const existingEventIndex = events.findIndex((e) => e.$id === event.$id)
+
+      if (existingEventIndex !== -1) {
+        // Actualizar evento existente
         onEventsUpdate((prev) =>
-          prev.map((e) => (e.$id === event.$id ? result : e)),
+          prev.map((e) => (e.$id === event.$id ? event : e)),
         )
-        return result
+      } else {
+        // Agregar nuevo evento
+        onEventsUpdate((prev) => [...prev, event])
+      }
+    },
+    [events, onEventsUpdate],
+  )
+
+  const handleEventDelete = useCallback(
+    async (eventId: string) => {
+      const promise = deleteEvent(eventId).then(() => {
+        onEventsUpdate((prev) => prev.filter((event) => event.$id !== eventId))
+        return true
       })
 
       toast.promise(promise, {
-        loading: "Actualizando evento...",
-        success: (result) => `Evento "${result.title}" actualizado`,
+        loading: "Eliminando evento...",
+        success: "Evento eliminado correctamente",
         error: (err: Error) => err.message,
       })
 
@@ -214,90 +225,37 @@ export function SetupCalendar({
         await promise
         setIsEventDialogOpen(false)
         setSelectedEvent(null)
-      } catch {
-        // El diálogo permanece abierto si hay error
-      }
-    } else {
-      // Crear evento nuevo
-      const promise = createEvent(event).then((result) => {
-        onEventsUpdate((prev) => [...prev, result])
-        return result
-      })
+      } catch {}
+    },
+    [onEventsUpdate],
+  )
 
-      toast.promise(promise, {
-        loading: "Creando evento...",
-        success: (result) => `Evento "${result.title}" creado`,
-        error: (err: Error) => err.message,
-      })
-
-      try {
-        await promise
-        setIsEventDialogOpen(false)
-        setSelectedEvent(null)
-      } catch {
-        // El diálogo permanece abierto si hay error
-      }
-    }
-  }
-
-  const handleEventDelete = async (eventId: string) => {
-    const promise = deleteEvent(eventId).then(() => {
-      onEventsUpdate((prev) => prev.filter((event) => event.$id !== eventId))
-      return true
-    })
-
-    toast.promise(promise, {
-      loading: "Eliminando evento...",
-      success: "Evento eliminado",
-      error: (err: Error) => err.message,
-    })
-
-    try {
-      await promise
-      setIsEventDialogOpen(false)
-      setSelectedEvent(null)
-    } catch {
-      // El diálogo permanece abierto si hay error
-    }
-  }
-
-  const handleEventUpdate = async (updatedEvent: CalendarEvents) => {
-    // Actualizar inmediatamente en la UI para drag & drop fluido
-    onEventsUpdate((prev) =>
-      prev.map((event) =>
-        event.$id === updatedEvent.$id ? updatedEvent : event,
-      ),
-    )
-
-    // Persistir cambios en la base de datos
-    const promise = updateEvent(updatedEvent)
-      .then((result) => {
-        // Actualizar con los datos reales de la respuesta
+  const handleEventMove = useCallback(
+    async (movedEvent: CalendarEvents) => {
+      onEventsUpdate((prev) =>
+        prev.map((event) =>
+          event.$id === movedEvent.$id ? movedEvent : event,
+        ),
+      )
+      const promise = moveEvent(movedEvent).catch((error) => {
         onEventsUpdate((prev) =>
           prev.map((event) =>
-            event.$id === updatedEvent.$id ? result : event,
-          ),
-        )
-        return result
-      })
-      .catch((error) => {
-        // Si hay error, revertir el cambio en la UI
-        onEventsUpdate((prev) =>
-          prev.map((event) =>
-            event.$id === updatedEvent.$id
-              ? events.find((e) => e.$id === updatedEvent.$id) || event
+            event.$id === movedEvent.$id
+              ? events.find((e) => e.$id === movedEvent.$id) || event
               : event,
           ),
         )
         throw error
       })
 
-    toast.promise(promise, {
-      loading: "Guardando...",
-      success: "Evento actualizado correctamente",
-      error: (err: Error) => err.message || "Error al mover evento",
-    })
-  }
+      toast.promise(promise, {
+        loading: "Guardando...",
+        success: "Evento actualizado correctamente",
+        error: (err: Error) => err.message || "Error al mover evento",
+      })
+    },
+    [onEventsUpdate, events],
+  )
 
   const viewTitle = useMemo(() => {
     if (view === "month") {
@@ -353,7 +311,7 @@ export function SetupCalendar({
       >
         <CalendarDndProvider
           etiquettes={etiquettes}
-          onEventUpdate={handleEventUpdate}
+          onEventUpdate={handleEventMove}
         >
           <div
             className={cn(
@@ -510,7 +468,6 @@ export function SetupCalendar({
 
           <EventViewDialog
             event={selectedEvent as CalendarEvents}
-            etiquettes={etiquettes}
             isOpen={isEventViewDialogOpen}
             onClose={() => {
               setIsEventViewDialogOpen(false)
