@@ -2,7 +2,7 @@
 
 import { Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import {
@@ -84,7 +84,9 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
     return visibleEtiquettes.includes(etiquetteId)
   }
 
-  const toggleEditMode = () => setEditMode(!editMode)
+  const toggleEditMode = useCallback(() => {
+    setEditMode((prev) => !prev)
+  }, [])
 
   useEffect(() => {
     if (!authLoading && !user) {
