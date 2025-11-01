@@ -1,4 +1,5 @@
-import { CalendarSync } from "lucide-react"
+import { CalendarSync, Settings } from "lucide-react"
+import { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,12 +34,21 @@ export function EtiquettesHeader({
   isEtiquetteVisible,
   toggleEtiquetteVisibility,
 }: EtiquettesHeaderProps) {
+  const [openEtiquettesManager, setOpenEtiquettesManager] = useState(false)
+
   return (
     <div className="bg-background sticky top-12 z-30 border-b">
       <div className="flex items-center justify-between">
         <div className="scrollbar-none flex h-12 items-center overflow-x-auto">
           {canEdit && editMode && (
-            <EtiquettesManager calendar={calendar} onUpdate={onManualRefetch} />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setOpenEtiquettesManager(true)}
+              className="ml-2 h-8"
+            >
+              <Settings className="size-4" />
+            </Button>
           )}
           <div className="ml-2 flex shrink-0 items-center gap-1">
             {calendar.etiquettes.map((etiquette) => (
@@ -81,6 +91,13 @@ export function EtiquettesHeader({
           </Tooltip>
         </div>
       </div>
+
+      <EtiquettesManager
+        calendar={calendar}
+        onUpdate={onManualRefetch}
+        open={openEtiquettesManager}
+        onOpenChange={setOpenEtiquettesManager}
+      />
     </div>
   )
 }
