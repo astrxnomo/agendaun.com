@@ -24,9 +24,9 @@ export function EventImage({
   const [loaded, setLoaded] = useState(false)
 
   return (
-    <div className={wrapperClassName}>
+    <div className={cn("relative", wrapperClassName)}>
       {!loaded && (
-        <Skeleton className={cn("h-40 w-full rounded", skeletonClassName)} />
+        <Skeleton className={cn("h-90 w-full rounded", skeletonClassName)} />
       )}
       <button
         type="button"
@@ -35,8 +35,8 @@ export function EventImage({
           if (src) window.open(src, "_blank", "noopener,noreferrer")
         }}
         className={cn(
-          !loaded && "hidden",
-          "group relative block cursor-zoom-in",
+          "group relative block cursor-zoom-in transition-opacity",
+          !loaded && "pointer-events-none absolute inset-0 opacity-0",
         )}
       >
         <Image
@@ -47,7 +47,7 @@ export function EventImage({
           height={typeof height === "number" ? height : undefined}
           onLoad={() => setLoaded(true)}
         />
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded bg-black/0 opacity-0 transition group-hover:bg-black/20 group-hover:opacity-100">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition group-hover:bg-black/20 group-hover:opacity-100">
           <ZoomIn className="drop-shadow-md" size={20} />
         </div>
       </button>
