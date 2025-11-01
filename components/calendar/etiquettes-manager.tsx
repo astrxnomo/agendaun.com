@@ -1,7 +1,7 @@
 "use client"
 
-import { Loader2, Settings, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { Trash2 } from "lucide-react"
+import { useActionState, useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -10,54 +10,69 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Separator } from "@/components/ui/separator"
 import {
-  createEtiquette,
   deleteEtiquette,
-  updateEtiquette,
+  saveEtiquette,
+  type EtiquetteActionState,
 } from "@/lib/actions/calendar/etiquettes"
 import {
   Colors,
   type CalendarEtiquettes,
   type Calendars,
 } from "@/lib/data/types"
-import { getColorIndicator } from "@/lib/utils"
+import { cn, getColorIndicator } from "@/lib/utils"
+import { Label } from "../ui/label"
 
 interface EtiquettesManagerProps {
   calendar: Calendars
   onUpdate: () => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-interface EtiquetteForm {
-  name: string
-  color: Colors
+const initialState: EtiquetteActionState = {
+  success: false,
+  message: "",
 }
 
 export function EtiquettesManager({
   calendar,
   onUpdate,
+  open,
+  onOpenChange,
 }: EtiquettesManagerProps) {
-  const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [editingEtiquette, setEditingEtiquette] =
     useState<CalendarEtiquettes | null>(null)
-  const [form, setForm] = useState<EtiquetteForm>({
-    name: "",
-    color: "" as Colors,
-  })
+  const [etiquetteToDelete, setEtiquetteToDelete] =
+    useState<CalendarEtiquettes | null>(null)
+  const [name, setName] = useState("")
+  const [color, setColor] = useState<Colors>("" as Colors)
 
-  const resetForm = () => {
-    setForm({
-      name: "",
-      color: "" as Colors,
-    })
+  const [state, formAction, isPending] = useActionState(
+    saveEtiquette,
+    initialState,
+  )
+
+  useEffect(() => {
+    if (state.message) {
+      if (state.success && state.data) {
+        toast.success(state.message)
+        resetForm()
+        onUpdate()
+      } else if (!state.success && !state.errors) {
+        toast.error(state.message)
+      }
+    }
+  }, [state])
+
+  const resetForm = useCallback(() => {
+    setName("")
+    setColor("" as Colors)
     setEditingEtiquette(null)
-  }
+  }, [])
 
   const getAvailableColors = () => {
     const usedColors = calendar.etiquettes
@@ -73,191 +88,230 @@ export function EtiquettesManager({
   }
 
   const handleEdit = (etiquette: CalendarEtiquettes) => {
-    setForm({
-      name: etiquette.name,
-      color: etiquette.color,
-    })
+    setName(etiquette.name)
+    setColor(etiquette.color)
     setEditingEtiquette(etiquette)
   }
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.name.trim()) {
-      toast.error("El nombre de la etiqueta es requerido")
-      return
-    }
+  const handleDeleteClick = (etiquette: CalendarEtiquettes) => {
+    setEtiquetteToDelete(etiquette)
+  }
 
-    const isEditing = !!editingEtiquette
+  const confirmDelete = async () => {
+    if (!etiquetteToDelete) return
 
-    setIsLoading(true)
-    const promise = isEditing
-      ? updateEtiquette({
-          ...editingEtiquette,
-          name: form.name.trim(),
-          color: form.color,
-        })
-      : createEtiquette({
-          name: form.name.trim(),
-          color: form.color,
-          calendar: calendar,
-        } as CalendarEtiquettes)
+    const promise = deleteEtiquette(etiquetteToDelete.$id).then((result) => {
+      if (result.success) {
+        onUpdate()
+        setEtiquetteToDelete(null)
+        return result
+      } else {
+        throw new Error(
+          result?.errors?._form?.join(", ") || "Error al eliminar",
+        )
+      }
+    })
 
     toast.promise(promise, {
-      loading: isEditing ? "Actualizando etiqueta..." : "Creando etiqueta...",
-      success: (result) => {
-        resetForm()
-        onUpdate()
-        setIsLoading(false)
-        return `Etiqueta "${result.name}" ${isEditing ? "actualizada" : "creada"}`
-      },
-      error: (err: Error) => {
-        setIsLoading(false)
-        return err.message || "Error inesperado"
-      },
+      loading: "Eliminando...",
+      success: (result) => result.message,
+      error: (error) =>
+        error instanceof Error ? error.message : "Error al eliminar",
     })
   }
 
-  const handleDelete = (etiquette: CalendarEtiquettes) => {
-    if (!confirm("¿Estás seguro de que quieres eliminar esta etiqueta?")) {
-      return
-    }
-
-    setIsLoading(true)
-    const promise = deleteEtiquette(etiquette.$id).then(() => {
-      onUpdate()
-      return true
-    })
-
-    toast.promise(promise, {
-      loading: "Eliminando etiqueta...",
-      success: () => `Etiqueta "${etiquette.name}" eliminada`,
-      error: (err: Error) => err.message || "Error al eliminar la etiqueta",
-    })
-    setIsLoading(false)
+  const cancelDelete = () => {
+    setEtiquetteToDelete(null)
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="ml-2" variant="ghost" size="sm" disabled={isLoading}>
-          <Settings className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Gestionar etiquetas</DialogTitle>
-        </DialogHeader>
+        {!etiquetteToDelete ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Etiquetas</DialogTitle>
+            </DialogHeader>
 
-        <div className="space-y-4">
-          <form onSubmit={handleFormSubmit} className="space-y-3">
-            <Label>
-              {editingEtiquette ? "Editar etiqueta" : "Crear etiqueta"}
-            </Label>
-            <Input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Nombre de la etiqueta"
-              disabled={isLoading}
-            />
-            <RadioGroup
-              value={form.color}
-              onValueChange={(value) =>
-                setForm({ ...form, color: value as Colors })
-              }
-              className="bg-muted/30 flex flex-wrap justify-center gap-3 rounded-lg p-3"
-              disabled={isLoading}
-            >
-              {getAvailableColors().map((option) => (
-                <div key={option.value} className="relative">
-                  <RadioGroupItem
-                    value={option.value}
-                    id={option.value}
-                    className="sr-only"
-                  />
-                  <Label
-                    htmlFor={option.value}
-                    className={`block h-5 w-5 cursor-pointer rounded-full transition-all duration-200 ${option.class} ${
-                      form.color === option.value
-                        ? "ring-foreground/20 ring-offset-background scale-125 shadow-lg ring-2 ring-offset-2"
-                        : "hover:scale-110 hover:shadow-md"
-                    }`}
-                  />
-                </div>
-              ))}
-            </RadioGroup>
-
-            <div className="flex gap-2">
-              <Button type="submit" size="sm" disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="animate-spin" />
-                ) : editingEtiquette ? (
-                  "Actualizar"
-                ) : (
-                  "Crear"
-                )}
-              </Button>
+            <form action={formAction} className="space-y-3">
+              <input type="hidden" name="calendar" value={calendar.$id} />
               {editingEtiquette && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={resetForm}
-                  size="sm"
-                  disabled={isLoading}
-                >
-                  Cancelar
-                </Button>
+                <input
+                  type="hidden"
+                  name="etiquetteId"
+                  value={editingEtiquette.$id}
+                />
               )}
-            </div>
-          </form>
 
-          {calendar.etiquettes.length === 0 ? (
-            <p className="text-muted-foreground py-4 text-center text-sm">
-              No hay etiquetas
-            </p>
-          ) : (
-            <>
-              <Separator className="my-4" />
+              {state.errors?._form && (
+                <div className="bg-destructive/10 text-destructive rounded-md p-2 text-xs">
+                  {state.errors._form.join(", ")}
+                </div>
+              )}
+
               <div className="space-y-1.5">
-                <h3 className="text-sm font-medium">Etiquetas creadas</h3>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    Nombre
+                  </Label>
+                  <span className="text-muted-foreground text-xs">
+                    {name.length}/50
+                  </span>
+                </div>
+                <Input
+                  id="name"
+                  name="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value.slice(0, 50))}
+                  placeholder="Nombre de la etiqueta"
+                  maxLength={50}
+                  disabled={isPending}
+                  aria-invalid={state.errors?.name ? "true" : "false"}
+                />
+                {state.errors?.name && (
+                  <p className="text-destructive text-xs">
+                    {state.errors.name.join(", ")}
+                  </p>
+                )}
+              </div>
+
+              <RadioGroup
+                name="color"
+                value={color}
+                onValueChange={(value) => setColor(value as Colors)}
+                className="bg-muted/30 flex flex-wrap justify-center gap-3 rounded-lg p-3"
+                disabled={isPending}
+              >
+                {getAvailableColors().map((option) => (
+                  <div key={option.value} className="relative">
+                    <RadioGroupItem
+                      value={option.value}
+                      id={option.value}
+                      className="sr-only"
+                    />
+                    <label
+                      htmlFor={option.value}
+                      className={cn(
+                        "block size-5 cursor-pointer rounded-full transition-all duration-200",
+                        option.class,
+                        color === option.value
+                          ? "ring-foreground/20 ring-offset-background scale-125 shadow-lg ring-2 ring-offset-2"
+                          : "hover:scale-110 hover:shadow-md",
+                      )}
+                    />
+                  </div>
+                ))}
+              </RadioGroup>
+              {state.errors?.color && (
+                <p className="text-destructive text-xs">
+                  {state.errors.color.join(", ")}
+                </p>
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="flex-1"
+                  disabled={isPending || !name.trim() || !color}
+                >
+                  {editingEtiquette ? "Actualizar" : "Crear"}
+                </Button>
+                {editingEtiquette && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={resetForm}
+                    disabled={isPending}
+                  >
+                    Cancelar
+                  </Button>
+                )}
+              </div>
+            </form>
+
+            {calendar.etiquettes.length > 0 && (
+              <div className="space-y-1 border-t pt-3">
                 {calendar.etiquettes.map((etiquette) => (
                   <div
                     key={etiquette.$id}
-                    className="flex items-center justify-between rounded border p-2"
+                    className={cn(
+                      "group flex items-center justify-between rounded-md px-2 py-1.5 transition-colors",
+                      editingEtiquette?.$id === etiquette.$id
+                        ? "bg-muted"
+                        : "hover:bg-muted/50",
+                    )}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <div
-                        className={`h-3 w-3 rounded-full ${getColorIndicator(
-                          etiquette.color,
-                        )}`}
+                        className={cn(
+                          "size-3 shrink-0 rounded-full",
+                          getColorIndicator(etiquette.color),
+                        )}
                       />
-                      <span className="text-sm">{etiquette.name}</span>
+                      <span className="flex-1 text-sm">{etiquette.name}</span>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(etiquette)}
-                        className="h-6 px-2 text-xs"
-                        disabled={isLoading}
+                        className="h-7 px-2 text-xs"
+                        disabled={isPending}
                       >
                         Editar
                       </Button>
                       <Button
                         variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(etiquette)}
-                        className="text-destructive h-6 w-6 p-0"
-                        disabled={isLoading}
+                        size="icon"
+                        onClick={() => handleDeleteClick(etiquette)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7"
+                        disabled={isPending}
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="size-3.5" />
                       </Button>
                     </div>
                   </div>
                 ))}
               </div>
-            </>
-          )}
-        </div>
+            )}
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>¿Eliminar etiqueta?</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-muted-foreground text-sm">
+                Al eliminar la etiqueta{" "}
+                <span className="font-semibold">{etiquetteToDelete.name}</span>,
+                se eliminarán todos los eventos asociados. Esta acción no se
+                puede deshacer.
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={cancelDelete}
+                  disabled={isPending}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={confirmDelete}
+                  disabled={isPending}
+                >
+                  Eliminar
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )
