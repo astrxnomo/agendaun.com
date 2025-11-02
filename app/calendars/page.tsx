@@ -14,10 +14,7 @@ export default function Page() {
         ]}
       />
       <div className="border-b p-6">
-        <h1 className="text-3xl font-bold">Calendarios Académicos</h1>
-        <p className="text-muted-foreground mt-2">
-          Gestiona y visualiza eventos por nivel académico
-        </p>
+        <h1 className="text-3xl font-bold">Calendarios</h1>
       </div>
 
       <Suspense fallback={<CalendarsSkeleton />}>

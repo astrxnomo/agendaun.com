@@ -1,13 +1,4 @@
-import {
-  ArrowRight,
-  BadgeCheck,
-  Calendar,
-  Clock,
-  GraduationCap,
-  Landmark,
-  School,
-  University,
-} from "lucide-react"
+import { ArrowRight, BadgeCheck, Calendar, Clock, Landmark } from "lucide-react"
 import Link from "next/link"
 
 import { PageHeader } from "@/components/layout/page-header"
@@ -24,29 +15,11 @@ export default function DashboardIntro() {
         "Tu espacio personal para organizar tus clases, eventos y recordatorios.",
     },
     {
-      title: "Calendario Nacional",
-      href: "/calendars/national",
+      title: "Calendario Universitario",
+      href: "/calendars/unal",
       icon: Landmark,
-      description: "Fechas y eventos importantes para toda la universidad.",
-    },
-    {
-      title: "Calendario Sede",
-      href: "/calendars/sede",
-      icon: School,
-      description: "Actividades y eventos exclusivos de tu sede.",
-    },
-    {
-      title: "Calendario Facultad",
-      href: "/calendars/faculty",
-      icon: University,
-      description: "Fechas clave y eventos propios de tu facultad.",
-    },
-    {
-      title: "Calendario Programa",
-      href: "/calendars/program",
-      icon: GraduationCap,
       description:
-        "Información y actividades específicas de tu programa académico.",
+        "Calendario unificado con eventos de todos los niveles: nacional, sede, facultad y programa.",
     },
     {
       title: "Horarios",

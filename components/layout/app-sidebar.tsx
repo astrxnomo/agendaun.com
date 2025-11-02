@@ -5,14 +5,14 @@ import {
   Calendar,
   CalendarDays,
   ChevronRight,
-  GraduationCap,
+  Grid3X3,
   Home,
-  Landmark,
   LifeBuoy,
   LogIn,
-  School,
+  Rows3,
+  Rows4,
   Send,
-  University,
+  Table,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -101,28 +101,16 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Universidad</SidebarGroupLabel>
           <SidebarMenu>
-            <SidebarMenuButton
-              asChild
-              tooltip="Agenda"
-              isActive={isActive("/calendars")}
-            >
-              <Link href="/calendars">
-                <BookMarked />
-                <span>Agenda</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenu>
-          <SidebarMenu>
-            <Collapsible asChild defaultOpen={true}>
+            <Collapsible asChild>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  tooltip="Calendarios"
-                  isActive={isActive("/calendars")}
+                  tooltip="Calendario"
+                  isActive={isActive("/calendars/unal")}
                 >
-                  <Link href="/calendars">
+                  <Link href="/calendars/unal">
                     <CalendarDays />
-                    <span>Calendarios</span>
+                    <span>Calendario</span>
                   </Link>
                 </SidebarMenuButton>
                 <CollapsibleTrigger asChild>
@@ -134,46 +122,34 @@ export function AppSidebar() {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/calendars/national")}
-                      >
-                        <Link href="/calendars/national">
-                          <Landmark className="size-4" />
-                          <span>Nacional</span>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/calendars/unal?view=agenda">
+                          <Rows3 />
+                          <span>Agenda</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/calendars/sede")}
-                      >
-                        <Link href="/calendars/sede">
-                          <School />
-                          <span>Sede</span>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/calendars/unal?view=month">
+                          <Grid3X3 />
+                          <span>Mes</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/calendars/faculty")}
-                      >
-                        <Link href="/calendars/faculty">
-                          <University />
-                          <span>Facultad</span>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/calendars/unal?view=week">
+                          <Table />
+                          <span>Semana</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={isActive("/calendars/program")}
-                      >
-                        <Link href="/calendars/program">
-                          <GraduationCap />
-                          <span>Programa</span>
+                      <SidebarMenuSubButton asChild>
+                        <Link href="/calendars/unal?view=day">
+                          <Rows4 />
+                          <span>Día</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
