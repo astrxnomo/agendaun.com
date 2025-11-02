@@ -1,6 +1,5 @@
 "use client"
 
-import { Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -11,23 +10,25 @@ import { getCalendarBySlug } from "@/lib/data/calendars/getBySlug"
 import { getEvents } from "@/lib/data/calendars/getEvents"
 import { getProfile } from "@/lib/data/profiles/getProfile"
 
-import { ConfigDialog } from "@/components/auth/config-dialog"
-
 import { PageHeader } from "@/components/layout/page-header"
-import { StatusMessage } from "@/components/status-message"
 import type {
   CalendarEtiquettes,
   CalendarEvents,
   Calendars,
-  Profiles,
+  CalendarViews,
 } from "@/lib/data/types"
-import { Button } from "react-aria-components"
 import { EtiquettesHeader } from "./etiquettes/etiquettes-header"
 import { CalendarNotFound } from "./not-found"
 import { SetupCalendar } from "./setup-calendar"
 import { CalendarSkeleton } from "./skeleton"
 
-export default function Calendar({ slug: calendarSlug }: { slug: string }) {
+export default function Calendar({
+  slug: calendarSlug,
+  view,
+}: {
+  slug: string
+  view?: CalendarViews
+}) {
   const { user, isLoading: authLoading } = useAuthContext()
   const router = useRouter()
 
@@ -38,26 +39,9 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   const [editMode, setEditMode] = useState(false)
   const [canEdit, setCanEdit] = useState(false)
   const [refetchTrigger, setRefetchTrigger] = useState(0)
-  const [profile, setProfile] = useState<Profiles | null>(null)
 
   const manualRefetch = () => {
     setRefetchTrigger((prev) => prev + 1)
-  }
-
-  const canGetEvents = (calendar: Calendars, profile: Profiles | null) => {
-    if (!calendar.requireConfig) return true
-    if (!profile) return false
-
-    switch (calendar.slug) {
-      case "sede":
-        return !!profile.sede
-      case "faculty":
-        return !!profile.faculty
-      case "program":
-        return !!profile.program
-      default:
-        return true
-    }
   }
 
   const getActiveEtiquette = (etiquettes: CalendarEtiquettes[]): string[] => {
@@ -96,7 +80,6 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
   useEffect(() => {
     setCalendar(null)
     setEvents([])
-    setProfile(null)
   }, [calendarSlug])
 
   useEffect(() => {
@@ -119,18 +102,11 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
 
         setCalendar(calendarResult)
 
-        let currentProfile: Profiles | null = null
-        if (calendarResult.requireConfig) {
-          try {
-            const profileResult = await getProfile(user.$id)
-            currentProfile = profileResult
-            setProfile(profileResult)
-          } catch (error) {
-            const errorMessage =
-              error instanceof Error ? error.message : "Error cargando perfil"
-            toast.error(errorMessage)
-            return
-          }
+        let currentProfile = null
+        try {
+          currentProfile = await getProfile(user.$id)
+        } catch (error) {
+          console.error("Error cargando perfil:", error)
         }
 
         try {
@@ -143,20 +119,16 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
           setCanEdit(false)
         }
 
-        if (canGetEvents(calendarResult, currentProfile)) {
-          try {
-            const eventsResult = await getEvents(
-              calendarResult,
-              currentProfile ?? undefined,
-            )
-            setEvents(eventsResult)
-          } catch (error) {
-            const errorMessage =
-              error instanceof Error ? error.message : "Error cargando eventos"
-            toast.error(errorMessage)
-            setEvents([])
-          }
-        } else {
+        try {
+          const eventsResult = await getEvents(
+            calendarResult,
+            currentProfile ?? undefined,
+          )
+          setEvents(eventsResult)
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Error cargando eventos"
+          toast.error(errorMessage)
           setEvents([])
         }
 
@@ -181,7 +153,6 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
     }
   }, [user, calendarSlug, refetchTrigger])
 
-  // Mostrar skeleton mientras el auth está cargando
   if (authLoading || isLoading) return <CalendarSkeleton />
 
   if (!user) {
@@ -190,26 +161,6 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
 
   if (!calendar) {
     return <CalendarNotFound />
-  }
-
-  if (calendar.requireConfig && !canGetEvents(calendar, profile)) {
-    return (
-      <StatusMessage
-        type="warning"
-        title="Completa tu información"
-        description="Para acceder a este calendario, necesitas completar la información de tu cuenta"
-        button={
-          <div className="flex justify-center">
-            <ConfigDialog>
-              <Button className="bg-yellow-600 text-white shadow-lg hover:scale-105 hover:bg-yellow-700 hover:shadow-xl dark:bg-yellow-500 dark:hover:bg-yellow-600">
-                <Settings className="size-4" />
-                Completar ahora
-              </Button>
-            </ConfigDialog>
-          </div>
-        }
-      />
-    )
   }
 
   const visibleEvents = events.filter((event) =>
