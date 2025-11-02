@@ -2,7 +2,15 @@
 
 import { differenceInMinutes, format, getMinutes, isPast } from "date-fns"
 import { es } from "date-fns/locale"
-import { CalendarIcon, ClockIcon, MapPinIcon } from "lucide-react"
+import {
+  CalendarIcon,
+  ClockIcon,
+  Globe,
+  GraduationCap,
+  MapPinIcon,
+  School,
+  University,
+} from "lucide-react"
 
 import {
   Tooltip,
@@ -81,6 +89,40 @@ function EventTooltipContent({ event }: { event: CalendarEvents }) {
           <p className="text-muted-foreground line-clamp-3 text-xs leading-relaxed">
             {event.description}
           </p>
+        </div>
+      )}
+
+      {event.calendar.slug === "unal" && (
+        <div className="space-y-2 border-t pt-2">
+          {event.sede || event.faculty || event.program ? (
+            <div>
+              {event.sede && (
+                <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                  <School className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{event.sede.name}</span>
+                </div>
+              )}
+
+              {event.faculty && (
+                <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                  <University className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{event.faculty.name}</span>
+                </div>
+              )}
+
+              {event.program && (
+                <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                  <GraduationCap className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{event.program.name}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
+              <Globe className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">Nacional</span>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -339,7 +381,9 @@ export function EventItem({
             )}
           </div>
           {event.description && (
-            <div className="my-1 text-xs opacity-90">{event.description}</div>
+            <div className="my-1 line-clamp-4 text-xs opacity-90">
+              {event.description}
+            </div>
           )}
         </button>
       </TooltipTrigger>
