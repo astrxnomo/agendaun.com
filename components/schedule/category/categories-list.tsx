@@ -12,7 +12,7 @@ import { Item, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item"
 import { getAllScheduleCategories } from "@/lib/data/schedules/getAllScheduleCategories"
 import { getIcon } from "@/lib/utils"
 
-export async function SchedulesCategories() {
+export async function CategoriesList() {
   const categories = await getAllScheduleCategories()
 
   return (

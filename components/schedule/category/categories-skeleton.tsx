@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton"
 
-export function SchedulesCategoriesSkeleton() {
+export function CategoriesSkeleton() {
   return (
     <div className="p-6 md:p-10 lg:p-20">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

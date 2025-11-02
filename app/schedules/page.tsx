@@ -2,8 +2,8 @@ import { Suspense } from "react"
 
 import { PageHeader } from "@/components/layout/page-header"
 
-import { SchedulesCategoriesSkeleton } from "../../components/schedule/category/categories-skeleton"
-import { SchedulesCategories } from "../../components/schedule/category/schedules-categories"
+import { CategoriesList } from "@/components/schedule/category/categories-list"
+import { CategoriesSkeleton } from "../../components/schedule/category/categories-skeleton"
 
 export default function CategoriesPage() {
   return (
@@ -21,8 +21,8 @@ export default function CategoriesPage() {
         </p>
       </div>
 
-      <Suspense fallback={<SchedulesCategoriesSkeleton />}>
-        <SchedulesCategories />
+      <Suspense fallback={<CategoriesSkeleton />}>
+        <CategoriesList />
       </Suspense>
     </>
   )
