@@ -1,6 +1,6 @@
 "use client"
 
-import { Trash2 } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -12,6 +12,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   deleteEtiquette,
@@ -232,35 +239,40 @@ export function EtiquettesManager({
             </form>
 
             {calendar.etiquettes.length > 0 && (
-              <div className="space-y-1 border-t pt-3">
+              <div className="space-y-2 border-t pt-3">
                 {calendar.etiquettes.map((etiquette) => (
-                  <div
+                  <Item
                     key={etiquette.$id}
                     className={cn(
-                      "group flex items-center justify-between rounded-md px-2 py-1.5 transition-colors",
-                      editingEtiquette?.$id === etiquette.$id
-                        ? "bg-muted"
-                        : "hover:bg-muted/50",
+                      "bg-muted/30 p-3",
+                      editingEtiquette?.$id === etiquette.$id &&
+                        "border-primary/50 bg-primary/5",
                     )}
                   >
-                    <div className="flex flex-1 items-center gap-2">
+                    <ItemMedia>
                       <div
                         className={cn(
-                          "size-3 shrink-0 rounded-full",
+                          "size-4 rounded-full",
                           getColorIndicator(etiquette.color),
                         )}
                       />
-                      <span className="flex-1 text-sm">{etiquette.name}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
+                    </ItemMedia>
+
+                    <ItemContent>
+                      <ItemTitle className="text-sm font-medium">
+                        {etiquette.name}
+                      </ItemTitle>
+                    </ItemContent>
+
+                    <ItemActions className="gap-1">
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         onClick={() => handleEdit(etiquette)}
-                        className="h-7 px-2 text-xs"
+                        className="h-7 w-7"
                         disabled={isPending}
                       >
-                        Editar
+                        <Pencil className="size-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -271,8 +283,8 @@ export function EtiquettesManager({
                       >
                         <Trash2 className="size-3.5" />
                       </Button>
-                    </div>
-                  </div>
+                    </ItemActions>
+                  </Item>
                 ))}
               </div>
             )}
@@ -286,7 +298,7 @@ export function EtiquettesManager({
               <p className="text-muted-foreground text-sm">
                 Al eliminar la etiqueta{" "}
                 <span className="font-semibold">{etiquetteToDelete.name}</span>,
-                se eliminarán todos los eventos asociados. Esta acción no se
+                los eventos asociados quedarán sin etiqueta. Esta acción no se
                 puede deshacer.
               </p>
               <div className="flex justify-end gap-2">
