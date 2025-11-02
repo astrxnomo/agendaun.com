@@ -133,94 +133,156 @@ export function EtiquettesManager({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="flex max-w-md flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] [&>button:last-child]:top-3.5">
         {!etiquetteToDelete ? (
           <>
-            <DialogHeader>
-              <DialogTitle>Etiquetas</DialogTitle>
+            <DialogHeader className="contents space-y-0 text-left">
+              <DialogTitle className="border-b px-6 py-4 text-base">
+                Etiquetas
+              </DialogTitle>
             </DialogHeader>
 
-            <form action={formAction} className="space-y-3">
-              <input type="hidden" name="calendar" value={calendar.$id} />
-              {editingEtiquette && (
-                <input
-                  type="hidden"
-                  name="etiquetteId"
-                  value={editingEtiquette.$id}
-                />
-              )}
+            <div className="overflow-y-auto px-6 py-4">
+              <form
+                id="etiquette-form"
+                action={formAction}
+                className="space-y-3"
+              >
+                <input type="hidden" name="calendar" value={calendar.$id} />
+                {editingEtiquette && (
+                  <input
+                    type="hidden"
+                    name="etiquetteId"
+                    value={editingEtiquette.$id}
+                  />
+                )}
 
-              {state.errors?._form && (
-                <div className="bg-destructive/10 text-destructive rounded-md p-2 text-xs">
-                  {state.errors._form.join(", ")}
-                </div>
-              )}
+                {state.errors?._form && (
+                  <div className="bg-destructive/10 text-destructive rounded-md p-2 text-xs">
+                    {state.errors._form.join(", ")}
+                  </div>
+                )}
 
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Nombre
-                  </Label>
-                  <span className="text-muted-foreground text-xs">
-                    {name.length}/50
-                  </span>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="name" className="text-sm font-medium">
+                      Nombre
+                    </Label>
+                    <span className="text-muted-foreground text-xs">
+                      {name.length}/50
+                    </span>
+                  </div>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value.slice(0, 50))}
+                    placeholder="Nombre de la etiqueta"
+                    maxLength={50}
+                    disabled={isPending}
+                    aria-invalid={state.errors?.name ? "true" : "false"}
+                  />
+                  {state.errors?.name && (
+                    <p className="text-destructive text-xs">
+                      {state.errors.name.join(", ")}
+                    </p>
+                  )}
                 </div>
-                <Input
-                  id="name"
-                  name="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value.slice(0, 50))}
-                  placeholder="Nombre de la etiqueta"
-                  maxLength={50}
+
+                <RadioGroup
+                  name="color"
+                  value={color}
+                  onValueChange={(value) => setColor(value as Colors)}
+                  className="bg-muted/30 flex flex-wrap justify-center gap-3 rounded-lg p-3"
                   disabled={isPending}
-                  aria-invalid={state.errors?.name ? "true" : "false"}
-                />
-                {state.errors?.name && (
+                >
+                  {getAvailableColors().map((option) => (
+                    <div key={option.value} className="relative">
+                      <RadioGroupItem
+                        value={option.value}
+                        id={option.value}
+                        className="sr-only"
+                      />
+                      <label
+                        htmlFor={option.value}
+                        className={cn(
+                          "block size-5 cursor-pointer rounded-full transition-all duration-200",
+                          option.class,
+                          color === option.value
+                            ? "ring-foreground/20 ring-offset-background scale-125 shadow-lg ring-2 ring-offset-2"
+                            : "hover:scale-110 hover:shadow-md",
+                        )}
+                      />
+                    </div>
+                  ))}
+                </RadioGroup>
+                {state.errors?.color && (
                   <p className="text-destructive text-xs">
-                    {state.errors.name.join(", ")}
+                    {state.errors.color.join(", ")}
                   </p>
                 )}
-              </div>
+              </form>
 
-              <RadioGroup
-                name="color"
-                value={color}
-                onValueChange={(value) => setColor(value as Colors)}
-                className="bg-muted/30 flex flex-wrap justify-center gap-3 rounded-lg p-3"
-                disabled={isPending}
-              >
-                {getAvailableColors().map((option) => (
-                  <div key={option.value} className="relative">
-                    <RadioGroupItem
-                      value={option.value}
-                      id={option.value}
-                      className="sr-only"
-                    />
-                    <label
-                      htmlFor={option.value}
+              {calendar.etiquettes.length > 0 && (
+                <div className="space-y-2 border-t pt-3">
+                  {calendar.etiquettes.map((etiquette) => (
+                    <Item
+                      key={etiquette.$id}
                       className={cn(
-                        "block size-5 cursor-pointer rounded-full transition-all duration-200",
-                        option.class,
-                        color === option.value
-                          ? "ring-foreground/20 ring-offset-background scale-125 shadow-lg ring-2 ring-offset-2"
-                          : "hover:scale-110 hover:shadow-md",
+                        "bg-muted/30 p-3",
+                        editingEtiquette?.$id === etiquette.$id &&
+                          "border-primary/50 bg-primary/5",
                       )}
-                    />
-                  </div>
-                ))}
-              </RadioGroup>
-              {state.errors?.color && (
-                <p className="text-destructive text-xs">
-                  {state.errors.color.join(", ")}
-                </p>
-              )}
+                    >
+                      <ItemMedia>
+                        <div
+                          className={cn(
+                            "size-4 rounded-full",
+                            getColorIndicator(etiquette.color),
+                          )}
+                        />
+                      </ItemMedia>
 
+                      <ItemContent>
+                        <ItemTitle className="text-sm font-medium">
+                          {etiquette.name}
+                        </ItemTitle>
+                      </ItemContent>
+
+                      <ItemActions className="gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(etiquette)}
+                          className="h-7 w-7"
+                          disabled={isPending}
+                        >
+                          <Pencil className="size-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(etiquette)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7"
+                          disabled={isPending}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      </ItemActions>
+                    </Item>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t px-6 py-4">
               <div className="flex gap-2">
                 <Button
                   type="submit"
                   size="sm"
                   className="flex-1"
                   disabled={isPending || !name.trim() || !color}
+                  form="etiquette-form"
                 >
                   {editingEtiquette ? "Actualizar" : "Crear"}
                 </Button>
@@ -236,71 +298,26 @@ export function EtiquettesManager({
                   </Button>
                 )}
               </div>
-            </form>
-
-            {calendar.etiquettes.length > 0 && (
-              <div className="space-y-2 border-t pt-3">
-                {calendar.etiquettes.map((etiquette) => (
-                  <Item
-                    key={etiquette.$id}
-                    className={cn(
-                      "bg-muted/30 p-3",
-                      editingEtiquette?.$id === etiquette.$id &&
-                        "border-primary/50 bg-primary/5",
-                    )}
-                  >
-                    <ItemMedia>
-                      <div
-                        className={cn(
-                          "size-4 rounded-full",
-                          getColorIndicator(etiquette.color),
-                        )}
-                      />
-                    </ItemMedia>
-
-                    <ItemContent>
-                      <ItemTitle className="text-sm font-medium">
-                        {etiquette.name}
-                      </ItemTitle>
-                    </ItemContent>
-
-                    <ItemActions className="gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(etiquette)}
-                        className="h-7 w-7"
-                        disabled={isPending}
-                      >
-                        <Pencil className="size-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteClick(etiquette)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7"
-                        disabled={isPending}
-                      >
-                        <Trash2 className="size-3.5" />
-                      </Button>
-                    </ItemActions>
-                  </Item>
-                ))}
-              </div>
-            )}
+            </div>
           </>
         ) : (
           <>
-            <DialogHeader>
-              <DialogTitle>¿Eliminar etiqueta?</DialogTitle>
+            <DialogHeader className="contents space-y-0 text-left">
+              <DialogTitle className="border-b px-6 py-4 text-base">
+                ¿Eliminar etiqueta?
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+
+            <div className="overflow-y-auto px-6 py-4">
               <p className="text-muted-foreground text-sm">
                 Al eliminar la etiqueta{" "}
-                <span className="font-semibold">{etiquetteToDelete.name}</span>,
-                los eventos asociados quedarán sin etiqueta. Esta acción no se
+                <span className="font-semibold">{etiquetteToDelete?.name}</span>
+                , los eventos asociados quedarán sin etiqueta. Esta acción no se
                 puede deshacer.
               </p>
+            </div>
+
+            <div className="border-t px-6 py-4">
               <div className="flex justify-end gap-2">
                 <Button
                   type="button"
