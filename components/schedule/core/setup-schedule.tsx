@@ -7,7 +7,7 @@ import { deleteEvent } from "@/lib/actions/schedule/events"
 
 import type { ScheduleEvents, Schedules } from "@/lib/data/types"
 import { DefaultEventDuration } from "./constants"
-import { ScheduleEventDialog } from "./event/event-dialog"
+import { ScheduleEventDialog } from "./event/event-upsert-dialog"
 import { ScheduleEventViewDialog } from "./event/event-view-dialog"
 import { ScheduleView } from "./schedule-view"
 
