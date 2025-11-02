@@ -79,10 +79,7 @@ export const calendarEtiquetteSchema = z.object({
   calendar: z.string().min(1, "El calendario es requerido"),
 })
 
-/**
- * Schema para validación de eventos de calendario (sin refinamientos)
- */
-export const calendarEventSchemaRaw = z.object({
+const calendarEventSchemaRaw = z.object({
   title: z
     .string()
     .min(1, "El título es requerido")
@@ -111,21 +108,56 @@ export const calendarEventSchemaRaw = z.object({
 /**
  * Schema para validación de eventos de calendario (con validación de fechas)
  */
-export const calendarEventSchema = calendarEventSchemaRaw.refine(
-  (data) => {
-    // Si es todo el día, solo validamos las fechas
-    if (data.all_day) {
-      return data.end >= data.start
-    }
-    // Si no es todo el día, validamos fecha y hora completas
-    return data.end > data.start
-  },
-  {
-    message:
-      "La fecha y hora de fin debe ser después de la fecha y hora de inicio",
-    path: ["end"],
-  },
-)
+export const calendarEventSchema = calendarEventSchemaRaw
+  .refine(
+    (data) => {
+      // Si es todo el día, solo validamos las fechas
+      if (data.all_day) {
+        return data.end >= data.start
+      }
+      // Si no es todo el día, validamos fecha y hora completas
+      return data.end > data.start
+    },
+    {
+      message:
+        "La fecha y hora de fin debe ser después de la fecha y hora de inicio",
+      path: ["end"],
+    },
+  )
+  .refine(
+    (data) => {
+      // Validar que solo se especifique un nivel organizacional a la vez
+      const levels = [data.sede, data.faculty, data.program].filter(Boolean)
+      return levels.length <= 1
+    },
+    {
+      message:
+        "Solo se puede especificar un nivel organizacional por evento (sede, facultad o programa)",
+      path: ["program"],
+    },
+  )
+  .refine(
+    (data) => {
+      // Solo debe haber un nivel organizacional (jerárquico en UI, único en DB)
+      // Si hay sede (sin faculty ni program), debe tener sede
+      if (data.sede && !data.faculty && !data.program) {
+        return true
+      }
+      // Si hay faculty (sin program), debe tener faculty
+      if (data.faculty && !data.program) {
+        return true
+      }
+      // Si hay program, debe tener program
+      if (data.program) {
+        return true
+      }
+      return true
+    },
+    {
+      message: "Debe seleccionar un nivel organizacional",
+      path: ["sede"],
+    },
+  )
 
 // =============================================================================
 // SCHEDULE SCHEMAS

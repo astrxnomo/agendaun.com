@@ -17,41 +17,11 @@ export async function setPermissions(
       )
       break
 
-    case calendarSlug === "national":
+    case calendarSlug === "unal":
       permissions.push(
         Permission.read(Role.users("verified")),
         Permission.write(
-          Role.team(
-            process.env.NEXT_PUBLIC_TEAMS_EDITORS!,
-            "national-calendar",
-          ),
-        ),
-      )
-      break
-
-    case calendarSlug === "sede":
-      permissions.push(
-        Permission.read(Role.users("verified")),
-        Permission.write(
-          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "sede-calendar"),
-        ),
-      )
-      break
-
-    case calendarSlug === "faculty":
-      permissions.push(
-        Permission.read(Role.users("verified")),
-        Permission.write(
-          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "faculty-calendar"),
-        ),
-      )
-      break
-
-    case calendarSlug === "program":
-      permissions.push(
-        Permission.read(Role.users("verified")),
-        Permission.write(
-          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "program-calendar"),
+          Role.team(process.env.NEXT_PUBLIC_TEAMS_EDITORS!, "unal-calendar"),
         ),
       )
       break

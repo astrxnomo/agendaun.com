@@ -42,10 +42,10 @@ export async function saveCalendarEvent(
       all_day: formData.get("all_day") === "true",
       location: formData.get("location") as string,
       calendar: formData.get("calendar") as string,
-      etiquette: formData.get("etiquette") as string,
-      sede: formData.get("sede") as string,
-      faculty: formData.get("faculty") as string,
-      program: formData.get("program") as string,
+      etiquette: (formData.get("etiquette") as string) || null,
+      sede: (formData.get("sede") as string) || null,
+      faculty: (formData.get("faculty") as string) || null,
+      program: (formData.get("program") as string) || null,
     }
 
     const imageFile = formData.get("image") as File | null

@@ -17,21 +17,55 @@ export async function getEvents(
   const { database } = await createSessionClient()
 
   try {
-    const queries = []
+    if (calendar.slug === "unal") {
+      const queries = [Query.equal("calendar", calendar.$id)]
 
-    queries.push(Query.equal("calendar", calendar.$id))
-
-    if (profile) {
-      if (calendar.slug === "sede" && profile.sede) {
-        queries.push(Query.equal("sede", profile.sede.$id))
-      } else if (calendar.slug === "faculty" && profile.faculty) {
-        queries.push(Query.equal("faculty", profile.faculty.$id))
-      } else if (calendar.slug === "program" && profile.program) {
-        queries.push(Query.equal("program", profile.program.$id))
+      if (profile && profile.sede && profile.faculty && profile.program) {
+        queries.push(
+          Query.or([
+            Query.and([
+              Query.isNull("sede"),
+              Query.isNull("faculty"),
+              Query.isNull("program"),
+            ]),
+            Query.equal("sede", profile.sede.$id),
+            Query.equal("faculty", profile.faculty.$id),
+            Query.equal("program", profile.program.$id),
+          ]),
+        )
+      } else {
+        queries.push(Query.isNull("sede"))
+        queries.push(Query.isNull("faculty"))
+        queries.push(Query.isNull("program"))
       }
+
+      queries.push(
+        Query.select([
+          "*",
+          "calendar.slug",
+          "etiquette.*",
+          "sede.*",
+          "faculty.*",
+          "faculty.sede.*",
+          "program.*",
+          "program.faculty.*",
+          "program.faculty.sede.*",
+        ]),
+      )
+
+      const result = await database.listRows({
+        databaseId: DATABASE_ID,
+        tableId: TABLES.CALENDAR_EVENTS,
+        queries,
+      })
+
+      return result.rows as unknown as CalendarEvents[]
     }
 
-    queries.push(Query.select(["*", "etiquette.*"]))
+    const queries = [
+      Query.equal("calendar", calendar.$id),
+      Query.select(["*", "etiquette.*"]),
+    ]
 
     const result = await database.listRows({
       databaseId: DATABASE_ID,
