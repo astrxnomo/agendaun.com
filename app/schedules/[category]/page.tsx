@@ -1,7 +1,6 @@
-import { Suspense } from "react"
-
-import { SchedulesContent } from "@/components/schedule/schedules-content"
+import { CategorySchedules } from "@/components/schedule/category/category-schedules"
 import { SchedulesSkeleton } from "@/components/schedule/schedules-skeleton"
+import { Suspense } from "react"
 
 type Props = {
   params: Promise<{ category: string }>
@@ -19,7 +18,10 @@ export default async function ScheduleCategoryPage({
 
   return (
     <Suspense fallback={<SchedulesSkeleton />}>
-      <SchedulesContent categorySlug={categorySlug} currentPage={currentPage} />
+      <CategorySchedules
+        categorySlug={categorySlug}
+        currentPage={currentPage}
+      />
     </Suspense>
   )
 }

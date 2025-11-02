@@ -1,4 +1,4 @@
-import { Schedule } from "@/components/schedule/schedule"
+import { Schedule } from "@/components/schedule/core/schedule"
 
 type Props = {
   params: Promise<{ category: string; id: string }>

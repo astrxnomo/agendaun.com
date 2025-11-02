@@ -1,8 +1,8 @@
 import { Suspense } from "react"
 
-import { CalendarsContent } from "@/components/calendar/calendars-content"
+import { CalendarsList } from "@/components/calendar/calendars-list"
 import { CalendarsSkeleton } from "@/components/calendar/calendars-skeleton"
-import { PageHeader } from "@/components/page-header"
+import { PageHeader } from "@/components/layout/page-header"
 
 export default function Page() {
   return (
@@ -21,7 +21,7 @@ export default function Page() {
       </div>
 
       <Suspense fallback={<CalendarsSkeleton />}>
-        <CalendarsContent />
+        <CalendarsList />
       </Suspense>
     </>
   )

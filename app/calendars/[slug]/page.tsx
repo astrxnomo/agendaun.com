@@ -1,4 +1,4 @@
-import Calendar from "@/components/calendar/calendar"
+import Calendar from "@/components/calendar/core/calendar"
 
 export default async function CalendarPage({
   params,

@@ -1,11 +1,11 @@
 import { Suspense } from "react"
 
-import { PageHeader } from "@/components/page-header"
+import { PageHeader } from "@/components/layout/page-header"
 
-import { SchedulesCategoriesContent } from "../../components/schedule/schedules-categories-content"
-import { SchedulesCategoriesSkeleton } from "../../components/schedule/schedules-categories-skeleton"
+import { SchedulesCategoriesSkeleton } from "../../components/schedule/category/categories-skeleton"
+import { SchedulesCategories } from "../../components/schedule/category/schedules-categories"
 
-export default function SchedulesCategoriesPage() {
+export default function CategoriesPage() {
   return (
     <>
       <PageHeader
@@ -22,7 +22,7 @@ export default function SchedulesCategoriesPage() {
       </div>
 
       <Suspense fallback={<SchedulesCategoriesSkeleton />}>
-        <SchedulesCategoriesContent />
+        <SchedulesCategories />
       </Suspense>
     </>
   )

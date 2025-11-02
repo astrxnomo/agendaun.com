@@ -1,8 +1,8 @@
 import { Outfit } from "next/font/google"
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { CalendarProvider } from "@/components/calendar/calendar-context"
-import NavTop from "@/components/nav-top"
+import { CalendarProvider } from "@/components/calendar/core/calendar-context"
+import { AppSidebar } from "@/components/layout/app-sidebar"
+import NavTop from "@/components/layout/nav-top"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
