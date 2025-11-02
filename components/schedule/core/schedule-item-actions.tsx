@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { deleteSchedule } from "@/lib/actions/schedule/schedules"
 
-import { ScheduleDialog } from "./schedule-dialog"
+import { ScheduleDialog } from "../schedule-dialog"
 
 import type { Schedules } from "@/lib/data/types"
 

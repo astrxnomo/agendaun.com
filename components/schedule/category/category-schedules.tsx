@@ -8,7 +8,7 @@ import { getProfile } from "@/lib/data/profiles/getProfile"
 import { getSchedulesByCategory } from "@/lib/data/schedules/getSchedulesByCategory"
 import { getUser } from "@/lib/data/users/getUser"
 import { PageHeader } from "../../layout/page-header"
-import { ScheduleDialog } from "../core/schedule-dialog"
+import { ScheduleDialog } from "../schedule-dialog"
 import { SchedulesList } from "../schedules-list"
 import { ScheduleCategoryNotFound } from "./category-not-found"
 
@@ -21,7 +21,6 @@ export async function CategorySchedules({
   categorySlug,
   currentPage,
 }: SchedulesContentProps) {
-  // Paso 1: Consultas dependientes
   const user = await getUser()
   const profile = await getProfile(user.$id)
 
@@ -60,7 +59,6 @@ export async function CategorySchedules({
     return <ScheduleCategoryNotFound />
   }
 
-  // Paso 3: Consultar permisos de cada schedule en paralelo
   const schedulesWithPermissions = await Promise.all(
     schedules.map(async (schedule) => ({
       schedule,
