@@ -239,7 +239,7 @@ export default function Calendar({ slug: calendarSlug }: { slug: string }) {
         onManualRefetch={manualRefetch}
       />
       <SetupCalendar
-        initialView={calendar.defaultView}
+        initialView={view || calendar.defaultView}
         calendar={calendar}
         events={visibleEvents}
         etiquettes={calendar.etiquettes}

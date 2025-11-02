@@ -19,6 +19,7 @@ import {
   ChevronRightIcon,
   Plus,
 } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -47,7 +48,7 @@ import {
   EventHeight,
   WeekCellsHeight,
 } from "./constants"
-import { EventDialog } from "./event/event-dialog"
+import { EventDialog } from "./event/event-upsert-dialog"
 import { EventViewDialog } from "./event/event-view-dialog"
 import { addHoursToDate } from "./utils"
 import { AgendaView } from "./views/agenda-view"
@@ -80,12 +81,26 @@ export function SetupCalendar({
   initialView = "month",
   className,
 }: EventCalendarProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { currentDate, setCurrentDate } = useCalendarContext()
   const [view, setView] = useState<CalendarView>(initialView)
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false)
   const [isEventViewDialogOpen, setIsEventViewDialogOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] =
     useState<Partial<CalendarEvents> | null>(null)
+
+  const updateView = (newView: CalendarView) => {
+    setView(newView)
+
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("view", newView)
+    router.push(`?${params.toString()}`, { scroll: false })
+  }
+
+  useEffect(() => {
+    setView(initialView)
+  }, [initialView])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -102,16 +117,16 @@ export function SetupCalendar({
 
       switch (e.key.toLowerCase()) {
         case "m":
-          setView("month")
+          updateView("month")
           break
         case "s":
-          setView("week")
+          updateView("week")
           break
         case "d":
-          setView("day")
+          updateView("day")
           break
         case "a":
-          setView("agenda")
+          updateView("agenda")
           break
       }
     }
@@ -380,16 +395,16 @@ export function SetupCalendar({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="min-w-32">
-                    <DropdownMenuItem onClick={() => setView("month")}>
+                    <DropdownMenuItem onClick={() => updateView("month")}>
                       Mes <DropdownMenuShortcut>M</DropdownMenuShortcut>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setView("week")}>
+                    <DropdownMenuItem onClick={() => updateView("week")}>
                       Semana <DropdownMenuShortcut>S</DropdownMenuShortcut>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setView("day")}>
+                    <DropdownMenuItem onClick={() => updateView("day")}>
                       Día <DropdownMenuShortcut>D</DropdownMenuShortcut>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setView("agenda")}>
+                    <DropdownMenuItem onClick={() => updateView("agenda")}>
                       Agenda <DropdownMenuShortcut>A</DropdownMenuShortcut>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
