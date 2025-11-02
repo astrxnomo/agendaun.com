@@ -20,8 +20,6 @@ import { DateInput, TimeField } from "@/components/ui/datefield-rac"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -197,76 +195,79 @@ export function EventDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="text-base sm:text-lg">
+      <DialogContent className="flex max-w-md flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-lg [&>button:last-child]:top-3.5">
+        <DialogHeader className="contents space-y-0 text-left">
+          <DialogTitle className="border-b px-6 py-4 text-base">
             {event?.$id ? "Editar evento" : "Crear evento"}
           </DialogTitle>
-          <DialogDescription className="sr-only">
-            {event?.$id
-              ? "Edit the details of this event"
-              : "Add a new event to your calendar"}
-          </DialogDescription>
         </DialogHeader>
 
-        <form action={formActionWithImage} className="space-y-4">
-          {/* Campos ocultos */}
-          <input type="hidden" name="calendar" value={calendar.$id} />
-          {event?.$id && (
-            <input type="hidden" name="eventId" value={event.$id} />
-          )}
-          <input type="hidden" name="start" value={getStartDateTime()} />
-          <input type="hidden" name="end" value={getEndDateTime()} />
-          <input type="hidden" name="all_day" value={allDay.toString()} />
-          <input type="hidden" name="etiquette" value={etiquette?.$id || ""} />
-          <input
-            type="hidden"
-            name="sede"
-            value={
-              calendar.slug === "sede" && profile?.sede?.$id
-                ? profile.sede.$id
-                : ""
-            }
-          />
-          <input
-            type="hidden"
-            name="faculty"
-            value={
-              calendar.slug === "faculty" && profile?.faculty?.$id
-                ? profile.faculty.$id
-                : ""
-            }
-          />
-          <input
-            type="hidden"
-            name="program"
-            value={
-              calendar.slug === "program" && profile?.program?.$id
-                ? profile.program.$id
-                : ""
-            }
-          />
-          <input type="hidden" name="currentImageId" value={image || ""} />
-          <input
-            type="hidden"
-            name="previousImageId"
-            value={previousImage || ""}
-          />
+        <div className="overflow-y-auto px-6 py-4">
+          <form
+            id="calendar-event-form"
+            action={formActionWithImage}
+            className="space-y-4"
+          >
+            {/* Campos ocultos */}
+            <input type="hidden" name="calendar" value={calendar.$id} />
+            {event?.$id && (
+              <input type="hidden" name="eventId" value={event.$id} />
+            )}
+            <input type="hidden" name="start" value={getStartDateTime()} />
+            <input type="hidden" name="end" value={getEndDateTime()} />
+            <input type="hidden" name="all_day" value={allDay.toString()} />
+            <input
+              type="hidden"
+              name="etiquette"
+              value={etiquette?.$id || ""}
+            />
+            <input
+              type="hidden"
+              name="sede"
+              value={
+                calendar.slug === "sede" && profile?.sede?.$id
+                  ? profile.sede.$id
+                  : ""
+              }
+            />
+            <input
+              type="hidden"
+              name="faculty"
+              value={
+                calendar.slug === "faculty" && profile?.faculty?.$id
+                  ? profile.faculty.$id
+                  : ""
+              }
+            />
+            <input
+              type="hidden"
+              name="program"
+              value={
+                calendar.slug === "program" && profile?.program?.$id
+                  ? profile.program.$id
+                  : ""
+              }
+            />
+            <input type="hidden" name="currentImageId" value={image || ""} />
+            <input
+              type="hidden"
+              name="previousImageId"
+              value={previousImage || ""}
+            />
 
-          {/* Errores generales */}
-          {state.errors?._form && (
-            <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
-              {state.errors._form.join(", ")}
-            </div>
-          )}
+            {/* Errores generales */}
+            {state.errors?._form && (
+              <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
+                {state.errors._form.join(", ")}
+              </div>
+            )}
 
-          {error && (
-            <div className="bg-destructive/15 text-destructive rounded-md px-3 py-2 text-sm">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="bg-destructive/15 text-destructive rounded-md px-3 py-2 text-sm">
+                {error}
+              </div>
+            )}
 
-          <div className="grid gap-4">
             {/* Título */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -313,7 +314,7 @@ export function EventDialog({
                 value={description}
                 onChange={(e) => setDescription(e.target.value.slice(0, 3000))}
                 placeholder="Información adicional sobre el evento..."
-                rows={3}
+                rows={8}
                 className="resize-none text-sm"
                 maxLength={3000}
                 aria-invalid={state.errors?.description ? "true" : "false"}
@@ -513,20 +514,6 @@ export function EventDialog({
               )}
             </div>
 
-            {/* Imagen */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Imagen</Label>
-              <EventImageUpload
-                currentImage={image}
-                onFileChange={setImageFile}
-                onRemoveExisting={handleRemoveExistingImage}
-              />
-              {state.errors?.image && (
-                <p className="text-destructive text-sm">
-                  {state.errors.image.join(", ")}
-                </p>
-              )}
-            </div>
             <fieldset className="space-y-4">
               <legend className="text-foreground text-sm leading-none font-medium">
                 Etiqueta
@@ -565,21 +552,39 @@ export function EventDialog({
                 ))}
               </RadioGroup>
             </fieldset>
-          </div>
 
-          <DialogFooter className="flex-row justify-between gap-2">
-            <div className="mr-auto flex items-center justify-start">
+            {/* Imagen */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Imagen</Label>
+              <EventImageUpload
+                currentImage={image}
+                onFileChange={setImageFile}
+                onRemoveExisting={handleRemoveExistingImage}
+              />
+              {state.errors?.image && (
+                <p className="text-destructive text-sm">
+                  {state.errors.image.join(", ")}
+                </p>
+              )}
+            </div>
+          </form>
+        </div>
+
+        <div className="border-t px-6 py-4">
+          <div className="flex justify-between gap-2">
+            <div className="flex items-center">
               {event?.$id && (
                 <Button
                   type="button"
                   variant="destructive"
                   onClick={handleDelete}
+                  disabled={isPending}
                 >
                   <Trash />
                 </Button>
               )}
             </div>
-            <div className="flex w-auto justify-end gap-2">
+            <div className="flex gap-2">
               <Button
                 type="button"
                 variant="outline"
@@ -588,12 +593,16 @@ export function EventDialog({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button
+                type="submit"
+                form="calendar-event-form"
+                disabled={isPending}
+              >
                 {isPending ? "Guardando..." : event?.$id ? "Guardar" : "Crear"}
               </Button>
             </div>
-          </DialogFooter>
-        </form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )
