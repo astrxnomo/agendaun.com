@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { cn, formatTime, getColor } from "@/lib/utils"
 
@@ -72,15 +73,15 @@ export function ScheduleEventViewDialog({
         </DialogHeader>
 
         {/* Contenido principal */}
-        <div className="overflow-y-auto px-6 py-4">
-          <div
-            className={cn(
-              "space-y-5",
-              event.image && "sm:flex sm:gap-6 sm:space-y-0",
-            )}
-          >
-            {/* Información del evento */}
-            <div className="space-y-5 sm:flex-1">
+        <div
+          className={cn(
+            "flex min-h-0 flex-1",
+            event.image ? "flex-col sm:flex-row sm:divide-x" : "flex-col",
+          )}
+        >
+          {/* Información del evento - con scroll */}
+          <ScrollArea className="min-w-0 flex-1">
+            <div className="space-y-5 px-6 py-4">
               {/* Días de la semana */}
               <div>
                 <div className="mb-2 flex items-center gap-2">
@@ -130,29 +131,43 @@ export function ScheduleEventViewDialog({
                   </div>
                 </>
               )}
-            </div>
 
-            {/* Imagen */}
-            {event.image && (
-              <>
-                <Separator
-                  orientation="vertical"
-                  className="hidden h-auto sm:block"
+              {/* Imagen en móvil */}
+              {event.image && (
+                <>
+                  <Separator className="sm:hidden" />
+                  <div className="sm:hidden">
+                    <EventImage
+                      src={event.image}
+                      alt={event.title}
+                      width={400}
+                      height={400}
+                      wrapperClassName="overflow-hidden rounded-lg"
+                      className="h-auto w-full object-cover"
+                      skeletonClassName="aspect-square w-full"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </ScrollArea>
+
+          {/* Imagen en desktop - columna fija a la derecha */}
+          {event.image && (
+            <div className="hidden sm:flex sm:w-80 sm:shrink-0 sm:items-center sm:justify-center sm:overflow-y-auto sm:p-6">
+              <div className="sticky top-6 w-full">
+                <EventImage
+                  src={event.image}
+                  alt={event.title}
+                  width={280}
+                  height={280}
+                  wrapperClassName="mx-auto overflow-hidden rounded-lg"
+                  className="h-auto w-full object-cover"
+                  skeletonClassName="aspect-square w-full"
                 />
-                <div className="sm:w-70 sm:shrink-0">
-                  <EventImage
-                    src={event.image}
-                    alt={event.title}
-                    width={208}
-                    height={208}
-                    wrapperClassName="overflow-hidden rounded"
-                    className="h-auto w-full object-cover"
-                    skeletonClassName="aspect-square w-full"
-                  />
-                </div>
-              </>
-            )}
-          </div>
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
