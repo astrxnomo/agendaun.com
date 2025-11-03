@@ -134,7 +134,7 @@ export function ScheduleEventDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="flex max-w-md flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-lg [&>button:last-child]:top-3.5">
+      <DialogContent className="flex max-w-md flex-col gap-0 p-0 sm:max-h-[min(800px,80vh)] sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
             {event?.$id ? "Editar evento" : "Crear evento"}
@@ -168,13 +168,6 @@ export function ScheduleEventDialog({
               name="previousImageId"
               value={event?.image || ""}
             />
-
-            {/* Errores generales */}
-            {state.errors?._form && (
-              <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
-                {state.errors._form.join(", ")}
-              </div>
-            )}
 
             {/* Título */}
             <div className="space-y-2">
@@ -455,7 +448,7 @@ export function ScheduleEventDialog({
           </form>
         </div>
 
-        <div className="border-t px-6 py-4">
+        <div className="space-y-3 border-t px-6 py-4">
           <div className="flex justify-between gap-2">
             <div className="flex items-center">
               {event?.$id && onDelete && (
