@@ -1,7 +1,7 @@
 "use client"
 
 import { Time } from "@internationalized/date"
-import { ClockIcon, Trash } from "lucide-react"
+import { ClockIcon, Loader2, Trash } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
 import { Label as AriaLabel } from "react-aria-components"
 import { toast } from "sonner"
@@ -483,10 +483,23 @@ export function ScheduleEventDialog({
                 form="schedule-event-form"
                 disabled={isPending}
               >
-                {isPending ? "Guardando..." : event?.$id ? "Guardar" : "Crear"}
+                {isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </>
+                ) : (
+                  <>{schedule ? "Actualizar" : "Crear"}</>
+                )}
               </Button>
             </div>
           </div>
+
+          {/* Errores generales */}
+          {state.errors?._form && (
+            <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
+              {state.errors._form.join(", ")}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

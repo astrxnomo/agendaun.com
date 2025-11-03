@@ -3,7 +3,7 @@
 import { Time } from "@internationalized/date"
 import { format, isBefore } from "date-fns"
 import { es } from "date-fns/locale"
-import { CalendarIcon, ClockIcon, Trash } from "lucide-react"
+import { CalendarIcon, ClockIcon, Loader2, Trash } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
 import { Label as AriaLabel } from "react-aria-components"
 import { toast } from "sonner"
@@ -722,10 +722,29 @@ export function EventDialog({
                 form="calendar-event-form"
                 disabled={isPending || !isFormValid()}
               >
-                {isPending ? "Guardando..." : event?.$id ? "Guardar" : "Crear"}
+                {isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </>
+                ) : (
+                  <>{event?.$id ? "Actualizar" : "Crear"}</>
+                )}
               </Button>
             </div>
           </div>
+
+          {/* Errores generales */}
+          {state.errors?._form && (
+            <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
+              {state.errors._form.join(", ")}
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-destructive/15 text-destructive rounded-md px-3 py-2 text-sm">
+              {error}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
