@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
     turbopackFileSystemCacheForDev: true,
     serverActions: {
-      bodySizeLimit: "10mb",
+      bodySizeLimit: "5mb",
     },
   },
 }
