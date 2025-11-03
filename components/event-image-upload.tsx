@@ -18,6 +18,7 @@ export function EventImageUpload({
   onRemoveExisting,
 }: ScheduleEventImageUploadProps) {
   const maxSizeMB = 10
+  const maxSizeBytes = maxSizeMB * 1024 * 1024
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null)
 
   const [
@@ -33,6 +34,8 @@ export function EventImageUpload({
     },
   ] = useFileUpload({
     accept: "image/png,image/jpeg,image/jpg,image/gif,image/webp",
+    maxSize: maxSizeBytes,
+    maxFiles: 1,
   })
 
   // Load existing image from database
