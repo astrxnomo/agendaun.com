@@ -1,36 +1,19 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🗓️ AgendaUN
 
-## Getting Started
+**Proyecto:** [agendaun.com](https://agendaun.com)  
+**Documentación completa:** [deepwiki.com/astrxnomo/agendaun.com](https://deepwiki.com/astrxnomo/agendaun.com)
 
-First, run the development server:
+**AgendaUN** es una plataforma web integral diseñada para consolidar y personalizar la información académica y logística de la **Universidad Nacional de Colombia (UN)**. La plataforma permite a la comunidad universitaria acceder a calendarios institucionales, gestionar calendarios personales y navegar por horarios recurrentes de clases, laboratorios, monitorias, gimnasios y horas de oficina. El sistema soporta la delimitación organizacional a través de una estructura jerárquica de sedes, facultades y programas.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🔧 Tecnologías
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Área | Tecnología | Descripción |
+|------|-------------|-------------|
+| **Framework principal** | Next.js 16 | App Router, Server Actions y rendering híbrido |
+| **Librería UI** | React 19 | React Compiler y Suspense optimizado |
+| **Estilos** | Tailwind CSS 4.1 | Utilidades modernas y soporte para temas |
+| **Componentes accesibles** | Shadcn | Primitivos accesibles y personalizables |
+| **Backend (BaaS)** | Appwrite 2.0 | Autenticación, base de datos y storage |
+| **Validación** | Zod 4.1 | Esquemas y refinamientos de datos |
+| **Iconos** | Lucide React | Íconos modernos en SVG |
+| **Fechas** | date-fns 4.1 | Utilidades de manejo de tiempo |
