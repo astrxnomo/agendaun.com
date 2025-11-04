@@ -3,10 +3,11 @@ import { Settings } from "lucide-react"
 import { ConfigDialog } from "@/components/auth/config-dialog"
 import { StatusMessage } from "@/components/status-message"
 import { Button } from "@/components/ui/button"
-import { canEditSchedule, canEditScheduleCategory } from "@/lib/actions/users"
+import { canAdminScheduleCategory, canEditSchedule } from "@/lib/actions/users"
 import { getProfile } from "@/lib/data/profiles/getProfile"
 import { getSchedulesByCategory } from "@/lib/data/schedules/getSchedulesByCategory"
-import { getUser } from "@/lib/data/users/getUser"
+import { User } from "@/lib/data/types"
+import { redirect } from "next/navigation"
 import { PageHeader } from "../../layout/page-header"
 import { ScheduleDialog } from "../schedule-dialog"
 import { SchedulesList } from "../schedules-list"
@@ -15,13 +16,20 @@ import { ScheduleCategoryNotFound } from "./category-not-found"
 type SchedulesContentProps = {
   categorySlug: string
   currentPage: number
+  user?: User
 }
 
 export async function CategorySchedules({
   categorySlug,
   currentPage,
+  user,
 }: SchedulesContentProps) {
-  const user = await getUser()
+  if (!user) {
+    redirect(
+      "/auth/login?message=Debes iniciar sesión para acceder a esta página",
+    )
+  }
+
   const profile = await getProfile(user.$id)
 
   if (!profile?.sede) {

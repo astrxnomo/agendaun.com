@@ -1,5 +1,7 @@
 import { CategorySchedules } from "@/components/schedule/category/category-schedules"
 import { SchedulesSkeleton } from "@/components/schedule/schedules-skeleton"
+import { getUser } from "@/lib/data/users/getUser"
+import { redirect } from "next/dist/client/components/navigation"
 import { Suspense } from "react"
 
 type Props = {
@@ -16,11 +18,20 @@ export default async function ScheduleCategoryPage({
 
   const currentPage = pageParam ? parseInt(pageParam, 10) : 1
 
+  const user = await getUser()
+
+  if (!user) {
+    redirect(
+      "/auth/login?message=Debes iniciar sesión para acceder a esta página",
+    )
+  }
+
   return (
     <Suspense fallback={<SchedulesSkeleton />}>
       <CategorySchedules
         categorySlug={categorySlug}
         currentPage={currentPage}
+        user={user}
       />
     </Suspense>
   )
