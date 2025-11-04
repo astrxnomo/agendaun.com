@@ -45,8 +45,11 @@ export async function canEditCalendar(calendar: Calendars): Promise<boolean> {
 
     if (calendar.profile?.user_id === user.$id) return true
 
-    const roles = await getUserEditorRoles()
-    return checkPermissions(roles, [`${calendar.slug}-calendar`])
+    const roles = await getRoles()
+    return checkPermissions(roles, [
+      `c-${calendar.slug}.admin`,
+      `c-${calendar.slug}.editor`,
+    ])
   } catch (error) {
     handleError(error)
   }

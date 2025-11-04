@@ -149,6 +149,11 @@ export function EtiquettesManager({
                 className="space-y-3"
               >
                 <input type="hidden" name="calendar" value={calendar.$id} />
+                <input
+                  type="hidden"
+                  name="calendarSlug"
+                  value={calendar.slug}
+                />
                 {editingEtiquette && (
                   <input
                     type="hidden"

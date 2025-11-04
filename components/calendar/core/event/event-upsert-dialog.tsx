@@ -328,6 +328,10 @@ export function EventDialog({
               name="etiquette"
               value={etiquette?.$id || ""}
             />
+            {/* Solo enviar created_by si es creación (no edición) */}
+            {!event?.$id && profile && (
+              <input type="hidden" name="created_by" value={profile.$id} />
+            )}
             {/* Solo enviar el campo correspondiente al nivel seleccionado */}
             <input
               type="hidden"

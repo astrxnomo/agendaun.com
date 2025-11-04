@@ -26,23 +26,23 @@ export enum DefaultView {
   WEEK = "week",
   DAY = "day",
 }
-export type Sedes = Models.Document & {
+export type Sedes = Models.Row & {
   name: string
   faculties: Faculties[]
 }
 
-export type Faculties = Models.Document & {
+export type Faculties = Models.Row & {
   name: string
   programs: Programs[]
   sede: Sedes
 }
 
-export type Programs = Models.Document & {
+export type Programs = Models.Row & {
   name: string
   faculty: Faculties
 }
 
-export type CalendarEvents = Models.Document & {
+export type CalendarEvents = Models.Row & {
   title: string
   description: string | null
   start: Date
@@ -55,9 +55,10 @@ export type CalendarEvents = Models.Document & {
   faculty: Faculties
   program: Programs
   image: string | null
+  created_by: Profiles
 }
 
-export type ScheduleEvents = Models.Document & {
+export type ScheduleEvents = Models.Row & {
   title: string
   description: string | null
   location: string | null
@@ -71,14 +72,14 @@ export type ScheduleEvents = Models.Document & {
   image: string | null
 }
 
-export type CalendarEtiquettes = Models.Document & {
+export type CalendarEtiquettes = Models.Row & {
   name: string
   color: Colors
   isActive: boolean
   calendar: Calendars
 }
 
-export type Calendars = Models.Document & {
+export type Calendars = Models.Row & {
   name: string | null
   defaultView: DefaultView
   slug: string
@@ -88,7 +89,7 @@ export type Calendars = Models.Document & {
   icon: string | null
 }
 
-export type Schedules = Models.Document & {
+export type Schedules = Models.Row & {
   name: string | null
   description: string | null
   sede: Sedes
@@ -99,13 +100,13 @@ export type Schedules = Models.Document & {
   end_hour: number
 }
 
-export type ScheduleCategories = Models.Document & {
+export type ScheduleCategories = Models.Row & {
   name: string
   slug: string
   icon: string | null
 }
 
-export type Profiles = Models.Document & {
+export type Profiles = Models.Row & {
   user_id: string
   sede: Sedes
   faculty: Faculties

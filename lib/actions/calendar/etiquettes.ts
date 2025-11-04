@@ -2,11 +2,12 @@
 
 import { ID } from "node-appwrite"
 
-import { createSessionClient } from "@/lib/appwrite"
+import { createAdminClient, createSessionClient } from "@/lib/appwrite"
 import { DATABASE_ID, TABLES } from "@/lib/appwrite/config"
 import { calendarEtiquetteSchema } from "@/lib/data/schemas"
 import { type CalendarEtiquettes } from "@/lib/data/types"
-import { setPermissions } from "@/lib/utils/permissions"
+import { setEtiquettePermissions } from "@/lib/utils/permissions"
+import { canAdminCalendarEtiquettes } from "../users"
 
 export type EtiquetteActionState = {
   success: boolean
@@ -43,9 +44,22 @@ export async function saveEtiquette(
     }
 
     const validData = validationResult.data
-    const { database } = await createSessionClient()
 
     const etiquetteId = formData.get("etiquetteId") as string | null
+    const calendarSlug = formData.get("calendarSlug") as string
+
+    // Obtener el objeto calendar completo
+    const { database: tempDatabase } = await createAdminClient()
+    const calendar = await tempDatabase.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLES.CALENDARS,
+      rowId: validData.calendar,
+    })
+
+    // Usar el cliente apropiado basado en permisos
+    const { database } = (await canAdminCalendarEtiquettes(calendar as any))
+      ? await createAdminClient()
+      : await createSessionClient()
 
     const etiquetteData = {
       name: validData.name.trim(),
@@ -54,9 +68,7 @@ export async function saveEtiquette(
       calendar: validData.calendar,
     }
 
-    const permissions = await setPermissions(
-      (validData.calendar as any)?.slug || null,
-    )
+    const permissions = await setEtiquettePermissions(calendarSlug)
 
     const result = await database.upsertRow({
       databaseId: DATABASE_ID,

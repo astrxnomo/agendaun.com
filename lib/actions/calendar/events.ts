@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache"
 import { ID } from "node-appwrite"
 
-import { createSessionClient } from "@/lib/appwrite"
+import { createAdminClient, createSessionClient } from "@/lib/appwrite"
 import { BUCKETS, DATABASE_ID, TABLES } from "@/lib/appwrite/config"
 import { calendarEventSchema } from "@/lib/data/schemas"
 import { type CalendarEvents } from "@/lib/data/types"
 import { buildImageUrl, extractImageUrl } from "@/lib/utils"
 import { handleError } from "@/lib/utils/error-handler"
-import { setPermissions } from "@/lib/utils/permissions"
+import { setCalendarEventPermissions } from "@/lib/utils/permissions"
+import { canCreateInCalendar, canEditCalendarEvent } from "../users"
 
 export type CalendarEventActionState = {
   success: boolean
@@ -66,7 +67,7 @@ export async function saveCalendarEvent(
 
     const validData = validationResult.data
 
-    const { storage, database } = await createSessionClient()
+    const { storage, database } = await createAdminClient()
 
     let uploadedImageUrl: string | null = null
 
@@ -130,8 +131,8 @@ export async function saveCalendarEvent(
     }
 
     const eventId = formData.get("eventId") as string | null
+    const createdBy = formData.get("created_by") as string | null
 
-    // Obtener el calendario para acceder al slug
     const calendar = await database.getRow({
       databaseId: DATABASE_ID,
       tableId: TABLES.CALENDARS,
@@ -151,15 +152,43 @@ export async function saveCalendarEvent(
       faculty: validData.faculty || null,
       program: validData.program || null,
       image: uploadedImageUrl,
+      ...(eventId ? {} : { created_by: createdBy }), // Solo agregar created_by en creación
     }
 
     const calendarSlug = (calendar as any).slug
-    const permissions = await setPermissions(calendarSlug || null)
 
-    const result = await database.upsertRow({
+    // Determinar si es creación o edición
+    const isCreating = !eventId
+    let canUseAdminClient = false
+
+    if (isCreating) {
+      canUseAdminClient = await canCreateInCalendar(calendar as any)
+    } else {
+      // Para edición, necesitamos obtener el evento existente para verificar quién lo creó
+      const existingEvent = await database.getRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLES.CALENDAR_EVENTS,
+        rowId: eventId,
+      })
+      canUseAdminClient = await canEditCalendarEvent(
+        calendar as any,
+        (existingEvent as any).created_by?.$id ||
+          (existingEvent as any).created_by,
+      )
+    }
+
+    const { database: adminDatabase } = canUseAdminClient
+      ? await createAdminClient()
+      : await createSessionClient()
+
+    const permissions = await setCalendarEventPermissions(calendarSlug)
+
+    const eventIdToUse = eventId || ID.unique()
+
+    const result = await adminDatabase.upsertRow({
       databaseId: DATABASE_ID,
       tableId: TABLES.CALENDAR_EVENTS,
-      rowId: eventId || ID.unique(),
+      rowId: eventIdToUse,
       data: eventData,
       permissions: permissions,
     })
@@ -233,7 +262,22 @@ export async function moveEvent(
   event: CalendarEvents,
 ): Promise<CalendarEvents> {
   try {
-    const { database } = await createSessionClient()
+    // Obtener el calendario completo
+    const { database: tempDatabase } = await createAdminClient()
+    const calendar = await tempDatabase.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLES.CALENDARS,
+      rowId: (event.calendar as any).$id || event.calendar,
+    })
+
+    // Verificar si puede editar este evento específico (considerando si es creador)
+    const canEdit = await canEditCalendarEvent(
+      calendar as any,
+      (event as any).created_by?.$id || (event as any).created_by,
+    )
+    const { database } = canEdit
+      ? await createAdminClient()
+      : await createSessionClient()
 
     const result = await database.upsertRow({
       databaseId: DATABASE_ID,

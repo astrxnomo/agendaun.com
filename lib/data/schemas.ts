@@ -6,9 +6,6 @@ import { Colors, DefaultView } from "@/lib/data/types"
 // AUTH SCHEMAS
 // =============================================================================
 
-/**
- * Schema para validación de login
- */
 export const loginSchema = z.object({
   username: z
     .string()
@@ -16,9 +13,6 @@ export const loginSchema = z.object({
     .regex(/^[a-zA-Z0-9._-]+$/, "Usuario inválido"),
 })
 
-/**
- * Schema para validación de configuración de usuario
- */
 export const configSchema = z.object({
   name: z
     .string()
@@ -37,9 +31,6 @@ export const configSchema = z.object({
 // CALENDAR SCHEMAS
 // =============================================================================
 
-/**
- * Schema para validación de calendarios
- */
 export const calendarSchema = z.object({
   name: z
     .string()
@@ -66,9 +57,6 @@ export const calendarSchema = z.object({
     .optional(),
 })
 
-/**
- * Schema para validación de etiquetas de calendario
- */
 export const calendarEtiquetteSchema = z.object({
   name: z
     .string()
@@ -105,9 +93,6 @@ const calendarEventSchemaRaw = z.object({
   image: z.string().nullable().optional(),
 })
 
-/**
- * Schema para validación de eventos de calendario (con validación de fechas)
- */
 export const calendarEventSchema = calendarEventSchemaRaw
   .refine(
     (data) => {
@@ -220,9 +205,6 @@ export const scheduleCategorySchema = z.object({
   icon: z.string().max(100, "El ícono es muy largo").nullable().optional(),
 })
 
-/**
- * Schema para validación de eventos de horario (sin refinamientos)
- */
 export const scheduleEventSchemaRaw = z.object({
   title: z
     .string()
@@ -263,10 +245,6 @@ export const scheduleEventSchema = scheduleEventSchemaRaw.refine(
     path: ["end_hour"],
   },
 )
-
-// =============================================================================
-// TYPE EXPORTS
-// =============================================================================
 
 export type LoginInput = z.infer<typeof loginSchema>
 export type ConfigInput = z.infer<typeof configSchema>
