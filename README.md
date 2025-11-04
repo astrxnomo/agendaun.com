@@ -1,9 +1,14 @@
-# 🗓️ AgendaUN
+# 📗 AgendaUN
 
 **Proyecto:** [agendaun.com](https://agendaun.com)  
 **Documentación completa:** [deepwiki.com/astrxnomo/agendaun.com](https://deepwiki.com/astrxnomo/agendaun.com)
 
 **AgendaUN** es una plataforma web integral diseñada para consolidar y personalizar la información académica y logística de la **Universidad Nacional de Colombia (UN)**. La plataforma permite a la comunidad universitaria acceder a calendarios institucionales, gestionar calendarios personales y navegar por horarios recurrentes de clases, laboratorios, monitorias, gimnasios y horas de oficina. El sistema soporta la delimitación organizacional a través de una estructura jerárquica de sedes, facultades y programas.
+
+### Problema Resuelto
+
+Actualmente, los estudiantes, profesores y el personal administrativo de la Universidad Nacional deben consultar múltiples canales —correos, carteleras físicas, páginas web y grupos de mensajería— para mantenerse informados. Esta dispersión de fuentes genera confusión, pérdida de tiempo y errores en la comunicación institucional. 
+AgendaUN soluciona este problema centralizando toda la información académica y administrativa en un solo lugar. Cada usuario tiene acceso a calendarios personalizados, con eventos y recordatorios relevantes según su Sede, Facultad o Programa, garantizando una comunicación más clara, eficiente y accesible.
 
 ### 🔧 Tecnologías
 
