@@ -18,7 +18,16 @@ export async function getScheduleById(
       tableId: TABLES.SCHEDULES,
       queries: [
         Query.equal("$id", scheduleId),
-        Query.select(["*", "sede.*", "category.*"]),
+        Query.select([
+          "*",
+          "sede.*",
+          "category.*",
+          "faculty.*",
+          "faculty.sede.*",
+          "program.*",
+          "program.faculty.*",
+          "program.faculty.sede.*",
+        ]),
         Query.limit(1),
       ],
     })

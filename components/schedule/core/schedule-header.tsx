@@ -1,8 +1,16 @@
-import { Info, Plus } from "lucide-react"
+import {
+  Globe,
+  GraduationCap,
+  Info,
+  Plus,
+  School,
+  University,
+} from "lucide-react"
 
 import { EditModeToggle } from "@/components/calendar/core/edit-mode-toggle"
 import { Button } from "@/components/ui/button"
 
+import { Separator } from "@/components/ui/separator"
 import type { Schedules } from "@/lib/data/types"
 import { formatHour } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover"
@@ -54,6 +62,42 @@ export function ScheduleHeader({
                     <p className="text-muted-foreground text-sm">
                       {schedule.description}
                     </p>
+                    {schedule.sede || schedule.faculty || schedule.program ? (
+                      <>
+                        <Separator />
+                        {schedule.sede && (
+                          <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                            <School className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">
+                              {schedule.sede.name}
+                            </span>
+                          </div>
+                        )}
+
+                        {schedule.faculty && (
+                          <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                            <University className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">
+                              {schedule.faculty.name}
+                            </span>
+                          </div>
+                        )}
+
+                        {schedule.program && (
+                          <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                            <GraduationCap className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">
+                              {schedule.program.name}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                        <Globe className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">Nacional</span>
+                      </div>
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>

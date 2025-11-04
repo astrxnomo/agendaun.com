@@ -45,11 +45,39 @@ export async function getSchedulesByCategory(
     }
 
     const queries = [Query.equal("category", category.$id)]
-    if (profile?.sede) {
-      queries.push(Query.equal("sede", profile.sede.$id))
+
+    // Filtrar por visibilidad organizacional
+    if (profile && profile.sede && profile.faculty && profile.program) {
+      queries.push(
+        Query.or([
+          Query.and([
+            Query.isNull("sede"),
+            Query.isNull("faculty"),
+            Query.isNull("program"),
+          ]),
+          Query.equal("sede", profile.sede.$id),
+          Query.equal("faculty", profile.faculty.$id),
+          Query.equal("program", profile.program.$id),
+        ]),
+      )
+    } else {
+      queries.push(Query.isNull("sede"))
+      queries.push(Query.isNull("faculty"))
+      queries.push(Query.isNull("program"))
     }
 
-    queries.push(Query.select(["*", "sede.*", "category.*"]))
+    queries.push(
+      Query.select([
+        "*",
+        "sede.*",
+        "category.*",
+        "faculty.*",
+        "faculty.sede.*",
+        "program.*",
+        "program.faculty.*",
+        "program.faculty.sede.*",
+      ]),
+    )
     queries.push(Query.limit(limit))
     queries.push(Query.offset((page - 1) * limit))
 
