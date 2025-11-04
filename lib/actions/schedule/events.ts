@@ -3,11 +3,13 @@
 import { revalidatePath } from "next/cache"
 import { ID } from "node-appwrite"
 
-import { createSessionClient } from "@/lib/appwrite"
+import { createAdminClient, createSessionClient } from "@/lib/appwrite"
 import { BUCKETS, DATABASE_ID, TABLES } from "@/lib/appwrite/config"
 import { scheduleEventSchema } from "@/lib/data/schemas"
 import { Colors, type ScheduleEvents } from "@/lib/data/types"
 import { buildImageUrl, extractImageUrl } from "@/lib/utils"
+import { setScheduleEventPermissions } from "@/lib/utils/permissions"
+import { canAdminSchedule } from "../users"
 
 export type EventActionState = {
   success: boolean
@@ -67,7 +69,7 @@ export async function saveEvent(
 
     const validData = validationResult.data
 
-    const { storage, database } = await createSessionClient()
+    const { storage } = await createAdminClient()
 
     let uploadedImageUrl: string | null = null
 
@@ -131,6 +133,21 @@ export async function saveEvent(
     }
 
     const eventId = formData.get("eventId") as string | null
+    const scheduleCategorySlug =
+      (formData.get("scheduleCategorySlug") as string) || ""
+
+    // Obtener el schedule completo para verificar permisos
+    const { database: tempDatabase } = await createAdminClient()
+    const schedule = await tempDatabase.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLES.SCHEDULES,
+      rowId: validData.schedule,
+    })
+
+    // Usar el cliente apropiado basado en permisos
+    const { database } = (await canAdminSchedule(schedule as any))
+      ? await createAdminClient()
+      : await createSessionClient()
 
     const eventData = {
       title: validData.title,
@@ -146,11 +163,19 @@ export async function saveEvent(
       image: uploadedImageUrl,
     }
 
+    const eventIdToUse = eventId || ID.unique()
+
+    const permissions = await setScheduleEventPermissions(
+      eventIdToUse,
+      scheduleCategorySlug,
+    )
+
     const result = await database.upsertRow({
       databaseId: DATABASE_ID,
       tableId: TABLES.SCHEDULE_EVENTS,
-      rowId: eventId || ID.unique(),
+      rowId: eventIdToUse,
       data: eventData,
+      permissions: permissions,
     })
 
     revalidatePath(`/schedules/[category]/[slug]`, "page")

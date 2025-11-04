@@ -3,13 +3,13 @@
 import { revalidatePath } from "next/cache"
 import { ID } from "node-appwrite"
 
-import { createSessionClient } from "@/lib/appwrite"
+import { createAdminClient, createSessionClient } from "@/lib/appwrite"
 import { DATABASE_ID, TABLES } from "@/lib/appwrite/config"
-import { getProfile } from "@/lib/data/profiles/getProfile"
 import { scheduleSchema } from "@/lib/data/schemas"
 import { type Schedules } from "@/lib/data/types"
-import { getUser } from "@/lib/data/users/getUser"
 import { handleError } from "@/lib/utils/error-handler"
+import { setSchedulePermissions } from "@/lib/utils/permissions"
+import { canAdminSchedule } from "../users"
 
 export type ScheduleActionState = {
   success: boolean
@@ -31,24 +31,12 @@ export async function saveSchedule(
   formData: FormData,
 ): Promise<ScheduleActionState> {
   try {
-    // Primero obtener el perfil del usuario para la sede
-    const user = await getUser()
-    const profile = await getProfile(user.$id)
-
-    if (!profile?.sede) {
-      return {
-        success: false,
-        message: "El usuario no tiene una sede asignada",
-        errors: { _form: ["El usuario no tiene una sede asignada"] },
-      }
-    }
-
     const rawData = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
-      sede: profile.sede.$id, // Usar la sede del perfil
-      faculty: profile.faculty?.$id || null,
-      program: profile.program?.$id || null,
+      sede: (formData.get("sede") as string) || null,
+      faculty: (formData.get("faculty") as string) || null,
+      program: (formData.get("program") as string) || null,
       category: formData.get("category") as string,
       start_hour: parseInt(formData.get("start_hour") as string) || 6,
       end_hour: parseInt(formData.get("end_hour") as string) || 22,
@@ -66,9 +54,30 @@ export async function saveSchedule(
 
     const validData = validationResult.data
 
-    const { database } = await createSessionClient()
-
     const scheduleId = formData.get("scheduleId") as string | null
+    const scheduleCategorySlug =
+      (formData.get("scheduleCategory") as string) || ""
+
+    // Si estamos editando, obtener el schedule existente para verificar permisos
+    let database
+    if (scheduleId) {
+      const { database: tempDatabase } = await createAdminClient()
+      const existingSchedule = await tempDatabase.getRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLES.SCHEDULES,
+        rowId: scheduleId,
+      })
+
+      // Usar el cliente apropiado basado en permisos
+      const client = (await canAdminSchedule(existingSchedule as any))
+        ? await createAdminClient()
+        : await createSessionClient()
+      database = client.database
+    } else {
+      // Para crear nuevos schedules, usar createAdminClient por defecto
+      const client = await createAdminClient()
+      database = client.database
+    }
 
     const scheduleData = {
       name: validData.name,
@@ -80,13 +89,18 @@ export async function saveSchedule(
       start_hour: validData.start_hour,
       end_hour: validData.end_hour,
     }
+    const scheduleIdToUse = scheduleId || ID.unique()
+    const permissions = await setSchedulePermissions(
+      scheduleIdToUse,
+      scheduleCategorySlug,
+    )
 
     const result = await database.upsertRow({
       databaseId: DATABASE_ID,
       tableId: TABLES.SCHEDULES,
-      rowId: scheduleId || ID.unique(),
+      rowId: scheduleIdToUse,
       data: scheduleData,
-      permissions: [],
+      permissions: permissions,
     })
 
     revalidatePath("/schedules")

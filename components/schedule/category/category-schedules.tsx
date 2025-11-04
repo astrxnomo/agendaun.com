@@ -60,7 +60,7 @@ export async function CategorySchedules({
     canEditCategory,
   ] = await Promise.all([
     getSchedulesByCategory(categorySlug, profile, currentPage),
-    canEditScheduleCategory(categorySlug),
+    canAdminScheduleCategory(categorySlug),
   ])
 
   if (!category) {
@@ -87,13 +87,13 @@ export async function CategorySchedules({
         ]}
       />
       <div className="border-b p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div>
             <h1 className="text-3xl font-bold">{category.name}</h1>
             {total > 0 && (
               <p className="text-muted-foreground mt-1 text-sm">
-                {total} {total === 1 ? "horario" : "horarios"} disponibles para{" "}
-                {profile.sede.name}
+                {total} {total === 1 ? "horario" : "horarios"} disponible
+                {total === 1 ? "" : "s"}
               </p>
             )}
           </div>
