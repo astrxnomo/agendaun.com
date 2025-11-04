@@ -163,40 +163,47 @@ export const calendarEventSchema = calendarEventSchemaRaw
 // SCHEDULE SCHEMAS
 // =============================================================================
 
-/**
- * Schema para validación de horarios
- */
-export const scheduleSchema = z.object({
-  name: z
-    .string()
-    .min(1, "El nombre es requerido")
-    .max(100, "El nombre es muy largo")
-    .nullable()
-    .optional(),
-  description: z
-    .string()
-    .max(500, "La descripción es muy larga")
-    .nullable()
-    .optional(),
-  sede: z.string().min(1, "La sede es requerida"),
-  faculty: z.string().nullable().optional(),
-  program: z.string().nullable().optional(),
-  category: z.string().min(1, "La categoría es requerida"),
-  start_hour: z
-    .number()
-    .int()
-    .min(0, "La hora de inicio debe ser entre 0 y 23")
-    .max(23, "La hora de inicio debe ser entre 0 y 23"),
-  end_hour: z
-    .number()
-    .int()
-    .min(0, "La hora de fin debe ser entre 0 y 23")
-    .max(23, "La hora de fin debe ser entre 0 y 23"),
-})
+export const scheduleSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, "El nombre es requerido")
+      .max(100, "El nombre es muy largo")
+      .nullable()
+      .optional(),
+    description: z
+      .string()
+      .max(500, "La descripción es muy larga")
+      .nullable()
+      .optional(),
+    sede: z.string().nullable().optional(),
+    faculty: z.string().nullable().optional(),
+    program: z.string().nullable().optional(),
+    category: z.string().min(1, "La categoría es requerida"),
+    start_hour: z
+      .number()
+      .int()
+      .min(0, "La hora de inicio debe ser entre 0 y 23")
+      .max(23, "La hora de inicio debe ser entre 0 y 23"),
+    end_hour: z
+      .number()
+      .int()
+      .min(0, "La hora de fin debe ser entre 0 y 23")
+      .max(23, "La hora de fin debe ser entre 0 y 23"),
+  })
+  .refine(
+    (data) => {
+      // Validar que solo se especifique un nivel organizacional a la vez
+      const levels = [data.sede, data.faculty, data.program].filter(Boolean)
+      return levels.length <= 1
+    },
+    {
+      message:
+        "Solo se puede especificar un nivel organizacional por horario (sede, facultad o programa)",
+      path: ["program"],
+    },
+  )
 
-/**
- * Schema para validación de categorías de horarios
- */
 export const scheduleCategorySchema = z.object({
   name: z
     .string()

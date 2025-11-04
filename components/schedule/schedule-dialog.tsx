@@ -6,12 +6,14 @@ import { useActionState, useEffect, useState } from "react"
 import { Label as AriaLabel } from "react-aria-components"
 import { toast } from "sonner"
 
+import { EventVisibilitySelector } from "@/components/calendar/core/event/event-visibility-selector"
 import { Button } from "@/components/ui/button"
 import { DateInput, TimeField } from "@/components/ui/datefield-rac"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -24,7 +26,14 @@ import {
   type ScheduleActionState,
 } from "@/lib/actions/schedule/schedules"
 
-import type { ScheduleCategories, Schedules } from "@/lib/data/types"
+import { getFacultyById } from "@/lib/data/faculties/getFacultyById"
+import type {
+  Faculties,
+  Programs,
+  ScheduleCategories,
+  Schedules,
+  Sedes,
+} from "@/lib/data/types"
 
 const initialState: ScheduleActionState = {
   success: false,
@@ -43,6 +52,14 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
   const [startTime, setStartTime] = useState<Time>(new Time(6, 0))
   const [endTime, setEndTime] = useState<Time>(new Time(22, 0))
   const [error, setError] = useState<string | null>(null)
+
+  // Estados para el nivel del horario
+  const [scheduleLevel, setScheduleLevel] = useState<
+    "nacional" | "sede" | "faculty" | "program"
+  >("sede")
+  const [selectedSede, setSelectedSede] = useState<Sedes | null>(null)
+  const [selectedFaculty, setSelectedFaculty] = useState<Faculties | null>(null)
+  const [selectedProgram, setSelectedProgram] = useState<Programs | null>(null)
 
   const [state, formAction, isPending] = useActionState(
     saveSchedule,
@@ -77,12 +94,66 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
       setEndTime(new Time(end, 0))
       setError(null)
       validateHours(new Time(start, 0), new Time(end, 0))
+
+      // Configurar nivel del schedule basado en los campos existentes
+      if (schedule.program) {
+        setScheduleLevel("program")
+        setSelectedProgram(schedule.program)
+        setSelectedFaculty(schedule.program.faculty || null)
+        setSelectedSede(schedule.program.faculty?.sede || schedule.sede)
+
+        // Si no hay relaciones anidadas, cargar la facultad completa
+        const programFaculty = schedule.program.faculty
+        const facultySede = programFaculty?.sede
+
+        if (programFaculty && !facultySede) {
+          const loadFacultyWithSede = async () => {
+            const facultyData = await getFacultyById(programFaculty.$id)
+            setSelectedFaculty(facultyData)
+            setSelectedSede(facultyData.sede || null)
+          }
+          void loadFacultyWithSede()
+        }
+      } else if (schedule.faculty) {
+        setScheduleLevel("faculty")
+        setSelectedFaculty(schedule.faculty)
+        setSelectedSede(schedule.faculty.sede || schedule.sede)
+        setSelectedProgram(null)
+
+        // Si no hay relación anidada de sede, cargar la facultad completa
+        const facultySede = schedule.faculty.sede
+
+        if (!facultySede) {
+          const loadFacultyWithSede = async () => {
+            const facultyData = await getFacultyById(schedule.faculty!.$id)
+            setSelectedFaculty(facultyData)
+            setSelectedSede(facultyData.sede || null)
+          }
+          void loadFacultyWithSede()
+        }
+      } else if (schedule.sede) {
+        setScheduleLevel("sede")
+        setSelectedSede(schedule.sede)
+        setSelectedFaculty(null)
+        setSelectedProgram(null)
+      } else {
+        setScheduleLevel("nacional")
+        setSelectedSede(null)
+        setSelectedFaculty(null)
+        setSelectedProgram(null)
+      }
     } else if (open && !schedule) {
       setName("")
       setDescription("")
       setStartTime(new Time(6, 0))
       setEndTime(new Time(22, 0))
       setError(null)
+
+      // Reset niveles
+      setScheduleLevel("sede")
+      setSelectedSede(null)
+      setSelectedFaculty(null)
+      setSelectedProgram(null)
     }
   }, [open, schedule])
 
@@ -136,136 +207,175 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>
-            {schedule ? "Editar horario" : "Crear nuevo horario"}
-          </DialogTitle>
-          <DialogDescription>
-            {schedule
-              ? "Actualiza los datos del horario"
-              : `Crea un nuevo horario para ${category.name}`}
-          </DialogDescription>
-        </DialogHeader>
-        <form action={formAction} className="space-y-4">
-          {/* Campos ocultos */}
-          <input type="hidden" name="category" value={category.$id} />
-          {schedule?.$id && (
-            <input type="hidden" name="scheduleId" value={schedule.$id} />
-          )}
-          <input type="hidden" name="start_hour" value={startTime.hour} />
-          <input type="hidden" name="end_hour" value={endTime.hour} />
-
-          {/* Errores generales */}
-          {state.errors?._form && (
-            <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-md border p-3 text-sm">
-              {state.errors._form.join(", ")}
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="name">Nombre *</Label>
-              <span className="text-muted-foreground text-xs">
-                {name.length}/100
-              </span>
-            </div>
-            <Input
-              id="name"
-              name="name"
-              placeholder="Ej: Primer Semestre 2025"
-              value={name}
-              onChange={(e) => setName(e.target.value.slice(0, 100))}
-              disabled={isPending}
-              maxLength={100}
-              aria-invalid={state.errors?.name ? "true" : "false"}
-              aria-describedby={state.errors?.name ? "name-error" : undefined}
-            />
-            {state.errors?.name && (
-              <p id="name-error" className="text-destructive text-sm">
-                {state.errors.name.join(", ")}
-              </p>
-            )}
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-[500px] [&>button:last-child]:top-3.5">
+        <DialogHeader className="contents space-y-0 text-left">
+          <div className="border-b px-6 py-4">
+            <DialogTitle className="text-base">
+              {schedule ? "Editar horario" : "Crear nuevo horario"}
+            </DialogTitle>
+            <DialogDescription className="mt-1.5">
+              {schedule
+                ? "Actualiza los datos del horario"
+                : `Crea un nuevo horario para ${category.name}`}
+            </DialogDescription>
           </div>
+        </DialogHeader>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="description">Descripción</Label>
-              <span className="text-muted-foreground text-xs">
-                {description.length}/500
-              </span>
-            </div>
-            <Textarea
-              id="description"
-              name="description"
-              placeholder="Describe brevemente este horario..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value.slice(0, 500))}
-              disabled={isPending}
-              rows={3}
-              maxLength={500}
-              aria-invalid={state.errors?.description ? "true" : "false"}
-              aria-describedby={
-                state.errors?.description ? "description-error" : undefined
+        <div className="overflow-y-auto px-6 py-4">
+          <form id="schedule-form" action={formAction} className="space-y-4">
+            {/* Campos ocultos */}
+            <input type="hidden" name="category" value={category.$id} />
+            {schedule?.$id && (
+              <>
+                <input type="hidden" name="scheduleId" value={schedule.$id} />
+                <input
+                  type="hidden"
+                  name="scheduleCategorySlug"
+                  value={category.slug}
+                />
+              </>
+            )}
+            <input type="hidden" name="start_hour" value={startTime.hour} />
+            <input type="hidden" name="end_hour" value={endTime.hour} />
+            {/* Solo enviar el campo correspondiente al nivel seleccionado */}
+            <input
+              type="hidden"
+              name="sede"
+              value={scheduleLevel === "sede" ? selectedSede?.$id || "" : ""}
+            />
+            <input
+              type="hidden"
+              name="faculty"
+              value={
+                scheduleLevel === "faculty" ? selectedFaculty?.$id || "" : ""
               }
             />
-            {state.errors?.description && (
-              <p id="description-error" className="text-destructive text-sm">
-                {state.errors.description.join(", ")}
-              </p>
-            )}
-          </div>
+            <input
+              type="hidden"
+              name="program"
+              value={
+                scheduleLevel === "program" ? selectedProgram?.$id || "" : ""
+              }
+            />
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Hora de inicio */}
-              <TimeField
-                value={startTime}
-                onChange={handleStartTimeChange}
-                hourCycle={12}
-                granularity="hour"
-                isDisabled={isPending}
-              >
-                <AriaLabel className="text-sm font-medium">
-                  Hora de inicio
-                </AriaLabel>
-                <div className="relative">
-                  <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
-                    <ClockIcon size={16} aria-hidden="true" />
-                  </div>
-                  <DateInput className="ps-9" />
-                </div>
-              </TimeField>
-
-              {/* Hora de fin */}
-              <TimeField
-                value={endTime}
-                onChange={handleEndTimeChange}
-                hourCycle={12}
-                granularity="hour"
-                isDisabled={isPending}
-              >
-                <AriaLabel className="text-sm font-medium">
-                  Hora de fin
-                </AriaLabel>
-                <div className="relative">
-                  <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
-                    <ClockIcon size={16} aria-hidden="true" />
-                  </div>
-                  <DateInput className="ps-9" />
-                </div>
-              </TimeField>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="name">Nombre *</Label>
+                <span className="text-muted-foreground text-xs">
+                  {name.length}/100
+                </span>
+              </div>
+              <Input
+                id="name"
+                name="name"
+                placeholder="Ej: Primer Semestre 2025"
+                value={name}
+                onChange={(e) => setName(e.target.value.slice(0, 100))}
+                disabled={isPending}
+                maxLength={100}
+                aria-invalid={state.errors?.name ? "true" : "false"}
+                aria-describedby={state.errors?.name ? "name-error" : undefined}
+              />
+              {state.errors?.name && (
+                <p id="name-error" className="text-destructive text-sm">
+                  {state.errors.name.join(", ")}
+                </p>
+              )}
             </div>
 
-            {error && <p className="text-destructive text-sm">{error}</p>}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description">Descripción</Label>
+                <span className="text-muted-foreground text-xs">
+                  {description.length}/500
+                </span>
+              </div>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Describe brevemente este horario..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+                disabled={isPending}
+                rows={3}
+                maxLength={500}
+                aria-invalid={state.errors?.description ? "true" : "false"}
+                aria-describedby={
+                  state.errors?.description ? "description-error" : undefined
+                }
+              />
+              {state.errors?.description && (
+                <p id="description-error" className="text-destructive text-sm">
+                  {state.errors.description.join(", ")}
+                </p>
+              )}
+            </div>
 
-            <p className="text-muted-foreground text-xs">
-              Rango de horas visible en el horario. Los eventos solo podrán
-              crearse dentro de este rango. Mínimo 5 horas.
-            </p>
-          </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {/* Hora de inicio */}
+                <TimeField
+                  value={startTime}
+                  onChange={handleStartTimeChange}
+                  hourCycle={12}
+                  granularity="hour"
+                  isDisabled={isPending}
+                >
+                  <AriaLabel className="text-sm font-medium">
+                    Hora de inicio
+                  </AriaLabel>
+                  <div className="relative">
+                    <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
+                      <ClockIcon size={16} aria-hidden="true" />
+                    </div>
+                    <DateInput className="ps-9" />
+                  </div>
+                </TimeField>
 
-          <div className="flex justify-end gap-2 pt-4">
+                {/* Hora de fin */}
+                <TimeField
+                  value={endTime}
+                  onChange={handleEndTimeChange}
+                  hourCycle={12}
+                  granularity="hour"
+                  isDisabled={isPending}
+                >
+                  <AriaLabel className="text-sm font-medium">
+                    Hora de fin
+                  </AriaLabel>
+                  <div className="relative">
+                    <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 z-10 flex items-center justify-center ps-3">
+                      <ClockIcon size={16} aria-hidden="true" />
+                    </div>
+                    <DateInput className="ps-9" />
+                  </div>
+                </TimeField>
+              </div>
+
+              {error && <p className="text-destructive text-sm">{error}</p>}
+
+              <p className="text-muted-foreground text-xs">
+                Rango de horas visible en el horario. Los eventos solo podrán
+                crearse dentro de este rango. Mínimo 5 horas.
+              </p>
+            </div>
+
+            {/* Selector de visibilidad */}
+            <EventVisibilitySelector
+              value={scheduleLevel}
+              onChange={setScheduleLevel}
+              selectedSede={selectedSede}
+              selectedFaculty={selectedFaculty}
+              selectedProgram={selectedProgram}
+              onSedeChange={setSelectedSede}
+              onFacultyChange={setSelectedFaculty}
+              onProgramChange={setSelectedProgram}
+            />
+          </form>
+        </div>
+
+        <DialogFooter className="border-t px-6 py-4">
+          <div className="flex w-full justify-end gap-2">
             <Button
               type="button"
               variant="outline"
@@ -274,7 +384,11 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isPending || !!error}>
+            <Button
+              type="submit"
+              form="schedule-form"
+              disabled={isPending || !!error}
+            >
               {isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -284,7 +398,19 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
               )}
             </Button>
           </div>
-        </form>
+        </DialogFooter>
+        {/* Errores generales */}
+        {state.errors?._form && (
+          <div className="bg-destructive/10 text-destructive border-destructive/20 m-2 rounded-md border p-3 text-sm">
+            {state.errors._form.join(", ")}
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-destructive/15 text-destructive rounded-md px-3 py-2 text-sm">
+            {error}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )
