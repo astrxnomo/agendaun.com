@@ -10,7 +10,7 @@
 Actualmente, los estudiantes, profesores y el personal administrativo de la Universidad Nacional deben consultar múltiples canales —correos, carteleras físicas, páginas web y grupos de mensajería— para mantenerse informados. Esta dispersión de fuentes genera confusión, pérdida de tiempo y errores en la comunicación institucional. 
 AgendaUN soluciona este problema centralizando toda la información académica y administrativa en un solo lugar. Cada usuario tiene acceso a calendarios personalizados, con eventos y recordatorios relevantes según su Sede, Facultad o Programa, garantizando una comunicación más clara, eficiente y accesible.
 
-### 🔧 Tecnologías
+### Tecnologías
 
 | Área | Tecnología | Descripción |
 |------|-------------|-------------|
