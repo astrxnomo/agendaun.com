@@ -108,6 +108,7 @@ export type ScheduleCategories = Models.Row & {
 
 export type Profiles = Models.Row & {
   user_id: string
+  email: string
   sede: Sedes
   faculty: Faculties
   program: Programs
