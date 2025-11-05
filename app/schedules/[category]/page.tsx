@@ -1,7 +1,7 @@
 import { CategorySchedules } from "@/components/schedule/category/category-schedules"
 import { SchedulesSkeleton } from "@/components/schedule/schedules-skeleton"
-import { getUser } from "@/lib/data/users/getUser"
-import { redirect } from "next/dist/client/components/navigation"
+import { getOptionalUser } from "@/lib/data/users/getUser"
+import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
 type Props = {
@@ -16,9 +16,9 @@ export default async function ScheduleCategoryPage({
   const { category: categorySlug } = await params
   const { page: pageParam } = await searchParams
 
-  const currentPage = pageParam ? parseInt(pageParam, 10) : 1
+  const currentPage = pageParam ? Math.max(1, parseInt(pageParam, 10) || 1) : 1
 
-  const user = await getUser()
+  const user = await getOptionalUser()
 
   if (!user) {
     redirect(
