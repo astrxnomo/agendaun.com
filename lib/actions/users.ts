@@ -195,14 +195,6 @@ export async function canEditCalendarEvent(
       `c-${calendar.slug}.editor`,
     ])
 
-    console.log("canEditCalendarEvent - Debug info:", {
-      isEditor,
-      eventCreatedBy,
-      userId: user.$id,
-      calendarSlug: calendar.slug,
-      roles,
-    })
-
     if (isEditor && eventCreatedBy) {
       // Necesitamos obtener el perfil del usuario para comparar correctamente
       const { database } = await createAdminClient()
