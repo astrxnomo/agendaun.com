@@ -50,6 +50,7 @@ export async function getEvents(
           "program.*",
           "program.faculty.*",
           "program.faculty.sede.*",
+          "created_by.*",
         ]),
       )
 

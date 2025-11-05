@@ -682,6 +682,13 @@ export function EventDialog({
                 </p>
               )}
             </div>
+
+            {event?.created_by && (
+              <span className="text-muted-foreground text-xs font-light">
+                Creado por {event?.created_by?.email}
+                {event?.created_by?.user_id === profile?.user_id && " (Tu)"}
+              </span>
+            )}
           </form>
         </div>
 

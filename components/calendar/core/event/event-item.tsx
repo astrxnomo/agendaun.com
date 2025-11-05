@@ -10,6 +10,7 @@ import {
   MapPinIcon,
   School,
   University,
+  UserCircle,
 } from "lucide-react"
 
 import {
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn, getBorderRadiusClasses, getColor } from "@/lib/utils"
 
+import { useAuthContext } from "@/contexts/auth-context"
 import type { CalendarEtiquettes, CalendarEvents } from "@/lib/data/types"
 import type { DraggableAttributes } from "@dnd-kit/core"
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities"
@@ -242,6 +244,7 @@ export function EventItem({
   onMouseDown,
   onTouchStart,
 }: EventItemProps) {
+  const { profile } = useAuthContext()
   const colorClass = getColor(event.etiquette?.color)
 
   // Use the provided currentTime (for dragging) or the event's actual time
@@ -289,13 +292,18 @@ export function EventItem({
         onTouchStart={onTouchStart}
       >
         {children || (
-          <span className="truncate">
-            {!event.all_day && (
-              <span className="truncate font-normal uppercase opacity-70 sm:text-xs">
-                {formatTimeWithOptionalMinutes(displayStart)}{" "}
-              </span>
+          <span className="flex w-full items-center justify-between gap-1">
+            <span className="flex min-w-0 items-center gap-1">
+              {!event.all_day && (
+                <span className="shrink-0 font-normal uppercase opacity-70 sm:text-xs">
+                  {formatTimeWithOptionalMinutes(displayStart)}
+                </span>
+              )}
+              <span className="truncate">{event.title}</span>
+            </span>
+            {event?.created_by?.user_id === profile?.user_id && (
+              <UserCircle className="h-3.5 w-3.5 shrink-0 opacity-70" />
             )}
-            {event.title}
           </span>
         )}
       </EventWrapper>
@@ -324,17 +332,27 @@ export function EventItem({
         onTouchStart={onTouchStart}
       >
         {durationMinutes < 45 ? (
-          <div className="truncate">
-            {event.title}{" "}
-            {showTime && (
-              <span className="opacity-70">
-                {formatTimeWithOptionalMinutes(displayStart)}
-              </span>
+          <div className="flex w-full items-center justify-between gap-1">
+            <span className="truncate">
+              {event.title}{" "}
+              {showTime && (
+                <span className="opacity-70">
+                  {formatTimeWithOptionalMinutes(displayStart)}
+                </span>
+              )}
+            </span>
+            {event?.created_by?.user_id === profile?.user_id && (
+              <UserCircle className="h-3.5 w-3.5 shrink-0 opacity-70" />
             )}
           </div>
         ) : (
           <>
-            <div className="truncate font-medium">{event.title}</div>
+            <div className="flex items-center justify-between gap-1">
+              <span className="truncate font-medium">{event.title}</span>
+              {event?.created_by?.user_id === profile?.user_id && (
+                <UserCircle className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              )}
+            </div>
             {showTime && (
               <div className="truncate font-normal uppercase opacity-70 sm:text-xs">
                 {getEventTime()}
@@ -363,7 +381,12 @@ export function EventItem({
           {...dndListeners}
           {...dndAttributes}
         >
-          <div className="text-sm font-medium">{event.title}</div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium">{event.title}</span>
+            {event?.created_by?.user_id === profile?.user_id && (
+              <UserCircle className="h-3.5 w-3.5 shrink-0 opacity-70" />
+            )}
+          </div>
           <div className="text-xs opacity-70">
             {event.all_day ? (
               <span>Todo el dia</span>
