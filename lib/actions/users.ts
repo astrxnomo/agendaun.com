@@ -23,9 +23,7 @@ async function getRoles(): Promise<string[]> {
         membership.teamId === process.env.NEXT_PUBLIC_TEAMS_EDITORS,
     )
 
-    if (!editorMembership) return []
-
-    return editorMembership.roles || []
+    return editorMembership?.roles || []
   } catch (error) {
     handleError(error)
   }
