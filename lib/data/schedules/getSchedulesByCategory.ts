@@ -13,7 +13,7 @@ import { handleError } from "@/lib/utils/error-handler"
 
 export async function getSchedulesByCategory(
   categorySlug: string,
-  profile: Profiles,
+  profile: Profiles | null,
   page = 1,
   limit = 12,
 ): Promise<{
