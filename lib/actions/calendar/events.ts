@@ -1,6 +1,5 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
 import { ID } from "node-appwrite"
 
 import { createAdminClient, createSessionClient } from "@/lib/appwrite"
@@ -193,16 +192,10 @@ export async function saveCalendarEvent(
       permissions: permissions,
     })
 
-    // Revalidar la ruta específica del calendario
-    if (calendarSlug) {
-      revalidatePath(`/calendars/${calendarSlug}`)
-    }
-    revalidatePath(`/calendars/[slug]`, "page")
-
     return {
       success: true,
       message: eventId
-        ? "Evento actualizado correctamente (action)"
+        ? "Evento actualizado correctamente"
         : "Evento creado correctamente",
       data: result as unknown as CalendarEvents,
     }
