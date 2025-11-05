@@ -156,14 +156,13 @@ export async function saveCalendarEvent(
 
     const calendarSlug = (calendar as any).slug
 
-    // Determinar si es creación o edición
-    const isCreating = !eventId
+    // Determinar si puede usar admin client para crear/editar
     let canUseAdminClient = false
 
-    if (isCreating) {
+    if (!eventId) {
       canUseAdminClient = await canCreateInCalendar(calendar as any)
     } else {
-      // Para edición, necesitamos obtener el evento existente para verificar quién lo creó
+      // Edición: verificar si puede editar este evento específico
       const existingEvent = await database.getRow({
         databaseId: DATABASE_ID,
         tableId: TABLES.CALENDAR_EVENTS,
@@ -176,15 +175,15 @@ export async function saveCalendarEvent(
       )
     }
 
-    const { database: adminDatabase } = canUseAdminClient
+    // Usar el cliente apropiado según los permisos
+    const { database: dbClient } = canUseAdminClient
       ? await createAdminClient()
       : await createSessionClient()
 
     const permissions = await setCalendarEventPermissions(calendarSlug)
-
     const eventIdToUse = eventId || ID.unique()
 
-    const result = await adminDatabase.upsertRow({
+    const result = await dbClient.upsertRow({
       databaseId: DATABASE_ID,
       tableId: TABLES.CALENDAR_EVENTS,
       rowId: eventIdToUse,
