@@ -109,11 +109,40 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
       setSelectedProgram(profile?.program || null)
       setError(null)
 
+      // Si hay una facultad seleccionada, cargar las facultades disponibles
       if (profile?.sede && profile?.faculty) {
-        setFaculties(profile?.faculty ? [profile?.faculty] : [])
+        const loadFacultiesForProfile = async () => {
+          try {
+            setIsLoadingFaculties(true)
+            const result = await getFacultiesBySede(profile.sede.$id)
+            setFaculties(result)
+          } catch (error) {
+            console.error("Error loading faculties:", error)
+            // Fallback: al menos mostrar la facultad actual
+            setFaculties(profile.faculty ? [profile.faculty] : [])
+          } finally {
+            setIsLoadingFaculties(false)
+          }
+        }
+        void loadFacultiesForProfile()
       }
+
+      // Si hay un programa seleccionado, cargar los programas disponibles
       if (profile?.faculty && profile?.program) {
-        setPrograms(profile?.program ? [profile?.program] : [])
+        const loadProgramsForProfile = async () => {
+          try {
+            setIsLoadingPrograms(true)
+            const result = await getProgramsByFaculty(profile.faculty.$id)
+            setPrograms(result)
+          } catch (error) {
+            console.error("Error loading programs:", error)
+            // Fallback: al menos mostrar el programa actual
+            setPrograms(profile.program ? [profile.program] : [])
+          } finally {
+            setIsLoadingPrograms(false)
+          }
+        }
+        void loadProgramsForProfile()
       }
     }
   }
