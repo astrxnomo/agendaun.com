@@ -3,7 +3,6 @@ import "./globals.css"
 
 import { FileQuestion, Home } from "lucide-react"
 import { Outfit } from "next/font/google"
-import Link from "next/link"
 
 import type { Metadata } from "next"
 
@@ -44,13 +43,13 @@ export default function GlobalNotFound() {
             </div>
 
             <div className="space-y-6">
-              <Link
+              <a
                 href="/"
                 className="border-input bg-background hover:bg-accent hover:text-accent-foreground ring-offset-background focus-visible:ring-ring inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 <Home className="size-4" />
                 Volver al Inicio
-              </Link>
+              </a>
 
               <div className="border-border/30 border-t pt-4 text-center">
                 <p className="text-muted-foreground/80 text-xs">
