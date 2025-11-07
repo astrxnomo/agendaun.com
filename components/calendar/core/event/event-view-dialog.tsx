@@ -46,7 +46,7 @@ export function EventViewDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className={cn(
-          "flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] [&>button:last-child]:top-3.5",
+          "flex flex-col gap-0 p-0 [&>button:last-child]:top-3.5",
           event.image ? "sm:max-w-3xl" : "max-w-md",
         )}
       >

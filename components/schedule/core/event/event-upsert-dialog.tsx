@@ -134,7 +134,7 @@ export function ScheduleEventDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="flex max-w-md flex-col gap-0 p-0 sm:max-h-[min(800px,80vh)] sm:max-w-xl [&>button:last-child]:top-3.5">
+      <DialogContent className="flex max-w-md flex-col gap-0 p-0 sm:max-w-xl [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <DialogTitle className="border-b px-6 py-4 text-base">
             {event?.$id ? "Editar evento" : "Crear evento"}
