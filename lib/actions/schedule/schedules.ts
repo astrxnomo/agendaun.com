@@ -9,7 +9,7 @@ import { scheduleSchema } from "@/lib/data/schemas"
 import { type Schedules } from "@/lib/data/types"
 import { handleError } from "@/lib/utils/error-handler"
 import { setSchedulePermissions } from "@/lib/utils/permissions"
-import { canAdminSchedule } from "../users"
+import { canAdminSchedule, canEditSchedule } from "../users"
 
 export type ScheduleActionState = {
   success: boolean
@@ -54,22 +54,29 @@ export async function saveSchedule(
 
     const validData = validationResult.data
 
-    const scheduleId = formData.get("scheduleId") as string | null
-    const scheduleCategorySlug =
-      (formData.get("scheduleCategory") as string) || ""
+    // Obtener el schedule existente desde el input oculto (si existe)
+    const scheduleJson = formData.get("schedule") as string | null
+    const existingSchedule: Schedules | null = scheduleJson
+      ? JSON.parse(scheduleJson)
+      : null
 
-    // Si estamos editando, obtener el schedule existente para verificar permisos
+    // Si estamos editando, verificar permisos
     let database
-    if (scheduleId) {
-      const { database: tempDatabase } = await createAdminClient()
-      const existingSchedule = await tempDatabase.getRow({
-        databaseId: DATABASE_ID,
-        tableId: TABLES.SCHEDULES,
-        rowId: scheduleId,
-      })
+    if (existingSchedule) {
+      // Verificar si el usuario puede editar este schedule
+      const canEdit = await canEditSchedule(existingSchedule)
+      if (!canEdit) {
+        return {
+          success: false,
+          message: "No tienes permisos para editar este horario",
+          errors: {
+            _form: ["No tienes permisos para editar este horario"],
+          },
+        }
+      }
 
       // Usar el cliente apropiado basado en permisos
-      const client = (await canAdminSchedule(existingSchedule as any))
+      const client = (await canAdminSchedule(existingSchedule))
         ? await createAdminClient()
         : await createSessionClient()
       database = client.database
@@ -89,7 +96,8 @@ export async function saveSchedule(
       start_hour: validData.start_hour,
       end_hour: validData.end_hour,
     }
-    const scheduleIdToUse = scheduleId || ID.unique()
+    const scheduleIdToUse = existingSchedule?.$id || ID.unique()
+    const scheduleCategorySlug = existingSchedule?.category?.slug || ""
     const permissions = await setSchedulePermissions(
       scheduleIdToUse,
       scheduleCategorySlug,
@@ -107,7 +115,7 @@ export async function saveSchedule(
 
     return {
       success: true,
-      message: scheduleId
+      message: existingSchedule
         ? "Horario actualizado correctamente"
         : "Horario creado correctamente",
       data: result as unknown as Schedules,
@@ -126,12 +134,28 @@ export async function saveSchedule(
 
 export async function deleteSchedule(scheduleId: string): Promise<boolean> {
   try {
-    const sessionClient = await createSessionClient()
-    if (!sessionClient) {
-      throw new Error("No hay sesión activa")
+    // Primero obtener el schedule con admin client para verificar permisos
+    const { database: adminDatabase } = await createAdminClient()
+
+    const existingSchedule = await adminDatabase.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLES.SCHEDULES,
+      rowId: scheduleId,
+    })
+
+    // Verificar si el usuario puede editar/borrar este schedule
+    const canEdit = await canEditSchedule(existingSchedule as any)
+    if (!canEdit) {
+      throw new Error("No tienes permisos para eliminar este horario")
     }
 
-    const { database } = sessionClient
+    // Usar el cliente apropiado basado en permisos
+    const isAdmin = await canAdminSchedule(existingSchedule as any)
+    const client = isAdmin
+      ? await createAdminClient()
+      : await createSessionClient()
+
+    const { database } = client
 
     await database.deleteRow({
       databaseId: DATABASE_ID,

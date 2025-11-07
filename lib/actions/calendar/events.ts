@@ -210,29 +210,30 @@ export async function saveCalendarEvent(
   }
 }
 
-export async function deleteEvent(eventId: string): Promise<boolean> {
+export async function deleteEvent(event: CalendarEvents): Promise<boolean> {
   try {
-    const { database, storage } = await createSessionClient()
+    const canDelete = await canEditCalendarEvent(
+      event.calendar as any,
+      event.created_by?.$id || (event.created_by as any),
+    )
 
-    let eventImage: string | null = null
-    try {
-      const existingEvent = await database.getRow({
-        databaseId: DATABASE_ID,
-        tableId: TABLES.CALENDAR_EVENTS,
-        rowId: eventId,
-      })
-      eventImage = (existingEvent as unknown as CalendarEvents).image
-    } catch (error) {}
+    if (!canDelete) {
+      throw new Error("No tienes permisos para eliminar este evento")
+    }
+
+    const { database, storage } = canDelete
+      ? await createAdminClient()
+      : await createSessionClient()
 
     await database.deleteRow({
       databaseId: DATABASE_ID,
       tableId: TABLES.CALENDAR_EVENTS,
-      rowId: eventId,
+      rowId: event.$id,
     })
 
-    if (eventImage) {
+    if (event.image) {
       try {
-        const fileId = extractImageUrl(eventImage)
+        const fileId = extractImageUrl(event.image)
         if (fileId) {
           await storage.deleteFile({
             bucketId: BUCKETS.CALENDAR_EVENTS_IMAGES,
@@ -254,19 +255,15 @@ export async function moveEvent(
   event: CalendarEvents,
 ): Promise<CalendarEvents> {
   try {
-    // Obtener el calendario completo
-    const { database: tempDatabase } = await createAdminClient()
-    const calendar = await tempDatabase.getRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLES.CALENDARS,
-      rowId: (event.calendar as any).$id || event.calendar,
-    })
-
-    // Verificar si puede editar este evento específico (considerando si es creador)
     const canEdit = await canEditCalendarEvent(
-      calendar as any,
-      (event as any).created_by?.$id || (event as any).created_by,
+      event.calendar as any,
+      event.created_by?.$id || (event.created_by as any),
     )
+
+    if (!canEdit) {
+      throw new Error("No tienes permisos para mover este evento")
+    }
+
     const { database } = canEdit
       ? await createAdminClient()
       : await createSessionClient()

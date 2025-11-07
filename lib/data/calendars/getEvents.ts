@@ -17,56 +17,68 @@ export async function getEvents(
   const { database } = await createSessionClient()
 
   try {
-    if (calendar.slug === "unal") {
-      const queries = [Query.equal("calendar", calendar.$id)]
+    const isUnal = calendar.slug === "unal"
 
-      if (profile && profile.sede && profile.faculty && profile.program) {
+    const queries = [
+      Query.equal("calendar", calendar.$id),
+      Query.limit(1000),
+      Query.select([
+        "*",
+        "calendar.slug",
+        "etiquette.name",
+        "etiquette.color",
+        "etiquette.isActive",
+        "sede.*",
+        "faculty.*",
+        "faculty.sede.*",
+        "program.*",
+        "program.faculty.*",
+        "program.faculty.sede.*",
+        "created_by.user_id",
+        "created_by.email",
+      ]),
+    ]
+
+    if (isUnal && profile) {
+      if (profile.sede) {
         queries.push(
           Query.or([
-            Query.and([
-              Query.isNull("sede"),
-              Query.isNull("faculty"),
-              Query.isNull("program"),
-            ]),
+            Query.isNull("sede"),
             Query.equal("sede", profile.sede.$id),
-            Query.equal("faculty", profile.faculty.$id),
-            Query.equal("program", profile.program.$id),
           ]),
         )
       } else {
         queries.push(Query.isNull("sede"))
-        queries.push(Query.isNull("faculty"))
-        queries.push(Query.isNull("program"))
       }
 
+      if (profile.faculty) {
+        queries.push(
+          Query.or([
+            Query.isNull("faculty"),
+            Query.equal("faculty", profile.faculty.$id),
+          ]),
+        )
+      } else {
+        queries.push(Query.isNull("faculty"))
+      }
+
+      if (profile.program) {
+        queries.push(
+          Query.or([
+            Query.isNull("program"),
+            Query.equal("program", profile.program.$id),
+          ]),
+        )
+      } else {
+        queries.push(Query.isNull("program"))
+      }
+    } else if (isUnal) {
       queries.push(
-        Query.select([
-          "*",
-          "calendar.slug",
-          "etiquette.*",
-          "sede.*",
-          "faculty.*",
-          "faculty.sede.*",
-          "program.*",
-          "program.faculty.*",
-          "program.faculty.sede.*",
-          "created_by.*",
-        ]),
+        Query.isNull("sede"),
+        Query.isNull("faculty"),
+        Query.isNull("program"),
       )
-
-      const result = await database.listRows({
-        databaseId: DATABASE_ID,
-        tableId: TABLES.CALENDAR_EVENTS,
-        queries,
-      })
-
-      return result.rows as unknown as CalendarEvents[]
     }
-
-    const queries = [
-      Query.equal("calendar", calendar.$id),
-      Query.select(["*", "etiquette.*"]),
-    ]
 
     const result = await database.listRows({
       databaseId: DATABASE_ID,

@@ -58,8 +58,6 @@ export async function canEditSchedule(schedule: Schedules): Promise<boolean> {
     const user = await getUser()
     if (!user) return false
 
-    console.log(schedule)
-
     const roles = await getRoles()
     return checkPermissions(roles, [
       "s.admin",
@@ -109,9 +107,8 @@ export async function canAdminCalendarEtiquettes(
     if (calendar.profile?.user_id === user.$id) return true
 
     const roles = await getRoles()
-    console.log(roles)
     const res = checkPermissions(roles, [`c-${calendar.slug}.admin`])
-    console.log(roles)
+
     return res
   } catch (error) {
     handleError(error)
@@ -126,12 +123,12 @@ export async function canAdminCalendar(calendar: Calendars): Promise<boolean> {
     if (calendar.profile?.user_id === user.$id) return true
 
     const roles = await getRoles()
-    console.log(roles)
+
     const res = checkPermissions(roles, [
       `c-${calendar.slug}.admin`,
       `c-${calendar.slug}.editor`,
     ])
-    console.log(roles)
+
     return res
   } catch (error) {
     handleError(error)
@@ -208,11 +205,7 @@ export async function canEditCalendarEvent(
 
         if (userProfiles.rows.length > 0) {
           const userProfileId = userProfiles.rows[0].$id
-          console.log("Profile comparison:", {
-            userProfileId,
-            eventCreatedBy,
-            match: userProfileId === eventCreatedBy,
-          })
+
           if (userProfileId === eventCreatedBy) return true
         }
       } catch (error) {
@@ -231,8 +224,6 @@ export async function canAdminSchedule(schedule: Schedules): Promise<boolean> {
   try {
     const user = await getUser()
     if (!user) return false
-
-    console.log(schedule)
 
     const roles = await getRoles()
     return checkPermissions(roles, [

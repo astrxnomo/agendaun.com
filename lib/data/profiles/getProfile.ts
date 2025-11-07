@@ -16,7 +16,21 @@ export async function getProfile(profileId: string): Promise<Profiles | null> {
       tableId: TABLES.PROFILES,
       queries: [
         Query.equal("user_id", profileId),
-        Query.select(["*", "sede.*", "faculty.*", "program.*"]),
+        Query.select([
+          "*",
+          "sede.$id",
+          "sede.name",
+          "faculty.$id",
+          "faculty.name",
+          "faculty.sede.$id",
+          "faculty.sede.name",
+          "program.$id",
+          "program.name",
+          "program.faculty.$id",
+          "program.faculty.name",
+          "program.faculty.sede.$id",
+          "program.faculty.sede.name",
+        ]),
       ],
     })
 

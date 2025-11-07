@@ -101,7 +101,28 @@ export async function deleteEtiquette(
   etiquetteId: string,
 ): Promise<EtiquetteActionState> {
   try {
-    const { database } = await createSessionClient()
+    // Obtener la etiqueta para verificar permisos
+    const { database: tempDatabase } = await createAdminClient()
+    const existingEtiquette = await tempDatabase.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLES.ETIQUETTES,
+      rowId: etiquetteId,
+    })
+
+    const etiquette = existingEtiquette as unknown as CalendarEtiquettes
+    const calendar = await tempDatabase.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLES.CALENDARS,
+      rowId: (etiquette.calendar as any).$id || etiquette.calendar,
+    })
+
+    // Verificar permisos para administrar etiquetas
+    const canDelete = await canAdminCalendarEtiquettes(calendar as any)
+
+    // Usar el cliente apropiado
+    const { database } = canDelete
+      ? await createAdminClient()
+      : await createSessionClient()
 
     await database.deleteRow({
       databaseId: DATABASE_ID,

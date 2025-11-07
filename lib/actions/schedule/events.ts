@@ -9,7 +9,7 @@ import { scheduleEventSchema } from "@/lib/data/schemas"
 import { Colors, type ScheduleEvents } from "@/lib/data/types"
 import { buildImageUrl, extractImageUrl } from "@/lib/utils"
 import { setScheduleEventPermissions } from "@/lib/utils/permissions"
-import { canAdminSchedule } from "../users"
+import { canAdminSchedule, canEditSchedule } from "../users"
 
 export type EventActionState = {
   success: boolean
@@ -133,19 +133,38 @@ export async function saveEvent(
     }
 
     const eventId = formData.get("eventId") as string | null
-    const scheduleCategorySlug =
-      (formData.get("scheduleCategorySlug") as string) || ""
 
-    // Obtener el schedule completo para verificar permisos
-    const { database: tempDatabase } = await createAdminClient()
-    const schedule = await tempDatabase.getRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLES.SCHEDULES,
-      rowId: validData.schedule,
-    })
+    // Obtener el schedule completo desde el input oculto
+    const scheduleJson = formData.get("scheduleData") as string | null
+    if (!scheduleJson) {
+      return {
+        success: false,
+        message: "Datos del horario no encontrados",
+        errors: {
+          _form: ["Datos del horario no encontrados"],
+        },
+      }
+    }
+
+    const schedule = JSON.parse(scheduleJson)
+    const scheduleCategorySlug = schedule.category?.slug || ""
+
+    // Verificar si el usuario puede editar este schedule
+    const canEdit = await canEditSchedule(schedule)
+    if (!canEdit) {
+      return {
+        success: false,
+        message: "No tienes permisos para crear/editar eventos en este horario",
+        errors: {
+          _form: [
+            "No tienes permisos para crear/editar eventos en este horario",
+          ],
+        },
+      }
+    }
 
     // Usar el cliente apropiado basado en permisos
-    const { database } = (await canAdminSchedule(schedule as any))
+    const { database } = (await canAdminSchedule(schedule))
       ? await createAdminClient()
       : await createSessionClient()
 
@@ -199,29 +218,38 @@ export async function saveEvent(
   }
 }
 
-export async function deleteEvent(eventId: string): Promise<EventActionState> {
+export async function deleteEvent(
+  event: ScheduleEvents,
+): Promise<EventActionState> {
   try {
-    const { database, storage } = await createSessionClient()
+    // Verificar si el usuario puede editar/borrar este evento
+    const canEdit = await canEditSchedule(event.schedule as any)
+    if (!canEdit) {
+      return {
+        success: false,
+        message: "No tienes permisos para eliminar este evento",
+        errors: {
+          _form: ["No tienes permisos para eliminar este evento"],
+        },
+      }
+    }
 
-    let eventImage: string | null = null
-    try {
-      const existingEvent = await database.getRow({
-        databaseId: DATABASE_ID,
-        tableId: TABLES.SCHEDULE_EVENTS,
-        rowId: eventId,
-      })
-      eventImage = (existingEvent as unknown as ScheduleEvents).image
-    } catch (error) {}
+    // Usar el cliente apropiado según los permisos
+    const isAdmin = await canAdminSchedule(event.schedule as any)
+    const { database, storage } = isAdmin
+      ? await createAdminClient()
+      : await createSessionClient()
 
     await database.deleteRow({
       databaseId: DATABASE_ID,
       tableId: TABLES.SCHEDULE_EVENTS,
-      rowId: eventId,
+      rowId: event.$id,
     })
 
-    if (eventImage) {
+    // Eliminar imagen si existe
+    if (event.image) {
       try {
-        const fileId = extractImageUrl(eventImage)
+        const fileId = extractImageUrl(event.image)
         if (fileId) {
           await storage.deleteFile({
             bucketId: BUCKETS.SCHEDULE_EVENTS_IMAGES,
