@@ -21,8 +21,8 @@ export const configSchema = z.object({
     .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, "El nombre solo debe contener letras")
     .trim(),
   sede: z.string().min(1, "La sede es requerida"),
-  faculty: z.string().min(1, "La facultad es requerida"),
-  program: z.string().min(1, "El programa es requerido"),
+  faculty: z.string().optional(),
+  program: z.string().optional(),
   userId: z.string().min(1, "Usuario no autenticado"),
   profileId: z.string().optional(),
 })

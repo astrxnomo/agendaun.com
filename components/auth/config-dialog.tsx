@@ -321,7 +321,7 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                   className="flex items-center text-sm font-medium"
                 >
                   <School className="mr-1 size-4" />
-                  Sede
+                  Sede *
                 </Label>
                 <Popover
                   open={sedeOpen}
@@ -338,6 +338,7 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                       role="combobox"
                       aria-expanded={sedeOpen}
                       className="w-full justify-between"
+                      aria-invalid={state.errors?.sede ? "true" : "false"}
                     >
                       {selectedSede
                         ? selectedSede.name || "Sede no encontrada"
@@ -379,6 +380,11 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                     </Command>
                   </PopoverContent>
                 </Popover>
+                {state.errors?.sede && (
+                  <p className="text-destructive text-sm">
+                    {state.errors.sede.join(", ")}
+                  </p>
+                )}
               </div>
 
               {/* Facultad */}
@@ -448,6 +454,11 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                     </Command>
                   </PopoverContent>
                 </Popover>
+                {state.errors?.faculty && (
+                  <p className="text-destructive text-sm">
+                    {state.errors.faculty.join(", ")}
+                  </p>
+                )}
               </div>
 
               {/* Programa */}
@@ -515,6 +526,11 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
                     </Command>
                   </PopoverContent>
                 </Popover>
+                {state.errors?.program && (
+                  <p className="text-destructive text-sm">
+                    {state.errors.program.join(", ")}
+                  </p>
+                )}
               </div>
             </form>
           </div>
@@ -529,13 +545,7 @@ export function ConfigDialog({ children }: UserConfigDialogProps) {
           <Button
             type="submit"
             form={`${id}-config-form`}
-            disabled={
-              !name.trim() ||
-              !selectedSede ||
-              !selectedFaculty ||
-              !selectedProgram ||
-              isPending
-            }
+            disabled={!name.trim() || !selectedSede || isPending}
           >
             {isPending ? <Loader2 className="animate-spin" /> : "Guardar"}
           </Button>

@@ -56,8 +56,8 @@ export async function saveProfileConfig(
       $id: validData.profileId || "",
       user_id: validData.userId,
       sede: { $id: validData.sede },
-      faculty: { $id: validData.faculty },
-      program: { $id: validData.program },
+      faculty: validData.faculty ? { $id: validData.faculty } : null,
+      program: validData.program ? { $id: validData.program } : null,
     }
 
     await database.upsertRow({
