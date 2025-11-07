@@ -221,7 +221,13 @@ export function SetupCalendar({
   }
 
   const handleEventDelete = async (eventId: string) => {
-    const promise = deleteEvent(eventId).then(() => {
+    const eventToDelete = events.find((e) => e.$id === eventId)
+    if (!eventToDelete) {
+      toast.error("Evento no encontrado")
+      return
+    }
+
+    const promise = deleteEvent(eventToDelete).then(() => {
       onEventsUpdate((prev) => prev.filter((event) => event.$id !== eventId))
       return true
     })

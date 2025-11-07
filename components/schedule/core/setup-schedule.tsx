@@ -90,7 +90,13 @@ export function SetupSchedule({
   }
 
   const handleEventDelete = async (eventId: string) => {
-    const deletePromise = deleteEvent(eventId)
+    const eventToDelete = events.find((e) => e.$id === eventId)
+    if (!eventToDelete) {
+      toast.error("Evento no encontrado")
+      return
+    }
+
+    const deletePromise = deleteEvent(eventToDelete)
 
     toast.promise(deletePromise, {
       loading: "Eliminando evento...",
