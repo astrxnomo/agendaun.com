@@ -10,6 +10,7 @@ import {
   MapPinIcon,
   School,
   University,
+  User,
   UserCircle,
 } from "lucide-react"
 
@@ -302,7 +303,7 @@ export function EventItem({
               <span className="truncate">{event.title}</span>
             </span>
             {event?.created_by?.user_id === profile?.user_id && (
-              <UserCircle className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              <User className="h-3 w-3 shrink-0 opacity-70" />
             )}
           </span>
         )}
