@@ -26,7 +26,6 @@ import {
   type ScheduleActionState,
 } from "@/lib/actions/schedule/schedules"
 
-import { getFacultyById } from "@/lib/data/faculties/getFacultyById"
 import type {
   Faculties,
   Programs,
@@ -98,39 +97,21 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
       // Configurar nivel del schedule basado en los campos existentes
       if (schedule.program) {
         setScheduleLevel("program")
+
+        // Establecer en orden: sede -> facultad -> programa
+        const faculty = schedule.program.faculty
+        const sede = faculty?.sede || schedule.sede
+
+        setSelectedSede(sede || null)
+        setSelectedFaculty(faculty || null)
         setSelectedProgram(schedule.program)
-        setSelectedFaculty(schedule.program.faculty || null)
-        setSelectedSede(schedule.program.faculty?.sede || schedule.sede)
-
-        // Si no hay relaciones anidadas, cargar la facultad completa
-        const programFaculty = schedule.program.faculty
-        const facultySede = programFaculty?.sede
-
-        if (programFaculty && !facultySede) {
-          const loadFacultyWithSede = async () => {
-            const facultyData = await getFacultyById(programFaculty.$id)
-            setSelectedFaculty(facultyData)
-            setSelectedSede(facultyData.sede || null)
-          }
-          void loadFacultyWithSede()
-        }
       } else if (schedule.faculty) {
         setScheduleLevel("faculty")
+
+        // Establecer en orden: sede -> facultad
+        setSelectedSede(schedule.faculty.sede || schedule.sede || null)
         setSelectedFaculty(schedule.faculty)
-        setSelectedSede(schedule.faculty.sede || schedule.sede)
         setSelectedProgram(null)
-
-        // Si no hay relación anidada de sede, cargar la facultad completa
-        const facultySede = schedule.faculty.sede
-
-        if (!facultySede) {
-          const loadFacultyWithSede = async () => {
-            const facultyData = await getFacultyById(schedule.faculty!.$id)
-            setSelectedFaculty(facultyData)
-            setSelectedSede(facultyData.sede || null)
-          }
-          void loadFacultyWithSede()
-        }
       } else if (schedule.sede) {
         setScheduleLevel("sede")
         setSelectedSede(schedule.sede)
@@ -207,7 +188,7 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-[500px] [&>button:last-child]:top-3.5">
+      <DialogContent className="flex max-w-md flex-col gap-0 p-0 sm:max-w-[500px] [&>button:last-child]:top-3.5">
         <DialogHeader className="contents space-y-0 text-left">
           <div className="border-b px-6 py-4">
             <DialogTitle className="text-base">
@@ -225,15 +206,12 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
           <form id="schedule-form" action={formAction} className="space-y-4">
             {/* Campos ocultos */}
             <input type="hidden" name="category" value={category.$id} />
-            {schedule?.$id && (
-              <>
-                <input type="hidden" name="scheduleId" value={schedule.$id} />
-                <input
-                  type="hidden"
-                  name="scheduleCategorySlug"
-                  value={category.slug}
-                />
-              </>
+            {schedule && (
+              <input
+                type="hidden"
+                name="schedule"
+                value={JSON.stringify(schedule)}
+              />
             )}
             <input type="hidden" name="start_hour" value={startTime.hour} />
             <input type="hidden" name="end_hour" value={endTime.hour} />
