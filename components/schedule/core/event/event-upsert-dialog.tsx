@@ -149,15 +149,13 @@ export function ScheduleEventDialog({
           >
             {/* Campos ocultos */}
             <input type="hidden" name="schedule" value={schedule.$id} />
+            <input
+              type="hidden"
+              name="scheduleData"
+              value={JSON.stringify(schedule)}
+            />
             {event?.$id && (
-              <>
-                <input type="hidden" name="eventId" value={event.$id} />
-                <input
-                  type="hidden"
-                  name="scheduleCategorySlug"
-                  value={schedule.category.slug}
-                />
-              </>
+              <input type="hidden" name="eventId" value={event.$id} />
             )}
             <input
               type="hidden"
