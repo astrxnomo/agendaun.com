@@ -1,4 +1,4 @@
-import { canAdminScheduleCategory, canEditSchedule } from "@/lib/actions/users"
+import { canAdminScheduleCategory, scheduleEditMode } from "@/lib/actions/users"
 import { getProfile } from "@/lib/data/profiles/getProfile"
 import { getSchedulesByCategory } from "@/lib/data/schedules/getSchedulesByCategory"
 import { User } from "@/lib/data/types"
@@ -39,7 +39,7 @@ export async function CategorySchedules({
   const schedulesWithPermissions = await Promise.all(
     schedules.map(async (schedule) => ({
       schedule,
-      canEdit: await canEditSchedule(schedule),
+      canEdit: await scheduleEditMode(schedule),
     })),
   )
 

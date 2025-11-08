@@ -6,7 +6,7 @@ import { toast } from "sonner"
 
 import { PageHeader } from "@/components/layout/page-header"
 import { useAuthContext } from "@/contexts/auth-context"
-import { canEditSchedule } from "@/lib/actions/users"
+import { scheduleEditMode } from "@/lib/actions/users"
 import { getScheduleById } from "@/lib/data/schedules/getScheduleById"
 import { getScheduleEvents } from "@/lib/data/schedules/getScheduleEvents"
 
@@ -50,7 +50,7 @@ export function Schedule({ scheduleId }: { scheduleId: string }) {
 
         const [eventsResult, canEditResult] = await Promise.all([
           getScheduleEvents(scheduleResult),
-          canEditSchedule(scheduleResult),
+          scheduleEditMode(scheduleResult),
         ])
 
         setEvents(eventsResult)

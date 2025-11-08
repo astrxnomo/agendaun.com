@@ -34,7 +34,7 @@ export function ScheduleItemActions({ schedule }: ScheduleItemActionsProps) {
     setIsDeleting(true)
 
     try {
-      toast.promise(deleteSchedule(schedule.$id), {
+      toast.promise(deleteSchedule(schedule), {
         loading: "Eliminando horario...",
         success: "Horario eliminado correctamente",
         error: (err: Error) => err.message || "Error al eliminar el horario",

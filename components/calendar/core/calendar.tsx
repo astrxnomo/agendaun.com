@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { useAuthContext } from "@/contexts/auth-context"
-import { canEditCalendar } from "@/lib/actions/users"
+import { calendarEditMode } from "@/lib/actions/users"
 import { getCalendarBySlug } from "@/lib/data/calendars/getBySlug"
 import { getEvents } from "@/lib/data/calendars/getEvents"
 import { getProfile } from "@/lib/data/profiles/getProfile"
@@ -110,7 +110,7 @@ export default function Calendar({
         }
 
         try {
-          const canEditResult = await canEditCalendar(calendarResult)
+          const canEditResult = await calendarEditMode(calendarResult)
           setCanEdit(canEditResult)
         } catch (error) {
           const errorMessage =

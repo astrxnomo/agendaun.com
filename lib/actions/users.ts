@@ -1,10 +1,12 @@
 "use server"
 
-import { Query } from "node-appwrite"
-
 import { createAdminClient } from "@/lib/appwrite"
-import { DATABASE_ID, TABLES } from "@/lib/appwrite/config"
-import { type Calendars, type Schedules } from "@/lib/data/types"
+import {
+  ScheduleCategories,
+  type CalendarEvents,
+  type Calendars,
+  type Schedules,
+} from "@/lib/data/types"
 
 import { getUser } from "../data/users/getUser"
 import { handleError } from "../utils/error-handler"
@@ -36,7 +38,7 @@ async function checkPermissions(
   return checks.some((check) => roles.includes(check))
 }
 
-export async function canEditCalendar(calendar: Calendars): Promise<boolean> {
+export async function calendarEditMode(calendar: Calendars): Promise<boolean> {
   try {
     const user = await getUser()
     if (!user) return false
@@ -53,7 +55,7 @@ export async function canEditCalendar(calendar: Calendars): Promise<boolean> {
   }
 }
 
-export async function canEditSchedule(schedule: Schedules): Promise<boolean> {
+export async function scheduleEditMode(schedule: Schedules): Promise<boolean> {
   try {
     const user = await getUser()
     if (!user) return false
@@ -171,12 +173,13 @@ export async function canEditInCalendar(calendar: Calendars): Promise<boolean> {
 }
 
 export async function canEditCalendarEvent(
-  calendar: Calendars,
-  eventCreatedBy?: string,
+  event: CalendarEvents,
 ): Promise<boolean> {
   try {
     const user = await getUser()
     if (!user) return false
+
+    const calendar = event.calendar as Calendars
 
     // Si es dueño del calendario, puede editar todos los eventos
     if (calendar.profile?.user_id === user.$id) return true
@@ -220,19 +223,30 @@ export async function canEditCalendarEvent(
   }
 }
 
-export async function canAdminSchedule(schedule: Schedules): Promise<boolean> {
+export async function canAdminSchedule(
+  category?: ScheduleCategories,
+  schedule?: Schedules,
+): Promise<boolean> {
   try {
     const user = await getUser()
     if (!user) return false
 
     const roles = await getRoles()
-    return checkPermissions(roles, [
-      "s.admin",
-      `s-${schedule.category.slug}.admin`,
-      `s-${schedule.$id}.admin`,
-    ])
+
+    const permissions = ["s.admin"]
+
+    if (category) {
+      permissions.push(`s-${category.slug}.admin`)
+    }
+
+    if (schedule) {
+      permissions.push(`s-${schedule.$id}.admin`)
+    }
+
+    return checkPermissions(roles, permissions)
   } catch (error) {
     handleError(error)
+    return false
   }
 }
 
