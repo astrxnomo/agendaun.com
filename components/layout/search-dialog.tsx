@@ -1,12 +1,7 @@
 "use client"
 
-import {
-  ArrowUpRightIcon,
-  CircleFadingPlusIcon,
-  FileInputIcon,
-  FolderPlusIcon,
-  SearchIcon,
-} from "lucide-react"
+import { Calendar, CalendarDays, Clock, Home, SearchIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 import * as React from "react"
 
 import {
@@ -17,11 +12,11 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command"
 
 export default function Search() {
   const [open, setOpen] = React.useState(false)
+  const router = useRouter()
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -34,6 +29,11 @@ export default function Search() {
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
   }, [])
+
+  const handleNavigation = (path: string) => {
+    setOpen(false)
+    router.push(path)
+  }
 
   return (
     <>
@@ -51,63 +51,42 @@ export default function Search() {
         </span>
       </button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Type a command or search..." />
+        <CommandInput placeholder="Buscar páginas, calendarios, horarios..." />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Quick start">
-            <CommandItem>
-              <FolderPlusIcon
-                size={16}
-                className="opacity-60"
-                aria-hidden="true"
-              />
-              <span>New folder</span>
-              <CommandShortcut className="justify-center">⌘N</CommandShortcut>
-            </CommandItem>
-            <CommandItem>
-              <FileInputIcon
-                size={16}
-                className="opacity-60"
-                aria-hidden="true"
-              />
-              <span>Import document</span>
-              <CommandShortcut className="justify-center">⌘I</CommandShortcut>
-            </CommandItem>
-            <CommandItem>
-              <CircleFadingPlusIcon
-                size={16}
-                className="opacity-60"
-                aria-hidden="true"
-              />
-              <span>Add block</span>
-              <CommandShortcut className="justify-center">⌘B</CommandShortcut>
+          <CommandEmpty>No se encontraron resultados.</CommandEmpty>
+
+          <CommandGroup>
+            <CommandItem onSelect={() => handleNavigation("/")}>
+              <Home size={16} className="opacity-60" aria-hidden="true" />
+              <span>Inicio</span>
             </CommandItem>
           </CommandGroup>
+
           <CommandSeparator />
-          <CommandGroup heading="Navigation">
-            <CommandItem>
-              <ArrowUpRightIcon
-                size={16}
-                className="opacity-60"
-                aria-hidden="true"
-              />
-              <span>Go to dashboard</span>
+
+          <CommandGroup heading="Yo">
+            <CommandItem
+              onSelect={() => handleNavigation("/calendars/personal")}
+            >
+              <Calendar size={16} className="opacity-60" aria-hidden="true" />
+              <span>Mi calendario</span>
             </CommandItem>
-            <CommandItem>
-              <ArrowUpRightIcon
+          </CommandGroup>
+
+          <CommandSeparator />
+
+          <CommandGroup heading="Universidad">
+            <CommandItem onSelect={() => handleNavigation("/calendars/unal")}>
+              <CalendarDays
                 size={16}
                 className="opacity-60"
                 aria-hidden="true"
               />
-              <span>Go to apps</span>
+              <span>Calendario</span>
             </CommandItem>
-            <CommandItem>
-              <ArrowUpRightIcon
-                size={16}
-                className="opacity-60"
-                aria-hidden="true"
-              />
-              <span>Go to connections</span>
+            <CommandItem onSelect={() => handleNavigation("/schedules")}>
+              <Clock size={16} className="opacity-60" aria-hidden="true" />
+              <span>Horarios</span>
             </CommandItem>
           </CommandGroup>
         </CommandList>
