@@ -84,21 +84,6 @@ export async function canEditScheduleCategory(
   }
 }
 
-export async function getUserRoles(filterPattern?: string): Promise<string[]> {
-  try {
-    const roles = await getRoles()
-
-    if (!filterPattern) return roles
-
-    return roles.filter((role) => {
-      if (role === filterPattern) return true
-      return role.includes(filterPattern)
-    })
-  } catch (error) {
-    handleError(error)
-  }
-}
-
 export async function canAdminCalendarEtiquettes(
   calendar: Calendars,
 ): Promise<boolean> {
@@ -149,7 +134,7 @@ export async function canCreateInCalendar(
     const roles = await getRoles()
     return checkPermissions(roles, [
       `c-${calendar.slug}.admin`,
-      `c-${calendar.slug}.editor`, // Los editores pueden crear
+      `c-${calendar.slug}.editor`,
     ])
   } catch (error) {
     handleError(error)
