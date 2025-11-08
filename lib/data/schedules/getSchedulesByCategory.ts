@@ -46,20 +46,39 @@ export async function getSchedulesByCategory(
 
     const queries = [Query.equal("category", category.$id)]
 
-    // Filtrar por visibilidad organizacional
-    if (profile && profile.sede && profile.faculty && profile.program) {
-      queries.push(
-        Query.or([
-          Query.and([
+    if (profile) {
+      if (profile.sede) {
+        queries.push(
+          Query.or([
             Query.isNull("sede"),
-            Query.isNull("faculty"),
-            Query.isNull("program"),
+            Query.equal("sede", profile.sede.$id),
           ]),
-          Query.equal("sede", profile.sede.$id),
-          Query.equal("faculty", profile.faculty.$id),
-          Query.equal("program", profile.program.$id),
-        ]),
-      )
+        )
+      } else {
+        queries.push(Query.isNull("sede"))
+      }
+
+      if (profile.faculty) {
+        queries.push(
+          Query.or([
+            Query.isNull("faculty"),
+            Query.equal("faculty", profile.faculty.$id),
+          ]),
+        )
+      } else {
+        queries.push(Query.isNull("faculty"))
+      }
+
+      if (profile.program) {
+        queries.push(
+          Query.or([
+            Query.isNull("program"),
+            Query.equal("program", profile.program.$id),
+          ]),
+        )
+      } else {
+        queries.push(Query.isNull("program"))
+      }
     } else {
       queries.push(Query.isNull("sede"))
       queries.push(Query.isNull("faculty"))
@@ -69,8 +88,8 @@ export async function getSchedulesByCategory(
     queries.push(
       Query.select([
         "*",
-        "sede.*",
         "category.*",
+        "sede.*",
         "faculty.*",
         "faculty.sede.*",
         "program.*",
