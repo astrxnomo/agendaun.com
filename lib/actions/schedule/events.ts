@@ -9,7 +9,7 @@ import { scheduleEventSchema } from "@/lib/data/schemas"
 import { Colors, type ScheduleEvents } from "@/lib/data/types"
 import { buildImageUrl, extractImageUrl } from "@/lib/utils"
 import { setScheduleEventPermissions } from "@/lib/utils/permissions"
-import { canAdminSchedule, canEditSchedule } from "../users"
+import { canAdminSchedule } from "../users"
 
 export type EventActionState = {
   success: boolean
@@ -149,21 +149,6 @@ export async function saveEvent(
     const schedule = JSON.parse(scheduleJson)
     const scheduleCategorySlug = schedule.category?.slug || ""
 
-    // Verificar si el usuario puede editar este schedule
-    const canEdit = await canEditSchedule(schedule)
-    if (!canEdit) {
-      return {
-        success: false,
-        message: "No tienes permisos para crear/editar eventos en este horario",
-        errors: {
-          _form: [
-            "No tienes permisos para crear/editar eventos en este horario",
-          ],
-        },
-      }
-    }
-
-    // Usar el cliente apropiado basado en permisos
     const { database } = (await canAdminSchedule(schedule))
       ? await createAdminClient()
       : await createSessionClient()
@@ -222,19 +207,6 @@ export async function deleteEvent(
   event: ScheduleEvents,
 ): Promise<EventActionState> {
   try {
-    // Verificar si el usuario puede editar/borrar este evento
-    const canEdit = await canEditSchedule(event.schedule as any)
-    if (!canEdit) {
-      return {
-        success: false,
-        message: "No tienes permisos para eliminar este evento",
-        errors: {
-          _form: ["No tienes permisos para eliminar este evento"],
-        },
-      }
-    }
-
-    // Usar el cliente apropiado según los permisos
     const isAdmin = await canAdminSchedule(event.schedule as any)
     const { database, storage } = isAdmin
       ? await createAdminClient()

@@ -6,10 +6,10 @@ import { ID } from "node-appwrite"
 import { createAdminClient, createSessionClient } from "@/lib/appwrite"
 import { DATABASE_ID, TABLES } from "@/lib/appwrite/config"
 import { scheduleSchema } from "@/lib/data/schemas"
-import { type Schedules } from "@/lib/data/types"
+import { type ScheduleCategories, type Schedules } from "@/lib/data/types"
 import { handleError } from "@/lib/utils/error-handler"
 import { setSchedulePermissions } from "@/lib/utils/permissions"
-import { canAdminSchedule, canEditSchedule } from "../users"
+import { canAdminSchedule } from "../users"
 
 export type ScheduleActionState = {
   success: boolean
@@ -132,25 +132,9 @@ export async function saveSchedule(
   }
 }
 
-export async function deleteSchedule(scheduleId: string): Promise<boolean> {
+export async function deleteSchedule(schedule: Schedules): Promise<boolean> {
   try {
-    // Primero obtener el schedule con admin client para verificar permisos
-    const { database: adminDatabase } = await createAdminClient()
-
-    const existingSchedule = await adminDatabase.getRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLES.SCHEDULES,
-      rowId: scheduleId,
-    })
-
-    // Verificar si el usuario puede editar/borrar este schedule
-    const canEdit = await canEditSchedule(existingSchedule as any)
-    if (!canEdit) {
-      throw new Error("No tienes permisos para eliminar este horario")
-    }
-
-    // Usar el cliente apropiado basado en permisos
-    const isAdmin = await canAdminSchedule(existingSchedule as any)
+    const isAdmin = await canAdminSchedule(schedule.category)
     const client = isAdmin
       ? await createAdminClient()
       : await createSessionClient()
@@ -160,7 +144,7 @@ export async function deleteSchedule(scheduleId: string): Promise<boolean> {
     await database.deleteRow({
       databaseId: DATABASE_ID,
       tableId: TABLES.SCHEDULES,
-      rowId: scheduleId,
+      rowId: schedule.$id,
     })
 
     revalidatePath("/schedules")
