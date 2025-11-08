@@ -5,7 +5,7 @@ import { ID } from "node-appwrite"
 import { createAdminClient, createSessionClient } from "@/lib/appwrite"
 import { BUCKETS, DATABASE_ID, TABLES } from "@/lib/appwrite/config"
 import { calendarEventSchema } from "@/lib/data/schemas"
-import { type CalendarEvents } from "@/lib/data/types"
+import { type CalendarEvents, type Calendars } from "@/lib/data/types"
 import { buildImageUrl, extractImageUrl } from "@/lib/utils"
 import { handleError } from "@/lib/utils/error-handler"
 import { setCalendarEventPermissions } from "@/lib/utils/permissions"
@@ -67,6 +67,12 @@ export async function saveCalendarEvent(
     const validData = validationResult.data
 
     const { storage, database } = await createAdminClient()
+
+    // Obtener evento existente desde el formulario si existe
+    const eventJson = formData.get("event") as string | null
+    const existingEvent: CalendarEvents | null = eventJson
+      ? JSON.parse(eventJson)
+      : null
 
     let uploadedImageUrl: string | null = null
 
@@ -159,19 +165,19 @@ export async function saveCalendarEvent(
     // Determinar si puede usar admin client para crear/editar
     let canUseAdminClient = false
 
-    if (!eventId) {
+    if (!existingEvent) {
+      // Creación: verificar si puede crear en el calendario
       canUseAdminClient = await canCreateInCalendar(calendar as any)
     } else {
       // Edición: verificar si puede editar este evento específico
-      const existingEvent = await database.getRow({
-        databaseId: DATABASE_ID,
-        tableId: TABLES.CALENDAR_EVENTS,
-        rowId: eventId,
-      })
+      // Crear un evento temporal con el calendario completo para la verificación
+      const eventForCheck = {
+        ...existingEvent,
+        calendar: calendar as unknown as Calendars,
+      }
+
       canUseAdminClient = await canEditCalendarEvent(
-        calendar as any,
-        (existingEvent as any).created_by?.$id ||
-          (existingEvent as any).created_by,
+        eventForCheck as CalendarEvents,
       )
     }
 
@@ -212,10 +218,7 @@ export async function saveCalendarEvent(
 
 export async function deleteEvent(event: CalendarEvents): Promise<boolean> {
   try {
-    const canDelete = await canEditCalendarEvent(
-      event.calendar as any,
-      event.created_by?.$id || (event.created_by as any),
-    )
+    const canDelete = await canEditCalendarEvent(event)
 
     if (!canDelete) {
       throw new Error("No tienes permisos para eliminar este evento")
@@ -255,10 +258,7 @@ export async function moveEvent(
   event: CalendarEvents,
 ): Promise<CalendarEvents> {
   try {
-    const canEdit = await canEditCalendarEvent(
-      event.calendar as any,
-      event.created_by?.$id || (event.created_by as any),
-    )
+    const canEdit = await canEditCalendarEvent(event)
 
     if (!canEdit) {
       throw new Error("No tienes permisos para mover este evento")

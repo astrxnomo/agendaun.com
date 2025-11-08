@@ -190,30 +190,18 @@ export async function canEditCalendarEvent(
     const isAdmin = await checkPermissions(roles, [`c-${calendar.slug}.admin`])
     if (isAdmin) return true
 
-    // Si es editor y creador del evento, puede editarlo
+    // Si es editor, solo puede editar sus propios eventos
     const isEditor = await checkPermissions(roles, [
       `c-${calendar.slug}.editor`,
     ])
 
-    if (isEditor && eventCreatedBy) {
-      // Necesitamos obtener el perfil del usuario para comparar correctamente
-      const { database } = await createAdminClient()
-      try {
-        // Obtener el perfil del usuario actual
-        const userProfiles = await database.listRows({
-          databaseId: DATABASE_ID,
-          tableId: TABLES.PROFILES,
-          queries: [Query.equal("user_id", user.$id)],
-        })
+    if (isEditor && event.created_by) {
+      const createdByUserId =
+        typeof event.created_by === "object"
+          ? event.created_by.user_id
+          : undefined
 
-        if (userProfiles.rows.length > 0) {
-          const userProfileId = userProfiles.rows[0].$id
-
-          if (userProfileId === eventCreatedBy) return true
-        }
-      } catch (error) {
-        console.error("Error getting user profile:", error)
-      }
+      if (createdByUserId === user.$id) return true
     }
 
     return false
