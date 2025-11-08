@@ -1,7 +1,6 @@
 "use client"
 
 import { BellIcon } from "lucide-react"
-import Image from "next/image"
 import { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
@@ -15,57 +14,10 @@ import {
 const initialNotifications = [
   {
     id: 1,
-    image: "/a",
-    user: "Chris Tompson",
-    action: "requested review on",
-    target: "PR #42: Feature implementation",
-    timestamp: "15 minutes ago",
+    message:
+      "¡Vota por AgendaUN en ExpoASI! Tu apoyo nos ayuda a seguir mejorando.",
+    timestamp: "Ahora",
     unread: true,
-  },
-  {
-    id: 2,
-    image: "/",
-    user: "Emma Davis",
-    action: "shared",
-    target: "New component library",
-    timestamp: "45 minutes ago",
-    unread: true,
-  },
-  {
-    id: 3,
-    image: "/a",
-    user: "James Wilson",
-    action: "assigned you to",
-    target: "API integration task",
-    timestamp: "4 hours ago",
-    unread: false,
-  },
-  {
-    id: 4,
-    image: "/a",
-    user: "Alex Morgan",
-    action: "replied to your comment in",
-    target: "Authentication flow",
-    timestamp: "12 hours ago",
-    unread: false,
-  },
-  {
-    id: 5,
-    image: "/a",
-    user: "Sarah Chen",
-    action: "commented on",
-    target: "Dashboard redesign",
-    timestamp: "2 days ago",
-    unread: false,
-  },
-  {
-    id: 6,
-    image: "/a",
-    user: "Miky Derya",
-    action: "mentioned you in",
-    target: "Origin UI open graph image",
-    timestamp: "2 weeks ago",
-    unread: false,
   },
 ]
 
@@ -148,26 +100,12 @@ export default function Notifications() {
             className="hover:bg-accent rounded-md px-3 py-2 text-sm transition-colors"
           >
             <div className="relative flex items-start gap-3 pe-3">
-              <Image
-                className="size-9 rounded-md"
-                src={notification.image}
-                width={32}
-                height={32}
-                alt={notification.user}
-              />
               <div className="flex-1 space-y-1">
                 <button
                   className="text-foreground/80 text-left after:absolute after:inset-0"
                   onClick={() => handleNotificationClick(notification.id)}
                 >
-                  <span className="text-foreground font-medium hover:underline">
-                    {notification.user}
-                  </span>{" "}
-                  {notification.action}{" "}
-                  <span className="text-foreground font-medium hover:underline">
-                    {notification.target}
-                  </span>
-                  .
+                  {notification.message}
                 </button>
                 <div className="text-muted-foreground text-xs">
                   {notification.timestamp}
