@@ -2,7 +2,7 @@
 
 import { addHours, eachHourOfInterval, format, startOfDay } from "date-fns"
 import { es } from "date-fns/locale"
-import { Plus } from "lucide-react"
+import { MapPin, Plus } from "lucide-react"
 import React from "react"
 
 import { cn, getColor } from "@/lib/utils"
@@ -371,6 +371,12 @@ function ScheduleEvents({ event, onClick, height }: ScheduleEventsProps) {
             {" - "}
             {String(endHour % 12 || 12).padStart(2, "0")}:
             {String(endMinute).padStart(2, "0")} {endHour >= 12 ? "PM" : "AM"}
+          </div>
+        )}
+        {event.location && (
+          <div className="mt-0.5 line-clamp-2 text-[8px] opacity-60 sm:mt-1 sm:text-xs">
+            <MapPin className="mr-1 inline size-2 sm:size-3" />
+            {event.location}
           </div>
         )}
         {showDescription && (
