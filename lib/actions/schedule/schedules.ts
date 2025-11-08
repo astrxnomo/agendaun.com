@@ -54,37 +54,17 @@ export async function saveSchedule(
 
     const validData = validationResult.data
 
-    // Obtener el schedule existente desde el input oculto (si existe)
-    const scheduleJson = formData.get("schedule") as string | null
-    const existingSchedule: Schedules | null = scheduleJson
-      ? JSON.parse(scheduleJson)
+    const existingSchedule: Schedules | null = formData.get("schedule")
+      ? JSON.parse(formData.get("schedule") as string)
       : null
 
-    // Si estamos editando, verificar permisos
-    let database
-    if (existingSchedule) {
-      // Verificar si el usuario puede editar este schedule
-      const canEdit = await canEditSchedule(existingSchedule)
-      if (!canEdit) {
-        return {
-          success: false,
-          message: "No tienes permisos para editar este horario",
-          errors: {
-            _form: ["No tienes permisos para editar este horario"],
-          },
-        }
-      }
+    const categoryData: ScheduleCategories | null = formData.get("categoryData")
+      ? JSON.parse(formData.get("categoryData") as string)
+      : null
 
-      // Usar el cliente apropiado basado en permisos
-      const client = (await canAdminSchedule(existingSchedule))
-        ? await createAdminClient()
-        : await createSessionClient()
-      database = client.database
-    } else {
-      // Para crear nuevos schedules, usar createAdminClient por defecto
-      const client = await createAdminClient()
-      database = client.database
-    }
+    const { database } = (await canAdminSchedule(categoryData as any))
+      ? await createAdminClient()
+      : await createSessionClient()
 
     const scheduleData = {
       name: validData.name,
