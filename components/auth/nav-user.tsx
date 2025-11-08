@@ -73,9 +73,10 @@ export function NavUser() {
                 <span className="truncate font-medium">
                   {formatUserName(user.name, user.email)}
                 </span>
-                {profile?.sede && profile?.program && (
+                {profile?.sede && (
                   <span className="text-muted-foreground truncate text-[10px]">
-                    {profile.sede.name} - {profile.program.name}
+                    {profile.sede.name}
+                    {profile?.program ? ` - ${profile.program.name}` : ""}
                   </span>
                 )}
               </div>
