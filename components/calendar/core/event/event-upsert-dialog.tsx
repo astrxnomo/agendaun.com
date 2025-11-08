@@ -318,7 +318,14 @@ export function EventDialog({
             {/* Campos ocultos */}
             <input type="hidden" name="calendar" value={calendar.$id} />
             {event?.$id && (
-              <input type="hidden" name="eventId" value={event.$id} />
+              <>
+                <input type="hidden" name="eventId" value={event.$id} />
+                <input
+                  type="hidden"
+                  name="event"
+                  value={JSON.stringify(event)}
+                />
+              </>
             )}
             <input type="hidden" name="start" value={getStartDateTime()} />
             <input type="hidden" name="end" value={getEndDateTime()} />
