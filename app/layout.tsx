@@ -1,5 +1,6 @@
 import { Outfit } from "next/font/google"
 
+import { ConfigBanner } from "@/components/auth/config-banner"
 import { CalendarProvider } from "@/components/calendar/core/calendar-context"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import NavTop from "@/components/layout/nav-top"
@@ -46,6 +47,7 @@ export default async function RootLayout({
               </SidebarProvider>
             </CalendarProvider>
             <Toaster richColors />
+            <ConfigBanner />
           </AuthContextProvider>
         </ThemeProvider>
       </body>
