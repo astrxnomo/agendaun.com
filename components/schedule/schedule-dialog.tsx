@@ -206,6 +206,11 @@ export function ScheduleDialog({ category, schedule }: ScheduleDialogProps) {
           <form id="schedule-form" action={formAction} className="space-y-4">
             {/* Campos ocultos */}
             <input type="hidden" name="category" value={category.$id} />
+            <input
+              type="hidden"
+              name="categoryData"
+              value={JSON.stringify(category)}
+            />
             {schedule && (
               <input
                 type="hidden"
