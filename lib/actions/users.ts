@@ -119,7 +119,8 @@ export async function canEditCalendarEvent(
 
     const calendar = event.calendar as Calendars
 
-    // Si es dueño del calendario, puede editar todos los eventos
+    console.log(calendar)
+
     if (calendar.profile?.user_id === user.$id) return true
 
     const roles = await getRoles()
