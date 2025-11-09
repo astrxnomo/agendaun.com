@@ -73,17 +73,6 @@ export async function scheduleEditMode(schedule: Schedules): Promise<boolean> {
   }
 }
 
-export async function canEditScheduleCategory(
-  categorySlug: string,
-): Promise<boolean> {
-  try {
-    const roles = await getRoles()
-    return checkPermissions(roles, ["s.admin", `s-${categorySlug}.admin`])
-  } catch (error) {
-    handleError(error)
-  }
-}
-
 export async function canAdminCalendarEtiquettes(
   calendar: Calendars,
 ): Promise<boolean> {
@@ -95,26 +84,6 @@ export async function canAdminCalendarEtiquettes(
 
     const roles = await getRoles()
     const res = checkPermissions(roles, [`c-${calendar.slug}.admin`])
-
-    return res
-  } catch (error) {
-    handleError(error)
-  }
-}
-
-export async function canAdminCalendar(calendar: Calendars): Promise<boolean> {
-  try {
-    const user = await getUser()
-    if (!user) return false
-
-    if (calendar.profile?.user_id === user.$id) return true
-
-    const roles = await getRoles()
-
-    const res = checkPermissions(roles, [
-      `c-${calendar.slug}.admin`,
-      `c-${calendar.slug}.editor`,
-    ])
 
     return res
   } catch (error) {
@@ -135,22 +104,6 @@ export async function canCreateInCalendar(
     return checkPermissions(roles, [
       `c-${calendar.slug}.admin`,
       `c-${calendar.slug}.editor`,
-    ])
-  } catch (error) {
-    handleError(error)
-  }
-}
-
-export async function canEditInCalendar(calendar: Calendars): Promise<boolean> {
-  try {
-    const user = await getUser()
-    if (!user) return false
-
-    if (calendar.profile?.user_id === user.$id) return true
-
-    const roles = await getRoles()
-    return checkPermissions(roles, [
-      `c-${calendar.slug}.admin`, // Solo los admins pueden editar
     ])
   } catch (error) {
     handleError(error)
