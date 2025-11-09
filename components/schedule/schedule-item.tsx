@@ -25,9 +25,8 @@ export function ScheduleItem({
   const scheduleUrl = `/schedules/${categorySlug}/${schedule.$id}`
 
   if (!canEdit) {
-    // Versión completa como enlace
     return (
-      <Item className="bg-muted/40" asChild>
+      <Item className="bg-muted/40" asChild title={schedule?.name ?? undefined}>
         <Link href={scheduleUrl} aria-label={`Ver horario ${schedule.name}`}>
           <ItemMedia>
             <div className="bg-primary/10 text-primary rounded p-3">
@@ -36,7 +35,7 @@ export function ScheduleItem({
           </ItemMedia>
 
           <ItemContent>
-            <ItemTitle className="text-lg font-semibold">
+            <ItemTitle className="line-clamp-1 text-lg font-semibold">
               {schedule.name}
             </ItemTitle>
             {schedule.description && (
@@ -51,7 +50,10 @@ export function ScheduleItem({
   }
 
   return (
-    <Item className="bg-muted/40 hover:border-primary/30">
+    <Item
+      className="bg-muted/40 hover:border-primary/30"
+      title={schedule?.name ?? undefined}
+    >
       <ItemMedia>
         <div className="bg-primary/10 text-primary rounded p-3">
           <CalendarClock className="h-6 w-6" />
@@ -60,7 +62,7 @@ export function ScheduleItem({
 
       <ItemContent>
         <Link href={scheduleUrl} className="block">
-          <ItemTitle className="text-lg font-semibold">
+          <ItemTitle className="line-clamp-1 text-lg font-semibold">
             {schedule.name}
           </ItemTitle>
           {schedule.description && (
