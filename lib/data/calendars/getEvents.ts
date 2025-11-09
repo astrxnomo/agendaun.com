@@ -25,6 +25,7 @@ export async function getEvents(
       Query.select([
         "*",
         "calendar.slug",
+        "calendar.profile.user_id",
         "etiquette.name",
         "etiquette.color",
         "etiquette.isActive",
