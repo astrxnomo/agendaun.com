@@ -25,17 +25,17 @@ export function ConfigBanner() {
   }
 
   return (
-    <div className="animate-in slide-in-from-bottom-5 fixed right-4 bottom-4 z-50 max-w-md duration-700">
-      <div className="from-primary/10 via-primary/5 to-background border-primary/20 relative overflow-hidden rounded border-2 bg-gradient-to-br p-5 shadow-2xl backdrop-blur-md">
+    <div className="animate-in slide-in-from-bottom-5 fixed right-4 bottom-4 z-50 max-w-xl duration-700">
+      <div className="from-primary/10 via-primary/5 to-background border-primary/20 relative overflow-hidden rounded-xl border-2 bg-gradient-to-br p-6 shadow-2xl backdrop-blur-md">
         <div className="via-primary/10 absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent to-transparent" />
 
-        <div className="relative flex gap-4">
-          <div className="flex-1 space-y-3">
+        <div className="relative flex gap-5">
+          <div className="flex-1 space-y-4">
             <div>
-              <h3 className="text-lg font-bold">
+              <h3 className="text-xl font-bold">
                 ¡Completa tu perfil universitario!
               </h3>
-              <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+              <p className="text-muted-foreground mt-2 text-base leading-relaxed">
                 Completa tu información para ver eventos, horarios y contenido
                 personalizado de tu{" "}
                 <span className="text-primary font-semibold">sede</span>,{" "}
@@ -46,10 +46,10 @@ export function ConfigBanner() {
 
             <ConfigDialog>
               <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90 w-full animate-pulse shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                size="lg"
+                className="bg-primary hover:bg-primary/90 w-full shadow-lg transition-all hover:scale-105 hover:shadow-xl"
               >
-                <Settings className="h-4 w-4" />
+                <Settings className="h-5 w-5" />
                 Completar información
               </Button>
             </ConfigDialog>
