@@ -22,6 +22,7 @@ import {
 import { cn, getBorderRadiusClasses, getColor } from "@/lib/utils"
 
 import { useAuthContext } from "@/contexts/auth-context"
+import { useIsMobile } from "@/hooks/use-mobile"
 import type { CalendarEtiquettes, CalendarEvents } from "@/lib/data/types"
 import type { DraggableAttributes } from "@dnd-kit/core"
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities"
@@ -246,6 +247,7 @@ export function EventItem({
   onTouchStart,
 }: EventItemProps) {
   const { profile } = useAuthContext()
+  const isMobile = useIsMobile()
   const colorClass = getColor(event.etiquette?.color)
 
   // Use the provided currentTime (for dragging) or the event's actual time
@@ -295,10 +297,14 @@ export function EventItem({
         {children || (
           <span className="flex w-full items-center justify-between gap-1">
             <span className="flex min-w-0 items-center gap-1">
-              {!event.all_day && (
-                <span className="shrink-0 font-normal uppercase opacity-70 sm:text-xs">
-                  {formatTimeWithOptionalMinutes(displayStart)}
-                </span>
+              {!isMobile && (
+                <>
+                  {!event.all_day && (
+                    <span className="shrink-0 font-normal uppercase opacity-70 sm:text-xs">
+                      {formatTimeWithOptionalMinutes(displayStart)}
+                    </span>
+                  )}
+                </>
               )}
               <span className="truncate">{event.title}</span>
             </span>
