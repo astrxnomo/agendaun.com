@@ -16,7 +16,6 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
@@ -269,7 +268,7 @@ export function EventVisibilitySelector({
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start">
               <Command>
-                <CommandInput placeholder="Buscar sede..." />
+                {/* <CommandInput placeholder="Buscar sede..." /> */}
                 <CommandList>
                   <CommandEmpty>
                     {!isSedesLoaded
@@ -340,7 +339,7 @@ export function EventVisibilitySelector({
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start">
               <Command>
-                <CommandInput placeholder="Buscar facultad..." />
+                {/* <CommandInput placeholder="Buscar facultad..." /> */}
                 <CommandList>
                   <CommandEmpty>No se encontró ninguna facultad.</CommandEmpty>
                   <CommandGroup>
@@ -407,7 +406,7 @@ export function EventVisibilitySelector({
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start">
               <Command>
-                <CommandInput placeholder="Buscar programa..." />
+                {/* <CommandInput placeholder="Buscar programa..." /> */}
                 <CommandList>
                   <CommandEmpty>No se encontró ningún programa.</CommandEmpty>
                   <CommandGroup>
