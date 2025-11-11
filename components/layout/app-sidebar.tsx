@@ -2,16 +2,16 @@
 
 import {
   BookMarked,
+  Bug,
   Calendar,
   CalendarDays,
   ChevronRight,
+  Github,
   Grid3X3,
   Home,
-  LifeBuoy,
   LogIn,
   Rows3,
   Rows4,
-  Send,
   Table,
 } from "lucide-react"
 import Link from "next/link"
@@ -162,23 +162,31 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel>Ayuda</SidebarGroupLabel>
+          <SidebarGroupLabel>Comunidad</SidebarGroupLabel>
 
           <SidebarMenu>
-            <SidebarMenuButton asChild tooltip="Soporte">
-              <Link href="">
-                <LifeBuoy />
-                <span>Soporte</span>
-              </Link>
+            <SidebarMenuButton asChild tooltip="Ver código en GitHub">
+              <a
+                href="https://github.com/astrxnomo/agendaun.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github />
+                <span>Código fuente</span>
+              </a>
             </SidebarMenuButton>
           </SidebarMenu>
 
           <SidebarMenu>
-            <SidebarMenuButton asChild tooltip="Feedback">
-              <Link href="">
-                <Send />
-                <span>Feedback</span>
-              </Link>
+            <SidebarMenuButton asChild tooltip="Reporta bugs o sugiere mejoras">
+              <a
+                href="https://github.com/astrxnomo/agendaun.com/issues/new"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Bug />
+                <span>Reportar bug</span>
+              </a>
             </SidebarMenuButton>
           </SidebarMenu>
         </SidebarGroup>
