@@ -86,7 +86,7 @@ export function LoginForm() {
 
   return (
     <main className="flex min-h-[75vh] w-full items-center justify-center px-6 py-16">
-      <div className="w-full max-w-sm space-y-10">
+      <div className="w-full max-w-sm space-y-6">
         {/* Header Section */}
         <div className="space-y-6 text-center">
           <div className="flex justify-center">
@@ -109,9 +109,7 @@ export function LoginForm() {
               {emailSent ? "¡Enlace enviado!" : "Iniciar sesión"}
             </h1>
             <p className="text-muted-foreground mx-auto text-sm leading-relaxed">
-              {emailSent
-                ? "Revisa tu correo y haz clic en el enlace para acceder"
-                : "Ingresa tu correo institucional para acceder"}
+              {!emailSent && "Ingresa tu correo institucional para acceder"}
             </p>
           </div>
         </div>
@@ -144,10 +142,14 @@ export function LoginForm() {
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isPending}
                   required
+                  autoComplete="email"
+                  autoFocus
                   className="bg-background/50 border-border/50 focus:border-primary/50 focus:ring-primary/20 placeholder:text-muted-foreground/60 h-12 rounded px-4 pe-32 transition-all duration-200"
                   aria-invalid={state.errors?.username ? "true" : "false"}
                   aria-describedby={
-                    state.errors?.username ? "username-error" : undefined
+                    state.errors?.username
+                      ? "username-error username-hint"
+                      : "username-hint"
                   }
                 />
                 <span className="text-muted-foreground pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-3 text-sm peer-disabled:opacity-50">
@@ -181,38 +183,102 @@ export function LoginForm() {
           </form>
         ) : (
           <div className="space-y-6">
-            <div className="bg-primary/5 border-primary/20 rounded border p-5 backdrop-blur-sm">
-              <div className="space-y-2 text-center">
-                <p className="text-sm">Enlace enviado a</p>
-                <p className="text-primary text-sm font-semibold">
-                  {sentEmail || `${username}@unal.edu.co`}
-                </p>
+            {/* Email enviado - destacado */}
+            <div className="from-primary/10 to-primary/5 border-primary/20 rounded-lg border bg-gradient-to-br p-6 shadow-sm backdrop-blur-sm">
+              <div className="space-y-4 text-center">
+                <div className="space-y-2">
+                  <p className="text-foreground text-sm font-medium">
+                    Enlace enviado a:
+                  </p>
+                  <div className="bg-background/50 border-primary/30 rounded-md border px-4 py-3">
+                    <p className="font-mono text-base break-all">
+                      {sentEmail || `${username}@unal.edu.co`}
+                    </p>
+                  </div>
+                  <p className="text-muted-foreground pt-1 text-xs">
+                    Verifica que el correo sea correcto
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-4 text-center">
-              <p className="text-muted-foreground text-xs">
-                El enlace expira en <span className="font-medium">1 hora</span>
+            {/* Instrucciones paso a paso */}
+            <div className="bg-muted/30 space-y-4 rounded-lg p-5">
+              <p className="text-foreground text-sm font-medium">
+                Sigue estos pasos:
               </p>
+              <ol className="space-y-3 text-sm">
+                <li className="flex items-start gap-3">
+                  <span className="bg-primary/20 text-primary flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                    1
+                  </span>
+                  <span className="text-muted-foreground pt-0.5">
+                    Revisa tu bandeja de entrada y spam
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="bg-primary/20 text-primary flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                    2
+                  </span>
+                  <span className="text-muted-foreground pt-0.5">
+                    Haz clic en el enlace de acceso
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="bg-primary/20 text-primary flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                    3
+                  </span>
+                  <span className="text-muted-foreground pt-0.5">
+                    Serás redirigido automáticamente
+                  </span>
+                </li>
+              </ol>
+            </div>
 
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEmailSent(false)
-                  setUsername("")
-                }}
-                className="border-border/50 hover:bg-muted/50 h-11 w-full rounded transition-all duration-200"
-              >
-                <RotateCw />
-                Enviar otro enlace
-              </Button>
+            {/* Sección "¿No llegó?" */}
+            <div className="space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="border-border/50 w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-background text-muted-foreground px-3">
+                    ¿No te llegó el correo?
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEmailSent(false)
+                  }}
+                  className="border-border/50 hover:bg-muted/50 hover:border-primary/30 h-11 w-full rounded transition-all duration-200"
+                >
+                  <RotateCw className="size-4" />
+                  Reenviar enlace
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setEmailSent(false)
+                    setUsername("")
+                  }}
+                  className="text-muted-foreground hover:text-foreground h-9 w-full text-sm transition-colors"
+                >
+                  Usar otro correo
+                </Button>
+              </div>
             </div>
           </div>
         )}
 
-        <div className="border-border/30 border-t pt-8 text-center">
+        <div className="border-border/30 border-t pt-4 text-center">
           <p className="text-muted-foreground/80 text-xs">
-            Enviaremos un enlace de acceso a tu correo institucional
+            No necesitas contraseña. Enviaremos un enlace a tu correo para
+            acceder.
           </p>
         </div>
       </div>
