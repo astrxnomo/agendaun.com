@@ -575,7 +575,7 @@ export function EventDialog({
                 checked={allDay}
                 onCheckedChange={(checked) => setAllDay(checked === true)}
               />
-              <Label htmlFor="all-day">Todo el día</Label>
+              <Label htmlFor="all-day">Todo el día o sin hora especifica</Label>
             </div>
 
             {/* Ubicación */}
