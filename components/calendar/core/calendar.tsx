@@ -11,6 +11,7 @@ import { getEvents } from "@/lib/data/calendars/getEvents"
 import { getProfile } from "@/lib/data/profiles/getProfile"
 
 import { PageHeader } from "@/components/layout/page-header"
+import { useIsMobile } from "@/hooks/use-mobile"
 import type {
   CalendarEtiquettes,
   CalendarEvents,
@@ -31,6 +32,7 @@ export default function Calendar({
 }) {
   const { user, isLoading: authLoading } = useAuthContext()
   const router = useRouter()
+  const isMobile = useIsMobile()
 
   const [calendar, setCalendar] = useState<Calendars | null>(null)
   const [events, setEvents] = useState<CalendarEvents[]>([])
@@ -190,7 +192,7 @@ export default function Calendar({
         onManualRefetch={manualRefetch}
       />
       <SetupCalendar
-        initialView={view || calendar.defaultView}
+        initialView={isMobile ? "agenda" : view || calendar.defaultView}
         calendar={calendar}
         events={visibleEvents}
         etiquettes={calendar.etiquettes}
