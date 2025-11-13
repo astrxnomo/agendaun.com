@@ -91,6 +91,11 @@ const calendarEventSchemaRaw = z.object({
   faculty: z.string().optional().nullable(),
   program: z.string().optional().nullable(),
   image: z.string().nullable().optional(),
+  links: z
+    .array(z.string().url("URL inválida"))
+    .max(10, "Máximo 10 enlaces")
+    .optional()
+    .default([]),
 })
 
 export const calendarEventSchema = calendarEventSchemaRaw
@@ -231,6 +236,11 @@ export const scheduleEventSchemaRaw = z.object({
   color: z.nativeEnum(Colors),
   schedule: z.string().min(1, "El horario es requerido"),
   image: z.string().nullable().optional(),
+  links: z
+    .array(z.string().url("URL inválida"))
+    .max(10, "Máximo 10 enlaces")
+    .optional()
+    .default([]),
 })
 
 export const scheduleEventSchema = scheduleEventSchemaRaw.refine(

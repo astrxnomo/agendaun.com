@@ -7,6 +7,7 @@ import { Label as AriaLabel } from "react-aria-components"
 import { toast } from "sonner"
 
 import { EventImageUpload } from "@/components/event-image-upload"
+import { EventLinksManager } from "@/components/event-links-manager"
 import { Button } from "@/components/ui/button"
 import { DateInput, TimeField } from "@/components/ui/datefield-rac"
 import {
@@ -64,6 +65,7 @@ export function ScheduleEventDialog({
   const [color, setColor] = useState<Colors>(Colors.GREEN)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [image, setImage] = useState<string | null>(null)
+  const [links, setLinks] = useState<string[]>([])
 
   const [state, formAction, isPending] = useActionState(saveEvent, initialState)
 
@@ -94,6 +96,7 @@ export function ScheduleEventDialog({
       setEndTime(new Time(event.end_hour ?? 10, event.end_minute ?? 0))
       setColor(event.color || Colors.GREEN)
       setImage(event.image || null)
+      setLinks(event.links || [])
       setImageFile(null)
     } else if (isOpen && !event) {
       // Resetear para evento nuevo usando las horas del horario
@@ -107,6 +110,7 @@ export function ScheduleEventDialog({
       setEndTime(new Time(endH, 0))
       setColor(Colors.GREEN)
       setImage(null)
+      setLinks([])
       setImageFile(null)
     }
   }, [isOpen, event, schedule.start_hour, schedule.end_hour])
@@ -173,6 +177,7 @@ export function ScheduleEventDialog({
               name="previousImageId"
               value={event?.image || ""}
             />
+            <input type="hidden" name="links" value={JSON.stringify(links)} />
 
             {/* Título */}
             <div className="space-y-2">
@@ -234,6 +239,9 @@ export function ScheduleEventDialog({
                 </p>
               )}
             </div>
+
+            {/* Enlaces */}
+            <EventLinksManager links={links} onChange={setLinks} />
 
             {/* Ubicación */}
             <div className="space-y-2">

@@ -1,5 +1,5 @@
 import { EventImage } from "@/components/schedule/core/event/event-image"
-import { Calendar, FileText, MapPin } from "lucide-react"
+import { Calendar, FileText, Link, MapPin } from "lucide-react"
 
 import {
   Dialog,
@@ -128,6 +128,43 @@ export function ScheduleEventViewDialog({
                     <p className="text-muted-foreground pl-6 text-sm leading-relaxed whitespace-pre-wrap">
                       {event.description}
                     </p>
+                  </div>
+                </>
+              )}
+
+              {/* Links */}
+              {event.links && event.links.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <div className="mb-2 flex items-center gap-2">
+                      <Link className="text-muted-foreground size-4" />
+                      <p className="text-sm font-medium">Enlaces</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pl-6">
+                      {event.links.slice(0, 5).map((link, index) => (
+                        <a
+                          key={index}
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={link}
+                          className="bg-primary/10 text-primary hover:bg-primary/20 group inline-flex max-w-[250px] items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
+                        >
+                          <Link className="size-3 shrink-0" />
+                          <span className="truncate">
+                            {link
+                              .replace(/^https?:\/\//, "")
+                              .replace(/\/$/, "")}
+                          </span>
+                        </a>
+                      ))}
+                      {event.links.length > 5 && (
+                        <span className="text-muted-foreground inline-flex items-center rounded-md border px-2.5 py-1 text-xs">
+                          +{event.links.length - 5} más
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </>
               )}

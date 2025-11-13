@@ -5,9 +5,9 @@ import {
   FileText,
   Globe,
   GraduationCap,
+  Link,
   MapPin,
   School,
-  Tag,
   University,
 } from "lucide-react"
 
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { cn, formatTime, getColor, getColorIndicator } from "@/lib/utils"
+import { cn, formatTime, getColor } from "@/lib/utils"
 
 import type { CalendarEvents } from "@/lib/data/types"
 
@@ -144,8 +144,45 @@ export function EventViewDialog({
                   </div>
                 </>
               )}
+
+              {/* Links */}
+              {event.links && event.links.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <div className="mb-2 flex items-center gap-2">
+                      <Link className="text-muted-foreground size-4" />
+                      <p className="text-sm font-medium">Enlaces</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pl-6">
+                      {event.links.slice(0, 5).map((link, index) => (
+                        <a
+                          key={index}
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={link}
+                          className="bg-primary/10 text-primary hover:bg-primary/20 group inline-flex max-w-[250px] items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
+                        >
+                          <span className="truncate">
+                            {link
+                              .replace(/^https?:\/\//, "")
+                              .replace(/\/$/, "")}
+                          </span>
+                        </a>
+                      ))}
+                      {event.links.length > 5 && (
+                        <span className="text-muted-foreground inline-flex items-center rounded-md border px-2.5 py-1 text-xs">
+                          +{event.links.length - 5} más
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* Etiqueta */}
-              {event.etiquette && (
+              {/* {event.etiquette && (
                 <>
                   <Separator />
                   <div>
@@ -166,7 +203,7 @@ export function EventViewDialog({
                     </div>
                   </div>
                 </>
-              )}
+              )} */}
 
               {/* Imagen en móvil */}
               {event.image && (

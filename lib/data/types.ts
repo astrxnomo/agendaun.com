@@ -55,6 +55,7 @@ export type CalendarEvents = Models.Row & {
   faculty: Faculties
   program: Programs
   image: string | null
+  links: string[]
   created_by: Profiles
 }
 
@@ -70,6 +71,7 @@ export type ScheduleEvents = Models.Row & {
   end_hour: number
   end_minute: number
   image: string | null
+  links: string[]
 }
 
 export type CalendarEtiquettes = Models.Row & {

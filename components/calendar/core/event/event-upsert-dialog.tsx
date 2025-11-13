@@ -14,6 +14,7 @@ import {
 } from "@/components/calendar/core/constants"
 import { EventVisibilitySelector } from "@/components/calendar/core/event/event-visibility-selector"
 import { EventImageUpload } from "@/components/event-image-upload"
+import { EventLinksManager } from "@/components/event-links-manager"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -90,6 +91,7 @@ export function EventDialog({
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [image, setImage] = useState<string | null>(null)
   const [previousImage, setPreviousImage] = useState<string | null>(null)
+  const [links, setLinks] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [startDateOpen, setStartDateOpen] = useState(false)
   const [endDateOpen, setEndDateOpen] = useState(false)
@@ -127,6 +129,7 @@ export function EventDialog({
       setEtiquette(matchingEtiquette || null)
       setImage(event.image || null)
       setPreviousImage(event.image || null)
+      setLinks(event.links || [])
       setImageFile(null)
       setError(null)
 
@@ -227,6 +230,7 @@ export function EventDialog({
     setImage(null)
     setPreviousImage(null)
     setImageFile(null)
+    setLinks([])
     setError(null)
 
     // Reset nuevos campos
@@ -361,6 +365,7 @@ export function EventDialog({
               name="previousImageId"
               value={previousImage || ""}
             />
+            <input type="hidden" name="links" value={JSON.stringify(links)} />
 
             {/* Título */}
             <div className="space-y-2">
@@ -419,6 +424,39 @@ export function EventDialog({
               {state.errors?.description && (
                 <p id="description-error" className="text-destructive text-sm">
                   {state.errors.description.join(", ")}
+                </p>
+              )}
+            </div>
+
+            {/* Enlaces */}
+            <EventLinksManager links={links} onChange={setLinks} />
+
+            {/* Ubicación */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="location" className="text-sm font-medium">
+                  Ubicación
+                </Label>
+                <span className="text-muted-foreground text-xs">
+                  {location.length}/200
+                </span>
+              </div>
+              <Input
+                id="location"
+                name="location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value.slice(0, 200))}
+                placeholder="Ej: Sala de conferencias"
+                className="text-sm"
+                maxLength={200}
+                aria-invalid={state.errors?.location ? "true" : "false"}
+                aria-describedby={
+                  state.errors?.location ? "location-error" : undefined
+                }
+              />
+              {state.errors?.location && (
+                <p id="location-error" className="text-destructive text-sm">
+                  {state.errors.location.join(", ")}
                 </p>
               )}
             </div>
@@ -576,36 +614,6 @@ export function EventDialog({
                 onCheckedChange={(checked) => setAllDay(checked === true)}
               />
               <Label htmlFor="all-day">Todo el día o sin hora especifica</Label>
-            </div>
-
-            {/* Ubicación */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="location" className="text-sm font-medium">
-                  Ubicación
-                </Label>
-                <span className="text-muted-foreground text-xs">
-                  {location.length}/200
-                </span>
-              </div>
-              <Input
-                id="location"
-                name="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value.slice(0, 200))}
-                placeholder="Ej: Sala de conferencias"
-                className="text-sm"
-                maxLength={200}
-                aria-invalid={state.errors?.location ? "true" : "false"}
-                aria-describedby={
-                  state.errors?.location ? "location-error" : undefined
-                }
-              />
-              {state.errors?.location && (
-                <p id="location-error" className="text-destructive text-sm">
-                  {state.errors.location.join(", ")}
-                </p>
-              )}
             </div>
 
             {/* Nivel del evento - Solo para calendario unal */}

@@ -51,6 +51,9 @@ export async function saveEvent(
       schedule: formData.get("schedule") as string,
     }
 
+    const linksJson = formData.get("links") as string | null
+    const links: string[] = linksJson ? JSON.parse(linksJson) : []
+
     const imageFile = formData.get("image") as File | null
     const currentImageId =
       (formData.get("currentImageId") as string | null) || null
@@ -165,6 +168,7 @@ export async function saveEvent(
       color: validData.color,
       schedule: validData.schedule,
       image: uploadedImageUrl,
+      links: links,
     }
 
     const eventIdToUse = eventId || ID.unique()

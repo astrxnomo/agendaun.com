@@ -48,6 +48,9 @@ export async function saveCalendarEvent(
       program: (formData.get("program") as string) || null,
     }
 
+    const linksJson = formData.get("links") as string | null
+    const links: string[] = linksJson ? JSON.parse(linksJson) : []
+
     const imageFile = formData.get("image") as File | null
     const currentImageId =
       (formData.get("currentImageId") as string | null) || null
@@ -157,6 +160,7 @@ export async function saveCalendarEvent(
       faculty: validData.faculty || null,
       program: validData.program || null,
       image: uploadedImageUrl,
+      links: links,
       ...(eventId ? {} : { created_by: createdBy }), // Solo agregar created_by en creación
     }
 
