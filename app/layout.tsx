@@ -8,7 +8,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthContextProvider } from "@/contexts/auth-context"
-
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import type { Metadata } from "next"
 
 import "./globals.css"
@@ -43,6 +44,8 @@ export default async function RootLayout({
                 <SidebarInset>
                   <NavTop />
                   {children}
+                  <Analytics />
+                  <SpeedInsights />
                 </SidebarInset>
               </SidebarProvider>
             </CalendarProvider>
