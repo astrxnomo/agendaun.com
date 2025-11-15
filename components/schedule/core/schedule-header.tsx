@@ -34,19 +34,19 @@ export function ScheduleHeader({
     <div className="bg-background top-12 z-30">
       <div className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1 space-y-1">
-          <h1 className="truncate text-2xl font-bold sm:text-3xl">
+          <h1 className="text-xl font-bold sm:text-2xl lg:text-3xl">
             <div className="flex items-center gap-2">
-              <span>{schedule.name}</span>
+              <span className="truncate">{schedule.name}</span>
 
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-7 shrink-0"
+                    className="size-6 shrink-0 sm:size-7"
                     aria-label="Ver descripción completa"
                   >
-                    <Info />
+                    <Info className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
