@@ -56,6 +56,16 @@ const WEEKDAYS = Array.from({ length: 7 }).map((_, i) => {
   return format(date, "EEE", { locale: es })
 })
 
+// Type for pre-computed day events data
+interface DayEventsData {
+  dayEvents: CalendarEvents[]
+  spanningEvents: CalendarEvents[]
+  allDayEvents: CalendarEvents[]
+  allEvents: CalendarEvents[]
+  sortedAllDayEvents: CalendarEvents[]
+  sortedAllEvents: CalendarEvents[]
+}
+
 export function MonthView({
   currentDate,
   events,
@@ -99,17 +109,7 @@ export function MonthView({
 
   // Pre-compute events data for all days
   const dayEventsData = useMemo(() => {
-    const map = new Map<
-      string,
-      {
-        dayEvents: CalendarEvents[]
-        spanningEvents: CalendarEvents[]
-        allDayEvents: CalendarEvents[]
-        allEvents: CalendarEvents[]
-        sortedAllDayEvents: CalendarEvents[]
-        sortedAllEvents: CalendarEvents[]
-      }
-    >()
+    const map = new Map<string, DayEventsData>()
 
     for (const day of days) {
       const dayEvents = getEventsForDay(events, day)

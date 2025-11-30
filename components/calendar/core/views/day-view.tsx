@@ -116,7 +116,8 @@ export function DayView({
       return bDuration - aDuration
     })
 
-    const columns: { event: CalendarEvents; end: Date }[][] = []
+    // Store pre-computed dates to avoid repeated Date constructor calls
+    const columns: { start: Date; end: Date }[][] = []
 
     sortedEvents.forEach((event) => {
       const eventStart = new Date(event.start)
@@ -146,7 +147,7 @@ export function DayView({
           const overlaps = col.some((c) =>
             areIntervalsOverlapping(
               { start: adjustedStart, end: adjustedEnd },
-              { start: new Date(c.event.start), end: new Date(c.event.end) },
+              { start: c.start, end: c.end },
             ),
           )
           if (!overlaps) {
@@ -159,7 +160,7 @@ export function DayView({
 
       const currentColumn = columns[columnIndex] || []
       columns[columnIndex] = currentColumn
-      currentColumn.push({ event, end: adjustedEnd })
+      currentColumn.push({ start: adjustedStart, end: adjustedEnd })
 
       const width = columnIndex === 0 ? 1 : 0.9
       const left = columnIndex === 0 ? 0 : columnIndex * 0.1

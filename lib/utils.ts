@@ -94,7 +94,7 @@ const COLOR_CLASSES: Record<Colors, string> = {
 const DEFAULT_COLOR_CLASS = COLOR_CLASSES[Colors.GRAY]
 
 export function getColor(color?: Colors): string {
-  return color ? COLOR_CLASSES[color] ?? DEFAULT_COLOR_CLASS : DEFAULT_COLOR_CLASS
+  return COLOR_CLASSES[color as Colors] ?? DEFAULT_COLOR_CLASS
 }
 const COLOR_INDICATOR_CLASSES: Record<Colors, string> = {
   [Colors.GRAY]: "bg-gray-400 dark:bg-gray-500",
@@ -112,9 +112,7 @@ const COLOR_INDICATOR_CLASSES: Record<Colors, string> = {
 const DEFAULT_COLOR_INDICATOR = COLOR_INDICATOR_CLASSES[Colors.GRAY]
 
 export function getColorIndicator(color?: Colors): string {
-  return color
-    ? COLOR_INDICATOR_CLASSES[color] ?? DEFAULT_COLOR_INDICATOR
-    : DEFAULT_COLOR_INDICATOR
+  return COLOR_INDICATOR_CLASSES[color as Colors] ?? DEFAULT_COLOR_INDICATOR
 }
 
 const BORDER_RADIUS_CLASSES = {
