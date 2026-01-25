@@ -56,8 +56,11 @@ export async function saveEtiquette(
       rowId: validData.calendar,
     })
 
+    // Calendario demo: siempre usar admin client
+    const isDemo = calendarSlug === "demo"
+    
     // Usar el cliente apropiado basado en permisos
-    const { database } = (await canAdminCalendarEtiquettes(calendar as any))
+    const { database } = (isDemo || (await canAdminCalendarEtiquettes(calendar as any)))
       ? await createAdminClient()
       : await createSessionClient()
 
@@ -116,8 +119,12 @@ export async function deleteEtiquette(
       rowId: (etiquette.calendar as any).$id || etiquette.calendar,
     })
 
+    // Verificar si es el calendario demo
+    const calendarSlug = (calendar as any).slug
+    const isDemo = calendarSlug === "demo"
+
     // Verificar permisos para administrar etiquetas
-    const canDelete = await canAdminCalendarEtiquettes(calendar as any)
+    const canDelete = isDemo || (await canAdminCalendarEtiquettes(calendar as any))
 
     // Usar el cliente apropiado
     const { database } = canDelete

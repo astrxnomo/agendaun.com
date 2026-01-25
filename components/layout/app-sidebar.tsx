@@ -5,6 +5,7 @@ import {
   Bug,
   Calendar,
   CalendarDays,
+  CalendarSearch,
   ChevronRight,
   Github,
   Grid3X3,
@@ -12,7 +13,7 @@ import {
   LogIn,
   Rows3,
   Rows4,
-  Table,
+  Table
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -161,7 +162,20 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
+
+
         <SidebarGroup className="mt-auto">
+          {!user && (
+            <SidebarMenuButton
+              asChild
+              tooltip="Calendario Demo"
+              isActive={isActive("/calendars/demo")}>
+                <Link href="/calendars/demo">
+                  <CalendarSearch />
+                <span>Calendario Demo</span>
+              </Link>
+              </SidebarMenuButton>
+            )}
           <SidebarGroupLabel>Comunidad</SidebarGroupLabel>
 
           <SidebarMenu>

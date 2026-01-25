@@ -169,7 +169,10 @@ export async function saveCalendarEvent(
     // Determinar si puede usar admin client para crear/editar
     let canUseAdminClient = false
 
-    if (!existingEvent) {
+    // Calendario demo: siempre usar admin client para permitir operaciones sin autenticación
+    if (calendarSlug === "demo") {
+      canUseAdminClient = true
+    } else if (!existingEvent) {
       // Creación: verificar si puede crear en el calendario
       canUseAdminClient = await canCreateInCalendar(calendar as any)
     } else {
@@ -222,13 +225,20 @@ export async function saveCalendarEvent(
 
 export async function deleteEvent(event: CalendarEvents): Promise<boolean> {
   try {
-    const canDelete = await canEditCalendarEvent(event)
-
-    if (!canDelete) {
-      throw new Error("No tienes permisos para eliminar este evento")
+    // Verificar si es el calendario demo
+    const calendarSlug = typeof event.calendar === "object" ? event.calendar.slug : null
+    const isDemo = calendarSlug === "demo"
+    
+    let canDelete = isDemo
+    
+    if (!isDemo) {
+      canDelete = await canEditCalendarEvent(event)
+      if (!canDelete) {
+        throw new Error("No tienes permisos para eliminar este evento")
+      }
     }
 
-    const { database, storage } = canDelete
+    const { database, storage } = (canDelete || isDemo)
       ? await createAdminClient()
       : await createSessionClient()
 
@@ -262,13 +272,20 @@ export async function moveEvent(
   event: CalendarEvents,
 ): Promise<CalendarEvents> {
   try {
-    const canEdit = await canEditCalendarEvent(event)
-
-    if (!canEdit) {
-      throw new Error("No tienes permisos para mover este evento")
+    // Verificar si es el calendario demo
+    const calendarSlug = typeof event.calendar === "object" ? event.calendar.slug : null
+    const isDemo = calendarSlug === "demo"
+    
+    let canEdit = isDemo
+    
+    if (!isDemo) {
+      canEdit = await canEditCalendarEvent(event)
+      if (!canEdit) {
+        throw new Error("No tienes permisos para mover este evento")
+      }
     }
 
-    const { database } = canEdit
+    const { database } = (canEdit || isDemo)
       ? await createAdminClient()
       : await createSessionClient()
 

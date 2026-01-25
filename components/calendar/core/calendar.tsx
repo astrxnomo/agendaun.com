@@ -72,12 +72,16 @@ export default function Calendar({
   }
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push(
-        "/auth/login?message=Debes iniciar sesión para acceder a esta página",
-      )
+    const isDemo = calendarSlug === "demo"
+    
+    if (!isDemo) {
+      if (!authLoading && !user) {
+        router.push(
+          "/auth/login?message=Debes iniciar sesión para acceder a esta página",
+        )
+      }
     }
-  }, [user, authLoading, router])
+  }, [user, authLoading, router, calendarSlug])
 
   useEffect(() => {
     setCalendar(null)
@@ -86,13 +90,16 @@ export default function Calendar({
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return
+      const isDemo = calendarSlug === "demo"
+      
+      // Para el calendario demo, no se requiere usuario autenticado
+      if (!isDemo && !user) return
 
       try {
         setIsLoading(true)
 
         const slug =
-          calendarSlug === "personal"
+          calendarSlug === "personal" && user
             ? `${calendarSlug}-${user.$id}`
             : calendarSlug
 
@@ -105,20 +112,27 @@ export default function Calendar({
         setCalendar(calendarResult)
 
         let currentProfile = null
-        try {
-          currentProfile = await getProfile(user.$id)
-        } catch (error) {
-          console.error("Error cargando perfil:", error)
+        if (user) {
+          try {
+            currentProfile = await getProfile(user.$id)
+          } catch (error) {
+            console.error("Error cargando perfil:", error)
+          }
         }
 
-        try {
-          const canEditResult = await calendarEditMode(calendarResult)
-          setCanEdit(canEditResult)
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : "Error cargando permisos"
-          toast.error(errorMessage)
-          setCanEdit(false)
+        // Para el calendario demo, permitir edición sin autenticación
+        if (isDemo) {
+          setCanEdit(true)
+        } else if (user) {
+          try {
+            const canEditResult = await calendarEditMode(calendarResult)
+            setCanEdit(canEditResult)
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : "Error cargando permisos"
+            toast.error(errorMessage)
+            setCanEdit(false)
+          }
         }
 
         try {
@@ -150,14 +164,17 @@ export default function Calendar({
       }
     }
 
-    if (user) {
+    // Ejecutar fetchData si hay usuario o si es el calendario demo
+    const isDemo = calendarSlug === "demo"
+    if (user || isDemo) {
       void fetchData()
     }
   }, [user, calendarSlug, refetchTrigger])
 
   if (authLoading || isLoading) return <CalendarSkeleton />
 
-  if (!user) {
+  const isDemo = calendarSlug === "demo"
+  if (!user && !isDemo) {
     return null
   }
 

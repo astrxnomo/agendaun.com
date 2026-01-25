@@ -7,10 +7,19 @@ const EDITORS_TEAM = process.env.NEXT_PUBLIC_TEAMS_EDITORS!
 export async function setCalendarPermissions(
   calendarSlug: string,
 ): Promise<string[]> {
+  const permissions: string[] = []
+
+  // Calendario demo: acceso público para lectura y escritura
+  if (calendarSlug === "demo") {
+    permissions.push(
+      Permission.read(Role.any()),
+      Permission.write(Role.any()),
+    )
+    return permissions
+  }
+
   const user = await getUser()
   if (!user) throw new Error("Usuario no autenticado")
-
-  const permissions: string[] = []
 
   if (calendarSlug.startsWith("personal")) {
     permissions.push(
@@ -32,10 +41,19 @@ export async function setCalendarPermissions(
 export async function setCalendarEventPermissions(
   calendarSlug: string,
 ): Promise<string[]> {
+  const permissions: string[] = []
+
+  // Eventos del calendario demo: acceso público
+  if (calendarSlug === "demo") {
+    permissions.push(
+      Permission.read(Role.any()),
+      Permission.write(Role.any()),
+    )
+    return permissions
+  }
+
   const user = await getUser()
   if (!user) throw new Error("Usuario no autenticado")
-
-  const permissions: string[] = []
 
   // Eventos en calendarios personales
   if (calendarSlug.startsWith("personal")) {
@@ -58,10 +76,19 @@ export async function setCalendarEventPermissions(
 export async function setEtiquettePermissions(
   calendarSlug: string,
 ): Promise<string[]> {
+  const permissions: string[] = []
+
+  // Etiquetas del calendario demo: acceso público
+  if (calendarSlug === "demo") {
+    permissions.push(
+      Permission.read(Role.any()),
+      Permission.write(Role.any()),
+    )
+    return permissions
+  }
+
   const user = await getUser()
   if (!user) throw new Error("Usuario no autenticado")
-
-  const permissions: string[] = []
 
   if (calendarSlug.startsWith("personal")) {
     permissions.push(

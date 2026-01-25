@@ -15,5 +15,5 @@ export default async function CalendarPage({
 }
 
 export function generateStaticParams() {
-  return [{ slug: "personal" }, { slug: "unal" }]
+  return [{ slug: "personal" }, { slug: "unal" }, { slug: "demo" }]
 }
